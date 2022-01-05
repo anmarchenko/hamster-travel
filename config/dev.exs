@@ -24,6 +24,7 @@ config :hamster_travel, HamsterTravelWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "x6soMyzjJhwqH8sWVPY+MA4psvArVe3ehuqWXdrlszCqi146uHhbrg9Pflem41w3",
   watchers: [
+    tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]},
     # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
     esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]}
   ]
