@@ -1,4 +1,8 @@
-<main class="container">
+<header class="dark:border-b dark:border-zinc-800">
+  <.navbar />
+</header>
+
+<main>
   <p class="alert alert-info" role="alert"
     phx-click="lv:clear-flash"
     phx-value-key="info"><%= live_flash(@flash, :info) %></p>
