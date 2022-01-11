@@ -1,8 +1,8 @@
 <header class="dark:border-b dark:border-zinc-800">
-  <.navbar />
+  <.navbar active_nav={assigns[:active_nav]} />
 </header>
 
-<main>
+<main class="text-zinc-600 dark:text-zinc-400">
   <p class="alert alert-info" role="alert"
     phx-click="lv:clear-flash"
     phx-value-key="info"><%= live_flash(@flash, :info) %></p>

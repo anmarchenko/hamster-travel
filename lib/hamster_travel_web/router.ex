@@ -18,6 +18,9 @@ defmodule HamsterTravelWeb.Router do
     pipe_through :browser
 
     live "/", HomeLive
+
+    live "/plans", Planning.PlansLive
+    live "/backpacks", Packing.BackpacksLive
   end
 
   # Other scopes may use custom stacks.
