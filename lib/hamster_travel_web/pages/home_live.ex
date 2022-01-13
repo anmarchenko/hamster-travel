@@ -7,6 +7,11 @@ defmodule HamsterTravelWeb.HomeLive do
 
   @impl true
   def mount(_params, _session, socket) do
+    socket =
+      socket
+      |> assign(active_nav: :home)
+      |> assign(page_title: "Главная")
+
     {:ok, socket}
   end
 end

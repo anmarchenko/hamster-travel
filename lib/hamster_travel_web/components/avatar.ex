@@ -1,10 +1,10 @@
-defmodule HamsterTravelWeb.UserComponents do
+defmodule HamsterTravelWeb.Avatar do
   @moduledoc """
   Shared components dealing with users
   """
   use Phoenix.Component
 
-  def avatar(%{user: user} = assigns) do
+  def small(%{user: user} = assigns) do
     background_image = "background-image: url(\"#{user.avatar_url}\");"
 
     ~H"""
