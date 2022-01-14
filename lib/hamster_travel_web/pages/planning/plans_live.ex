@@ -14,7 +14,7 @@ defmodule HamsterTravelWeb.Planning.PlansLive do
     socket =
       socket
       |> assign(active_nav: :plans)
-      |> assign(page_title: "Путешествия")
+      |> assign(page_title: "Планы")
 
     {:noreply, socket}
   end
