@@ -80,7 +80,12 @@ defmodule HamsterTravel.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      "assets.deploy": ["esbuild default --minify", "tailwind default --minify", "phx.digest"]
+      "assets.deploy": ["esbuild default --minify", "tailwind default --minify", "phx.digest"],
+      gettext: [
+        "gettext.extract",
+        "gettext.merge priv/gettext/en/LC_MESSAGES/default.po priv/gettext/default.pot",
+        "gettext.merge priv/gettext/ru/LC_MESSAGES/default.po priv/gettext/default.pot"
+      ]
     ]
   end
 end

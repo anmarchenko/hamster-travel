@@ -15,12 +15,17 @@ defmodule HamsterTravelWeb.Router do
   end
 
   scope "/", HamsterTravelWeb do
-    pipe_through :browser
+    live_session :default,
+      on_mount: [
+        {HamsterTravelWeb.Hooks.UserAuth, :set_current_user}
+      ] do
+      pipe_through :browser
 
-    live "/", HomeLive
+      live "/", HomeLive
 
-    live "/plans", Planning.PlansLive
-    live "/backpacks", Packing.BackpacksLive
+      live "/plans", Planning.PlansLive
+      live "/backpacks", Packing.BackpacksLive
+    end
   end
 
   # Other scopes may use custom stacks.

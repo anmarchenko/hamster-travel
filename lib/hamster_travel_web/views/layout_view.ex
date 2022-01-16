@@ -1,6 +1,8 @@
 defmodule HamsterTravelWeb.LayoutView do
   use HamsterTravelWeb, :view
 
+  import HamsterTravelWeb.Gettext
+
   alias HamsterTravelWeb.{Avatar, Icons}
 
   # Phoenix LiveDashboard is available only in development by default,
@@ -8,11 +10,6 @@ defmodule HamsterTravelWeb.LayoutView do
   @compile {:no_warn_undefined, {Routes, :live_dashboard_path, 2}}
 
   def navbar(assigns) do
-    user = %{
-      name: "Andrey Marchenko",
-      avatar_url: "https://d2fetf4i8a4kn6.cloudfront.net/2014/09/30/11/27/53/591/2014_nizh.png"
-    }
-
     ~H"""
       <div class="mx-auto px-6 max-w-screen-md h-20 flex items-center justify-between">
         <%= live_redirect to: "/" do %>
@@ -24,14 +21,16 @@ defmodule HamsterTravelWeb.LayoutView do
           <div class="hidden sm:block">
             <div class="space-x-6 flex items-center">
               <.nav_link to="/plans" active={@active_nav == :plans}>
-                Планы
+                <%= gettext("Plans") %>
               </.nav_link>
               <.nav_link to="/backpacks" active={@active_nav == :backpacks}>
-                Рюкзачки
+                <%= gettext("Backpacks") %>
               </.nav_link>
             </div>
           </div>
-          <Avatar.small user={user} />
+          <%= if @current_user do %>
+            <Avatar.small user={@current_user} />
+          <% end %>
         </nav>
       </div>
       <div class="sm:hidden">
@@ -39,15 +38,15 @@ defmodule HamsterTravelWeb.LayoutView do
           <div class="mx-auto px-6 max-w-md h-16 flex items-center justify-around">
             <.mobile_nav_link to="/" active={@active_nav == :home}>
               <Icons.home />
-              <span class="text-xs text-zinc-600 dark:text-zinc-400">Главная</span>
+              <span class="text-xs text-zinc-600 dark:text-zinc-400"><%= gettext("Homepage") %></span>
             </.mobile_nav_link>
             <.mobile_nav_link to="/plans" active={@active_nav == :plans}>
               <Icons.pen />
-              <span class="text-xs text-zinc-600 dark:text-zinc-400">Планы</span>
+              <span class="text-xs text-zinc-600 dark:text-zinc-400"><%= gettext("Plans") %></span>
             </.mobile_nav_link>
             <.mobile_nav_link to="/backpacks" active={@active_nav == :backpacks}>
               <Icons.backpack />
-              <span class="text-xs text-zinc-600 dark:text-zinc-400">Рюкзачки</span>
+              <span class="text-xs text-zinc-600 dark:text-zinc-400"><%= gettext("Backpacks") %></span>
             </.mobile_nav_link>
           </div>
         </nav>
