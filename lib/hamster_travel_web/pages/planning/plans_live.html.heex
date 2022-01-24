@@ -1,3 +1,38 @@
-<section class="mx-auto max-w-screen-md p-6 mt-6">
-  Here will be plans
+<section class="mx-auto max-w-screen-md xl:max-w-screen-xl 2xl:max-w-screen-2xl p-6 mt-6">
+  <div class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8">
+    <%= for plan <- @plans do %>
+      <div class="flex flex-row bg-zinc-50 dark:bg-zinc-900 dark:border dark:border-zinc-600 shadow-md rounded-lg hover:shadow-lg hover:bg-white hover:dark:bg-zinc-800 ">
+        <div class="shrink-0">
+          <%= live_redirect to: "/plans/xxx" do %>
+            <img src={plan.cover} class="w-32 rounded-l-lg"/>
+          <% end %>
+        </div>
+        <div class="flex-1 p-4 max-w-[calc(100%_-_theme(width.32))] flex flex-col justify-between">
+          <p class="text-base font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
+            <%= live_redirect to: "/plans/xxx", class: "" do %>
+              <%= plan.name %>
+            <% end %>
+          </p>
+          <div class="text-zinc-400 font-light flex flex-row gap-x-4">
+            <div class="flex flex-row gap-x-2 items-center">
+              <Icons.money_stack />
+              <%= plan.budget %> <%= plan.currency_symbol %>
+            </div>
+            <div class="flex flex-row gap-x-2 items-center">
+              <Icons.calendar />
+              <%= plan.duration %> <%= ngettext("day", "days", plan.duration) %>
+            </div>
+            <div class="flex flex-row gap-x-2 items-center">
+              <Icons.user />
+              <%= plan.people_count %> <%= gettext("ppl") %>
+            </div>
+          </div>
+          <div class="flex flex-row justify-between">
+            <div><%= plan.status %></div>
+            <Avatar.round user={plan.author} size={:small} />
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
 </section>

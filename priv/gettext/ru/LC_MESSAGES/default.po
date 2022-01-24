@@ -1,20 +1,20 @@
 #, elixir-format, ex-autogen
-#: lib/hamster_travel_web/pages/planning/plans_live.ex:19
-#: lib/hamster_travel_web/views/layout_view.ex:29
-#: lib/hamster_travel_web/views/layout_view.ex:48
+#: lib/hamster_travel_web/pages/planning/plans_live.ex:21
+#: lib/hamster_travel_web/views/layout_view.ex:24
+#: lib/hamster_travel_web/views/layout_view.ex:45
 msgid "Plans"
 msgstr "Планы"
 
 #, elixir-format, ex-autogen
 #: lib/hamster_travel_web/pages/packing/backpacks_live.ex:14
-#: lib/hamster_travel_web/views/layout_view.ex:32
-#: lib/hamster_travel_web/views/layout_view.ex:52
+#: lib/hamster_travel_web/views/layout_view.ex:27
+#: lib/hamster_travel_web/views/layout_view.ex:49
 msgid "Backpacks"
 msgstr "Рюкзачки"
 
 #, elixir-format, ex-autogen
-#: lib/hamster_travel_web/pages/home_live.ex:17
-#: lib/hamster_travel_web/views/layout_view.ex:44
+#: lib/hamster_travel_web/pages/home_live.ex:15
+#: lib/hamster_travel_web/views/layout_view.ex:41
 msgid "Homepage"
 msgstr "Главная"
 
@@ -22,3 +22,16 @@ msgstr "Главная"
 #: lib/hamster_travel_web/pages/home_live.html.heex:2
 msgid "Next travels"
 msgstr "Ближайшие путешествия"
+
+#, elixir-format, ex-autogen
+#: lib/hamster_travel_web/pages/planning/plans_live.html.heex:27
+msgid "ppl"
+msgstr "чел"
+
+#, elixir-format, ex-autogen, fuzzy
+#: lib/hamster_travel_web/pages/planning/plans_live.html.heex:23
+msgid "day"
+msgid_plural "days"
+msgstr[0] "день"
+msgstr[1] "дня"
+msgstr[2] "дней"

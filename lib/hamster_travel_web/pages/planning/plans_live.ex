@@ -6,6 +6,8 @@ defmodule HamsterTravelWeb.Planning.PlansLive do
 
   import HamsterTravelWeb.Gettext
 
+  alias HamsterTravelWeb.{Avatar, Icons}
+
   @impl true
   def mount(_params, _session, socket) do
     {:ok, socket}
@@ -17,7 +19,7 @@ defmodule HamsterTravelWeb.Planning.PlansLive do
       socket
       |> assign(active_nav: :plans)
       |> assign(page_title: gettext("Plans"))
-      |> assign(plans: [])
+      |> assign(plans: HamsterTravel.plans())
 
     {:noreply, socket}
   end
