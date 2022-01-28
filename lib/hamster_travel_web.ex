@@ -51,6 +51,14 @@ defmodule HamsterTravelWeb do
     end
   end
 
+  def component do
+    quote do
+      use Phoenix.Component
+
+      unquote(view_helpers())
+    end
+  end
+
   def live_component do
     quote do
       use Phoenix.LiveComponent
@@ -72,7 +80,6 @@ defmodule HamsterTravelWeb do
   def channel do
     quote do
       use Phoenix.Channel
-      import HamsterTravelWeb.Gettext
     end
   end
 
@@ -89,6 +96,8 @@ defmodule HamsterTravelWeb do
 
       import HamsterTravelWeb.ErrorHelpers
       import HamsterTravelWeb.Gettext
+      import HamsterTravelWeb.Helpers
+
       alias HamsterTravelWeb.Router.Helpers, as: Routes
     end
   end

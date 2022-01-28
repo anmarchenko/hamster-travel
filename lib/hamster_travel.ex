@@ -11,6 +11,7 @@ defmodule HamsterTravel do
     [
       %{
         name: "Рождественский Стокгольм",
+        slug: "rozhdestvenskiy-stokgolm",
         duration: 4,
         start_date: ~D[2021-12-17],
         status: "planned",
@@ -27,6 +28,7 @@ defmodule HamsterTravel do
       },
       %{
         name: "Будапешт и Тапольца",
+        slug: "budapesht-i-tapoltsa",
         duration: 8,
         start_date: ~D[2021-09-07],
         status: "finished",
@@ -43,6 +45,7 @@ defmodule HamsterTravel do
       },
       %{
         name: "Мальорка",
+        slug: "maljorka",
         duration: 9,
         start_date: ~D[2021-07-13],
         status: "finished",
@@ -59,10 +62,11 @@ defmodule HamsterTravel do
       },
       %{
         name: "Копенгаген и немного Швеции",
+        slug: "kopengagen-i-nemnogo-shvetsii",
         duration: 4,
         start_date: ~D[2019-05-16],
         status: "finished",
-        countries: ["dk", "se"],
+        countries: ["dk", "se", "fi", "fo"],
         people_count: 3,
         cover:
           "https://d2fetf4i8a4kn6.cloudfront.net/2018/09/24/14/55/35/5016a1b2-2500-418f-8db1-97a8a229f4a2/photo.png",

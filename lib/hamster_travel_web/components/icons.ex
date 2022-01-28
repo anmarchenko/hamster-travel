@@ -2,7 +2,7 @@ defmodule HamsterTravelWeb.Icons do
   @moduledoc """
   Icons for live views
   """
-  use Phoenix.Component
+  use HamsterTravelWeb, :component
 
   def home(assigns) do
     ~H"""

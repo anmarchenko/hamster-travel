@@ -1,8 +1,8 @@
 defmodule HamsterTravelWeb.Avatar do
   @moduledoc """
-  Shared components dealing with users
+  Shared component dealing with user profile pictures
   """
-  use Phoenix.Component
+  use HamsterTravelWeb, :component
 
   def round(%{user: user} = assigns) do
     background_image = "background-image: url(\"#{user.avatar_url}\");"
@@ -20,13 +20,10 @@ defmodule HamsterTravelWeb.Avatar do
   end
 
   defp classes(size: size) do
-    Enum.join(
-      [
-        size_class(size),
-        "bg-zinc-200 dark:bg-zinc-800 bg-cover bg-center rounded-full shadow-inner"
-      ],
-      " "
-    )
+    class_list([
+      size_class(size),
+      "bg-zinc-200 dark:bg-zinc-800 bg-cover bg-center rounded-full shadow-inner"
+    ])
   end
 
   defp size_class(:medium), do: "w-10 h-10"

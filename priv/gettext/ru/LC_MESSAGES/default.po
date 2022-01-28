@@ -1,5 +1,5 @@
 #, elixir-format, ex-autogen
-#: lib/hamster_travel_web/pages/planning/plans_live.ex:21
+#: lib/hamster_travel_web/pages/planning/plans_live.ex:19
 #: lib/hamster_travel_web/views/layout_view.ex:24
 #: lib/hamster_travel_web/views/layout_view.ex:45
 msgid "Plans"
@@ -24,14 +24,24 @@ msgid "Next travels"
 msgstr "Ближайшие путешествия"
 
 #, elixir-format, ex-autogen
-#: lib/hamster_travel_web/pages/planning/plans_live.html.heex:27
+#: lib/hamster_travel_web/components/planning/plan.ex:36
 msgid "ppl"
 msgstr "чел"
 
 #, elixir-format, ex-autogen, fuzzy
-#: lib/hamster_travel_web/pages/planning/plans_live.html.heex:23
+#: lib/hamster_travel_web/components/planning/plan.ex:32
 msgid "day"
 msgid_plural "days"
 msgstr[0] "день"
 msgstr[1] "дня"
 msgstr[2] "дней"
+
+# plan statuses
+msgid "finished"
+msgstr "Состоявшееся"
+
+msgid "planned"
+msgstr "Планируемое"
+
+msgid "draft"
+msgstr "Черновик"
