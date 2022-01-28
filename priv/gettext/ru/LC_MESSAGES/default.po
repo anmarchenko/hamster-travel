@@ -1,20 +1,20 @@
 #, elixir-format, ex-autogen
 #: lib/hamster_travel_web/pages/planning/plans_live.ex:19
 #: lib/hamster_travel_web/views/layout_view.ex:24
-#: lib/hamster_travel_web/views/layout_view.ex:45
+#: lib/hamster_travel_web/views/layout_view.ex:48
 msgid "Plans"
 msgstr "Планы"
 
 #, elixir-format, ex-autogen
 #: lib/hamster_travel_web/pages/packing/backpacks_live.ex:14
-#: lib/hamster_travel_web/views/layout_view.ex:27
-#: lib/hamster_travel_web/views/layout_view.ex:49
+#: lib/hamster_travel_web/views/layout_view.ex:30
+#: lib/hamster_travel_web/views/layout_view.ex:52
 msgid "Backpacks"
 msgstr "Рюкзачки"
 
 #, elixir-format, ex-autogen
 #: lib/hamster_travel_web/pages/home_live.ex:15
-#: lib/hamster_travel_web/views/layout_view.ex:41
+#: lib/hamster_travel_web/views/layout_view.ex:44
 msgid "Homepage"
 msgstr "Главная"
 
@@ -24,12 +24,12 @@ msgid "Next travels"
 msgstr "Ближайшие путешествия"
 
 #, elixir-format, ex-autogen
-#: lib/hamster_travel_web/components/planning/plan.ex:36
+#: lib/hamster_travel_web/components/planning/plan.ex:37
 msgid "ppl"
 msgstr "чел"
 
 #, elixir-format, ex-autogen, fuzzy
-#: lib/hamster_travel_web/components/planning/plan.ex:32
+#: lib/hamster_travel_web/components/planning/plan.ex:33
 msgid "day"
 msgid_plural "days"
 msgstr[0] "день"
@@ -45,3 +45,8 @@ msgstr "Планируемое"
 
 msgid "draft"
 msgstr "Черновик"
+
+#, elixir-format, ex-autogen, fuzzy
+#: lib/hamster_travel_web/views/layout_view.ex:27
+msgid "Drafts"
+msgstr "Черновики"

@@ -7,7 +7,6 @@ defmodule HamsterTravelWeb.Planning.Plan do
   alias HamsterTravelWeb.{Avatar, Flags, Icons}
 
   def card(%{plan: %{slug: slug}} = assigns) do
-    max_flags = 3
     plan_url = "/plans/#{slug}"
 
     ~H"""
@@ -23,23 +22,23 @@ defmodule HamsterTravelWeb.Planning.Plan do
               <%= @plan.name %>
             <% end %>
           </p>
-          <div class="text-zinc-400 font-light flex flex-row gap-x-4 dark:text-zinc-500">
+          <div class="text-xs sm:text-base text-zinc-400 font-light flex flex-row gap-x-4 dark:text-zinc-500">
             <.icon_text>
-              <Icons.money_stack />
+              <Icons.money_stack class="hidden sm:block" />
               <%= @plan.budget %> <%= @plan.currency_symbol %>
             </.icon_text>
             <.icon_text>
-              <Icons.calendar />
+              <Icons.calendar class="hidden sm:block" />
               <%= @plan.duration %> <%= ngettext("day", "days", @plan.duration) %>
             </.icon_text>
             <.icon_text>
-              <Icons.user />
+              <Icons.user class="hidden sm:block" />
               <%= @plan.people_count %> <%= gettext("ppl") %>
             </.icon_text>
           </div>
           <div class="flex flex-row gap-x-3">
             <.status_badge status={@plan.status} />
-            <%= for country <- Enum.take(@plan.countries, max_flags) do %>
+            <%= for country <- Enum.take(@plan.countries, 1) do %>
               <Flags.flag size={24} country={country} />
             <% end %>
             <Avatar.round user={@plan.author} size={:small} />

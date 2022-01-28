@@ -23,6 +23,9 @@ defmodule HamsterTravelWeb.LayoutView do
               <.nav_link to="/plans" active={@active_nav == :plans}>
                 <%= gettext("Plans") %>
               </.nav_link>
+              <.nav_link to="/drafts" active={@active_nav == :drafts}>
+                <%= gettext("Drafts") %>
+              </.nav_link>
               <.nav_link to="/backpacks" active={@active_nav == :backpacks}>
                 <%= gettext("Backpacks") %>
               </.nav_link>
@@ -34,15 +37,19 @@ defmodule HamsterTravelWeb.LayoutView do
         </nav>
       </div>
       <div class="sm:hidden">
-        <nav class="w-full border-t dark:bg-zinc-900 dark:border-zinc-800 fixed bottom-0">
+        <nav class="w-full border-t bg-orange-50 dark:bg-zinc-900 dark:border-zinc-800 fixed bottom-0">
           <div class="mx-auto px-6 max-w-md h-16 flex items-center justify-around">
             <.mobile_nav_link to="/" active={@active_nav == :home}>
               <Icons.home />
               <span class="text-xs text-zinc-600 dark:text-zinc-400"><%= gettext("Homepage") %></span>
             </.mobile_nav_link>
             <.mobile_nav_link to="/plans" active={@active_nav == :plans}>
-              <Icons.pen />
+              <Icons.book />
               <span class="text-xs text-zinc-600 dark:text-zinc-400"><%= gettext("Plans") %></span>
+            </.mobile_nav_link>
+            <.mobile_nav_link to="/drafts" active={@active_nav == :drafts}>
+              <Icons.note />
+              <span class="text-xs text-zinc-600 dark:text-zinc-400"><%= gettext("Drafts") %></span>
             </.mobile_nav_link>
             <.mobile_nav_link to="/backpacks" active={@active_nav == :backpacks}>
               <Icons.backpack />

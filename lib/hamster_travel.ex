@@ -79,4 +79,43 @@ defmodule HamsterTravel do
       }
     ]
   end
+
+  def drafts() do
+    [
+      %{
+        name: "Бамберг - пивной город Франконии ",
+        slug: "bamberg-pivnoy-gorod",
+        duration: 3,
+        start_date: nil,
+        status: "draft",
+        countries: ["de"],
+        people_count: 2,
+        cover:
+          "https://d2fetf4i8a4kn6.cloudfront.net/2015/11/09/16/57/40/845/Bamberg_c_Bamberg_Tourismus_und_Congress_Service.jpg",
+        budget: Decimal.new("614.18"),
+        currency_symbol: "€",
+        author: %{
+          name: "Yulia Marchenko",
+          avatar_url: "https://d2fetf4i8a4kn6.cloudfront.net/2014/09/30/11/27/53/320/foto.png"
+        }
+      },
+      %{
+        name: "Гельголанд: в гости к тюленюшкам! ",
+        slug: "gelgoland-v-gosti-k-tyul",
+        duration: 2,
+        start_date: nil,
+        status: "draft",
+        countries: ["de"],
+        people_count: 1,
+        cover:
+          "https://d2fetf4i8a4kn6.cloudfront.net/2017/09/25/14/46/56/fa63eb59-8ab3-4648-a60f-27167708208b/photo.png",
+        budget: Decimal.new("90"),
+        currency_symbol: "€",
+        author: %{
+          name: "Yulia Marchenko",
+          avatar_url: "https://d2fetf4i8a4kn6.cloudfront.net/2014/09/30/11/27/53/320/foto.png"
+        }
+      }
+    ]
+  end
 end
