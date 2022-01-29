@@ -1,3 +1,28 @@
 <section class="mx-auto max-w-screen-md xl:max-w-screen-lg 2xl:max-w-screen-xl p-6 mt-6">
   <h1 class="text-xl font-semibold text-black dark:text-white"><%= @plan.name %></h1>
+  <div class="text-zinc-600 flex flex-row gap-x-4 mt-4 dark:text-zinc-300">
+    <UIComponents.icon_text>
+      <Icons.money_stack />
+      <%= @plan.budget %> <%= @plan.currency_symbol %>
+    </UIComponents.icon_text>
+    <UIComponents.icon_text>
+      <Icons.calendar />
+      <%= @plan.duration %> <%= ngettext("day", "days", @plan.duration) %>
+    </UIComponents.icon_text>
+    <UIComponents.icon_text>
+      <Icons.user />
+      <%= @plan.people_count %> <%= gettext("ppl") %>
+    </UIComponents.icon_text>
+  </div>
+  <div class="text-indigo-500 flex flex-row gap-x-4 mt-4 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-100">
+    <%= live_redirect to: "/plan/#{@plan.slug}/edit", class: "underline" do %>
+      <%= gettext("Edit plan") %>
+    <% end %>
+    <%= live_redirect to: "/plan/#{@plan.slug}/copy", class: "underline" do %>
+      <%= gettext("Make a copy") %>
+    <% end %>
+    <%= live_redirect to: "/plan/#{@plan.slug}/pdf", class: "underline" do %>
+      <%= gettext("Export as PDF") %>
+    <% end %>
+  </div>
 </section>

@@ -3,7 +3,7 @@ defmodule HamsterTravelWeb.LayoutView do
 
   import HamsterTravelWeb.Gettext
 
-  alias HamsterTravelWeb.{Avatar, Icons}
+  alias HamsterTravelWeb.Avatar
 
   # Phoenix LiveDashboard is available only in development by default,
   # so we instruct Elixir to not warn if the dashboard route is missing.

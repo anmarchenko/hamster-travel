@@ -99,6 +99,7 @@ defmodule HamsterTravelWeb do
       import HamsterTravelWeb.Helpers
 
       alias HamsterTravelWeb.Router.Helpers, as: Routes
+      alias HamsterTravelWeb.{Flags, Icons, UIComponents}
     end
   end
 
