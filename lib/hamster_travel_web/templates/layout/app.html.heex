@@ -1,3 +1,7 @@
+<header class="dark:border-b dark:border-zinc-800">
+  <.navbar current_user={assigns[:current_user]} active_nav={assigns[:active_nav]} />
+</header>
+
 <main class="container">
   <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
   <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>

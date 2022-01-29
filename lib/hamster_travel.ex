@@ -118,4 +118,17 @@ defmodule HamsterTravel do
       }
     ]
   end
+
+  def find_plan_by_slug(slug) do
+    plan =
+      Enum.find(plans() ++ drafts(), fn plan ->
+        plan.slug == slug
+      end)
+
+    if plan != nil do
+      {:ok, plan}
+    else
+      {:error, :not_found}
+    end
+  end
 end
