@@ -1,10 +1,22 @@
-defmodule HamsterTravelWeb.Planning.Plan do
+defmodule HamsterTravelWeb.Planning.PlansList do
   @moduledoc """
   This component renders plan items/cards
   """
   use HamsterTravelWeb, :component
 
   alias HamsterTravelWeb.{Avatar, Flags, Icons}
+
+  def grid(assigns) do
+    ~H"""
+      <section class="mx-auto max-w-screen-md xl:max-w-screen-xl 2xl:max-w-screen-2xl p-6 mt-6">
+        <div class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8">
+          <%= for plan <- @plans do %>
+            <.card plan={plan} />
+          <% end %>
+        </div>
+      </section>
+    """
+  end
 
   def card(%{plan: %{slug: slug}} = assigns) do
     plan_url = "/plans/#{slug}"

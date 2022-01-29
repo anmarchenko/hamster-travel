@@ -4,7 +4,7 @@ defmodule HamsterTravelWeb.Planning.PlansLive do
   """
   use HamsterTravelWeb, :live_view
 
-  alias HamsterTravelWeb.Planning.Plan
+  alias HamsterTravelWeb.Planning.PlansList
 
   @impl true
   def mount(_params, _session, socket) do

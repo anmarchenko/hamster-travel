@@ -1,7 +1,1 @@
-<section class="mx-auto max-w-screen-md xl:max-w-screen-xl 2xl:max-w-screen-2xl p-6 mt-6">
-  <div class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8">
-    <%= for plan <- @plans do %>
-      <Plan.card plan={plan} />
-    <% end %>
-  </div>
-</section>
+<PlansList.grid plans={@plans} />
