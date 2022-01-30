@@ -4,6 +4,8 @@ defmodule HamsterTravelWeb.Planning.PlanTransfersLive do
   """
   use HamsterTravelWeb, :live_view
 
+  alias HamsterTravelWeb.Planning.PlanHeader
+
   @impl true
   def mount(%{"plan_slug" => slug}, _session, socket) do
     case HamsterTravel.find_plan_by_slug(slug) do

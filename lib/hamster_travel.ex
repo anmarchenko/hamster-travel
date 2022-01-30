@@ -69,7 +69,7 @@ defmodule HamsterTravel do
         countries: ["dk", "se", "fi", "fo"],
         people_count: 3,
         cover:
-          "https://d2fetf4i8a4kn6.cloudfront.net/2018/09/24/14/55/35/5016a1b2-2500-418f-8db1-97a8a229f4a2/photo.png",
+          "https://images.unsplash.com/photo-1643288939906-5c6c60c9d289?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3432&q=80",
         budget: Decimal.new("1171.76"),
         currency_symbol: "€",
         author: %{
