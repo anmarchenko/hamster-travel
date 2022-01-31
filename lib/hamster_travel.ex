@@ -10,6 +10,7 @@ defmodule HamsterTravel do
   def plans() do
     [
       %{
+        id: 1,
         name: "Рождественский Стокгольм",
         slug: "rozhdestvenskiy-stokgolm",
         duration: 4,
@@ -27,6 +28,7 @@ defmodule HamsterTravel do
         }
       },
       %{
+        id: 2,
         name: "Будапешт и Тапольца",
         slug: "budapesht-i-tapoltsa",
         duration: 8,
@@ -44,6 +46,7 @@ defmodule HamsterTravel do
         }
       },
       %{
+        id: 3,
         name: "Мальорка",
         slug: "maljorka",
         duration: 9,
@@ -61,6 +64,7 @@ defmodule HamsterTravel do
         }
       },
       %{
+        id: 4,
         name: "Копенгаген и немного Швеции",
         slug: "kopengagen-i-nemnogo-shvetsii",
         duration: 4,
@@ -83,6 +87,7 @@ defmodule HamsterTravel do
   def drafts() do
     [
       %{
+        id: 5,
         name: "Бамберг - пивной город Франконии ",
         slug: "bamberg-pivnoy-gorod",
         duration: 3,
@@ -91,7 +96,7 @@ defmodule HamsterTravel do
         countries: ["de"],
         people_count: 2,
         cover:
-          "https://d2fetf4i8a4kn6.cloudfront.net/2015/11/09/16/57/40/845/Bamberg_c_Bamberg_Tourismus_und_Congress_Service.jpg",
+          "https://images.unsplash.com/photo-1607338533044-c5bc1ec32bde?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1887&q=80",
         budget: Decimal.new("614.18"),
         currency_symbol: "€",
         author: %{
@@ -100,6 +105,7 @@ defmodule HamsterTravel do
         }
       },
       %{
+        id: 6,
         name: "Гельголанд: в гости к тюленюшкам! ",
         slug: "gelgoland-v-gosti-k-tyul",
         duration: 2,
@@ -108,7 +114,7 @@ defmodule HamsterTravel do
         countries: ["de"],
         people_count: 1,
         cover:
-          "https://d2fetf4i8a4kn6.cloudfront.net/2017/09/25/14/46/56/fa63eb59-8ab3-4648-a60f-27167708208b/photo.png",
+          "https://images.unsplash.com/photo-1559157695-c3e284ea6c2b?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80",
         budget: Decimal.new("90"),
         currency_symbol: "€",
         author: %{

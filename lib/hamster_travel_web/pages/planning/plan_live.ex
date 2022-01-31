@@ -4,7 +4,7 @@ defmodule HamsterTravelWeb.Planning.PlanLive do
   """
   use HamsterTravelWeb, :live_view
 
-  alias HamsterTravelWeb.Planning.PlanComponents
+  alias HamsterTravelWeb.Planning.{Activities, PlanComponents, Transfers}
 
   @tabs ["activities", "transfers", "catering", "documents", "report"]
 
@@ -34,6 +34,20 @@ defmodule HamsterTravelWeb.Planning.PlanLive do
       |> assign(active_tab: fetch_tab(params))
 
     {:noreply, socket}
+  end
+
+  def render_tab(assigns) do
+    case assigns.active_tab do
+      "transfers" ->
+        ~H"""
+          <.live_component module={Transfers} id={"plan-#{@plan.id}-transfers"} plan={@plan} />
+        """
+
+      "activities" ->
+        ~H"""
+          <.live_component module={Activities} id={"plan-#{@plan.id}-activities"} plan={@plan} />
+        """
+    end
   end
 
   defp active_nav(%{status: "draft"}), do: :drafts
