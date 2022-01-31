@@ -1,5 +1,10 @@
 <header class="dark:border-b dark:border-zinc-800">
-  <.navbar current_user={assigns[:current_user]} active_nav={assigns[:active_nav]} />
+  <.navbar
+    current_user={assigns[:current_user]}
+    active_nav={assigns[:active_nav]}
+    active_tab={assigns[:active_tab]}
+    mobile_menu={assigns[:mobile_menu]}
+  />
 </header>
 
 <main class="pb-16 sm:pb-0 text-zinc-600 dark:text-zinc-400">

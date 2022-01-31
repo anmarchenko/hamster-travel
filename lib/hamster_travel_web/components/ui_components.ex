@@ -21,8 +21,10 @@ defmodule HamsterTravelWeb.UIComponents do
   end
 
   def tabs(assigns) do
+    classes = assigns[:class] || ""
+
     ~H"""
-      <div class="flex border-b border-gray-200 dark:border-gray-700 gap-x-4">
+      <div class={"flex border-b border-gray-200 dark:border-gray-700 gap-x-4 #{classes}"}>
         <%= render_slot(@inner_block) %>
       </div>
     """

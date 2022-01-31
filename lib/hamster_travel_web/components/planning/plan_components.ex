@@ -53,7 +53,7 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
 
   def plan_tabs(assigns) do
     ~H"""
-      <UI.tabs>
+      <UI.tabs class="hidden sm:flex">
         <UI.tab url={plan_url(@plan.slug, :transfers)} active={@active_tab == "transfers"}>
           <UI.icon_text>
             <Icons.airplane />

@@ -14,6 +14,7 @@ defmodule HamsterTravelWeb.Planning.PlanLive do
       {:ok, plan} ->
         socket =
           socket
+          |> assign(mobile_menu: :plan_tabs)
           |> assign(active_nav: active_nav(plan))
           |> assign(active_tab: fetch_tab(params))
           |> assign(page_title: plan.name)
