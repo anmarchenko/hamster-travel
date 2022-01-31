@@ -20,34 +20,34 @@ defmodule HamsterTravelWeb.Planning.PlansList do
   end
 
   def card(%{plan: %{slug: slug}} = assigns) do
-    plan_url = "/plans/#{slug}"
+    link = PlanComponents.plan_url(slug)
 
     ~H"""
       <div class="flex flex-row bg-zinc-50 dark:bg-zinc-900 dark:border dark:border-zinc-600 shadow-md rounded-lg hover:shadow-lg hover:bg-white hover:dark:bg-zinc-800 ">
         <div class="shrink-0">
-          <%= live_redirect to: plan_url do %>
+          <%= live_redirect to: link do %>
             <img src={@plan.cover} class="w-32 h-32 object-cover object-center rounded-l-lg"/>
           <% end %>
         </div>
         <div class="flex-1 p-4 max-w-[calc(100%_-_theme(width.32))] flex flex-col justify-between">
           <p class="text-base font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
-            <%= live_redirect to: plan_url do %>
+            <%= live_redirect to: link do %>
               <%= @plan.name %>
             <% end %>
           </p>
           <div class="text-xs sm:text-base text-zinc-400 font-light flex flex-row gap-x-4 dark:text-zinc-500">
-            <UIComponents.icon_text>
-              <Icons.money_stack class="hidden sm:block" />
+            <UI.icon_text>
+              <Icons.budget class="hidden sm:block" />
               <%= @plan.budget %> <%= @plan.currency_symbol %>
-            </UIComponents.icon_text>
-            <UIComponents.icon_text>
+            </UI.icon_text>
+            <UI.icon_text>
               <Icons.calendar class="hidden sm:block" />
               <%= @plan.duration %> <%= ngettext("day", "days", @plan.duration) %>
-            </UIComponents.icon_text>
-            <UIComponents.icon_text>
+            </UI.icon_text>
+            <UI.icon_text>
               <Icons.user class="hidden sm:block" />
               <%= @plan.people_count %> <%= gettext("ppl") %>
-            </UIComponents.icon_text>
+            </UI.icon_text>
           </div>
           <div class="flex flex-row gap-x-3">
             <PlanComponents.status_badge status={@plan.status} />

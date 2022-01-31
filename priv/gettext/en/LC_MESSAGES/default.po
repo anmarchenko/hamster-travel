@@ -24,14 +24,14 @@ msgid "Next travels"
 msgstr ""
 
 #, elixir-format, ex-autogen
-#: lib/hamster_travel_web/components/planning/plans_list.ex:48
-#: lib/hamster_travel_web/pages/planning/plan_transfers_live.html.heex:14
+#: lib/hamster_travel_web/components/planning/plan_components.ex:25
+#: lib/hamster_travel_web/components/planning/plans_list.ex:49
 msgid "ppl"
 msgstr ""
 
 #, elixir-format, ex-autogen, fuzzy
-#: lib/hamster_travel_web/components/planning/plans_list.ex:44
-#: lib/hamster_travel_web/pages/planning/plan_transfers_live.html.heex:10
+#: lib/hamster_travel_web/components/planning/plan_components.ex:21
+#: lib/hamster_travel_web/components/planning/plans_list.ex:45
 msgid "day"
 msgid_plural "days"
 msgstr[0] ""
@@ -55,7 +55,7 @@ msgid "Drafts"
 msgstr ""
 
 #, elixir-format, ex-autogen
-#: lib/hamster_travel_web/pages/planning/plan_transfers_live.html.heex:19
+#: lib/hamster_travel_web/components/planning/plan_components.ex:30
 msgid "Edit plan"
 msgstr ""
 
@@ -70,11 +70,21 @@ msgid "This URL is not found."
 msgstr ""
 
 #, elixir-format, ex-autogen
-#: lib/hamster_travel_web/pages/planning/plan_transfers_live.html.heex:25
+#: lib/hamster_travel_web/components/planning/plan_components.ex:36
 msgid "Export as PDF"
 msgstr ""
 
 #, elixir-format, ex-autogen
-#: lib/hamster_travel_web/pages/planning/plan_transfers_live.html.heex:22
+#: lib/hamster_travel_web/components/planning/plan_components.ex:33
 msgid "Make a copy"
+msgstr ""
+
+#, elixir-format, ex-autogen
+#: lib/hamster_travel_web/components/planning/plan_components.ex:66
+msgid "Activities"
+msgstr ""
+
+#, elixir-format, ex-autogen
+#: lib/hamster_travel_web/components/planning/plan_components.ex:60
+msgid "Transfers and hotels"
 msgstr ""

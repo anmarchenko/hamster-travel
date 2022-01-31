@@ -27,9 +27,7 @@ defmodule HamsterTravelWeb.Router do
       live "/drafts", Planning.DraftsLive
       live "/backpacks", Packing.BackpacksLive
 
-      live "/plans/:plan_slug", Planning.PlanTransfersLive
-      live "/plans/:plan_slug/transfers", Planning.PlanTransfersLive
-      live "/plans/:plan_slug/activities", Planning.PlanActivitiesLive
+      live "/plans/:plan_slug", Planning.PlanLive
     end
   end
 

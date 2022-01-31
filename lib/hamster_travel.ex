@@ -18,7 +18,7 @@ defmodule HamsterTravel do
         countries: ["se"],
         people_count: 3,
         cover:
-          "https://d2fetf4i8a4kn6.cloudfront.net/2021/09/19/12/38/10/41fe55b1-aa9d-4798-9854-f57ce928ded0/photo.png",
+          "https://images.unsplash.com/photo-1572225303717-a96db5e8d8b0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1887&q=80",
         budget: Decimal.new("1124.59"),
         currency_symbol: "€",
         author: %{
@@ -35,7 +35,7 @@ defmodule HamsterTravel do
         countries: ["hu"],
         people_count: 3,
         cover:
-          "https://d2fetf4i8a4kn6.cloudfront.net/2017/02/10/17/38/23/f15ba329-31e3-4497-9caa-2ee2d7caf3e7/photo.png",
+          "https://images.unsplash.com/photo-1549877452-9c387954fbc2?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80",
         budget: Decimal.new("1431.28"),
         currency_symbol: "€",
         author: %{

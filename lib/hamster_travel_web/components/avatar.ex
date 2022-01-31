@@ -21,8 +21,8 @@ defmodule HamsterTravelWeb.Avatar do
 
   defp classes(size: size) do
     class_list([
-      size_class(size),
-      "bg-zinc-200 dark:bg-zinc-800 bg-cover bg-center rounded-full shadow-inner"
+      {size_class(size), true},
+      {"bg-zinc-200 dark:bg-zinc-800 bg-cover bg-center rounded-full shadow-inner", true}
     ])
   end
 
