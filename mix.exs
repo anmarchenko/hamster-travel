@@ -62,6 +62,11 @@ defmodule HamsterTravel.MixProject do
       # json
       {:jason, "~> 1.2"},
 
+      # locale info, dates and money formatting
+      {:ex_cldr, "~> 2.23"},
+      {:ex_cldr_dates_times, "~> 2.0"},
+      {:ex_cldr_numbers, "~> 2.0"},
+
       # test/lint
       {:floki, ">= 0.30.0", only: :test},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false}

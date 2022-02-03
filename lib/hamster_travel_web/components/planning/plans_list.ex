@@ -38,7 +38,7 @@ defmodule HamsterTravelWeb.Planning.PlansList do
           <div class="text-xs sm:text-base text-zinc-400 font-light flex flex-row gap-x-4 dark:text-zinc-500">
             <UI.icon_text>
               <Icons.budget class="hidden sm:block" />
-              <%= @plan.budget %> <%= @plan.currency_symbol %>
+              <%= Formatter.format_money(@plan.budget, @plan.currency) %>
             </UI.icon_text>
             <UI.icon_text>
               <Icons.calendar class="hidden sm:block" />

@@ -12,6 +12,7 @@ defmodule HamsterTravelWeb.Hooks.UserAuth do
     }
 
     Gettext.put_locale(HamsterTravelWeb.Gettext, user.locale)
+    {:ok, _} = Cldr.put_locale(HamsterTravelWeb.Cldr, user.locale)
 
     socket = socket |> assign(:current_user, user)
 

@@ -1,3 +1,31 @@
-  <p class="mt-8">
-  Here will be transfers
-  </p>
+<div>
+  <div class="flex flex-row gap-x-4 mt-8 text-xl">
+    <UI.icon_text>
+      <Icons.budget class="hidden sm:block" />
+      <%= Formatter.format_money(@budget, @plan.currency) %>
+    </UI.icon_text>
+  </div>
+
+<table class="table-auto border-collapse border border-slate-500 w-full mt-8">
+  <thead>
+    <tr>
+      <th class="border border-slate-600 px-2 py-4 text-left w-1/12"><%= gettext("Day") %></th>
+      <th class="border border-slate-600 px-2 py-4 text-left w-1/6"><%= gettext("Places") %></th>
+      <th class="border border-slate-600 px-2 py-4 text-left w-1/3"><%= gettext("Transfers") %></th>
+      <th class="border border-slate-600 px-2 py-4 text-left w-1/3"><%= gettext("Hotel") %></th>
+    </tr>
+  </thead>
+  <tbody>
+  <%= for i <- 0..@plan.duration-1 do %>
+    <tr>
+      <td class="border border-slate-600 px-2 py-4">
+        <.day index={i} start_date={@plan.start_date} />
+      </td>
+      <td class="border border-slate-600 px-2 py-4"></td>
+      <td class="border border-slate-600 px-2 py-4"></td>
+      <td class="border border-slate-600 px-2 py-4"></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+</div>

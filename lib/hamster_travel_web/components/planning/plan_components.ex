@@ -14,7 +14,7 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
           <div class="text-zinc-600 flex flex-row gap-x-4 mt-4 dark:text-zinc-300">
             <UI.icon_text>
               <Icons.budget />
-              <%= @plan.budget %> <%= @plan.currency_symbol %>
+              <%= Formatter.format_money(@plan.budget, @plan.currency) %>
             </UI.icon_text>
             <UI.icon_text>
               <Icons.calendar />

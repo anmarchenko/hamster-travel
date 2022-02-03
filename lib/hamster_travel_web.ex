@@ -98,6 +98,7 @@ defmodule HamsterTravelWeb do
       import HamsterTravelWeb.Gettext
       import HamsterTravelWeb.Helpers
 
+      alias HamsterTravelWeb.Cldr, as: Formatter
       alias HamsterTravelWeb.Router.Helpers, as: Routes
       alias HamsterTravelWeb.{Flags, Icons}
       alias HamsterTravelWeb.UIComponents, as: UI

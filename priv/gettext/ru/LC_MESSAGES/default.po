@@ -97,6 +97,22 @@ msgid "Back"
 msgstr "Назад"
 
 #, elixir-format, ex-autogen, fuzzy
+#: lib/hamster_travel_web/components/planning/transfers.html.heex:14
 #: lib/hamster_travel_web/views/layout_view.ex:75
 msgid "Transfers"
 msgstr "Трансферы"
+
+#, elixir-format, ex-autogen
+#: lib/hamster_travel_web/components/planning/transfers.html.heex:12
+msgid "Day"
+msgstr "День"
+
+#, elixir-format, ex-autogen
+#: lib/hamster_travel_web/components/planning/transfers.html.heex:15
+msgid "Hotel"
+msgstr "Жильё"
+
+#, elixir-format, ex-autogen, fuzzy
+#: lib/hamster_travel_web/components/planning/transfers.html.heex:13
+msgid "Places"
+msgstr "Города"

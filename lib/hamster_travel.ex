@@ -21,6 +21,7 @@ defmodule HamsterTravel do
         cover:
           "https://images.unsplash.com/photo-1572225303717-a96db5e8d8b0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1887&q=80",
         budget: Decimal.new("1124.59"),
+        currency: "EUR",
         currency_symbol: "€",
         author: %{
           name: "Yulia Marchenko",
@@ -39,6 +40,7 @@ defmodule HamsterTravel do
         cover:
           "https://images.unsplash.com/photo-1549877452-9c387954fbc2?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80",
         budget: Decimal.new("1431.28"),
+        currency: "EUR",
         currency_symbol: "€",
         author: %{
           name: "Yulia Marchenko",
@@ -57,6 +59,7 @@ defmodule HamsterTravel do
         cover:
           "https://images.unsplash.com/photo-1617093888347-f73de2649f94?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80",
         budget: Decimal.new("2939.65"),
+        currency: "EUR",
         currency_symbol: "€",
         author: %{
           name: "Yulia Marchenko",
@@ -75,6 +78,7 @@ defmodule HamsterTravel do
         cover:
           "https://images.unsplash.com/photo-1643288939906-5c6c60c9d289?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3432&q=80",
         budget: Decimal.new("1171.76"),
+        currency: "EUR",
         currency_symbol: "€",
         author: %{
           name: "Yulia Marchenko",
@@ -98,6 +102,7 @@ defmodule HamsterTravel do
         cover:
           "https://images.unsplash.com/photo-1607338533044-c5bc1ec32bde?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1887&q=80",
         budget: Decimal.new("614.18"),
+        currency: "EUR",
         currency_symbol: "€",
         author: %{
           name: "Yulia Marchenko",
@@ -116,6 +121,7 @@ defmodule HamsterTravel do
         cover:
           "https://images.unsplash.com/photo-1559157695-c3e284ea6c2b?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80",
         budget: Decimal.new("90"),
+        currency: "EUR",
         currency_symbol: "€",
         author: %{
           name: "Yulia Marchenko",
@@ -136,5 +142,9 @@ defmodule HamsterTravel do
     else
       {:error, :not_found}
     end
+  end
+
+  def fetch_budget(_, _) do
+    Decimal.new(:rand.uniform(1000))
   end
 end

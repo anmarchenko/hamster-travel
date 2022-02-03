@@ -1,3 +1,7 @@
-  <p class="mt-8">
-  Here will be activities
-  </p>
+<div class="flex flex-row gap-x-4 mt-8 text-xl">
+  <UI.icon_text>
+    <Icons.budget class="hidden sm:block" />
+    <%= Formatter.format_money(@budget, @plan.currency) %>
+  </UI.icon_text>
+</div>
+
