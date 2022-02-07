@@ -26,7 +26,17 @@ defmodule HamsterTravel do
         author: %{
           name: "Yulia Marchenko",
           avatar_url: "https://d2fetf4i8a4kn6.cloudfront.net/2014/09/30/11/27/53/320/foto.png"
-        }
+        },
+        places: [
+          %{
+            id: 434_343,
+            city: %{
+              country: "se",
+              name: "Стокгольм"
+            },
+            day_intervals: [[0, 3]]
+          }
+        ]
       },
       %{
         id: 2,
@@ -45,7 +55,8 @@ defmodule HamsterTravel do
         author: %{
           name: "Yulia Marchenko",
           avatar_url: "https://d2fetf4i8a4kn6.cloudfront.net/2014/09/30/11/27/53/320/foto.png"
-        }
+        },
+        places: []
       },
       %{
         id: 3,
@@ -64,7 +75,8 @@ defmodule HamsterTravel do
         author: %{
           name: "Yulia Marchenko",
           avatar_url: "https://d2fetf4i8a4kn6.cloudfront.net/2014/09/30/11/27/53/320/foto.png"
-        }
+        },
+        places: []
       },
       %{
         id: 4,
@@ -73,7 +85,7 @@ defmodule HamsterTravel do
         duration: 4,
         start_date: ~D[2019-05-16],
         status: "finished",
-        countries: ["dk", "se", "fi", "fo"],
+        countries: ["dk", "se"],
         people_count: 3,
         cover:
           "https://images.unsplash.com/photo-1643288939906-5c6c60c9d289?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3432&q=80",
@@ -83,7 +95,33 @@ defmodule HamsterTravel do
         author: %{
           name: "Yulia Marchenko",
           avatar_url: "https://d2fetf4i8a4kn6.cloudfront.net/2014/09/30/11/27/53/320/foto.png"
-        }
+        },
+        places: [
+          %{
+            id: 32,
+            city: %{
+              country: "dk",
+              name: "Копенгаген"
+            },
+            day_intervals: [[0, 3]]
+          },
+          %{
+            id: 1,
+            city: %{
+              country: "se",
+              name: "Мальмё"
+            },
+            day_intervals: [[2, 2]]
+          },
+          %{
+            id: 2,
+            city: %{
+              country: "se",
+              name: "Лунд"
+            },
+            day_intervals: [[2, 2]]
+          }
+        ]
       }
     ]
   end
@@ -107,7 +145,8 @@ defmodule HamsterTravel do
         author: %{
           name: "Yulia Marchenko",
           avatar_url: "https://d2fetf4i8a4kn6.cloudfront.net/2014/09/30/11/27/53/320/foto.png"
-        }
+        },
+        places: []
       },
       %{
         id: 6,
@@ -126,7 +165,8 @@ defmodule HamsterTravel do
         author: %{
           name: "Yulia Marchenko",
           avatar_url: "https://d2fetf4i8a4kn6.cloudfront.net/2014/09/30/11/27/53/320/foto.png"
-        }
+        },
+        places: []
       }
     ]
   end
@@ -144,7 +184,17 @@ defmodule HamsterTravel do
     end
   end
 
+  def find_places_by_day(plan, day_index) do
+    Enum.filter(plan.places, fn pl -> intersects_day(pl, day_index) end)
+  end
+
   def fetch_budget(_, _) do
     Decimal.new(:rand.uniform(1000))
+  end
+
+  defp intersects_day(item, day_index) do
+    Enum.any?(item.day_intervals, fn [l, r] ->
+      day_index >= l && day_index <= r
+    end)
   end
 end

@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.Planning.Activities do
+defmodule HamsterTravelWeb.Planning.Tabs.ActivitiesTab do
   @moduledoc """
   Activities tab
   """

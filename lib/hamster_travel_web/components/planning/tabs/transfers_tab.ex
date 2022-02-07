@@ -1,8 +1,10 @@
-defmodule HamsterTravelWeb.Planning.Transfers do
+defmodule HamsterTravelWeb.Planning.Tabs.TransfersTab do
   @moduledoc """
   Transfers/hotels tab
   """
   use HamsterTravelWeb, :live_component
+
+  alias HamsterTravelWeb.Planning.Places
 
   def update(%{plan: plan}, socket) do
     budget = HamsterTravel.fetch_budget(plan, :transfers)
