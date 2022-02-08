@@ -4,7 +4,7 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
   """
   use HamsterTravelWeb, :component
 
-  alias HamsterTravelWeb.{Avatar, Flags}
+  alias HamsterTravelWeb.Avatar
 
   def header(assigns) do
     ~H"""
@@ -81,6 +81,40 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
       <span class={classes}>
         <%= Gettext.gettext(HamsterTravelWeb.Gettext, @status) %>
       </span>
+    """
+  end
+
+  def transfer_icon(%{type: "plane"} = assigns) do
+    ~H"""
+    <Icons.airplane />
+    """
+  end
+
+  def transfer_icon(%{type: "car"} = assigns) do
+    ~H"""
+    <Icons.car />
+    """
+  end
+
+  def transfer_icon(%{type: "taxi"} = assigns) do
+    ~H"""
+    """
+  end
+
+  def transfer_icon(%{type: "bus"} = assigns) do
+    ~H"""
+    <Icons.bus />
+    """
+  end
+
+  def transfer_icon(%{type: "train"} = assigns) do
+    ~H"""
+    <Icons.train />
+    """
+  end
+
+  def transfer_icon(%{type: "ship"} = assigns) do
+    ~H"""
     """
   end
 

@@ -111,6 +111,44 @@ defmodule HamsterTravelWeb.Icons do
     """
   end
 
+  def bus(assigns) do
+    ~H"""
+    <svg width="18" height="18" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M7 16.01L7.01 15.9989" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M17 16.01L17.01 15.9989" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M3 12H21V19C21 19.5523 20.5523 20 20 20H4C3.44772 20 3 19.5523 3 19V12Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M21 8V6C21 3.79086 19.2091 2 17 2H7C4.79086 2 3 3.79086 3 6V8" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M7 8L17 8" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M4 20H8V22C8 22.5523 7.55228 23 7 23H5C4.44772 23 4 22.5523 4 22V20Z" fill="currentColor"/>
+      <path d="M16 20H20V22C20 22.5523 19.5523 23 19 23H17C16.4477 23 16 22.5523 16 22V20Z" fill="currentColor"/>
+    </svg>
+    """
+  end
+
+  def car(assigns) do
+    ~H"""
+    <svg width="18" height="18" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 10L16 10" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M7 14L8 14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M16 14L17 14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M3 18V11.4105C3 11.1397 3.05502 10.8716 3.16171 10.6227L5.4805 5.21216C5.79566 4.47679 6.51874 4 7.31879 4H16.6812C17.4813 4 18.2043 4.47679 18.5195 5.21216L20.8383 10.6227C20.945 10.8716 21 11.1397 21 11.4105V18M3 18V20.4C3 20.7314 3.26863 21 3.6 21H6.4C6.73137 21 7 20.7314 7 20.4V18M3 18H7M21 18V20.4C21 20.7314 20.7314 21 20.4 21H17.6C17.2686 21 17 20.7314 17 20.4V18M21 18H17M7 18H17" stroke="currentColor" stroke-width="1.5"/>
+    </svg>
+    """
+  end
+
+  def train(assigns) do
+    ~H"""
+    <svg width="18" height="18" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M9.6087 7H14.3913C15.832 7 17 8.16795 17 9.6087C17 9.82481 16.8248 10 16.6087 10H7.3913C7.17519 10 7 9.82481 7 9.6087C7 8.16795 8.16795 7 9.6087 7Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M7 19H10L8.27639 22.4472C8.107 22.786 7.76074 23 7.38197 23H6.61803C5.87465 23 5.39116 22.2177 5.72361 21.5528L7 19Z" fill="currentColor"/>
+      <path d="M17 19H14L15.7236 22.4472C15.893 22.786 16.2393 23 16.618 23H17.382C18.1253 23 18.6088 22.2177 18.2764 21.5528L17 19Z" fill="currentColor"/>
+      <path d="M9 3H15C18.3137 3 21 5.68629 21 9V13C21 16.3137 18.3137 19 15 19H9C5.68629 19 3 16.3137 3 13V9C3 5.68629 5.68629 3 9 3Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M16 15.01L16.01 14.9989" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M8 15.01L8.01 14.9989" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    """
+  end
+
   def arrow_left(assigns) do
     ~H"""
     <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" width="15" height="15"><path d="M1.5 7.5l4-4m-4 4l4 4m-4-4H14" stroke="currentColor"></path></svg>

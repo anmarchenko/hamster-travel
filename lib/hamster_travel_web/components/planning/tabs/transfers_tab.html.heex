@@ -24,7 +24,9 @@
       <td class="border border-slate-600 px-2 py-4 align-top">
         <.live_component module={Places} id={"plan-#{@plan.id}-places-#{i}"} plan={@plan} day_index={i} />
       </td>
-      <td class="border border-slate-600 px-2 py-4 align-top"></td>
+      <td class="border border-slate-600 px-2 py-4 align-top">
+        <.live_component module={Transfers} id={"plan-#{@plan.id}-trabsfers-#{i}"} plan={@plan} day_index={i} />
+      </td>
       <td class="border border-slate-600 px-2 py-4 align-top"></td>
     </tr>
   <% end %>

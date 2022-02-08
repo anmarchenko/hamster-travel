@@ -36,7 +36,8 @@ defmodule HamsterTravel do
             },
             day_intervals: [[0, 3]]
           }
-        ]
+        ],
+        transfers: []
       },
       %{
         id: 2,
@@ -56,7 +57,8 @@ defmodule HamsterTravel do
           name: "Yulia Marchenko",
           avatar_url: "https://d2fetf4i8a4kn6.cloudfront.net/2014/09/30/11/27/53/320/foto.png"
         },
-        places: []
+        places: [],
+        transfers: []
       },
       %{
         id: 3,
@@ -76,7 +78,8 @@ defmodule HamsterTravel do
           name: "Yulia Marchenko",
           avatar_url: "https://d2fetf4i8a4kn6.cloudfront.net/2014/09/30/11/27/53/320/foto.png"
         },
-        places: []
+        places: [],
+        transfers: []
       },
       %{
         id: 4,
@@ -121,6 +124,127 @@ defmodule HamsterTravel do
             },
             day_intervals: [[2, 2]]
           }
+        ],
+        transfers: [
+          %{
+            day_index: 0,
+            position: 0,
+            type: "plane",
+            station_from: "TXL",
+            station_to: "CPN",
+            time_from: "10:45",
+            time_to: "11:55",
+            city_from: %{
+              name: "Берлин",
+              country: "de"
+            },
+            city_to: %{
+              name: "Копенгаген",
+              country: "dk"
+            },
+            price: Decimal.new("85.06"),
+            price_currency: "EUR",
+            vehicle_id: nil,
+            company: "Easyjet",
+            comment: nil,
+            links: [
+              "https://www.easyjet.com/en"
+            ]
+          },
+          %{
+            day_index: 2,
+            position: 0,
+            type: "train",
+            station_from: nil,
+            station_to: "Centralstation",
+            time_from: "08:47",
+            time_to: "09:26",
+            city_from: %{
+              name: "Копенгаген",
+              country: "dk"
+            },
+            city_to: %{
+              name: "Мальмё",
+              country: "se"
+            },
+            price: Decimal.new("182"),
+            price_currency: "DKK",
+            vehicle_id: "Re 1028",
+            company: "DSB",
+            comment: nil,
+            links: []
+          },
+          %{
+            day_index: 2,
+            position: 1,
+            type: "train",
+            station_from: "Centralstation",
+            station_to: "Centralstation",
+            time_from: "12:11",
+            time_to: "12:24",
+            city_from: %{
+              name: "Мальмё",
+              country: "se"
+            },
+            city_to: %{
+              name: "Лунд",
+              country: "se"
+            },
+            price: Decimal.new("106"),
+            price_currency: "SEK",
+            vehicle_id: "1714",
+            company: "Skånetrafiken",
+            comment: nil,
+            links: []
+          },
+          %{
+            day_index: 2,
+            position: 2,
+            type: "train",
+            station_from: "Centralstation",
+            station_to: "H",
+            time_from: "15:40",
+            time_to: "16:28",
+            city_from: %{
+              name: "Лунд",
+              country: "se"
+            },
+            city_to: %{
+              name: "Копенгаген",
+              country: "dk"
+            },
+            price: Decimal.new("300"),
+            price_currency: "SEK",
+            vehicle_id: "1714",
+            company: "Skånetrafiken",
+            comment: nil,
+            links: []
+          },
+          %{
+            day_index: 3,
+            position: 0,
+            type: "plane",
+            station_from: "CPN",
+            station_to: "TXL",
+            time_from: "17:20",
+            time_to: "18:20",
+            city_from: %{
+              name: "Копенгаген",
+              country: "dk"
+            },
+            city_to: %{
+              name: "Берлин",
+              country: "de"
+            },
+            price: Decimal.new("70.14"),
+            price_currency: "EUR",
+            vehicle_id: nil,
+            company: "Easyjet",
+            comment: nil,
+            links: [
+              "https://www.easyjet.com/en"
+            ]
+          }
         ]
       }
     ]
@@ -146,7 +270,8 @@ defmodule HamsterTravel do
           name: "Yulia Marchenko",
           avatar_url: "https://d2fetf4i8a4kn6.cloudfront.net/2014/09/30/11/27/53/320/foto.png"
         },
-        places: []
+        places: [],
+        transfers: []
       },
       %{
         id: 6,
@@ -166,7 +291,8 @@ defmodule HamsterTravel do
           name: "Yulia Marchenko",
           avatar_url: "https://d2fetf4i8a4kn6.cloudfront.net/2014/09/30/11/27/53/320/foto.png"
         },
-        places: []
+        places: [],
+        transfers: []
       }
     ]
   end
@@ -186,6 +312,12 @@ defmodule HamsterTravel do
 
   def find_places_by_day(plan, day_index) do
     Enum.filter(plan.places, fn pl -> intersects_day(pl, day_index) end)
+  end
+
+  def find_transfers_by_day(plan, day_index) do
+    plan.transfers
+    |> Enum.filter(fn tr -> tr.day_index == day_index end)
+    |> Enum.sort(fn l, r -> l.position <= r.position end)
   end
 
   def fetch_budget(_, _) do
