@@ -128,7 +128,6 @@ defmodule HamsterTravel do
         transfers: [
           %{
             day_index: 0,
-            position: 0,
             type: "plane",
             station_from: "TXL",
             station_to: "CPN",
@@ -148,12 +147,12 @@ defmodule HamsterTravel do
             company: "Easyjet",
             comment: nil,
             links: [
+              "https://www.easyjet.com/en",
               "https://www.easyjet.com/en"
             ]
           },
           %{
             day_index: 2,
-            position: 0,
             type: "train",
             station_from: nil,
             station_to: "Centralstation",
@@ -171,12 +170,11 @@ defmodule HamsterTravel do
             price_currency: "DKK",
             vehicle_id: "Re 1028",
             company: "DSB",
-            comment: nil,
+            comment: "Купить билеты в автомате на платформе",
             links: []
           },
           %{
             day_index: 2,
-            position: 1,
             type: "train",
             station_from: "Centralstation",
             station_to: "Centralstation",
@@ -199,7 +197,6 @@ defmodule HamsterTravel do
           },
           %{
             day_index: 2,
-            position: 2,
             type: "train",
             station_from: "Centralstation",
             station_to: "H",
@@ -222,7 +219,6 @@ defmodule HamsterTravel do
           },
           %{
             day_index: 3,
-            position: 0,
             type: "plane",
             station_from: "CPN",
             station_to: "TXL",
@@ -317,7 +313,7 @@ defmodule HamsterTravel do
   def find_transfers_by_day(plan, day_index) do
     plan.transfers
     |> Enum.filter(fn tr -> tr.day_index == day_index end)
-    |> Enum.sort(fn l, r -> l.position <= r.position end)
+    |> Enum.sort(fn l, r -> l.time_from <= r.time_from end)
   end
 
   def fetch_budget(_, _) do

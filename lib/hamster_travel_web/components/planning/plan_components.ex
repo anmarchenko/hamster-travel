@@ -35,6 +35,9 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
             <UI.link url={plan_url(@plan.slug, :pdf)}%>
               <%= gettext("Export as PDF") %>
             </UI.link>
+            <UI.link url={plan_url(@plan.slug, :delete)}%>
+              <%= gettext("Delete") %>
+            </UI.link>
           </div>
           <div class="flex flex-row gap-x-3 mt-4">
             <.status_badge status={@plan.status} />
@@ -98,6 +101,7 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
 
   def transfer_icon(%{type: "taxi"} = assigns) do
     ~H"""
+    <Icons.taxi />
     """
   end
 
@@ -115,6 +119,7 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
 
   def transfer_icon(%{type: "ship"} = assigns) do
     ~H"""
+    <Icons.ship />
     """
   end
 
@@ -127,6 +132,7 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
   def plan_url(slug, :edit), do: "/plans/#{slug}/edit"
   def plan_url(slug, :pdf), do: "/plans/#{slug}/pdf"
   def plan_url(slug, :copy), do: "/plans/#{slug}/copy"
+  def plan_url(slug, :delete), do: "/plans/#{slug}/delete"
 
   defp status_colors(%{status: "finished"}),
     do: "text-green-500 bg-green-100 dark:bg-green-800 dark:text-green-100"

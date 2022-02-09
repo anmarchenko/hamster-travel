@@ -27,14 +27,15 @@ defmodule HamsterTravelWeb.Planning.Transfers do
     ~H"""
     <div class="flex flex-col gap-y-8">
       <%= for transfer <- transfers do %>
-        <div class="flex flex-col gap-y-2">
-          <div class="flex flex-row gap-x-2 items-center text-zinc-400 dark:text-zinc-600">
+        <div class="flex flex-col gap-y-1">
+          <div class="flex flex-row gap-2 items-center text-zinc-400 dark:text-zinc-600">
             <PlanComponents.transfer_icon type={transfer.type} />
+            <%= transfer.vehicle_id %>
             <%= transfer.company %>
             <Icons.budget />
             <%= Formatter.format_money(transfer.price, transfer.price_currency) %>
           </div>
-          <div class="flex flex-row text-lg">
+          <div class="flex flex-row text-lg mt-2">
             <div class="flex flex-col gap-y-2 pr-6 border-r-2 font-medium">
               <div><%= transfer.time_from %></div>
               <div><%= transfer.time_to %></div>
@@ -50,6 +51,17 @@ defmodule HamsterTravelWeb.Planning.Transfers do
               </div>
             </div>
           </div>
+
+          <p class="text-zinc-400 dark:text-zinc-600 italic">
+            <%= transfer.comment %>
+          </p>
+
+          <%= for link <- transfer.links do %>
+            <UI.link url={link}>
+              <%= URI.new!(link).host %>
+              <br />
+            </UI.link>
+          <% end %>
         </div>
       <% end %>
     </div>
