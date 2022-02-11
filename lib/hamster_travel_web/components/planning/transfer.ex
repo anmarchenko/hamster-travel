@@ -24,7 +24,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
   def render(%{edit: false, transfer: transfer} = assigns) do
     ~H"""
       <div class="flex flex-col gap-y-1">
-        <div class="flex flex-row gap-2 items-center text-zinc-400 dark:text-zinc-600">
+        <div class="flex flex-row gap-2 items-center text-zinc-400 dark:text-zinc-500">
           <PlanComponents.transfer_icon type={transfer.type} />
           <%= transfer.vehicle_id %>
           <%= transfer.company %>

@@ -29,7 +29,7 @@ defmodule HamsterTravelWeb.Planning.PlansList do
             <img src={@plan.cover} class="w-32 h-32 object-cover object-center rounded-l-lg"/>
           <% end %>
         </div>
-        <div class="flex-1 p-4 max-w-[calc(100%_-_theme(width.32))] flex flex-col justify-between">
+        <div class="p-4 max-w-[calc(100%_-_theme(width.32))] flex flex-col justify-between">
           <p class="text-base font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
             <%= live_redirect to: link do %>
               <%= @plan.name %>

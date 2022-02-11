@@ -76,7 +76,7 @@ defmodule HamsterTravelWeb.UIComponents do
 
   def secondary_text(assigns) do
     ~H"""
-      <p class="text-zinc-400 dark:text-zinc-600 italic">
+      <p class="text-zinc-400 dark:text-zinc-500 italic">
         <%= render_slot(@inner_block) %>
       </p>
     """
