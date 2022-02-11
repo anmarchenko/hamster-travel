@@ -123,6 +123,18 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
     """
   end
 
+  def day(%{index: index, start_date: start_date} = assigns) do
+    if start_date != nil do
+      ~H"""
+        <%= Formatter.date_with_weekday(Date.add(start_date, index)) %>
+      """
+    else
+      ~H"""
+        <%= gettext("Day") %> <%= index + 1 %>
+      """
+    end
+  end
+
   def plan_url(slug), do: "/plans/#{slug}"
   def plan_url(slug, :transfers), do: "/plans/#{slug}?tab=transfers"
   def plan_url(slug, :activities), do: "/plans/#{slug}?tab=activities"

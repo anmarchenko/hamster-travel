@@ -4,7 +4,7 @@ defmodule HamsterTravelWeb.Planning.Tabs.TransfersTab do
   """
   use HamsterTravelWeb, :live_component
 
-  alias HamsterTravelWeb.Planning.{Hotel, Place, Transfer}
+  alias HamsterTravelWeb.Planning.{Hotel, Place, PlanComponents, Transfer}
 
   def update(%{plan: plan}, socket) do
     budget = HamsterTravel.fetch_budget(plan, :transfers)
@@ -15,17 +15,5 @@ defmodule HamsterTravelWeb.Planning.Tabs.TransfersTab do
       |> assign(plan: plan)
 
     {:ok, socket}
-  end
-
-  def day(%{index: index, start_date: start_date} = assigns) do
-    if start_date != nil do
-      ~H"""
-        <%= Formatter.date_with_weekday(Date.add(start_date, index)) %>
-      """
-    else
-      ~H"""
-        <%= gettext("Day") %> <%= index + 1 %>
-      """
-    end
   end
 end

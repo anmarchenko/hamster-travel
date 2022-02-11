@@ -1,7 +1,21 @@
-<div class="flex flex-row gap-x-4 mt-8 text-xl">
-  <UI.icon_text>
-    <Icons.budget class="hidden sm:block" />
-    <%= Formatter.format_money(@budget, @plan.currency) %>
-  </UI.icon_text>
-</div>
+<div>
+  <div class="flex flex-row gap-x-4 mt-8 text-xl">
+    <UI.icon_text>
+      <Icons.budget class="hidden sm:block" />
+      <%= Formatter.format_money(@budget, @plan.currency) %>
+    </UI.icon_text>
+  </div>
 
+  <div class="flex flex-col gap-y-4 mt-8">
+    <%= for i <- 0..@plan.duration-1 do %>
+      <div class="text-xl text-bold">
+        <PlanComponents.day index={i} start_date={@plan.start_date} />
+      </div>
+      <div class="flex flex-row gap-x-4">
+        <%= for place <- HamsterTravel.find_places_by_day(@plan, i) do %>
+          <.live_component module={Place} id={"plan-#{@plan.id}-places-#{place.id}-day-#{i}"} place={place} day_index={i} />
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
