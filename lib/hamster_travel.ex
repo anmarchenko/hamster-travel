@@ -37,7 +37,8 @@ defmodule HamsterTravel do
             day_intervals: [[0, 3]]
           }
         ],
-        transfers: []
+        transfers: [],
+        hotels: []
       },
       %{
         id: 2,
@@ -58,7 +59,8 @@ defmodule HamsterTravel do
           avatar_url: "https://d2fetf4i8a4kn6.cloudfront.net/2014/09/30/11/27/53/320/foto.png"
         },
         places: [],
-        transfers: []
+        transfers: [],
+        hotels: []
       },
       %{
         id: 3,
@@ -79,7 +81,8 @@ defmodule HamsterTravel do
           avatar_url: "https://d2fetf4i8a4kn6.cloudfront.net/2014/09/30/11/27/53/320/foto.png"
         },
         places: [],
-        transfers: []
+        transfers: [],
+        hotels: []
       },
       %{
         id: 4,
@@ -127,6 +130,7 @@ defmodule HamsterTravel do
         ],
         transfers: [
           %{
+            id: 1,
             day_index: 0,
             type: "plane",
             station_from: "TXL",
@@ -152,6 +156,7 @@ defmodule HamsterTravel do
             ]
           },
           %{
+            id: 2,
             day_index: 2,
             type: "train",
             station_from: nil,
@@ -174,6 +179,7 @@ defmodule HamsterTravel do
             links: []
           },
           %{
+            id: 3,
             day_index: 2,
             type: "train",
             station_from: "Centralstation",
@@ -196,6 +202,7 @@ defmodule HamsterTravel do
             links: []
           },
           %{
+            id: 4,
             day_index: 2,
             type: "train",
             station_from: "Centralstation",
@@ -218,6 +225,7 @@ defmodule HamsterTravel do
             links: []
           },
           %{
+            id: 5,
             day_index: 3,
             type: "plane",
             station_from: "CPN",
@@ -239,6 +247,20 @@ defmodule HamsterTravel do
             comment: nil,
             links: [
               "https://www.easyjet.com/en"
+            ]
+          }
+        ],
+        hotels: [
+          %{
+            id: 1,
+            name: "Скандинавская уютная квартира",
+            day_intervals: [[0, 3]],
+            price: Decimal.new("132"),
+            price_currency: "EUR",
+            price_type: :per_night,
+            comment: "Фредериксберг, Дания",
+            links: [
+              "https://www.airbnb.ru/rooms/21433516?location=Копенгаген%2C%20Дания&adults=2&infants=1&check_in=2019-05-16&check_out=2019-05-19&home_collection=1&s=quWwV675"
             ]
           }
         ]
@@ -267,7 +289,8 @@ defmodule HamsterTravel do
           avatar_url: "https://d2fetf4i8a4kn6.cloudfront.net/2014/09/30/11/27/53/320/foto.png"
         },
         places: [],
-        transfers: []
+        transfers: [],
+        hotels: []
       },
       %{
         id: 6,
@@ -288,7 +311,8 @@ defmodule HamsterTravel do
           avatar_url: "https://d2fetf4i8a4kn6.cloudfront.net/2014/09/30/11/27/53/320/foto.png"
         },
         places: [],
-        transfers: []
+        transfers: [],
+        hotels: []
       }
     ]
   end
@@ -308,6 +332,10 @@ defmodule HamsterTravel do
 
   def find_places_by_day(plan, day_index) do
     Enum.filter(plan.places, fn pl -> intersects_day(pl, day_index) end)
+  end
+
+  def find_hotels_by_day(plan, day_index) do
+    Enum.filter(plan.hotels, fn hotel -> intersects_day(hotel, day_index) end)
   end
 
   def find_transfers_by_day(plan, day_index) do

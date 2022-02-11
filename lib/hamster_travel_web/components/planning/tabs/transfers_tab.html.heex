@@ -22,12 +22,25 @@
         <.day index={i} start_date={@plan.start_date} />
       </td>
       <td class="border border-slate-600 px-2 py-4 align-top">
-        <.live_component module={Places} id={"plan-#{@plan.id}-places-#{i}"} plan={@plan} day_index={i} />
+        <div class="flex flex-col gap-y-2">
+          <%= for place <- HamsterTravel.find_places_by_day(@plan, i) do %>
+            <.live_component module={Place} id={"plan-#{@plan.id}-places-#{place.id}-day-#{i}"} place={place} day_index={i} />
+          <% end %>
+        </div>
+
       </td>
       <td class="border border-slate-600 px-2 py-4 align-top">
-        <.live_component module={Transfers} id={"plan-#{@plan.id}-trabsfers-#{i}"} plan={@plan} day_index={i} />
+        <div class="flex flex-col gap-y-8">
+          <%= for transfer <- HamsterTravel.find_transfers_by_day(@plan, i) do %>
+            <.live_component module={Transfer} id={"plan-#{@plan.id}-transfers-#{transfer.id}-day-#{i}"} transfer={transfer} day_index={i} />
+          <% end %>
+        </div>
       </td>
-      <td class="border border-slate-600 px-2 py-4 align-top"></td>
+      <td class="border border-slate-600 px-2 py-4 align-top">
+        <%= for hotel <- HamsterTravel.find_hotels_by_day(@plan, i) do %>
+          <.live_component module={Hotel} id={"plan-#{@plan.id}-hotels-#{hotel.id}-day-#{i}"} hotel={hotel} day_index={i} />
+        <% end %>
+      </td>
     </tr>
   <% end %>
   </tbody>

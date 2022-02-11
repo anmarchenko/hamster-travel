@@ -20,6 +20,25 @@ defmodule HamsterTravelWeb.UIComponents do
     """
   end
 
+  def external_link(assigns) do
+    uri = URI.parse(assigns[:link])
+
+    ~H"""
+    <UI.link url={@link}>
+      <%= uri.host %>
+      <br />
+    </UI.link>
+    """
+  end
+
+  def external_links(assigns) do
+    ~H"""
+      <%= for link <- @links do %>
+        <.external_link link={link} />
+      <% end %>
+    """
+  end
+
   def tabs(assigns) do
     classes = assigns[:class] || ""
 
@@ -52,6 +71,14 @@ defmodule HamsterTravelWeb.UIComponents do
       <%= live_patch to: @url, class: classes do %>
         <%= render_slot(@inner_block) %>
       <% end %>
+    """
+  end
+
+  def secondary_text(assigns) do
+    ~H"""
+      <p class="text-zinc-400 dark:text-zinc-600 italic">
+        <%= render_slot(@inner_block) %>
+      </p>
     """
   end
 end

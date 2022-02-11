@@ -4,7 +4,7 @@ defmodule HamsterTravelWeb.Planning.Tabs.TransfersTab do
   """
   use HamsterTravelWeb, :live_component
 
-  alias HamsterTravelWeb.Planning.{Places, Transfers}
+  alias HamsterTravelWeb.Planning.{Hotel, Place, Transfer}
 
   def update(%{plan: plan}, socket) do
     budget = HamsterTravel.fetch_budget(plan, :transfers)
