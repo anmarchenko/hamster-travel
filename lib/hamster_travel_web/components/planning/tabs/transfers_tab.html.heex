@@ -6,51 +6,51 @@
     </UI.icon_text>
   </div>
 
-<table class="sm:mt-8 sm:table-auto sm:border-collapse sm:border sm:border-slate-500 sm:w-full">
-  <thead>
-    <tr class="hidden sm:table-row">
-      <th class="border border-slate-600 px-2 py-4 text-left w-1/12"><%= gettext("Day") %></th>
-      <th class="border border-slate-600 px-2 py-4 text-left w-1/6"><%= gettext("Places") %></th>
-      <th class="border border-slate-600 px-2 py-4 text-left w-1/3"><%= gettext("Transfers") %></th>
-      <th class="border border-slate-600 px-2 py-4 text-left w-1/3"><%= gettext("Hotel") %></th>
-    </tr>
-  </thead>
-  <tbody>
-  <%= for i <- 0..@plan.duration-1 do %>
-    <tr class="flex flex-col gap-y-6 mt-10 sm:table-row sm:gap-y-0 sm:mt-0">
-      <td class="text-xl font-bold sm:font-normal sm:text-base sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
-        <.day index={i} start_date={@plan.start_date} />
-      </td>
-      <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
-        <div class="flex flex-col gap-y-2">
-          <%= for place <- HamsterTravel.find_places_by_day(@plan, i) do %>
-            <.live_component module={Place} id={"plan-#{@plan.id}-places-#{place.id}-day-#{i}"} place={place} day_index={i} />
-          <% end %>
-          <%# add here empty placeholder %>
-          <%# add here Add new button %>
-        </div>
+  <table class="sm:mt-8 sm:table-auto sm:border-collapse sm:border sm:border-slate-500 sm:w-full">
+    <thead>
+      <tr class="hidden sm:table-row">
+        <th class="border border-slate-600 px-2 py-4 text-left w-1/12"><%= gettext("Day") %></th>
+        <th class="border border-slate-600 px-2 py-4 text-left w-1/6"><%= gettext("Places") %></th>
+        <th class="border border-slate-600 px-2 py-4 text-left w-1/3"><%= gettext("Transfers") %></th>
+        <th class="border border-slate-600 px-2 py-4 text-left w-1/3"><%= gettext("Hotel") %></th>
+      </tr>
+    </thead>
+    <tbody>
+    <%= for i <- 0..@plan.duration-1 do %>
+      <tr class="flex flex-col gap-y-6 mt-10 sm:table-row sm:gap-y-0 sm:mt-0">
+        <td class="text-xl font-bold sm:font-normal sm:text-base sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
+          <.day index={i} start_date={@plan.start_date} />
+        </td>
+        <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
+          <div class="flex flex-col gap-y-2">
+            <%= for place <- HamsterTravel.find_places_by_day(@plan, i) do %>
+              <.live_component module={Place} id={"plan-#{@plan.id}-places-#{place.id}-day-#{i}"} place={place} day_index={i} />
+            <% end %>
+            <%# add here empty placeholder %>
+            <%# add here Add new button %>
+          </div>
 
-      </td>
-      <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
-        <div class="flex flex-col gap-y-8">
-          <%= for transfer <- HamsterTravel.find_transfers_by_day(@plan, i) do %>
-            <.live_component module={Transfer} id={"plan-#{@plan.id}-transfers-#{transfer.id}-day-#{i}"} transfer={transfer} day_index={i} />
-          <% end %>
+        </td>
+        <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
+          <div class="flex flex-col gap-y-8">
+            <%= for transfer <- HamsterTravel.find_transfers_by_day(@plan, i) do %>
+              <.live_component module={Transfer} id={"plan-#{@plan.id}-transfers-#{transfer.id}-day-#{i}"} transfer={transfer} day_index={i} />
+            <% end %>
+            <%# add here empty placeholder %>
+            <%# add here Add new button %>
+          </div>
+        </td>
+        <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
+          <div class="flex flex-col gap-y-8">
+            <%= for hotel <- HamsterTravel.find_hotels_by_day(@plan, i) do %>
+              <.live_component module={Hotel} id={"plan-#{@plan.id}-hotels-#{hotel.id}-day-#{i}"} hotel={hotel} day_index={i} />
+            <% end %>
+          </div>
           <%# add here empty placeholder %>
           <%# add here Add new button %>
-        </div>
-      </td>
-      <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
-        <div class="flex flex-col gap-y-8">
-          <%= for hotel <- HamsterTravel.find_hotels_by_day(@plan, i) do %>
-            <.live_component module={Hotel} id={"plan-#{@plan.id}-hotels-#{hotel.id}-day-#{i}"} hotel={hotel} day_index={i} />
-          <% end %>
-        </div>
-        <%# add here empty placeholder %>
-        <%# add here Add new button %>
-      </td>
-    </tr>
-  <% end %>
-  </tbody>
-</table>
+        </td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
 </div>
