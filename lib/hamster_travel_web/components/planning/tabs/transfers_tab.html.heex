@@ -26,6 +26,8 @@
           <%= for place <- HamsterTravel.find_places_by_day(@plan, i) do %>
             <.live_component module={Place} id={"plan-#{@plan.id}-places-#{place.id}-day-#{i}"} place={place} day_index={i} />
           <% end %>
+          <%# add here empty placeholder %>
+          <%# add here Add new button %>
         </div>
 
       </td>
@@ -34,12 +36,18 @@
           <%= for transfer <- HamsterTravel.find_transfers_by_day(@plan, i) do %>
             <.live_component module={Transfer} id={"plan-#{@plan.id}-transfers-#{transfer.id}-day-#{i}"} transfer={transfer} day_index={i} />
           <% end %>
+          <%# add here empty placeholder %>
+          <%# add here Add new button %>
         </div>
       </td>
       <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
-        <%= for hotel <- HamsterTravel.find_hotels_by_day(@plan, i) do %>
-          <.live_component module={Hotel} id={"plan-#{@plan.id}-hotels-#{hotel.id}-day-#{i}"} hotel={hotel} day_index={i} />
-        <% end %>
+        <div class="flex flex-col gap-y-8">
+          <%= for hotel <- HamsterTravel.find_hotels_by_day(@plan, i) do %>
+            <.live_component module={Hotel} id={"plan-#{@plan.id}-hotels-#{hotel.id}-day-#{i}"} hotel={hotel} day_index={i} />
+          <% end %>
+        </div>
+        <%# add here empty placeholder %>
+        <%# add here Add new button %>
       </td>
     </tr>
   <% end %>
