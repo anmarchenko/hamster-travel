@@ -5,6 +5,7 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
   use HamsterTravelWeb, :component
 
   alias HamsterTravelWeb.Avatar
+  alias HamsterTravelWeb.Planning.Place
 
   def header(assigns) do
     ~H"""
@@ -84,6 +85,16 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
       <span class={classes}>
         <%= Gettext.gettext(HamsterTravelWeb.Gettext, @status) %>
       </span>
+    """
+  end
+
+  def places_list(%{places: places, day_index: day_index} = assigns) do
+    places_for_day = HamsterTravel.filter_places_by_day(places, day_index)
+
+    ~H"""
+      <%= for place <- places_for_day do %>
+        <.live_component module={Place} id={"places-#{place.id}-day-#{day_index}"} place={place} day_index={day_index} />
+      <% end %>
     """
   end
 

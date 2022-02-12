@@ -12,9 +12,10 @@
         <PlanComponents.day index={i} start_date={@plan.start_date} />
       </div>
       <div class="flex flex-row gap-x-4">
-        <%= for place <- HamsterTravel.find_places_by_day(@plan, i) do %>
-          <.live_component module={Place} id={"plan-#{@plan.id}-places-#{place.id}-day-#{i}"} place={place} day_index={i} />
-        <% end %>
+        <PlanComponents.places_list places={@places} day_index={i} />
+      </div>
+      <div class="flex flex-col gap-y-2">
+        <.activities_list activities={@activities} day_index={i} />
       </div>
     <% end %>
   </div>
