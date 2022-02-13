@@ -24,8 +24,13 @@ defmodule HamsterTravelWeb.Planning.Activity do
 
   def render(%{edit: false, activity: activity, index: index} = assigns) do
     ~H"""
-    <div class="flex flex-col gap-y-1 py-1 sm:ml-[-1.5rem] sm:pl-[1.5rem] sm:hover:bg-zinc-100 sm:dark:hover:bg-zinc-700">
-      <div class={"flex flex-row items-center gap-x-1 lg:text-lg #{activity_font(activity.priority)}"}>
+    <div
+      class="flex flex-col gap-y-1 py-1 sm:ml-[-1.5rem] sm:pl-[1.5rem] sm:hover:bg-zinc-100 sm:dark:hover:bg-zinc-700"
+      x-data="{ showButtons: false }"
+      @mouseover="showButtons = true"
+      @mouseleave="showButtons = false"
+    >
+      <div class={"flex flex-row items-center gap-x-2 lg:text-lg #{activity_font(activity.priority)}"} >
         <span class="cursor-pointer" phx-click={
           JS.toggle(
             to: "#activity-content-#{activity.id}",
@@ -36,6 +41,12 @@ defmodule HamsterTravelWeb.Planning.Activity do
         }>
           <%= "#{index+1}." %>
           <%= activity.name %>
+        </span>
+        <span class="cursor-pointer hover:text-zinc-900 hover:dark:text-zinc-100" x-bind:class="!showButtons ? 'hidden' : ''">
+          <Icons.edit />
+        </span>
+        <span class="cursor-pointer hover:text-zinc-900 hover:dark:text-zinc-100" x-bind:class="!showButtons ? 'hidden' : ''">
+          <Icons.delete />
         </span>
       </div>
       <div id={"activity-content-#{activity.id}"} class="hidden flex flex-col gap-y-1">
