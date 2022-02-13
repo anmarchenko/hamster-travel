@@ -42,12 +42,12 @@ defmodule HamsterTravelWeb.Planning.Activity do
           <%= "#{index+1}." %>
           <%= activity.name %>
         </span>
-        <span class="cursor-pointer hover:text-zinc-900 hover:dark:text-zinc-100" x-bind:class="!showButtons ? 'hidden' : ''">
+        <.activity_button>
           <Icons.edit />
-        </span>
-        <span class="cursor-pointer hover:text-zinc-900 hover:dark:text-zinc-100" x-bind:class="!showButtons ? 'hidden' : ''">
+        </.activity_button>
+        <.activity_button>
           <Icons.delete />
-        </span>
+        </.activity_button>
       </div>
       <div id={"activity-content-#{activity.id}"} class="hidden flex flex-col gap-y-1">
         <UI.external_link link={activity.link} />
@@ -75,6 +75,14 @@ defmodule HamsterTravelWeb.Planning.Activity do
         <%= label %>:
         <%= value %>
       </UI.secondary_text>
+    """
+  end
+
+  def activity_button(assigns) do
+    ~H"""
+      <span class="cursor-pointer hover:text-zinc-900 hover:dark:text-zinc-100" x-bind:class="!showButtons ? 'hidden' : ''" x-cloak>
+        <%= render_slot(@inner_block) %>
+      </span>
     """
   end
 end
