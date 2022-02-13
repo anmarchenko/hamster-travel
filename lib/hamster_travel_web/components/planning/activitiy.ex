@@ -4,6 +4,8 @@ defmodule HamsterTravelWeb.Planning.Activity do
   """
   use HamsterTravelWeb, :live_component
 
+  alias Phoenix.LiveView.JS
+
   def update(%{activity: activity, index: index}, socket) do
     socket =
       socket
@@ -22,12 +24,46 @@ defmodule HamsterTravelWeb.Planning.Activity do
 
   def render(%{edit: false, activity: activity, index: index} = assigns) do
     ~H"""
-    <div class="flex flex-col gap-y-2">
-      <div>
-        <%= "#{index+1}." %>
-        <%= activity.name %>
+    <div class="flex flex-col gap-y-1 py-1 sm:ml-[-1.5rem] sm:pl-[1.5rem] sm:hover:bg-zinc-100 sm:dark:hover:bg-zinc-700">
+      <div class={"flex flex-row items-center gap-x-1 lg:text-lg #{activity_font(activity.priority)}"}>
+        <span class="cursor-pointer" phx-click={
+          JS.toggle(
+            to: "#activity-content-#{activity.id}",
+            display: "flex",
+            in: {"ease-out duration-300", "opacity-0", "opacity-100"},
+            out: {"ease-out duration-300", "opacity-100", "opacity-0"}
+          )
+        }>
+          <%= "#{index+1}." %>
+          <%= activity.name %>
+        </span>
+      </div>
+      <div id={"activity-content-#{activity.id}"} class="hidden flex flex-col gap-y-1">
+        <UI.external_link link={activity.link} />
+        <.activity_feature label={gettext("Address")} value={activity.address} />
+        <.activity_feature label={gettext("Opening hours")} value={activity.operation_times} />
+        <div class="max-w-prose whitespace-pre-line text-justify text-sm"><%= activity.comment %>
+        </div>
       </div>
     </div>
+    """
+  end
+
+  def activity_font("must"), do: "font-bold"
+  def activity_font("should"), do: "font-normal"
+  def activity_font("irrelevant"), do: "italic font-light text-zinc-400 dark:text-zinc-500"
+
+  def activity_feature(%{value: nil} = assigns) do
+    ~H"""
+    """
+  end
+
+  def activity_feature(%{value: value, label: label} = assigns) do
+    ~H"""
+      <UI.secondary_text class="max-w-prose">
+        <%= label %>:
+        <%= value %>
+      </UI.secondary_text>
     """
   end
 end

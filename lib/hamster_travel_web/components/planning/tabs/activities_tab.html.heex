@@ -1,20 +1,20 @@
 <div>
-  <div class="flex flex-row gap-x-4 mt-8 text-xl">
+  <div class="flex flex-row gap-x-4 mt-4 sm:mt-8 text-xl">
     <UI.icon_text>
-      <Icons.budget class="hidden sm:block" />
+      <Icons.budget />
       <%= Formatter.format_money(@budget, @plan.currency) %>
     </UI.icon_text>
   </div>
 
   <div class="flex flex-col gap-y-4 mt-8">
     <%= for i <- 0..@plan.duration-1 do %>
-      <div class="text-xl text-bold">
+      <div class="text-xl font-semibold">
         <PlanComponents.day index={i} start_date={@plan.start_date} />
       </div>
       <div class="flex flex-row gap-x-4">
         <PlanComponents.places_list places={@places} day_index={i} />
       </div>
-      <div class="flex flex-col gap-y-2">
+      <div class="flex flex-col">
         <.activities_list activities={@activities} day_index={i} />
       </div>
     <% end %>

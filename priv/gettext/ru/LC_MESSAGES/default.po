@@ -137,3 +137,13 @@ msgstr "На этот день не запланировано трансфер�
 #: lib/hamster_travel_web/components/planning/tabs/activities_tab.ex:27
 msgid "No activities planned for this day"
 msgstr "На этот день не запланировано впечатлений"
+
+#, elixir-autogen, elixir-format
+#: lib/hamster_travel_web/components/planning/activitiy.ex:39
+msgid "Address"
+msgstr "Адрес"
+
+#, elixir-autogen, elixir-format
+#: lib/hamster_travel_web/components/planning/activitiy.ex:43
+msgid "Opening hours"
+msgstr "Часы работы"

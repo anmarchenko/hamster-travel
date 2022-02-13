@@ -20,8 +20,13 @@ defmodule HamsterTravelWeb.UIComponents do
     """
   end
 
-  def external_link(assigns) do
-    uri = URI.parse(assigns[:link])
+  def external_link(%{link: nil} = assigns) do
+    ~H"""
+    """
+  end
+
+  def external_link(%{link: link} = assigns) do
+    uri = URI.parse(link)
 
     ~H"""
     <UI.link url={@link}>
@@ -75,8 +80,10 @@ defmodule HamsterTravelWeb.UIComponents do
   end
 
   def secondary_text(assigns) do
+    class = assigns[:class] || ""
+
     ~H"""
-      <p class="text-zinc-400 dark:text-zinc-500 italic">
+      <p class={"text-zinc-400 dark:text-zinc-500 italic #{class}"}>
         <%= render_slot(@inner_block) %>
       </p>
     """
