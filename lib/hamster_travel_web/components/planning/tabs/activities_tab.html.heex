@@ -14,6 +14,7 @@
       <div class="flex flex-row gap-x-4">
         <PlanComponents.places_list places={@places} day_index={i} />
       </div>
+      <.note notes={@notes} day_index={i} />
       <div class="flex flex-col">
         <.activities_list activities={@activities} day_index={i} />
       </div>

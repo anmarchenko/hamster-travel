@@ -39,7 +39,9 @@ defmodule HamsterTravel do
         ],
         transfers: [],
         hotels: [],
-        activities: []
+        activities: [],
+        notes: [],
+        expenses: []
       },
       %{
         id: 2,
@@ -62,7 +64,9 @@ defmodule HamsterTravel do
         places: [],
         transfers: [],
         hotels: [],
-        activities: []
+        activities: [],
+        notes: [],
+        expenses: []
       },
       %{
         id: 3,
@@ -85,7 +89,9 @@ defmodule HamsterTravel do
         places: [],
         transfers: [],
         hotels: [],
-        activities: []
+        activities: [],
+        notes: [],
+        expenses: []
       },
       %{
         id: 4,
@@ -413,7 +419,15 @@ defmodule HamsterTravel do
             price_currency: "DKK",
             priority: "irrelevant"
           }
-        ]
+        ],
+        notes: [
+          %{
+            id: 1,
+            text: "Посчитать разницу с картой и без",
+            day_index: 0
+          }
+        ],
+        expenses: []
       }
     ]
   end
@@ -441,7 +455,9 @@ defmodule HamsterTravel do
         places: [],
         transfers: [],
         hotels: [],
-        activities: []
+        activities: [],
+        notes: [],
+        expenses: []
       },
       %{
         id: 6,
@@ -464,7 +480,9 @@ defmodule HamsterTravel do
         places: [],
         transfers: [],
         hotels: [],
-        activities: []
+        activities: [],
+        notes: [],
+        expenses: []
       }
     ]
   end
@@ -500,6 +518,16 @@ defmodule HamsterTravel do
     activities
     |> Enum.filter(fn act -> act.day_index == day_index end)
     |> Enum.sort(fn l, r -> l.position <= r.position end)
+  end
+
+  def find_note_by_day(notes, day_index) do
+    case Enum.filter(notes, fn n -> n.day_index == day_index end) do
+      [] ->
+        nil
+
+      [note | _] ->
+        note
+    end
   end
 
   def fetch_budget(_, _) do
