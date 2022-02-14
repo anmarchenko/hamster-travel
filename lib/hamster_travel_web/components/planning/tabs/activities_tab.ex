@@ -4,7 +4,7 @@ defmodule HamsterTravelWeb.Planning.Tabs.ActivitiesTab do
   """
   use HamsterTravelWeb, :live_component
 
-  alias HamsterTravelWeb.Planning.{Activity, Note, PlanComponents}
+  alias HamsterTravelWeb.Planning.{Activity, Expense, Note, PlanComponents}
 
   def update(%{plan: plan}, socket) do
     budget = HamsterTravel.fetch_budget(plan, :activities)
@@ -16,6 +16,7 @@ defmodule HamsterTravelWeb.Planning.Tabs.ActivitiesTab do
       |> assign(places: plan.places)
       |> assign(activities: plan.activities)
       |> assign(notes: plan.notes)
+      |> assign(expenses: plan.expenses)
 
     {:ok, socket}
   end
@@ -36,6 +37,16 @@ defmodule HamsterTravelWeb.Planning.Tabs.ActivitiesTab do
           <% end %>
         """
     end
+  end
+
+  def expenses_list(%{expenses: expenses, day_index: day_index} = assigns) do
+    expenses_for_day = HamsterTravel.filter_expenses_by_day(expenses, day_index)
+
+    ~H"""
+      <%= for expense <-  expenses_for_day  do %>
+        <.live_component module={Expense} id={"expenses-#{expense.id}-day-#{day_index}"} expense={expense}  day_index={day_index} />
+      <% end %>
+    """
   end
 
   def note(%{notes: notes, day_index: day_index} = assigns) do

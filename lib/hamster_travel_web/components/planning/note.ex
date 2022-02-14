@@ -21,7 +21,7 @@ defmodule HamsterTravelWeb.Planning.Note do
 
   def render(%{edit: false, note: note} = assigns) do
     ~H"""
-    <div>
+    <div class="text-sm">
       <UI.secondary_text>
         <%= note.text %>
       </UI.secondary_text>

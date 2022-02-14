@@ -6,17 +6,21 @@
     </UI.icon_text>
   </div>
 
-  <div class="flex flex-col gap-y-4 mt-8">
+  <div class="flex flex-col gap-y-8 mt-8">
     <%= for i <- 0..@plan.duration-1 do %>
-      <div class="text-xl font-semibold">
-        <PlanComponents.day index={i} start_date={@plan.start_date} />
-      </div>
-      <div class="flex flex-row gap-x-4">
-        <PlanComponents.places_list places={@places} day_index={i} />
-      </div>
-      <.note notes={@notes} day_index={i} />
-      <div class="flex flex-col">
-        <.activities_list activities={@activities} day_index={i} />
+      <div class="flex flex-col gap-y-2">
+        <div class="text-xl font-semibold">
+          <PlanComponents.day index={i} start_date={@plan.start_date} />
+        </div>
+        <div class="flex flex-row gap-x-4">
+          <PlanComponents.places_list places={@places} day_index={i} />
+        </div>
+        <.note notes={@notes} day_index={i} />
+        <.expenses_list expenses={@expenses} day_index={i} />
+        <div class="flex flex-col mt-4">
+          <.activities_list activities={@activities} day_index={i} />
+        </div>
+        <hr />
       </div>
     <% end %>
   </div>

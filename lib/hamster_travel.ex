@@ -427,7 +427,99 @@ defmodule HamsterTravel do
             day_index: 0
           }
         ],
-        expenses: []
+        expenses: [
+          %{
+            id: 1,
+            name: "Дорога в аэропорт",
+            price: Decimal.new("3.40"),
+            price_currency: "EUR",
+            day_index: 0
+          },
+          %{
+            id: 2,
+            name: "Дорога в аэропорт",
+            price: Decimal.new("72"),
+            price_currency: "DKK",
+            day_index: 0
+          },
+          %{
+            id: 3,
+            name: "Проезд",
+            price: Decimal.new("48"),
+            price_currency: "DKK",
+            day_index: 0
+          },
+          %{
+            id: 4,
+            name: "Мед. страховка",
+            price: Decimal.new("4.80"),
+            price_currency: "EUR",
+            day_index: 0
+          },
+          %{
+            id: 5,
+            name: "Дневные билеты",
+            price: Decimal.new("160"),
+            price_currency: "DKK",
+            day_index: 1
+          },
+          %{
+            id: 6,
+            name: "Сувениры",
+            price: Decimal.new("75"),
+            price_currency: "DKK",
+            day_index: 1
+          },
+          %{
+            id: 7,
+            name: "Дневные билеты",
+            price: Decimal.new("160"),
+            price_currency: "DKK",
+            day_index: 2
+          },
+          %{
+            id: 8,
+            name: "Сувениры в Мальмё",
+            price: Decimal.new("100"),
+            price_currency: "SEK",
+            day_index: 2
+          },
+          %{
+            id: 9,
+            name: "Сувениры в Лего",
+            price: Decimal.new("180"),
+            price_currency: "DKK",
+            day_index: 2
+          },
+          %{
+            id: 10,
+            name: "Сувениры в Лунде",
+            price: Decimal.new("49"),
+            price_currency: "SEK",
+            day_index: 2
+          },
+          %{
+            id: 11,
+            name: "Аттракционы в Тиволи",
+            price: Decimal.new("150"),
+            price_currency: "DKK",
+            day_index: 3
+          },
+          %{
+            id: 12,
+            name: "Камера хранения",
+            price: Decimal.new("70"),
+            price_currency: "DKK",
+            day_index: 3
+          },
+          %{
+            id: 13,
+            name: "Сувениры",
+            price: Decimal.new("130"),
+            price_currency: "DKK",
+            day_index: 3
+          }
+        ]
       }
     ]
   end
@@ -518,6 +610,11 @@ defmodule HamsterTravel do
     activities
     |> Enum.filter(fn act -> act.day_index == day_index end)
     |> Enum.sort(fn l, r -> l.position <= r.position end)
+  end
+
+  def filter_expenses_by_day(expenses, day_index) do
+    expenses
+    |> Enum.filter(fn ex -> ex.day_index == day_index end)
   end
 
   def find_note_by_day(notes, day_index) do
