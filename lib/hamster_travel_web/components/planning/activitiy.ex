@@ -42,6 +42,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
           <%= "#{index+1}." %>
           <%= activity.name %>
         </span>
+        <%= Formatter.format_money(activity.price, activity.price_currency) %>
         <.activity_button>
           <Icons.edit />
         </.activity_button>
@@ -80,7 +81,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
 
   def activity_button(assigns) do
     ~H"""
-      <span class="cursor-pointer hover:text-zinc-900 hover:dark:text-zinc-100" x-bind:class="!showButtons ? 'hidden' : ''" x-cloak>
+      <span class="cursor-pointer hover:text-zinc-900 hover:dark:text-zinc-100" x-bind:class="!showButtons ? 'sm:hidden' : ''" x-cloak>
         <%= render_slot(@inner_block) %>
       </span>
     """
