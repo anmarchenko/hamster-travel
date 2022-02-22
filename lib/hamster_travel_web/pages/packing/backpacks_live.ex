@@ -4,6 +4,8 @@ defmodule HamsterTravelWeb.Packing.BackpacksLive do
   """
   use HamsterTravelWeb, :live_view
 
+  alias HamsterTravelWeb.Packing.BackpacksList
+
   import HamsterTravelWeb.Gettext
 
   @impl true
@@ -12,6 +14,7 @@ defmodule HamsterTravelWeb.Packing.BackpacksLive do
       socket
       |> assign(active_nav: :backpacks)
       |> assign(page_title: gettext("Backpacks"))
+      |> assign(backpacks: HamsterTravel.backpacks())
 
     {:ok, socket}
   end

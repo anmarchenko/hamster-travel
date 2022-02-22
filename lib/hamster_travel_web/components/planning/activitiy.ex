@@ -30,7 +30,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
       @mouseover="showButtons = true"
       @mouseleave="showButtons = false"
     >
-      <div class={"flex flex-row items-center gap-x-2 lg:text-lg #{activity_font(activity.priority)}"} >
+      <div class={"flex flex-row items-center gap-x-2 2xl:text-lg #{activity_font(activity.priority)}"} >
         <span class="cursor-pointer" phx-click={
           JS.toggle(
             to: "#activity-content-#{activity.id}",

@@ -579,6 +579,39 @@ defmodule HamsterTravel do
     ]
   end
 
+  def backpacks() do
+    [
+      %{
+        id: 1,
+        slug: "amsterdam",
+        name: "Амстердам",
+        duration: 2,
+        people_count: 1
+      },
+      %{
+        id: 2,
+        slug: "stokgolm",
+        name: "Стокгольм",
+        duration: 4,
+        people_count: 3
+      },
+      %{
+        id: 3,
+        slug: "helgo",
+        name: "Гельголанд: в гости к тюленюшкам!",
+        duration: 5,
+        people_count: 3
+      },
+      %{
+        id: 3,
+        slug: "bla",
+        name: "Тест",
+        duration: 1,
+        people_count: 3
+      }
+    ]
+  end
+
   def find_plan_by_slug(slug) do
     plan =
       Enum.find(plans() ++ drafts(), fn plan ->

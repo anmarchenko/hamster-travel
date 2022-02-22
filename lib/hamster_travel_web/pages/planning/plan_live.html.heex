@@ -1,8 +1,8 @@
-<section class="mx-auto max-w-screen-md xl:max-w-screen-lg 2xl:max-w-screen-xl p-6 mt-4">
+<section class={"#{standard_container()} p-6 mt-4"}>
   <PlanComponents.header plan={@plan} />
 </section>
 
-<section class="mx-auto max-w-screen-md lg:max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl py-4 sm:py-6 px-6 sm:px-10 mb-10 mt-4 bg-white dark:bg-zinc-800 rounded-md">
+<section class={"#{wide_container()} py-4 sm:py-6 px-6 sm:px-10 mb-10 mt-4 bg-white dark:bg-zinc-800 rounded-md"}>
   <PlanComponents.plan_tabs plan={@plan} active_tab={@active_tab} />
   <.render_tab plan={@plan} active_tab={@active_tab} />
 </section>

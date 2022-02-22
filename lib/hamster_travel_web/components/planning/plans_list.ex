@@ -9,13 +9,11 @@ defmodule HamsterTravelWeb.Planning.PlansList do
 
   def grid(assigns) do
     ~H"""
-      <section class="mx-auto max-w-screen-md xl:max-w-screen-xl 2xl:max-w-screen-2xl p-6 mt-6">
-        <div class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8">
-          <%= for plan <- @plans do %>
-            <.card plan={plan} />
-          <% end %>
-        </div>
-      </section>
+      <div class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8">
+        <%= for plan <- @plans do %>
+          <.card plan={plan} />
+        <% end %>
+      </div>
     """
   end
 
@@ -23,7 +21,7 @@ defmodule HamsterTravelWeb.Planning.PlansList do
     link = PlanComponents.plan_url(slug)
 
     ~H"""
-      <div class="flex flex-row bg-zinc-50 dark:bg-zinc-900 dark:border dark:border-zinc-600 shadow-md rounded-lg hover:shadow-lg hover:bg-white hover:dark:bg-zinc-800 ">
+      <div class={"flex flex-row #{card_styles()}"}>
         <div class="shrink-0">
           <%= live_redirect to: link do %>
             <img src={@plan.cover} class="w-32 h-32 object-cover object-center rounded-l-lg"/>
