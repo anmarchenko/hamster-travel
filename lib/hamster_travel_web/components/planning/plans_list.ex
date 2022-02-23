@@ -21,7 +21,7 @@ defmodule HamsterTravelWeb.Planning.PlansList do
     link = PlanComponents.plan_url(slug)
 
     ~H"""
-      <div class={"flex flex-row #{card_styles()}"}>
+      <UI.card>
         <div class="shrink-0">
           <%= live_redirect to: link do %>
             <img src={@plan.cover} class="w-32 h-32 object-cover object-center rounded-l-lg"/>
@@ -55,7 +55,7 @@ defmodule HamsterTravelWeb.Planning.PlansList do
             <Avatar.round user={@plan.author} size={:small} />
           </div>
         </div>
-      </div>
+      </UI.card>
     """
   end
 end

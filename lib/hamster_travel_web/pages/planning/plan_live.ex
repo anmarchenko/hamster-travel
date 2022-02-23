@@ -1,11 +1,11 @@
 defmodule HamsterTravelWeb.Planning.PlanLive do
   @moduledoc """
-  Plan page with transfers tab open
+  Plan page
   """
   use HamsterTravelWeb, :live_view
 
-  alias HamsterTravelWeb.Planning.Tabs.{ActivitiesTab, TransfersTab}
   alias HamsterTravelWeb.Planning.PlanComponents
+  alias HamsterTravelWeb.Planning.Tabs.{ActivitiesTab, TransfersTab}
 
   @tabs ["activities", "transfers", "catering", "documents", "report"]
 

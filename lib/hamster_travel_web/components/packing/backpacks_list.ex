@@ -22,7 +22,7 @@ defmodule HamsterTravelWeb.Packing.BackpacksList do
     link = BackpackComponents.backpack_url(slug)
 
     ~H"""
-      <div class={card_styles()}>
+      <UI.card>
         <div class="p-4 flex flex-col gap-y-4">
           <p class="text-base font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
             <%= live_redirect to: link do %>
@@ -40,7 +40,7 @@ defmodule HamsterTravelWeb.Packing.BackpacksList do
             </UI.icon_text>
           </div>
         </div>
-      </div>
+      </UI.card>
     """
   end
 end

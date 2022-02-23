@@ -625,6 +625,19 @@ defmodule HamsterTravel do
     end
   end
 
+  def find_backpack_by_slug(slug) do
+    backpack =
+      Enum.find(backpacks(), fn b ->
+        b.slug == slug
+      end)
+
+    if backpack != nil do
+      {:ok, backpack}
+    else
+      {:error, :not_found}
+    end
+  end
+
   def filter_places_by_day(places, day_index) do
     Enum.filter(places, fn pl -> intersects_day(pl, day_index) end)
   end
