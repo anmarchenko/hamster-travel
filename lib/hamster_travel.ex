@@ -586,28 +586,75 @@ defmodule HamsterTravel do
         slug: "amsterdam",
         name: "Амстердам",
         duration: 2,
-        people_count: 1
+        people_count: 1,
+        packing_lists: [
+          %{
+            id: 11,
+            name: "Документы и всякое",
+            items: [
+              %{
+                id: 111,
+                name: "Паспорт",
+                checked: true,
+                count: 1
+              },
+              %{
+                id: 112,
+                name: "Деньги",
+                checked: false,
+                count: 1000
+              }
+            ]
+          },
+          %{
+            id: 12,
+            name: "Одежда",
+            items: [
+              %{
+                id: 113,
+                name: "Носки",
+                checked: false,
+                count: 9
+              },
+              %{
+                id: 114,
+                name: "Трусы",
+                checked: true,
+                count: 8
+              },
+              %{
+                id: 115,
+                name: "Пижама",
+                checked: false,
+                count: 1
+              }
+            ]
+          }
+        ]
       },
       %{
         id: 2,
         slug: "stokgolm",
         name: "Стокгольм",
         duration: 4,
-        people_count: 3
+        people_count: 3,
+        packing_lists: []
       },
       %{
         id: 3,
         slug: "helgo",
         name: "Гельголанд: в гости к тюленюшкам!",
         duration: 5,
-        people_count: 3
+        people_count: 3,
+        packing_lists: []
       },
       %{
         id: 3,
         slug: "bla",
         name: "Тест",
         duration: 1,
-        people_count: 3
+        people_count: 3,
+        packing_lists: []
       }
     ]
   end

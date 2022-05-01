@@ -4,6 +4,10 @@ defmodule HamsterTravelWeb.Packing.BackpackLive do
   """
   use HamsterTravelWeb, :live_view
 
+  import HamsterTravelWeb.Packing.BackpackComponents
+
+  alias HamsterTravelWeb.Packing.List
+
   @impl true
   def mount(%{"backpack_slug" => slug}, _session, socket) do
     case HamsterTravel.find_backpack_by_slug(slug) do
