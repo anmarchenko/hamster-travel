@@ -30,16 +30,21 @@ defmodule HamsterTravelWeb.Planning.Activity do
       @mouseover="showButtons = true"
       @mouseleave="showButtons = false"
     >
-      <div class={"flex flex-row items-center gap-x-2 2xl:text-lg #{activity_font(activity.priority)}"} >
-        <span class="cursor-pointer" phx-click={
-          JS.toggle(
-            to: "#activity-content-#{activity.id}",
-            display: "flex",
-            in: {"ease-out duration-300", "opacity-0", "opacity-100"},
-            out: {"ease-out duration-300", "opacity-100", "opacity-0"}
-          )
-        }>
-          <%= "#{index+1}." %>
+      <div class={
+        "flex flex-row items-center gap-x-2 2xl:text-lg #{activity_font(activity.priority)}"
+      }>
+        <span
+          class="cursor-pointer"
+          phx-click={
+            JS.toggle(
+              to: "#activity-content-#{activity.id}",
+              display: "flex",
+              in: {"ease-out duration-300", "opacity-0", "opacity-100"},
+              out: {"ease-out duration-300", "opacity-100", "opacity-0"}
+            )
+          }
+        >
+          <%= "#{index + 1}." %>
           <%= activity.name %>
         </span>
         <%= Formatter.format_money(activity.price, activity.price_currency) %>
@@ -54,7 +59,8 @@ defmodule HamsterTravelWeb.Planning.Activity do
         <UI.external_link link={activity.link} />
         <.activity_feature label={gettext("Address")} value={activity.address} />
         <.activity_feature label={gettext("Opening hours")} value={activity.operation_times} />
-        <div class="max-w-prose whitespace-pre-line text-justify text-sm"><%= activity.comment %>
+        <div class="max-w-prose whitespace-pre-line text-justify text-sm">
+          <%= activity.comment %>
         </div>
       </div>
     </div>
@@ -67,23 +73,27 @@ defmodule HamsterTravelWeb.Planning.Activity do
 
   def activity_feature(%{value: nil} = assigns) do
     ~H"""
+
     """
   end
 
   def activity_feature(%{value: value, label: label} = assigns) do
     ~H"""
-      <UI.secondary_text class="max-w-prose">
-        <%= label %>:
-        <%= value %>
-      </UI.secondary_text>
+    <UI.secondary_text class="max-w-prose">
+      <%= label %>: <%= value %>
+    </UI.secondary_text>
     """
   end
 
   def activity_button(assigns) do
     ~H"""
-      <span class="cursor-pointer hover:text-zinc-900 hover:dark:text-zinc-100" x-bind:class="!showButtons ? 'sm:hidden' : ''" x-cloak>
-        <%= render_slot(@inner_block) %>
-      </span>
+    <span
+      class="cursor-pointer hover:text-zinc-900 hover:dark:text-zinc-100"
+      x-bind:class="!showButtons ? 'sm:hidden' : ''"
+      x-cloak
+    >
+      <%= render_slot(@inner_block) %>
+    </span>
     """
   end
 end

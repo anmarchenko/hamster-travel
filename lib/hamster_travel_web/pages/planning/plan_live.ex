@@ -39,13 +39,13 @@ defmodule HamsterTravelWeb.Planning.PlanLive do
 
   def render_tab(%{active_tab: "transfers"} = assigns) do
     ~H"""
-      <.live_component module={TransfersTab} id={"plan-#{@plan.id}-transfers"} plan={@plan} />
+    <.live_component module={TransfersTab} id={"plan-#{@plan.id}-transfers"} plan={@plan} />
     """
   end
 
   def render_tab(%{active_tab: "activities"} = assigns) do
     ~H"""
-      <.live_component module={ActivitiesTab} id={"plan-#{@plan.id}-activities"} plan={@plan} />
+    <.live_component module={ActivitiesTab} id={"plan-#{@plan.id}-activities"} plan={@plan} />
     """
   end
 

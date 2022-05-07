@@ -24,16 +24,21 @@ defmodule HamsterTravelWeb.Planning.Tabs.TransfersTab do
     case HamsterTravel.filter_transfers_by_day(transfers, day_index) do
       [] ->
         ~H"""
-          <UI.secondary_text>
-            <%= gettext("No transfers planned for this day") %>
-          </UI.secondary_text>
+        <UI.secondary_text>
+          <%= gettext("No transfers planned for this day") %>
+        </UI.secondary_text>
         """
 
       transfers_for_day ->
         ~H"""
-          <%= for transfer <- transfers_for_day  do %>
-            <.live_component module={Transfer} id={"transfers-#{transfer.id}-day-#{day_index}"} transfer={transfer} day_index={day_index} />
-          <% end %>
+        <%= for transfer <- transfers_for_day  do %>
+          <.live_component
+            module={Transfer}
+            id={"transfers-#{transfer.id}-day-#{day_index}"}
+            transfer={transfer}
+            day_index={day_index}
+          />
+        <% end %>
         """
     end
   end
@@ -42,16 +47,21 @@ defmodule HamsterTravelWeb.Planning.Tabs.TransfersTab do
     case HamsterTravel.filter_hotels_by_day(hotels, day_index) do
       [] ->
         ~H"""
-          <UI.secondary_text>
-            <%= gettext("No hotels for this day") %>
-          </UI.secondary_text>
+        <UI.secondary_text>
+          <%= gettext("No hotels for this day") %>
+        </UI.secondary_text>
         """
 
       hotels_for_day ->
         ~H"""
-          <%= for hotel <- hotels_for_day  do %>
-            <.live_component module={Hotel} id={"hotels-#{hotel.id}-day-#{day_index}"} hotel={hotel} day_index={day_index} />
-          <% end %>
+        <%= for hotel <- hotels_for_day  do %>
+          <.live_component
+            module={Hotel}
+            id={"hotels-#{hotel.id}-day-#{day_index}"}
+            hotel={hotel}
+            day_index={day_index}
+          />
+        <% end %>
         """
     end
   end

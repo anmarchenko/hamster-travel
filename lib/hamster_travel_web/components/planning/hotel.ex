@@ -21,20 +21,20 @@ defmodule HamsterTravelWeb.Planning.Hotel do
 
   def render(%{edit: false, hotel: hotel} = assigns) do
     ~H"""
-      <div class="flex flex-col gap-y-1">
-        <div class="flex flex-row gap-2 items-center">
-          <Icons.home_simple />
-          <%= hotel.name %>
-        </div>
-        <UI.icon_text>
-          <Icons.budget />
-          <%= Formatter.format_money(hotel.price, hotel.price_currency) %>
-        </UI.icon_text>
-        <UI.secondary_text>
-          <%= hotel.comment %>
-        </UI.secondary_text>
-        <UI.external_links links={hotel.links} />
+    <div class="flex flex-col gap-y-1">
+      <div class="flex flex-row gap-2 items-center">
+        <Icons.home_simple />
+        <%= hotel.name %>
       </div>
+      <UI.icon_text>
+        <Icons.budget />
+        <%= Formatter.format_money(hotel.price, hotel.price_currency) %>
+      </UI.icon_text>
+      <UI.secondary_text>
+        <%= hotel.comment %>
+      </UI.secondary_text>
+      <UI.external_links links={hotel.links} />
+    </div>
     """
   end
 end

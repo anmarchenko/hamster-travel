@@ -6,7 +6,7 @@ defmodule HamsterTravelWeb.UIComponents do
 
   def card(assigns) do
     ~H"""
-    <div class={"flex flex-row bg-zinc-50 dark:bg-zinc-900 dark:border dark:border-zinc-600 shadow-md rounded-lg hover:shadow-lg hover:bg-white hover:dark:bg-zinc-800"}>
+    <div class="flex flex-row bg-zinc-50 dark:bg-zinc-900 dark:border dark:border-zinc-600 shadow-md rounded-lg hover:shadow-lg hover:bg-white hover:dark:bg-zinc-800">
       <%= render_slot(@inner_block) %>
     </div>
     """
@@ -14,22 +14,23 @@ defmodule HamsterTravelWeb.UIComponents do
 
   def icon_text(assigns) do
     ~H"""
-      <div class="flex flex-row gap-x-2 items-center">
-        <%= render_slot(@inner_block) %>
-      </div>
+    <div class="flex flex-row gap-x-2 items-center">
+      <%= render_slot(@inner_block) %>
+    </div>
     """
   end
 
   def link(assigns) do
     ~H"""
-      <%= live_redirect to: @url, class: "underline text-indigo-500 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-100" do %>
-        <%= render_slot(@inner_block) %>
-      <% end %>
+    <%= live_redirect to: @url, class: "underline text-indigo-500 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-100" do %>
+      <%= render_slot(@inner_block) %>
+    <% end %>
     """
   end
 
   def external_link(%{link: nil} = assigns) do
     ~H"""
+
     """
   end
 
@@ -46,9 +47,9 @@ defmodule HamsterTravelWeb.UIComponents do
 
   def external_links(assigns) do
     ~H"""
-      <%= for link <- @links do %>
-        <.external_link link={link} />
-      <% end %>
+    <%= for link <- @links do %>
+      <.external_link link={link} />
+    <% end %>
     """
   end
 
@@ -58,9 +59,9 @@ defmodule HamsterTravelWeb.UIComponents do
       |> assign_new(:class, fn -> "" end)
 
     ~H"""
-      <div class={"flex border-b border-gray-200 dark:border-gray-700 gap-x-4 #{@class}"}>
-        <%= render_slot(@inner_block) %>
-      </div>
+    <div class={"flex border-b border-gray-200 dark:border-gray-700 gap-x-4 #{@class}"}>
+      <%= render_slot(@inner_block) %>
+    </div>
     """
   end
 
@@ -83,9 +84,9 @@ defmodule HamsterTravelWeb.UIComponents do
       ])
 
     ~H"""
-      <%= live_patch to: @url, class: classes do %>
-        <%= render_slot(@inner_block) %>
-      <% end %>
+    <%= live_patch to: @url, class: classes do %>
+      <%= render_slot(@inner_block) %>
+    <% end %>
     """
   end
 
@@ -95,9 +96,9 @@ defmodule HamsterTravelWeb.UIComponents do
       |> assign_new(:class, fn -> "" end)
 
     ~H"""
-      <p class={"text-zinc-400 dark:text-zinc-500 italic #{@class}"}>
-        <%= render_slot(@inner_block) %>
-      </p>
+    <p class={"text-zinc-400 dark:text-zinc-500 italic #{@class}"}>
+      <%= render_slot(@inner_block) %>
+    </p>
     """
   end
 end

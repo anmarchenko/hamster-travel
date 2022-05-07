@@ -12,12 +12,7 @@ defmodule HamsterTravelWeb.Avatar do
       |> assign_new(:size, fn -> :medium end)
 
     ~H"""
-      <div
-        title={user.name}
-        class={classes(size: @size)}
-        style={background_image}
-      >
-      </div>
+    <div title={user.name} class={classes(size: @size)} style={background_image}></div>
     """
   end
 

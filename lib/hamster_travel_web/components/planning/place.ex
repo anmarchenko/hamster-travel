@@ -21,10 +21,10 @@ defmodule HamsterTravelWeb.Planning.Place do
 
   def render(%{edit: false, place: place} = assigns) do
     ~H"""
-      <div class="flex flex-row gap-2 items-center">
-        <Flags.flag size={16} country={place.city.country} />
-        <%= place.city.name %>
-      </div>
+    <div class="flex flex-row gap-2 items-center">
+      <Flags.flag size={16} country={place.city.country} />
+      <%= place.city.name %>
+    </div>
     """
   end
 end

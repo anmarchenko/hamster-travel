@@ -9,68 +9,71 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
 
   def header(assigns) do
     ~H"""
-      <div class="flex flex-col-reverse sm:flex-row">
-        <div class="flex-1">
-          <h1 class="text-xl font-semibold text-black dark:text-white"><%= @plan.name %></h1>
-          <div class="text-zinc-600 flex flex-row gap-x-4 mt-4 dark:text-zinc-300">
-            <UI.icon_text>
-              <Icons.budget />
-              <%= Formatter.format_money(@plan.budget, @plan.currency) %>
-            </UI.icon_text>
-            <UI.icon_text>
-              <Icons.calendar />
-              <%= @plan.duration %> <%= ngettext("day", "days", @plan.duration) %>
-            </UI.icon_text>
-            <UI.icon_text>
-              <Icons.user />
-              <%= @plan.people_count %> <%= gettext("ppl") %>
-            </UI.icon_text>
-          </div>
-          <div class="flex flex-row text-xs gap-x-4 sm:text-base mt-4 ">
-            <UI.link url={plan_url(@plan.slug, :edit)}>
-              <%= gettext("Edit plan") %>
-            </UI.link>
-            <UI.link url={plan_url(@plan.slug, :copy)}>
-              <%= gettext("Make a copy") %>
-            </UI.link>
-            <UI.link url={plan_url(@plan.slug, :pdf)}%>
-              <%= gettext("Export as PDF") %>
-            </UI.link>
-            <UI.link url={plan_url(@plan.slug, :delete)}%>
-              <%= gettext("Delete") %>
-            </UI.link>
-          </div>
-          <div class="flex flex-row gap-x-3 mt-4">
-            <.status_badge status={@plan.status} />
-            <%= for country <- @plan.countries do %>
-              <Flags.flag size={24} country={country} />
-            <% end %>
-            <Avatar.round user={@plan.author} size={:small} />
-          </div>
+    <div class="flex flex-col-reverse sm:flex-row">
+      <div class="flex-1">
+        <h1 class="text-xl font-semibold text-black dark:text-white"><%= @plan.name %></h1>
+        <div class="text-zinc-600 flex flex-row gap-x-4 mt-4 dark:text-zinc-300">
+          <UI.icon_text>
+            <Icons.budget />
+            <%= Formatter.format_money(@plan.budget, @plan.currency) %>
+          </UI.icon_text>
+          <UI.icon_text>
+            <Icons.calendar />
+            <%= @plan.duration %> <%= ngettext("day", "days", @plan.duration) %>
+          </UI.icon_text>
+          <UI.icon_text>
+            <Icons.user />
+            <%= @plan.people_count %> <%= gettext("ppl") %>
+          </UI.icon_text>
         </div>
-        <div class="">
-          <img class="max-h-52 mb-4 sm:mb-0 sm:h-36 sm:w-auto sm:max-h-full shadow-lg rounded-md" src={@plan.cover} />
+        <div class="flex flex-row text-xs gap-x-4 sm:text-base mt-4 ">
+          <UI.link url={plan_url(@plan.slug, :edit)}>
+            <%= gettext("Edit plan") %>
+          </UI.link>
+          <UI.link url={plan_url(@plan.slug, :copy)}>
+            <%= gettext("Make a copy") %>
+          </UI.link>
+          <UI.link url={plan_url(@plan.slug, :pdf)} %>
+            <%= gettext("Export as PDF") %>
+          </UI.link>
+          <UI.link url={plan_url(@plan.slug, :delete)} %>
+            <%= gettext("Delete") %>
+          </UI.link>
+        </div>
+        <div class="flex flex-row gap-x-3 mt-4">
+          <.status_badge status={@plan.status} />
+          <%= for country <- @plan.countries do %>
+            <Flags.flag size={24} country={country} />
+          <% end %>
+          <Avatar.round user={@plan.author} size={:small} />
         </div>
       </div>
+      <div class="">
+        <img
+          class="max-h-52 mb-4 sm:mb-0 sm:h-36 sm:w-auto sm:max-h-full shadow-lg rounded-md"
+          src={@plan.cover}
+        />
+      </div>
+    </div>
     """
   end
 
   def plan_tabs(assigns) do
     ~H"""
-      <UI.tabs class="hidden sm:flex">
-        <UI.tab url={plan_url(@plan.slug, :transfers)} active={@active_tab == "transfers"}>
-          <UI.icon_text>
-            <Icons.airplane />
-            <%= gettext("Transfers and hotels") %>
-          </UI.icon_text>
-        </UI.tab>
-        <UI.tab url={plan_url(@plan.slug, :activities)} active={@active_tab == "activities"}>
-          <UI.icon_text>
-            <Icons.pen />
-            <%= gettext("Activities") %>
-          </UI.icon_text>
-        </UI.tab>
-      </UI.tabs>
+    <UI.tabs class="hidden sm:flex">
+      <UI.tab url={plan_url(@plan.slug, :transfers)} active={@active_tab == "transfers"}>
+        <UI.icon_text>
+          <Icons.airplane />
+          <%= gettext("Transfers and hotels") %>
+        </UI.icon_text>
+      </UI.tab>
+      <UI.tab url={plan_url(@plan.slug, :activities)} active={@active_tab == "activities"}>
+        <UI.icon_text>
+          <Icons.pen />
+          <%= gettext("Activities") %>
+        </UI.icon_text>
+      </UI.tab>
+    </UI.tabs>
     """
   end
 
@@ -82,9 +85,9 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
       ])
 
     ~H"""
-      <span class={classes}>
-        <%= Gettext.gettext(HamsterTravelWeb.Gettext, @status) %>
-      </span>
+    <span class={classes}>
+      <%= Gettext.gettext(HamsterTravelWeb.Gettext, @status) %>
+    </span>
     """
   end
 
@@ -92,9 +95,14 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
     places_for_day = HamsterTravel.filter_places_by_day(places, day_index)
 
     ~H"""
-      <%= for place <- places_for_day do %>
-        <.live_component module={Place} id={"places-#{place.id}-day-#{day_index}"} place={place} day_index={day_index} />
-      <% end %>
+    <%= for place <- places_for_day do %>
+      <.live_component
+        module={Place}
+        id={"places-#{place.id}-day-#{day_index}"}
+        place={place}
+        day_index={day_index}
+      />
+    <% end %>
     """
   end
 
@@ -137,11 +145,11 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
   def day(%{index: index, start_date: start_date} = assigns) do
     if start_date != nil do
       ~H"""
-        <%= Formatter.date_with_weekday(Date.add(start_date, index)) %>
+      <%= Formatter.date_with_weekday(Date.add(start_date, index)) %>
       """
     else
       ~H"""
-        <%= gettext("Day") %> <%= index + 1 %>
+      <%= gettext("Day") %> <%= index + 1 %>
       """
     end
   end

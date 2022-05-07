@@ -25,16 +25,22 @@ defmodule HamsterTravelWeb.Planning.Tabs.ActivitiesTab do
     case HamsterTravel.filter_activities_by_day(activities, day_index) do
       [] ->
         ~H"""
-          <UI.secondary_text>
-            <%= gettext("No activities planned for this day") %>
-          </UI.secondary_text>
+        <UI.secondary_text>
+          <%= gettext("No activities planned for this day") %>
+        </UI.secondary_text>
         """
 
       activities_for_day ->
         ~H"""
-          <%= for {activity, index} <-  Enum.with_index(activities_for_day)  do %>
-            <.live_component module={Activity} id={"activities-#{activity.id}-day-#{day_index}"} activity={activity} index={index} day_index={day_index} />
-          <% end %>
+        <%= for {activity, index} <-  Enum.with_index(activities_for_day)  do %>
+          <.live_component
+            module={Activity}
+            id={"activities-#{activity.id}-day-#{day_index}"}
+            activity={activity}
+            index={index}
+            day_index={day_index}
+          />
+        <% end %>
         """
     end
   end
@@ -43,9 +49,14 @@ defmodule HamsterTravelWeb.Planning.Tabs.ActivitiesTab do
     expenses_for_day = HamsterTravel.filter_expenses_by_day(expenses, day_index)
 
     ~H"""
-      <%= for expense <-  expenses_for_day  do %>
-        <.live_component module={Expense} id={"expenses-#{expense.id}-day-#{day_index}"} expense={expense}  day_index={day_index} />
-      <% end %>
+    <%= for expense <-  expenses_for_day  do %>
+      <.live_component
+        module={Expense}
+        id={"expenses-#{expense.id}-day-#{day_index}"}
+        expense={expense}
+        day_index={day_index}
+      />
+    <% end %>
     """
   end
 
@@ -53,11 +64,17 @@ defmodule HamsterTravelWeb.Planning.Tabs.ActivitiesTab do
     case HamsterTravel.find_note_by_day(notes, day_index) do
       nil ->
         ~H"""
+
         """
 
       note ->
         ~H"""
-          <.live_component module={Note} id={"notes-#{note.id}-day-#{day_index}"} note={note} day_index={day_index} />
+        <.live_component
+          module={Note}
+          id={"notes-#{note.id}-day-#{day_index}"}
+          note={note}
+          day_index={day_index}
+        />
         """
     end
   end
