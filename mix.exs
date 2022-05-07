@@ -47,6 +47,7 @@ defmodule HamsterTravel.MixProject do
       {:postgrex, ">= 0.0.0"},
 
       # frontend
+      {:petal_components, "~> 0.16"},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
 
@@ -86,7 +87,11 @@ defmodule HamsterTravel.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      "assets.deploy": ["esbuild default --minify", "tailwind default --minify", "phx.digest"],
+      "assets.deploy": [
+        "cmd --cd assets npm run deploy",
+        "esbuild default --minify",
+        "phx.digest"
+      ],
       gettext: [
         "gettext.extract",
         "gettext.merge priv/gettext/en/LC_MESSAGES/default.po priv/gettext/default.pot",

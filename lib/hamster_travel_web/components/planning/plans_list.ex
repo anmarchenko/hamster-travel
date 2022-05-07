@@ -11,13 +11,13 @@ defmodule HamsterTravelWeb.Planning.PlansList do
     ~H"""
     <div class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8">
       <%= for plan <- @plans do %>
-        <.card plan={plan} />
+        <.plan_card plan={plan} />
       <% end %>
     </div>
     """
   end
 
-  def card(%{plan: %{slug: slug}} = assigns) do
+  def plan_card(%{plan: %{slug: slug}} = assigns) do
     link = PlanComponents.plan_url(slug)
 
     ~H"""

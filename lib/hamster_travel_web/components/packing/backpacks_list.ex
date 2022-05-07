@@ -11,14 +11,14 @@ defmodule HamsterTravelWeb.Packing.BackpacksList do
     <section class={"#{standard_container()} p-6 mt-6"}>
       <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
         <%= for backpack <- @backpacks do %>
-          <.card backpack={backpack} />
+          <.backpack_card backpack={backpack} />
         <% end %>
       </div>
     </section>
     """
   end
 
-  def card(%{backpack: %{slug: slug}} = assigns) do
+  def backpack_card(%{backpack: %{slug: slug}} = assigns) do
     link = BackpackComponents.backpack_url(slug)
 
     ~H"""

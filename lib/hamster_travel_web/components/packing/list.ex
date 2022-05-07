@@ -22,18 +22,16 @@ defmodule HamsterTravelWeb.Packing.List do
             <%= @list.name %>
           </div>
           <div class="px-4 py-2">
-            <%= for item <- @list.items do %>
-              <div class="mt-2">
-                <%= label class: "cursor-pointer inline-flex items-center block gap-2" do %>
-                  <%= checkbox(:items, "item-#{item.id}",
-                    value: item.checked,
-                    class:
-                      "text-violet-700 border-gray-300 rounded w-5 h-5 ease-linear transition-all duration-150 dark:bg-gray-800 dark:border-gray-300"
-                  ) %>
-                  <div class="text-sm block"><%= item.name %></div>
-                <% end %>
-              </div>
-            <% end %>
+            <.form let={f} for={:items}>
+              <%= for item <- @list.items do %>
+                <div class="mt-2">
+                  <%= label class: "cursor-pointer inline-flex items-center block gap-2" do %>
+                    <.checkbox form={f} field={:"item-#{item.id}"} label={item.name} value={item.checked} />
+                    <div class="text-sm"><%= item.name %></div>
+                  <% end %>
+                </div>
+              <% end %>
+            </.form>
           </div>
         </div>
       </UI.card>
