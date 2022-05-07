@@ -4,6 +4,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
   """
   use HamsterTravelWeb, :live_component
 
+  import HamsterTravelWeb.ExternalLinks
   import HamsterTravelWeb.Icons.Budget
   import HamsterTravelWeb.Inline
 
@@ -55,7 +56,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
         <%= transfer.comment %>
       </UI.secondary_text>
 
-      <UI.external_links links={transfer.links} />
+      <.external_links links={transfer.links} />
     </div>
     """
   end

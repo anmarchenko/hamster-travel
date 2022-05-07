@@ -4,6 +4,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
   """
   use HamsterTravelWeb, :live_component
 
+  import HamsterTravelWeb.ExternalLink
   import HamsterTravelWeb.Inline
 
   alias Phoenix.LiveView.JS
@@ -56,7 +57,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
         </.activity_button>
       </.inline>
       <div id={"activity-content-#{activity.id}"} class="hidden flex flex-col gap-y-1">
-        <UI.external_link link={activity.link} />
+        <.external_link link={activity.link} />
         <.activity_feature label={gettext("Address")} value={activity.address} />
         <.activity_feature label={gettext("Opening hours")} value={activity.operation_times} />
         <div class="max-w-prose whitespace-pre-line text-justify text-sm">

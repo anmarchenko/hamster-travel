@@ -4,6 +4,7 @@ defmodule HamsterTravelWeb.Planning.Hotel do
   """
   use HamsterTravelWeb, :live_component
 
+  import HamsterTravelWeb.ExternalLinks
   import HamsterTravelWeb.Icons.{Budget, HomeSimple}
   import HamsterTravelWeb.Inline
 
@@ -36,7 +37,7 @@ defmodule HamsterTravelWeb.Planning.Hotel do
       <UI.secondary_text>
         <%= hotel.comment %>
       </UI.secondary_text>
-      <UI.external_links links={hotel.links} />
+      <.external_links links={hotel.links} />
     </div>
     """
   end
