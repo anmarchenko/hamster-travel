@@ -59,20 +59,30 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
 
   def plan_tabs(assigns) do
     ~H"""
-    <UI.tabs class="hidden sm:flex">
-      <UI.tab url={plan_url(@plan.slug, :transfers)} active={@active_tab == "transfers"}>
+    <.tabs underline class="hidden sm:flex">
+      <.tab
+        underline
+        to={plan_url(@plan.slug, :transfers)}
+        is_active={@active_tab == "transfers"}
+        link_type="live_patch"
+      >
         <UI.icon_text>
           <Icons.airplane />
           <%= gettext("Transfers and hotels") %>
         </UI.icon_text>
-      </UI.tab>
-      <UI.tab url={plan_url(@plan.slug, :activities)} active={@active_tab == "activities"}>
+      </.tab>
+      <.tab
+        underline
+        to={plan_url(@plan.slug, :activities)}
+        is_active={@active_tab == "activities"}
+        link_type="live_patch"
+      >
         <UI.icon_text>
           <Heroicons.Outline.clipboard_list />
           <%= gettext("Activities") %>
         </UI.icon_text>
-      </UI.tab>
-    </UI.tabs>
+      </.tab>
+    </.tabs>
     """
   end
 
