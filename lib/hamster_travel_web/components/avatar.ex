@@ -7,12 +7,14 @@ defmodule HamsterTravelWeb.Avatar do
   def round(%{user: user} = assigns) do
     background_image = "background-image: url(\"#{user.avatar_url}\");"
 
-    size = assigns[:size] || :medium
+    assigns =
+      assigns
+      |> assign_new(:size, fn -> :medium end)
 
     ~H"""
       <div
         title={user.name}
-        class={classes(size: size)}
+        class={classes(size: @size)}
         style={background_image}
       >
       </div>

@@ -53,10 +53,12 @@ defmodule HamsterTravelWeb.UIComponents do
   end
 
   def tabs(assigns) do
-    classes = assigns[:class] || ""
+    assigns =
+      assigns
+      |> assign_new(:class, fn -> "" end)
 
     ~H"""
-      <div class={"flex border-b border-gray-200 dark:border-gray-700 gap-x-4 #{classes}"}>
+      <div class={"flex border-b border-gray-200 dark:border-gray-700 gap-x-4 #{@class}"}>
         <%= render_slot(@inner_block) %>
       </div>
     """
@@ -88,10 +90,12 @@ defmodule HamsterTravelWeb.UIComponents do
   end
 
   def secondary_text(assigns) do
-    class = assigns[:class] || ""
+    assigns =
+      assigns
+      |> assign_new(:class, fn -> "" end)
 
     ~H"""
-      <p class={"text-zinc-400 dark:text-zinc-500 italic #{class}"}>
+      <p class={"text-zinc-400 dark:text-zinc-500 italic #{@class}"}>
         <%= render_slot(@inner_block) %>
       </p>
     """
