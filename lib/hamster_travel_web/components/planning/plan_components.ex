@@ -4,7 +4,6 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
   """
   use HamsterTravelWeb, :component
 
-  alias HamsterTravelWeb.Avatar
   alias HamsterTravelWeb.Planning.Place
 
   def header(assigns) do
@@ -40,12 +39,12 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
             <%= gettext("Delete") %>
           </UI.link>
         </div>
-        <div class="flex flex-row gap-x-3 mt-4">
+        <div class="flex flex-row gap-x-3 mt-4 items-center">
           <.status_badge status={@plan.status} />
           <%= for country <- @plan.countries do %>
             <Flags.flag size={24} country={country} />
           <% end %>
-          <Avatar.round user={@plan.author} size={:small} />
+          <.avatar size="xs" src={@plan.author.avatar_url} name={@plan.author.name} random_color />
         </div>
       </div>
       <div class="">
@@ -80,6 +79,7 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
   def status_badge(assigns) do
     classes =
       class_list([
+        {assigns[:class], true},
         {"flex items-center h-6 px-3 text-xs font-semibold rounded-full", true},
         {status_colors(assigns), true}
       ])

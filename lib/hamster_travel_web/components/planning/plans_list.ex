@@ -47,12 +47,12 @@ defmodule HamsterTravelWeb.Planning.PlansList do
             <%= @plan.people_count %> <%= gettext("ppl") %>
           </UI.icon_text>
         </div>
-        <div class="flex flex-row gap-x-3">
+        <div class="flex flex-row gap-x-3 items-center">
           <PlanComponents.status_badge status={@plan.status} />
           <%= for country <- Enum.take(@plan.countries, 1) do %>
             <Flags.flag size={24} country={country} />
           <% end %>
-          <Avatar.round user={@plan.author} size={:small} />
+          <.avatar size="xs" src={@plan.author.avatar_url} name={@plan.author.name} random_color />
         </div>
       </div>
     </UI.card>

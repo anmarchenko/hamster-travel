@@ -3,8 +3,6 @@ defmodule HamsterTravelWeb.LayoutView do
 
   import HamsterTravelWeb.Gettext
 
-  alias HamsterTravelWeb.Avatar
-
   # Phoenix LiveDashboard is available only in development by default,
   # so we instruct Elixir to not warn if the dashboard route is missing.
   @compile {:no_warn_undefined, {Routes, :live_dashboard_path, 2}}
@@ -32,7 +30,7 @@ defmodule HamsterTravelWeb.LayoutView do
           </div>
         </div>
         <%= if @current_user do %>
-          <Avatar.round user={@current_user} />
+          <.avatar size="md" src={@current_user.avatar_url} name={@current_user.name} random_color />
         <% end %>
       </nav>
     </div>
