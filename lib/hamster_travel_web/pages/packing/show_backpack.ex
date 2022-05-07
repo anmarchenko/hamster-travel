@@ -4,6 +4,7 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
   """
   use HamsterTravelWeb, :live_view
 
+  import HamsterTravelWeb.Inline
   import HamsterTravelWeb.Link
   import HamsterTravelWeb.Packing.BackpackComponents
 

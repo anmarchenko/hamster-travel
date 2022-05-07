@@ -5,6 +5,7 @@ defmodule HamsterTravelWeb.Planning.Tabs.TransfersTab do
   use HamsterTravelWeb, :live_component
 
   import HamsterTravelWeb.Icons.Budget
+  import HamsterTravelWeb.Inline
 
   alias HamsterTravelWeb.Planning.{Hotel, PlanComponents, Transfer}
 

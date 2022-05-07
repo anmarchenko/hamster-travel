@@ -14,14 +14,6 @@ defmodule HamsterTravelWeb.UIComponents do
     """
   end
 
-  def icon_text(assigns) do
-    ~H"""
-    <div class="flex flex-row gap-x-2 items-center">
-      <%= render_slot(@inner_block) %>
-    </div>
-    """
-  end
-
   def external_link(%{link: nil} = assigns) do
     ~H"""
 

@@ -4,6 +4,8 @@ defmodule HamsterTravelWeb.Planning.Activity do
   """
   use HamsterTravelWeb, :live_component
 
+  import HamsterTravelWeb.Inline
+
   alias Phoenix.LiveView.JS
 
   def update(%{activity: activity, index: index}, socket) do
@@ -30,9 +32,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
       @mouseover="showButtons = true"
       @mouseleave="showButtons = false"
     >
-      <div class={
-        "flex flex-row items-center gap-x-2 2xl:text-lg #{activity_font(activity.priority)}"
-      }>
+      <.inline class={"2xl:text-lg #{activity_font(activity.priority)}"}>
         <span
           class="cursor-pointer"
           phx-click={
@@ -54,7 +54,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
         <.activity_button>
           <Heroicons.Outline.trash class="h-4 w-4" />
         </.activity_button>
-      </div>
+      </.inline>
       <div id={"activity-content-#{activity.id}"} class="hidden flex flex-col gap-y-1">
         <UI.external_link link={activity.link} />
         <.activity_feature label={gettext("Address")} value={activity.address} />

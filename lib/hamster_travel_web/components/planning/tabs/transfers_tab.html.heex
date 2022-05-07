@@ -1,9 +1,9 @@
 <div>
   <div class="flex flex-row gap-x-4 mt-4 sm:mt-8 text-xl">
-    <UI.icon_text>
+    <.inline>
       <.budget />
       <%= Formatter.format_money(@budget, @plan.currency) %>
-    </UI.icon_text>
+    </.inline>
   </div>
 
   <table class="sm:mt-8 sm:table-auto sm:border-collapse sm:border sm:border-slate-500 sm:w-full">

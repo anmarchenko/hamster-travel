@@ -6,6 +6,7 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
 
   import HamsterTravelWeb.Flag
   import HamsterTravelWeb.Icons.{Airplane, Budget, Bus, Car, Ship, Taxi, Train}
+  import HamsterTravelWeb.Inline
   import HamsterTravelWeb.Link
 
   alias HamsterTravelWeb.Planning.Place
@@ -16,18 +17,18 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
       <div class="flex-1">
         <h1 class="text-xl font-semibold text-black dark:text-white"><%= @plan.name %></h1>
         <div class="text-zinc-600 flex flex-row gap-x-4 mt-4 dark:text-zinc-300">
-          <UI.icon_text>
+          <.inline>
             <.budget />
             <%= Formatter.format_money(@plan.budget, @plan.currency) %>
-          </UI.icon_text>
-          <UI.icon_text>
+          </.inline>
+          <.inline>
             <Heroicons.Outline.calendar class="h-4 w-4" />
             <%= @plan.duration %> <%= ngettext("day", "days", @plan.duration) %>
-          </UI.icon_text>
-          <UI.icon_text>
+          </.inline>
+          <.inline>
             <Heroicons.Outline.user class="h-4 w-4" />
             <%= @plan.people_count %> <%= gettext("ppl") %>
-          </UI.icon_text>
+          </.inline>
         </div>
         <div class="flex flex-row text-xs gap-x-4 sm:text-base mt-4 ">
           <.link to={plan_url(@plan.slug, :edit)} label={gettext("Edit plan")} />
@@ -35,7 +36,7 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
           <.link to={plan_url(@plan.slug, :pdf)} label={gettext("Export as PDF")} />
           <.link to={plan_url(@plan.slug, :delete)} label={gettext("Delete")} />
         </div>
-        <div class="flex flex-row gap-x-3 mt-4 items-center">
+        <.inline class="gap-3 mt-4">
           <.status_badge status={@plan.status} />
           <%= for country <- @plan.countries do %>
             <.flag size={24} country={country} />
@@ -47,7 +48,7 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
             random_color
             class="!w-6 !h-6"
           />
-        </div>
+        </.inline>
       </div>
       <div class="">
         <img
@@ -68,10 +69,10 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
         is_active={@active_tab == "transfers"}
         link_type="live_patch"
       >
-        <UI.icon_text>
+        <.inline>
           <.airplane />
           <%= gettext("Transfers and hotels") %>
-        </UI.icon_text>
+        </.inline>
       </.tab>
       <.tab
         underline
@@ -79,10 +80,10 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
         is_active={@active_tab == "activities"}
         link_type="live_patch"
       >
-        <UI.icon_text>
+        <.inline>
           <Heroicons.Outline.clipboard_list />
           <%= gettext("Activities") %>
-        </UI.icon_text>
+        </.inline>
       </.tab>
     </.tabs>
     """

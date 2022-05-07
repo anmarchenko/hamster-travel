@@ -6,6 +6,7 @@ defmodule HamsterTravelWeb.Planning.PlansList do
 
   import HamsterTravelWeb.Flag
   import HamsterTravelWeb.Icons.Budget
+  import HamsterTravelWeb.Inline
 
   alias HamsterTravelWeb.Planning.PlanComponents
 
@@ -19,6 +20,8 @@ defmodule HamsterTravelWeb.Planning.PlansList do
     """
   end
 
+  @spec plan_card(%{:plan => %{:slug => any, optional(any) => any}, optional(any) => any}) ::
+          Phoenix.LiveView.Rendered.t()
   def plan_card(%{plan: %{slug: slug}} = assigns) do
     link = PlanComponents.plan_url(slug)
 
@@ -36,20 +39,20 @@ defmodule HamsterTravelWeb.Planning.PlansList do
           <% end %>
         </p>
         <div class="text-xs sm:text-base text-zinc-400 font-light flex flex-row gap-x-4 dark:text-zinc-500">
-          <UI.icon_text>
+          <.inline>
             <.budget class="hidden sm:block" />
             <%= Formatter.format_money(@plan.budget, @plan.currency) %>
-          </UI.icon_text>
-          <UI.icon_text>
+          </.inline>
+          <.inline>
             <Heroicons.Outline.calendar class="h-4 w-4 hidden sm:block" />
             <%= @plan.duration %> <%= ngettext("day", "days", @plan.duration) %>
-          </UI.icon_text>
-          <UI.icon_text>
+          </.inline>
+          <.inline>
             <Heroicons.Outline.user class="h-4 w-4 hidden sm:block" />
             <%= @plan.people_count %> <%= gettext("ppl") %>
-          </UI.icon_text>
+          </.inline>
         </div>
-        <div class="flex flex-row gap-x-3 items-center">
+        <.inline class="gap-3">
           <PlanComponents.status_badge status={@plan.status} />
           <%= for country <- Enum.take(@plan.countries, 1) do %>
             <.flag size={24} country={country} />
@@ -61,7 +64,7 @@ defmodule HamsterTravelWeb.Planning.PlansList do
             random_color
             class="!w-6 !h-6"
           />
-        </div>
+        </.inline>
       </div>
     </UI.card>
     """

@@ -1,9 +1,9 @@
 <div>
   <div class="flex flex-row gap-x-4 mt-4 sm:mt-8 text-xl">
-    <UI.icon_text>
+    <.inline>
       <.budget />
       <%= Formatter.format_money(@budget, @plan.currency) %>
-    </UI.icon_text>
+    </.inline>
   </div>
 
   <div class="flex flex-col gap-y-8 mt-8">
