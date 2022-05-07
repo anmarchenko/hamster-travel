@@ -4,6 +4,8 @@ defmodule HamsterTravelWeb.Planning.Tabs.ActivitiesTab do
   """
   use HamsterTravelWeb, :live_component
 
+  import HamsterTravelWeb.Icons.Budget
+
   alias HamsterTravelWeb.Planning.{Activity, Expense, Note, PlanComponents}
 
   def update(%{plan: plan}, socket) do

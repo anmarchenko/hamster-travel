@@ -2,6 +2,7 @@ defmodule HamsterTravelWeb.LayoutView do
   use HamsterTravelWeb, :view
 
   import HamsterTravelWeb.Gettext
+  import HamsterTravelWeb.Icons.Airplane
 
   # Phoenix LiveDashboard is available only in development by default,
   # so we instruct Elixir to not warn if the dashboard route is missing.
@@ -75,7 +76,7 @@ defmodule HamsterTravelWeb.LayoutView do
       to="?tab=transfers"
       active={@active_tab == "transfers"}
     >
-      <Icons.airplane class="h-6 w-6" />
+      <.airplane class="h-6 w-6" />
     </.mobile_nav_link_tab>
     <.mobile_nav_link_tab
       label={gettext("Activities")}

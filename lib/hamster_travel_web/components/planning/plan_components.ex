@@ -5,6 +5,7 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
   use HamsterTravelWeb, :component
 
   import HamsterTravelWeb.Flag
+  import HamsterTravelWeb.Icons.{Airplane, Budget, Bus, Car, Ship, Taxi, Train}
 
   alias HamsterTravelWeb.Planning.Place
 
@@ -15,7 +16,7 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
         <h1 class="text-xl font-semibold text-black dark:text-white"><%= @plan.name %></h1>
         <div class="text-zinc-600 flex flex-row gap-x-4 mt-4 dark:text-zinc-300">
           <UI.icon_text>
-            <Icons.budget />
+            <.budget />
             <%= Formatter.format_money(@plan.budget, @plan.currency) %>
           </UI.icon_text>
           <UI.icon_text>
@@ -75,7 +76,7 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
         link_type="live_patch"
       >
         <UI.icon_text>
-          <Icons.airplane />
+          <.airplane />
           <%= gettext("Transfers and hotels") %>
         </UI.icon_text>
       </.tab>
@@ -126,37 +127,37 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
 
   def transfer_icon(%{type: "plane"} = assigns) do
     ~H"""
-    <Icons.airplane />
+    <.airplane />
     """
   end
 
   def transfer_icon(%{type: "car"} = assigns) do
     ~H"""
-    <Icons.car />
+    <.car />
     """
   end
 
   def transfer_icon(%{type: "taxi"} = assigns) do
     ~H"""
-    <Icons.taxi />
+    <.taxi />
     """
   end
 
   def transfer_icon(%{type: "bus"} = assigns) do
     ~H"""
-    <Icons.bus />
+    <.bus />
     """
   end
 
   def transfer_icon(%{type: "train"} = assigns) do
     ~H"""
-    <Icons.train />
+    <.train />
     """
   end
 
   def transfer_icon(%{type: "ship"} = assigns) do
     ~H"""
-    <Icons.ship />
+    <.ship />
     """
   end
 

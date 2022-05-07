@@ -4,7 +4,7 @@ defmodule HamsterTravelWeb.Planning.Hotel do
   """
   use HamsterTravelWeb, :live_component
 
-  import HamsterTravelWeb.Icons.HomeSimple
+  import HamsterTravelWeb.Icons.{Budget, HomeSimple}
 
   def update(%{hotel: hotel}, socket) do
     socket =
@@ -29,7 +29,7 @@ defmodule HamsterTravelWeb.Planning.Hotel do
         <%= hotel.name %>
       </div>
       <UI.icon_text>
-        <Icons.budget />
+        <.budget />
         <%= Formatter.format_money(hotel.price, hotel.price_currency) %>
       </UI.icon_text>
       <UI.secondary_text>

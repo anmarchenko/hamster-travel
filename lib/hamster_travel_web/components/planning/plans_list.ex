@@ -5,6 +5,7 @@ defmodule HamsterTravelWeb.Planning.PlansList do
   use HamsterTravelWeb, :component
 
   import HamsterTravelWeb.Flag
+  import HamsterTravelWeb.Icons.Budget
 
   alias HamsterTravelWeb.Planning.PlanComponents
 
@@ -36,7 +37,7 @@ defmodule HamsterTravelWeb.Planning.PlansList do
         </p>
         <div class="text-xs sm:text-base text-zinc-400 font-light flex flex-row gap-x-4 dark:text-zinc-500">
           <UI.icon_text>
-            <Icons.budget class="hidden sm:block" />
+            <.budget class="hidden sm:block" />
             <%= Formatter.format_money(@plan.budget, @plan.currency) %>
           </UI.icon_text>
           <UI.icon_text>

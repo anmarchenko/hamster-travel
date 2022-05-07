@@ -4,6 +4,8 @@ defmodule HamsterTravelWeb.Planning.Transfer do
   """
   use HamsterTravelWeb, :live_component
 
+  import HamsterTravelWeb.Icons.Budget
+
   alias HamsterTravelWeb.Planning.PlanComponents
 
   def update(%{transfer: transfer}, socket) do
@@ -28,7 +30,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
         <PlanComponents.transfer_icon type={transfer.type} />
         <%= transfer.vehicle_id %>
         <%= transfer.company %>
-        <Icons.budget />
+        <.budget />
         <%= Formatter.format_money(transfer.price, transfer.price_currency) %>
       </div>
       <div class="flex flex-row text-lg mt-2">
