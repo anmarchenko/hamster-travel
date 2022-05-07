@@ -21,14 +21,14 @@ defmodule HamsterTravelWeb.Router do
       ] do
       pipe_through :browser
 
-      live "/", HomeLive
+      live "/", Home
 
-      live "/plans", Planning.PlansLive
-      live "/drafts", Planning.DraftsLive
-      live "/plans/:plan_slug", Planning.PlanLive
+      live "/plans", Planning.IndexPlans
+      live "/drafts", Planning.IndexDrafts
+      live "/plans/:plan_slug", Planning.ShowPlan
 
-      live "/backpacks", Packing.BackpacksLive
-      live "/backpacks/:backpack_slug", Packing.BackpackLive
+      live "/backpacks", Packing.IndexBackpacks
+      live "/backpacks/:backpack_slug", Packing.ShowBackpack
     end
   end
 

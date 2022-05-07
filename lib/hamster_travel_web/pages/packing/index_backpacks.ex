@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.Packing.BackpacksLive do
+defmodule HamsterTravelWeb.Packing.IndexBackpacks do
   @moduledoc """
   Page showing all the backpacks
   """

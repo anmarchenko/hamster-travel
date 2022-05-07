@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.Planning.DraftsLive do
+defmodule HamsterTravelWeb.Planning.IndexDrafts do
   @moduledoc """
   Page showing all the drafts
   """

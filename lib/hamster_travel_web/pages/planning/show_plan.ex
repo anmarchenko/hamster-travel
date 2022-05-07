@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.Planning.PlanLive do
+defmodule HamsterTravelWeb.Planning.ShowPlan do
   @moduledoc """
   Plan page
   """

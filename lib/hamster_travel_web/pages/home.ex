@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.HomeLive do
+defmodule HamsterTravelWeb.Home do
   @moduledoc """
   Home page of Hamster Travel (showing landing for unauthenticated users and
   personalized home page for authenticated)
