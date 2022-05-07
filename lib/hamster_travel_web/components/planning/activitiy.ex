@@ -49,10 +49,10 @@ defmodule HamsterTravelWeb.Planning.Activity do
         </span>
         <%= Formatter.format_money(activity.price, activity.price_currency) %>
         <.activity_button>
-          <Icons.edit />
+          <Heroicons.Outline.pencil class="h-4 w-4" />
         </.activity_button>
         <.activity_button>
-          <Icons.delete />
+          <Heroicons.Outline.trash class="h-4 w-4" />
         </.activity_button>
       </div>
       <div id={"activity-content-#{activity.id}"} class="hidden flex flex-col gap-y-1">

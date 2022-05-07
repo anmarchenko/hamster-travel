@@ -31,11 +31,11 @@ defmodule HamsterTravelWeb.Packing.BackpacksList do
         </p>
         <div class="text-xs sm:text-base text-zinc-400 font-light flex flex-row gap-x-4 dark:text-zinc-500">
           <UI.icon_text>
-            <Icons.calendar />
+            <Heroicons.Outline.calendar class="h-4 w-4" />
             <%= @backpack.duration %> <%= ngettext("day", "days", @backpack.duration) %>
           </UI.icon_text>
           <UI.icon_text>
-            <Icons.user />
+            <Heroicons.Outline.user class="h-4 w-4" />
             <%= @backpack.people_count %> <%= gettext("ppl") %>
           </UI.icon_text>
         </div>

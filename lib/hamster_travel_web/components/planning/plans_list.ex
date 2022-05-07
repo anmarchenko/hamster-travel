@@ -39,11 +39,11 @@ defmodule HamsterTravelWeb.Planning.PlansList do
             <%= Formatter.format_money(@plan.budget, @plan.currency) %>
           </UI.icon_text>
           <UI.icon_text>
-            <Icons.calendar class="hidden sm:block" />
+            <Heroicons.Outline.calendar class="h-4 w-4 hidden sm:block" />
             <%= @plan.duration %> <%= ngettext("day", "days", @plan.duration) %>
           </UI.icon_text>
           <UI.icon_text>
-            <Icons.user class="hidden sm:block" />
+            <Heroicons.Outline.user class="h-4 w-4 hidden sm:block" />
             <%= @plan.people_count %> <%= gettext("ppl") %>
           </UI.icon_text>
         </div>

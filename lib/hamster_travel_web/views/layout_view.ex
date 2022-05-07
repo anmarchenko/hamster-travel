@@ -70,21 +70,21 @@ defmodule HamsterTravelWeb.LayoutView do
 
     ~H"""
     <.mobile_nav_link label={gettext("Back")} to={back_url} active={false}>
-      <Icons.arrow_left />
+      <Heroicons.Outline.arrow_left />
     </.mobile_nav_link>
     <.mobile_nav_link_tab
       label={gettext("Transfers")}
       to="?tab=transfers"
       active={@active_tab == "transfers"}
     >
-      <Icons.airplane />
+      <Icons.airplane class="h-6 w-6" />
     </.mobile_nav_link_tab>
     <.mobile_nav_link_tab
       label={gettext("Activities")}
       to="?tab=activities"
       active={@active_tab == "activities"}
     >
-      <Icons.pen />
+      <Heroicons.Outline.clipboard_list />
     </.mobile_nav_link_tab>
     """
   end
@@ -92,16 +92,16 @@ defmodule HamsterTravelWeb.LayoutView do
   def mobile_nav_global(assigns) do
     ~H"""
     <.mobile_nav_link label={gettext("Homepage")} to="/" active={@active_nav == :home}>
-      <Icons.home />
+      <Heroicons.Outline.home />
     </.mobile_nav_link>
     <.mobile_nav_link label={gettext("Plans")} to="/plans" active={@active_nav == :plans}>
-      <Icons.book />
+      <Heroicons.Outline.book_open />
     </.mobile_nav_link>
     <.mobile_nav_link label={gettext("Drafts")} to="/drafts" active={@active_nav == :drafts}>
-      <Icons.note />
+      <Heroicons.Outline.light_bulb />
     </.mobile_nav_link>
     <.mobile_nav_link label={gettext("Backpacks")} to="/backpacks" active={@active_nav == :backpacks}>
-      <Icons.backpack />
+      <Heroicons.Outline.briefcase />
     </.mobile_nav_link>
     """
   end

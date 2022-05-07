@@ -18,11 +18,11 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
             <%= Formatter.format_money(@plan.budget, @plan.currency) %>
           </UI.icon_text>
           <UI.icon_text>
-            <Icons.calendar />
+            <Heroicons.Outline.calendar class="h-4 w-4" />
             <%= @plan.duration %> <%= ngettext("day", "days", @plan.duration) %>
           </UI.icon_text>
           <UI.icon_text>
-            <Icons.user />
+            <Heroicons.Outline.user class="h-4 w-4" />
             <%= @plan.people_count %> <%= gettext("ppl") %>
           </UI.icon_text>
         </div>
@@ -69,7 +69,7 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
       </UI.tab>
       <UI.tab url={plan_url(@plan.slug, :activities)} active={@active_tab == "activities"}>
         <UI.icon_text>
-          <Icons.pen />
+          <Heroicons.Outline.clipboard_list />
           <%= gettext("Activities") %>
         </UI.icon_text>
       </UI.tab>
