@@ -1,20 +1,24 @@
-defmodule HamsterTravelWeb.Flags do
+defmodule HamsterTravelWeb.Flag do
   @moduledoc """
-  Renders flags
+  Renders flag by a country code
   """
   use HamsterTravelWeb, :component
+  import PhxComponentHelpers
 
   def flag(assigns) do
-    assigns =
-      assigns
-      |> assign_new(:class, fn -> "" end)
+    assigns
+    |> set_attributes([], required: [:country, :size])
+    |> extend_class("")
+    |> render()
+  end
 
+  defp render(assigns) do
     ~H"""
     <img
+      {@heex_class}
       src={Routes.static_path(HamsterTravelWeb.Endpoint, "/images/flags/#{@size}/#{@country}.png")}
       alt={"Country #{@country}"}
       style={"width: #{@size}px;  height: #{@size}px"}
-      class={@class}
     />
     """
   end

@@ -48,6 +48,7 @@ defmodule HamsterTravel.MixProject do
 
       # frontend
       {:petal_components, "~> 0.16"},
+      {:phx_component_helpers, "~> 1.0.0"},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
 

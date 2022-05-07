@@ -4,6 +4,8 @@ defmodule HamsterTravelWeb.Planning.Hotel do
   """
   use HamsterTravelWeb, :live_component
 
+  import HamsterTravelWeb.Icons.HomeSimple
+
   def update(%{hotel: hotel}, socket) do
     socket =
       socket
@@ -23,7 +25,7 @@ defmodule HamsterTravelWeb.Planning.Hotel do
     ~H"""
     <div class="flex flex-col gap-y-1">
       <div class="flex flex-row gap-2 items-center">
-        <Icons.home_simple />
+        <.home_simple />
         <%= hotel.name %>
       </div>
       <UI.icon_text>

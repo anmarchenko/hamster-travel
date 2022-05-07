@@ -4,7 +4,8 @@ defmodule HamsterTravelWeb.Planning.PlansList do
   """
   use HamsterTravelWeb, :component
 
-  alias HamsterTravelWeb.Avatar
+  import HamsterTravelWeb.Flag
+
   alias HamsterTravelWeb.Planning.PlanComponents
 
   def grid(assigns) do
@@ -50,7 +51,7 @@ defmodule HamsterTravelWeb.Planning.PlansList do
         <div class="flex flex-row gap-x-3 items-center">
           <PlanComponents.status_badge status={@plan.status} />
           <%= for country <- Enum.take(@plan.countries, 1) do %>
-            <Flags.flag size={24} country={country} />
+            <.flag size={24} country={country} />
           <% end %>
           <.avatar
             size="xs"

@@ -4,6 +4,8 @@ defmodule HamsterTravelWeb.Planning.Place do
   """
   use HamsterTravelWeb, :live_component
 
+  import HamsterTravelWeb.Flag
+
   def update(%{place: place}, socket) do
     socket =
       socket
@@ -22,7 +24,7 @@ defmodule HamsterTravelWeb.Planning.Place do
   def render(%{edit: false, place: place} = assigns) do
     ~H"""
     <div class="flex flex-row gap-2 items-center">
-      <Flags.flag size={16} country={place.city.country} />
+      <.flag size={16} country={place.city.country} />
       <%= place.city.name %>
     </div>
     """

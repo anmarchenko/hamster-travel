@@ -4,6 +4,8 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
   """
   use HamsterTravelWeb, :component
 
+  import HamsterTravelWeb.Flag
+
   alias HamsterTravelWeb.Planning.Place
 
   def header(assigns) do
@@ -42,7 +44,7 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
         <div class="flex flex-row gap-x-3 mt-4 items-center">
           <.status_badge status={@plan.status} />
           <%= for country <- @plan.countries do %>
-            <Flags.flag size={24} country={country} />
+            <.flag size={24} country={country} />
           <% end %>
           <.avatar
             size="xs"
