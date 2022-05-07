@@ -52,7 +52,13 @@ defmodule HamsterTravelWeb.Planning.PlansList do
           <%= for country <- Enum.take(@plan.countries, 1) do %>
             <Flags.flag size={24} country={country} />
           <% end %>
-          <.avatar size="xs" src={@plan.author.avatar_url} name={@plan.author.name} random_color />
+          <.avatar
+            size="xs"
+            src={@plan.author.avatar_url}
+            name={@plan.author.name}
+            random_color
+            class="!w-6 !h-6"
+          />
         </div>
       </div>
     </UI.card>
