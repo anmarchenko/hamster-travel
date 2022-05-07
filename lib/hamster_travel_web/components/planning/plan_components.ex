@@ -6,6 +6,7 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
 
   import HamsterTravelWeb.Flag
   import HamsterTravelWeb.Icons.{Airplane, Budget, Bus, Car, Ship, Taxi, Train}
+  import HamsterTravelWeb.Link
 
   alias HamsterTravelWeb.Planning.Place
 
@@ -29,18 +30,10 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
           </UI.icon_text>
         </div>
         <div class="flex flex-row text-xs gap-x-4 sm:text-base mt-4 ">
-          <UI.link url={plan_url(@plan.slug, :edit)}>
-            <%= gettext("Edit plan") %>
-          </UI.link>
-          <UI.link url={plan_url(@plan.slug, :copy)}>
-            <%= gettext("Make a copy") %>
-          </UI.link>
-          <UI.link url={plan_url(@plan.slug, :pdf)} %>
-            <%= gettext("Export as PDF") %>
-          </UI.link>
-          <UI.link url={plan_url(@plan.slug, :delete)} %>
-            <%= gettext("Delete") %>
-          </UI.link>
+          <.link to={plan_url(@plan.slug, :edit)} label={gettext("Edit plan")} />
+          <.link to={plan_url(@plan.slug, :copy)} label={gettext("Make a copy")} />
+          <.link to={plan_url(@plan.slug, :pdf)} label={gettext("Export as PDF")} />
+          <.link to={plan_url(@plan.slug, :delete)} label={gettext("Delete")} />
         </div>
         <div class="flex flex-row gap-x-3 mt-4 items-center">
           <.status_badge status={@plan.status} />

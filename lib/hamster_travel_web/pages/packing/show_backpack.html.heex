@@ -11,12 +11,8 @@
     </UI.icon_text>
   </div>
   <div class="flex flex-row text-xs gap-x-4 sm:text-base mt-4">
-    <UI.link url={backpack_url(@backpack.slug, :edit)}>
-      <%= gettext("Edit") %>
-    </UI.link>
-    <UI.link url={backpack_url(@backpack.slug, :delete)}%>
-      <%= gettext("Delete") %>
-    </UI.link>
+    <.link to={backpack_url(@backpack.slug, :edit)} label={gettext("Edit")} />
+    <.link to={backpack_url(@backpack.slug, :delete)} label={gettext("Delete")} />
   </div>
 </section>
 

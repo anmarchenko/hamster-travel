@@ -4,6 +4,8 @@ defmodule HamsterTravelWeb.UIComponents do
   """
   use HamsterTravelWeb, :component
 
+  import HamsterTravelWeb.Link
+
   def card(assigns) do
     ~H"""
     <div class="flex flex-row bg-zinc-50 dark:bg-zinc-900 dark:border dark:border-zinc-600 shadow-md rounded-lg hover:shadow-lg hover:bg-white hover:dark:bg-zinc-800">
@@ -20,14 +22,6 @@ defmodule HamsterTravelWeb.UIComponents do
     """
   end
 
-  def link(assigns) do
-    ~H"""
-    <%= live_redirect to: @url, class: "underline text-indigo-500 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-100" do %>
-      <%= render_slot(@inner_block) %>
-    <% end %>
-    """
-  end
-
   def external_link(%{link: nil} = assigns) do
     ~H"""
 
@@ -38,10 +32,10 @@ defmodule HamsterTravelWeb.UIComponents do
     uri = URI.parse(link)
 
     ~H"""
-    <UI.link url={@link}>
+    <.link to={@link} link_type="a">
       <%= uri.host %>
       <br />
-    </UI.link>
+    </.link>
     """
   end
 

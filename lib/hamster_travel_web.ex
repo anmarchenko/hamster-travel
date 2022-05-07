@@ -89,7 +89,12 @@ defmodule HamsterTravelWeb do
       use Phoenix.HTML
 
       # use PETAL components
-      use PetalComponents
+      import PetalComponents.Avatar
+      import PetalComponents.Button
+      import PetalComponents.Form
+      import PetalComponents.Tabs
+
+      alias PetalComponents.Heroicons
 
       # Import LiveView and .heex helpers (live_render, live_patch, <.form>, etc)
       import Phoenix.LiveView.Helpers
