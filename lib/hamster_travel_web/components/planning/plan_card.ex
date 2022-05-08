@@ -1,8 +1,9 @@
-defmodule HamsterTravelWeb.Planning.PlansList do
+defmodule HamsterTravelWeb.Planning.PlanCard do
   @moduledoc """
-  This component renders plan items/cards
+  Parses and renders an external link
   """
   use HamsterTravelWeb, :component
+  import PhxComponentHelpers
 
   import HamsterTravelWeb.Flag
   import HamsterTravelWeb.Icons.Budget
@@ -11,19 +12,13 @@ defmodule HamsterTravelWeb.Planning.PlansList do
 
   alias HamsterTravelWeb.Planning.PlanComponents
 
-  def grid(assigns) do
-    ~H"""
-    <div class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8">
-      <%= for plan <- @plans do %>
-        <.plan_card plan={plan} />
-      <% end %>
-    </div>
-    """
+  def plan_card(assigns) do
+    assigns
+    |> set_attributes([], required: [:plan])
+    |> render()
   end
 
-  @spec plan_card(%{:plan => %{:slug => any, optional(any) => any}, optional(any) => any}) ::
-          Phoenix.LiveView.Rendered.t()
-  def plan_card(%{plan: %{slug: slug}} = assigns) do
+  defp render(%{plan: %{slug: slug}} = assigns) do
     link = PlanComponents.plan_url(slug)
 
     ~H"""
