@@ -4,6 +4,8 @@ defmodule HamsterTravelWeb.Planning.Note do
   """
   use HamsterTravelWeb, :live_component
 
+  import HamsterTravelWeb.Secondary
+
   def update(%{note: note}, socket) do
     socket =
       socket
@@ -22,9 +24,9 @@ defmodule HamsterTravelWeb.Planning.Note do
   def render(%{edit: false, note: note} = assigns) do
     ~H"""
     <div class="text-sm">
-      <UI.secondary_text>
+      <.secondary>
         <%= note.text %>
-      </UI.secondary_text>
+      </.secondary>
     </div>
     """
   end

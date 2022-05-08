@@ -7,6 +7,7 @@ defmodule HamsterTravelWeb.Planning.PlansList do
   import HamsterTravelWeb.Flag
   import HamsterTravelWeb.Icons.Budget
   import HamsterTravelWeb.Inline
+  import HamsterTravelWeb.Secondary
 
   alias HamsterTravelWeb.Planning.PlanComponents
 
@@ -38,20 +39,22 @@ defmodule HamsterTravelWeb.Planning.PlansList do
             <%= @plan.name %>
           <% end %>
         </p>
-        <div class="text-xs sm:text-base text-zinc-400 font-light flex flex-row gap-x-4 dark:text-zinc-500">
-          <.inline>
-            <.budget class="hidden sm:block" />
-            <%= Formatter.format_money(@plan.budget, @plan.currency) %>
-          </.inline>
-          <.inline>
-            <Heroicons.Outline.calendar class="h-4 w-4 hidden sm:block" />
-            <%= @plan.duration %> <%= ngettext("day", "days", @plan.duration) %>
-          </.inline>
-          <.inline>
-            <Heroicons.Outline.user class="h-4 w-4 hidden sm:block" />
-            <%= @plan.people_count %> <%= gettext("ppl") %>
-          </.inline>
-        </div>
+        <.secondary tag="div" italic={false}>
+          <div class="text-xs sm:text-base font-light flex flex-row gap-x-4">
+            <.inline>
+              <.budget class="hidden sm:block" />
+              <%= Formatter.format_money(@plan.budget, @plan.currency) %>
+            </.inline>
+            <.inline>
+              <Heroicons.Outline.calendar class="h-4 w-4 hidden sm:block" />
+              <%= @plan.duration %> <%= ngettext("day", "days", @plan.duration) %>
+            </.inline>
+            <.inline>
+              <Heroicons.Outline.user class="h-4 w-4 hidden sm:block" />
+              <%= @plan.people_count %> <%= gettext("ppl") %>
+            </.inline>
+          </div>
+        </.secondary>
         <.inline class="gap-3">
           <PlanComponents.status_badge status={@plan.status} />
           <%= for country <- Enum.take(@plan.countries, 1) do %>

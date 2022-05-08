@@ -6,6 +6,7 @@ defmodule HamsterTravelWeb.Planning.Tabs.ActivitiesTab do
 
   import HamsterTravelWeb.Icons.Budget
   import HamsterTravelWeb.Inline
+  import HamsterTravelWeb.Secondary
 
   alias HamsterTravelWeb.Planning.{Activity, Expense, Note, PlanComponents}
 
@@ -28,9 +29,9 @@ defmodule HamsterTravelWeb.Planning.Tabs.ActivitiesTab do
     case HamsterTravel.filter_activities_by_day(activities, day_index) do
       [] ->
         ~H"""
-        <UI.secondary_text>
+        <.secondary class="sm:hidden">
           <%= gettext("No activities planned for this day") %>
-        </UI.secondary_text>
+        </.secondary>
         """
 
       activities_for_day ->

@@ -7,6 +7,7 @@ defmodule HamsterTravelWeb.Planning.Hotel do
   import HamsterTravelWeb.ExternalLinks
   import HamsterTravelWeb.Icons.{Budget, HomeSimple}
   import HamsterTravelWeb.Inline
+  import HamsterTravelWeb.Secondary
 
   def update(%{hotel: hotel}, socket) do
     socket =
@@ -34,9 +35,9 @@ defmodule HamsterTravelWeb.Planning.Hotel do
         <.budget />
         <%= Formatter.format_money(hotel.price, hotel.price_currency) %>
       </.inline>
-      <UI.secondary_text>
+      <.secondary>
         <%= hotel.comment %>
-      </UI.secondary_text>
+      </.secondary>
       <.external_links links={hotel.links} />
     </div>
     """

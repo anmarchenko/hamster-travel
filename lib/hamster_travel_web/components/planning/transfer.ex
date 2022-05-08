@@ -7,6 +7,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
   import HamsterTravelWeb.ExternalLinks
   import HamsterTravelWeb.Icons.Budget
   import HamsterTravelWeb.Inline
+  import HamsterTravelWeb.Secondary
 
   alias HamsterTravelWeb.Planning.PlanComponents
 
@@ -52,9 +53,9 @@ defmodule HamsterTravelWeb.Planning.Transfer do
         </div>
       </div>
 
-      <UI.secondary_text>
+      <.secondary>
         <%= transfer.comment %>
-      </UI.secondary_text>
+      </.secondary>
 
       <.external_links links={transfer.links} />
     </div>

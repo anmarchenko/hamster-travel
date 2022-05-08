@@ -6,6 +6,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
 
   import HamsterTravelWeb.ExternalLink
   import HamsterTravelWeb.Inline
+  import HamsterTravelWeb.Secondary
 
   alias Phoenix.LiveView.JS
 
@@ -80,9 +81,9 @@ defmodule HamsterTravelWeb.Planning.Activity do
 
   def activity_feature(%{value: value, label: label} = assigns) do
     ~H"""
-    <UI.secondary_text class="max-w-prose">
+    <.secondary class="max-w-prose">
       <%= label %>: <%= value %>
-    </UI.secondary_text>
+    </.secondary>
     """
   end
 

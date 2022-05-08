@@ -11,16 +11,4 @@ defmodule HamsterTravelWeb.UIComponents do
     </div>
     """
   end
-
-  def secondary_text(assigns) do
-    assigns =
-      assigns
-      |> assign_new(:class, fn -> "" end)
-
-    ~H"""
-    <p class={"text-zinc-400 dark:text-zinc-500 italic #{@class}"}>
-      <%= render_slot(@inner_block) %>
-    </p>
-    """
-  end
 end

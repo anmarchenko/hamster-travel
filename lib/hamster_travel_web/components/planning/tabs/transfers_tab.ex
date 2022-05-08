@@ -6,6 +6,7 @@ defmodule HamsterTravelWeb.Planning.Tabs.TransfersTab do
 
   import HamsterTravelWeb.Icons.Budget
   import HamsterTravelWeb.Inline
+  import HamsterTravelWeb.Secondary
 
   alias HamsterTravelWeb.Planning.{Hotel, PlanComponents, Transfer}
 
@@ -27,9 +28,9 @@ defmodule HamsterTravelWeb.Planning.Tabs.TransfersTab do
     case HamsterTravel.filter_transfers_by_day(transfers, day_index) do
       [] ->
         ~H"""
-        <UI.secondary_text>
+        <.secondary class="sm:hidden">
           <%= gettext("No transfers planned for this day") %>
-        </UI.secondary_text>
+        </.secondary>
         """
 
       transfers_for_day ->
@@ -50,9 +51,9 @@ defmodule HamsterTravelWeb.Planning.Tabs.TransfersTab do
     case HamsterTravel.filter_hotels_by_day(hotels, day_index) do
       [] ->
         ~H"""
-        <UI.secondary_text>
+        <.secondary class="sm:hidden">
           <%= gettext("No hotels for this day") %>
-        </UI.secondary_text>
+        </.secondary>
         """
 
       hotels_for_day ->

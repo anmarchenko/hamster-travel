@@ -5,6 +5,7 @@ defmodule HamsterTravelWeb.Packing.BackpacksList do
   use HamsterTravelWeb, :component
 
   import HamsterTravelWeb.Inline
+  import HamsterTravelWeb.Secondary
 
   alias HamsterTravelWeb.Packing.BackpackComponents
 
@@ -31,16 +32,19 @@ defmodule HamsterTravelWeb.Packing.BackpacksList do
             <%= @backpack.name %>
           <% end %>
         </p>
-        <div class="text-xs sm:text-base text-zinc-400 font-light flex flex-row gap-x-4 dark:text-zinc-500">
-          <.inline>
-            <Heroicons.Outline.calendar class="h-4 w-4" />
-            <%= @backpack.duration %> <%= ngettext("day", "days", @backpack.duration) %>
-          </.inline>
-          <.inline>
-            <Heroicons.Outline.user class="h-4 w-4" />
-            <%= @backpack.people_count %> <%= gettext("ppl") %>
-          </.inline>
-        </div>
+
+        <.secondary tag="div" italic={false}>
+          <div class="text-xs sm:text-base font-light flex flex-row gap-x-2">
+            <.inline>
+              <Heroicons.Outline.calendar class="h-4 w-4" />
+              <%= @backpack.duration %> <%= ngettext("day", "days", @backpack.duration) %>
+            </.inline>
+            <.inline>
+              <Heroicons.Outline.user class="h-4 w-4" />
+              <%= @backpack.people_count %> <%= gettext("ppl") %>
+            </.inline>
+          </div>
+        </.secondary>
       </div>
     </UI.card>
     """
