@@ -19,7 +19,7 @@ defmodule HamsterTravelWeb.Planning.PlanCard do
   end
 
   defp render(%{plan: %{slug: slug}} = assigns) do
-    link = PlanComponents.plan_url(slug)
+    link = plan_url(slug)
 
     ~H"""
     <UI.card>

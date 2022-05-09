@@ -60,35 +60,6 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
     """
   end
 
-  def plan_tabs(assigns) do
-    ~H"""
-    <.tabs underline class="hidden sm:flex">
-      <.tab
-        underline
-        to={plan_url(@plan.slug, :itinerary)}
-        is_active={@active_tab == "itinerary"}
-        link_type="live_patch"
-      >
-        <.inline>
-          <.airplane />
-          <%= gettext("Transfers and hotels") %>
-        </.inline>
-      </.tab>
-      <.tab
-        underline
-        to={plan_url(@plan.slug, :activities)}
-        is_active={@active_tab == "activities"}
-        link_type="live_patch"
-      >
-        <.inline>
-          <Heroicons.Outline.clipboard_list />
-          <%= gettext("Activities") %>
-        </.inline>
-      </.tab>
-    </.tabs>
-    """
-  end
-
   def status_badge(assigns) do
     classes =
       class_list([
@@ -166,17 +137,6 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
       """
     end
   end
-
-  def plan_url(slug), do: "/plans/#{slug}"
-  def plan_url(slug, :itinerary), do: "/plans/#{slug}?tab=itinerary"
-  def plan_url(slug, :activities), do: "/plans/#{slug}?tab=activities"
-  def plan_url(slug, :catering), do: "/plans/#{slug}?tab=catering"
-  def plan_url(slug, :documents), do: "/plans/#{slug}?tab=documents"
-  def plan_url(slug, :report), do: "/plans/#{slug}?tab=report"
-  def plan_url(slug, :edit), do: "/plans/#{slug}/edit"
-  def plan_url(slug, :pdf), do: "/plans/#{slug}/pdf"
-  def plan_url(slug, :copy), do: "/plans/#{slug}/copy"
-  def plan_url(slug, :delete), do: "/plans/#{slug}/delete"
 
   defp status_colors(%{status: "finished"}),
     do: "text-green-500 bg-green-100 dark:bg-green-800 dark:text-green-100"
