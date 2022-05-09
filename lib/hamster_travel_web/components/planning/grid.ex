@@ -1,6 +1,6 @@
 defmodule HamsterTravelWeb.Planning.Grid do
   @moduledoc """
-  Parses and renders an external link
+  Parses plan cards as a grid
   """
   use HamsterTravelWeb, :component
   import PhxComponentHelpers

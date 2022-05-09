@@ -1,6 +1,6 @@
 defmodule HamsterTravelWeb.Planning.PlanCard do
   @moduledoc """
-  Parses and renders an external link
+  Renders plan card for a list of plans
   """
   use HamsterTravelWeb, :component
   import PhxComponentHelpers

@@ -5,9 +5,10 @@ defmodule HamsterTravelWeb.Planning.ShowPlan do
   use HamsterTravelWeb, :live_view
 
   alias HamsterTravelWeb.Planning.PlanComponents
-  alias HamsterTravelWeb.Planning.Tabs.{ActivitiesTab, TransfersTab}
+  alias HamsterTravelWeb.Planning.TabActivity
+  alias HamsterTravelWeb.Planning.TabItinerary
 
-  @tabs ["activities", "transfers", "catering", "documents", "report"]
+  @tabs ["activities", "itinerary", "catering", "documents", "report"]
 
   @impl true
   def mount(%{"plan_slug" => slug} = params, _session, socket) do
@@ -37,15 +38,15 @@ defmodule HamsterTravelWeb.Planning.ShowPlan do
     {:noreply, socket}
   end
 
-  def render_tab(%{active_tab: "transfers"} = assigns) do
+  def render_tab(%{active_tab: "itinerary"} = assigns) do
     ~H"""
-    <.live_component module={TransfersTab} id={"plan-#{@plan.id}-transfers"} plan={@plan} />
+    <.live_component module={TabItinerary} id={"plan-#{@plan.id}-itinerary"} plan={@plan} />
     """
   end
 
   def render_tab(%{active_tab: "activities"} = assigns) do
     ~H"""
-    <.live_component module={ActivitiesTab} id={"plan-#{@plan.id}-activities"} plan={@plan} />
+    <.live_component module={TabActivity} id={"plan-#{@plan.id}-activities"} plan={@plan} />
     """
   end
 
@@ -56,5 +57,5 @@ defmodule HamsterTravelWeb.Planning.ShowPlan do
        when tab in @tabs,
        do: tab
 
-  defp fetch_tab(_), do: "transfers"
+  defp fetch_tab(_), do: "itinerary"
 end

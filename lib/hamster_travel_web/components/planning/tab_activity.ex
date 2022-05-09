@@ -1,8 +1,10 @@
-defmodule HamsterTravelWeb.Planning.Tabs.ActivitiesTab do
+defmodule HamsterTravelWeb.Planning.TabActivity do
   @moduledoc """
   Activities tab
   """
   use HamsterTravelWeb, :live_component
+
+  import PhxComponentHelpers
 
   import HamsterTravelWeb.Icons.Budget
   import HamsterTravelWeb.Inline
@@ -10,19 +12,24 @@ defmodule HamsterTravelWeb.Planning.Tabs.ActivitiesTab do
 
   alias HamsterTravelWeb.Planning.{Activity, Expense, Note, PlanComponents}
 
-  def update(%{plan: plan}, socket) do
+  def update(assigns, socket) do
+    plan = assigns[:plan]
     budget = HamsterTravel.fetch_budget(plan, :activities)
 
-    socket =
-      socket
-      |> assign(budget: budget)
-      |> assign(plan: plan)
-      |> assign(places: plan.places)
-      |> assign(activities: plan.activities)
-      |> assign(notes: plan.notes)
-      |> assign(expenses: plan.expenses)
+    assigns =
+      assigns
+      |> set_attributes(
+        [
+          budget: budget,
+          places: plan.places,
+          activities: plan.activities,
+          notes: plan.notes,
+          expenses: plan.expenses
+        ],
+        required: [:plan]
+      )
 
-    {:ok, socket}
+    {:ok, assign(socket, assigns)}
   end
 
   def activities_list(%{activities: activities, day_index: day_index} = assigns) do
@@ -81,5 +88,37 @@ defmodule HamsterTravelWeb.Planning.Tabs.ActivitiesTab do
         />
         """
     end
+  end
+
+  def render(assigns) do
+    ~H"""
+    <div>
+      <div class="flex flex-row gap-x-4 mt-4 sm:mt-8 text-xl">
+        <.inline>
+          <.budget />
+          <%= Formatter.format_money(@budget, @plan.currency) %>
+        </.inline>
+      </div>
+
+      <div class="flex flex-col gap-y-8 mt-8">
+        <%= for i <- 0..@plan.duration-1 do %>
+          <div class="flex flex-col gap-y-2">
+            <div class="text-xl font-semibold">
+              <PlanComponents.day index={i} start_date={@plan.start_date} />
+            </div>
+            <div class="flex flex-row gap-x-4">
+              <PlanComponents.places_list places={@places} day_index={i} />
+            </div>
+            <.note notes={@notes} day_index={i} />
+            <.expenses_list expenses={@expenses} day_index={i} />
+            <div class="flex flex-col mt-4">
+              <.activities_list activities={@activities} day_index={i} />
+            </div>
+            <hr />
+          </div>
+        <% end %>
+      </div>
+    </div>
+    """
   end
 end

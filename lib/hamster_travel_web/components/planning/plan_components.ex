@@ -65,8 +65,8 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
     <.tabs underline class="hidden sm:flex">
       <.tab
         underline
-        to={plan_url(@plan.slug, :transfers)}
-        is_active={@active_tab == "transfers"}
+        to={plan_url(@plan.slug, :itinerary)}
+        is_active={@active_tab == "itinerary"}
         link_type="live_patch"
       >
         <.inline>
@@ -168,7 +168,7 @@ defmodule HamsterTravelWeb.Planning.PlanComponents do
   end
 
   def plan_url(slug), do: "/plans/#{slug}"
-  def plan_url(slug, :transfers), do: "/plans/#{slug}?tab=transfers"
+  def plan_url(slug, :itinerary), do: "/plans/#{slug}?tab=itinerary"
   def plan_url(slug, :activities), do: "/plans/#{slug}?tab=activities"
   def plan_url(slug, :catering), do: "/plans/#{slug}?tab=catering"
   def plan_url(slug, :documents), do: "/plans/#{slug}?tab=documents"
