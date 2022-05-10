@@ -8,6 +8,7 @@ defmodule HamsterTravelWeb.Planning.PlanCard do
   import HamsterTravelWeb.Flag
   import HamsterTravelWeb.Icons.Budget
   import HamsterTravelWeb.Inline
+  import HamsterTravelWeb.Planning.PlanShorts
   import HamsterTravelWeb.Secondary
 
   alias HamsterTravelWeb.Planning.PlanComponents
@@ -34,21 +35,8 @@ defmodule HamsterTravelWeb.Planning.PlanCard do
             <%= @plan.name %>
           <% end %>
         </p>
-        <.secondary tag="div" italic={false}>
-          <div class="text-xs sm:text-base font-light flex flex-row gap-x-4">
-            <.inline>
-              <.budget class="hidden sm:block" />
-              <%= Formatter.format_money(@plan.budget, @plan.currency) %>
-            </.inline>
-            <.inline>
-              <Heroicons.Outline.calendar class="h-4 w-4 hidden sm:block" />
-              <%= @plan.duration %> <%= ngettext("day", "days", @plan.duration) %>
-            </.inline>
-            <.inline>
-              <Heroicons.Outline.user class="h-4 w-4 hidden sm:block" />
-              <%= @plan.people_count %> <%= gettext("ppl") %>
-            </.inline>
-          </div>
+        <.secondary tag="div" italic={false} class="font-light">
+          <.plan_shorts plan={@plan} class="text-sm sm:text-base" icon_class="hidden sm:block" />
         </.secondary>
         <.inline class="gap-3">
           <PlanComponents.status_badge status={@plan.status} />

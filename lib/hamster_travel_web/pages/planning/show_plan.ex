@@ -4,7 +4,10 @@ defmodule HamsterTravelWeb.Planning.ShowPlan do
   """
   use HamsterTravelWeb, :live_view
 
-  import HamsterTravelWeb.Planning.Tabs
+  import HamsterTravelWeb.Flag
+  import HamsterTravelWeb.Inline
+  import HamsterTravelWeb.Link
+  import HamsterTravelWeb.Planning.{PlanShorts, Tabs}
 
   alias HamsterTravelWeb.Planning.PlanComponents
   alias HamsterTravelWeb.Planning.TabActivity

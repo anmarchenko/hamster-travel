@@ -5,11 +5,9 @@ defmodule HamsterTravelWeb.Planning.Transfer do
   use HamsterTravelWeb, :live_component
 
   import HamsterTravelWeb.ExternalLinks
-  import HamsterTravelWeb.Icons.Budget
+  import HamsterTravelWeb.Icons.{Airplane, Budget, Bus, Car, Ship, Taxi, Train}
   import HamsterTravelWeb.Inline
   import HamsterTravelWeb.Secondary
-
-  alias HamsterTravelWeb.Planning.PlanComponents
 
   def update(%{transfer: transfer}, socket) do
     socket =
@@ -30,7 +28,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
     ~H"""
     <div class="flex flex-col gap-y-1">
       <.inline class="text-zinc-400 dark:text-zinc-500">
-        <PlanComponents.transfer_icon type={transfer.type} />
+        <.transfer_icon type={transfer.type} />
         <%= transfer.vehicle_id %>
         <%= transfer.company %>
         <.budget />
@@ -59,6 +57,42 @@ defmodule HamsterTravelWeb.Planning.Transfer do
 
       <.external_links links={transfer.links} />
     </div>
+    """
+  end
+
+  def transfer_icon(%{type: "plane"} = assigns) do
+    ~H"""
+    <.airplane />
+    """
+  end
+
+  def transfer_icon(%{type: "car"} = assigns) do
+    ~H"""
+    <.car />
+    """
+  end
+
+  def transfer_icon(%{type: "taxi"} = assigns) do
+    ~H"""
+    <.taxi />
+    """
+  end
+
+  def transfer_icon(%{type: "bus"} = assigns) do
+    ~H"""
+    <.bus />
+    """
+  end
+
+  def transfer_icon(%{type: "train"} = assigns) do
+    ~H"""
+    <.train />
+    """
+  end
+
+  def transfer_icon(%{type: "ship"} = assigns) do
+    ~H"""
+    <.ship />
     """
   end
 

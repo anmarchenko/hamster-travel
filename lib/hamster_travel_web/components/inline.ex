@@ -5,8 +5,7 @@ defmodule HamsterTravelWeb.Inline do
   use HamsterTravelWeb, :component
   import PhxComponentHelpers
 
-  @default_class "inline-flex gap-2 items-center block"
-
+  @default_class "flex flex-row gap-2 items-center block"
   def inline(assigns) do
     assigns
     |> set_attributes([], required: [:inner_block])

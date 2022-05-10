@@ -1,18 +1,20 @@
 <section class={"#{standard_container()} p-6 mt-4"}>
-  <h1 class="text-xl lg:text-2xl font-semibold"><%= @backpack.name %></h1>
-  <div class="text-zinc-600 flex flex-row gap-x-4 mt-4 dark:text-zinc-300">
-    <.inline>
-      <Heroicons.Outline.calendar class="h-4 w-4" />
-      <%= @backpack.duration %> <%= ngettext("day", "days", @backpack.duration) %>
+  <div class="flex flex-col gap-y-4">
+    <h1 class="text-xl lg:text-2xl font-semibold"><%= @backpack.name %></h1>
+    <.inline class="gap-4">
+      <.inline class="gap-1">
+        <Heroicons.Outline.calendar class="h-4 w-4" />
+        <%= @backpack.duration %> <%= ngettext("day", "days", @backpack.duration) %>
+      </.inline>
+      <.inline class="gap-1">
+        <Heroicons.Outline.user class="h-4 w-4" />
+        <%= @backpack.people_count %> <%= gettext("ppl") %>
+      </.inline>
     </.inline>
-    <.inline>
-      <Heroicons.Outline.user class="h-4 w-4" />
-      <%= @backpack.people_count %> <%= gettext("ppl") %>
+    <.inline class="text-xs gap-4 sm:text-base">
+      <.link to={backpack_url(@backpack.slug, :edit)} label={gettext("Edit")} />
+      <.link to={backpack_url(@backpack.slug, :delete)} label={gettext("Delete")} />
     </.inline>
-  </div>
-  <div class="flex flex-row text-xs gap-x-4 sm:text-base mt-4">
-    <.link to={backpack_url(@backpack.slug, :edit)} label={gettext("Edit")} />
-    <.link to={backpack_url(@backpack.slug, :delete)} label={gettext("Delete")} />
   </div>
 </section>
 

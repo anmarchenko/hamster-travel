@@ -73,8 +73,8 @@ defmodule HamsterTravelWeb.LayoutView do
     </.mobile_nav_link>
     <.mobile_nav_link_tab
       label={gettext("Transfers")}
-      to="?tab=transfers"
-      active={@active_tab == "transfers"}
+      to="?tab=itinerary"
+      active={@active_tab == "itinerary"}
     >
       <.airplane class="h-6 w-6" />
     </.mobile_nav_link_tab>
