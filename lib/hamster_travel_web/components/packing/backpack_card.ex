@@ -5,6 +5,7 @@ defmodule HamsterTravelWeb.Packing.BackpackCard do
   use HamsterTravelWeb, :component
   import PhxComponentHelpers
 
+  import HamsterTravelWeb.Card
   import HamsterTravelWeb.Inline
   import HamsterTravelWeb.Secondary
 
@@ -18,7 +19,7 @@ defmodule HamsterTravelWeb.Packing.BackpackCard do
     link = backpack_url(slug)
 
     ~H"""
-    <UI.card>
+    <.card>
       <div class="p-4 flex flex-col gap-y-4">
         <p class="text-base font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
           <%= live_redirect to: link do %>
@@ -39,7 +40,7 @@ defmodule HamsterTravelWeb.Packing.BackpackCard do
           </div>
         </.secondary>
       </div>
-    </UI.card>
+    </.card>
     """
   end
 end

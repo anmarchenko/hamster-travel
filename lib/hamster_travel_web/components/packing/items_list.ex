@@ -6,6 +6,7 @@ defmodule HamsterTravelWeb.Packing.ItemsList do
   use HamsterTravelWeb, :live_component
   import PhxComponentHelpers
 
+  import HamsterTravelWeb.Card
   import HamsterTravelWeb.Inline
 
   def update(assigns, socket) do
@@ -19,7 +20,7 @@ defmodule HamsterTravelWeb.Packing.ItemsList do
   def render(assigns) do
     ~H"""
     <span>
-      <UI.card>
+      <.card>
         <div class="flex flex-col w-full">
           <div class="p-4 bg-violet-700 dark:bg-violet-900 text-white dark:text-zinc-400 rounded-t-lg">
             <%= @list.name %>
@@ -44,7 +45,7 @@ defmodule HamsterTravelWeb.Packing.ItemsList do
             </.form>
           </div>
         </div>
-      </UI.card>
+      </.card>
     </span>
     """
   end

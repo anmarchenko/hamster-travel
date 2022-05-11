@@ -5,6 +5,7 @@ defmodule HamsterTravelWeb.Planning.PlanCard do
   use HamsterTravelWeb, :component
   import PhxComponentHelpers
 
+  import HamsterTravelWeb.Card
   import HamsterTravelWeb.Planning.{PlanShorts, PlanStatus}
   import HamsterTravelWeb.Secondary
 
@@ -18,7 +19,7 @@ defmodule HamsterTravelWeb.Planning.PlanCard do
     link = plan_url(slug)
 
     ~H"""
-    <UI.card>
+    <.card>
       <div class="shrink-0">
         <%= live_redirect to: link do %>
           <img src={@plan.cover} class="w-32 h-32 object-cover object-center rounded-l-lg" />
@@ -35,7 +36,7 @@ defmodule HamsterTravelWeb.Planning.PlanCard do
         </.secondary>
         <.plan_status plan={@plan} flags_limit={1} />
       </div>
-    </UI.card>
+    </.card>
     """
   end
 end
