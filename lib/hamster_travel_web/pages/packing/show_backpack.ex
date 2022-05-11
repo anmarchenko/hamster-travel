@@ -7,7 +7,7 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
   import HamsterTravelWeb.Inline
   import HamsterTravelWeb.Link
 
-  alias HamsterTravelWeb.Packing.List
+  alias HamsterTravelWeb.Packing.ItemsList
 
   @impl true
   def mount(%{"backpack_slug" => slug}, _session, socket) do

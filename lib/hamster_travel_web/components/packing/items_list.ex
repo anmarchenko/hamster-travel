@@ -1,18 +1,19 @@
-defmodule HamsterTravelWeb.Packing.List do
+defmodule HamsterTravelWeb.Packing.ItemsList do
   @moduledoc """
   Live component responsible for showing and editing packing list
   """
 
   use HamsterTravelWeb, :live_component
+  import PhxComponentHelpers
 
   import HamsterTravelWeb.Inline
 
-  def update(%{list: list}, socket) do
-    socket =
-      socket
-      |> assign(list: list)
+  def update(assigns, socket) do
+    assigns =
+      assigns
+      |> set_attributes([], required: [:list])
 
-    {:ok, socket}
+    {:ok, assign(socket, assigns)}
   end
 
   def render(assigns) do

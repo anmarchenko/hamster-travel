@@ -4,8 +4,6 @@ defmodule HamsterTravelWeb.Packing.IndexBackpacks do
   """
   use HamsterTravelWeb, :live_view
 
-  alias HamsterTravelWeb.Packing.BackpacksList
-
   import HamsterTravelWeb.Gettext
   import HamsterTravelWeb.Packing.Grid
 
