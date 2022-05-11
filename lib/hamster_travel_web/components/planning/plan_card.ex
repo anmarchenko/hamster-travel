@@ -5,13 +5,8 @@ defmodule HamsterTravelWeb.Planning.PlanCard do
   use HamsterTravelWeb, :component
   import PhxComponentHelpers
 
-  import HamsterTravelWeb.Flag
-  import HamsterTravelWeb.Icons.Budget
-  import HamsterTravelWeb.Inline
-  import HamsterTravelWeb.Planning.PlanShorts
+  import HamsterTravelWeb.Planning.{PlanShorts, PlanStatus}
   import HamsterTravelWeb.Secondary
-
-  alias HamsterTravelWeb.Planning.PlanComponents
 
   def plan_card(assigns) do
     assigns
@@ -38,19 +33,7 @@ defmodule HamsterTravelWeb.Planning.PlanCard do
         <.secondary tag="div" italic={false} class="font-light">
           <.plan_shorts plan={@plan} class="text-sm sm:text-base" icon_class="hidden sm:block" />
         </.secondary>
-        <.inline class="gap-3">
-          <PlanComponents.status_badge status={@plan.status} />
-          <%= for country <- Enum.take(@plan.countries, 1) do %>
-            <.flag size={24} country={country} />
-          <% end %>
-          <.avatar
-            size="xs"
-            src={@plan.author.avatar_url}
-            name={@plan.author.name}
-            random_color
-            class="!w-6 !h-6"
-          />
-        </.inline>
+        <.plan_status plan={@plan} flags_limit={1} />
       </div>
     </UI.card>
     """

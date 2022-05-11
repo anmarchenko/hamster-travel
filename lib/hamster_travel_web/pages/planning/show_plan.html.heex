@@ -9,19 +9,7 @@
         <.link to={plan_url(@plan.slug, :pdf)} label={gettext("Export as PDF")} />
         <.link to={plan_url(@plan.slug, :delete)} label={gettext("Delete")} />
       </.inline>
-      <.inline class="gap-3">
-        <PlanComponents.status_badge status={@plan.status} />
-        <%= for country <- @plan.countries do %>
-          <.flag size={24} country={country} />
-        <% end %>
-        <.avatar
-          size="xs"
-          src={@plan.author.avatar_url}
-          name={@plan.author.name}
-          random_color
-          class="!w-6 !h-6"
-        />
-      </.inline>
+      <.plan_status plan={@plan} />
     </div>
     <div class="">
       <img
