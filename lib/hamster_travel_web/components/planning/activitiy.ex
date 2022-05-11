@@ -3,6 +3,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
   Live component responsible for showing and editing activities
   """
   use HamsterTravelWeb, :live_component
+  import PhxComponentHelpers
 
   import HamsterTravelWeb.ExternalLink
   import HamsterTravelWeb.Inline
@@ -10,14 +11,12 @@ defmodule HamsterTravelWeb.Planning.Activity do
 
   alias Phoenix.LiveView.JS
 
-  def update(%{activity: activity, index: index}, socket) do
-    socket =
-      socket
-      |> assign(activity: activity)
-      |> assign(index: index)
-      |> assign(edit: false)
+  def update(assigns, socket) do
+    assigns =
+      assigns
+      |> set_attributes([edit: false], required: [:activity, :index])
 
-    {:ok, socket}
+    {:ok, assign(socket, assigns)}
   end
 
   def render(%{edit: true} = assigns) do
@@ -69,17 +68,17 @@ defmodule HamsterTravelWeb.Planning.Activity do
     """
   end
 
-  def activity_font("must"), do: "font-bold"
-  def activity_font("should"), do: "font-normal"
-  def activity_font("irrelevant"), do: "italic font-light text-zinc-400 dark:text-zinc-500"
+  defp activity_font("must"), do: "font-bold"
+  defp activity_font("should"), do: "font-normal"
+  defp activity_font("irrelevant"), do: "italic font-light text-zinc-400 dark:text-zinc-500"
 
-  def activity_feature(%{value: nil} = assigns) do
+  defp activity_feature(%{value: nil} = assigns) do
     ~H"""
 
     """
   end
 
-  def activity_feature(%{value: value, label: label} = assigns) do
+  defp activity_feature(%{value: value, label: label} = assigns) do
     ~H"""
     <.secondary class="max-w-prose">
       <%= label %>: <%= value %>
@@ -87,7 +86,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
     """
   end
 
-  def activity_button(assigns) do
+  defp activity_button(assigns) do
     ~H"""
     <span
       class="cursor-pointer hover:text-zinc-900 hover:dark:text-zinc-100"

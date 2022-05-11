@@ -3,16 +3,16 @@ defmodule HamsterTravelWeb.Planning.Note do
   Live component responsible for showing and editing day notes
   """
   use HamsterTravelWeb, :live_component
+  import PhxComponentHelpers
 
   import HamsterTravelWeb.Secondary
 
-  def update(%{note: note}, socket) do
-    socket =
-      socket
-      |> assign(note: note)
-      |> assign(edit: false)
+  def update(assigns, socket) do
+    assigns =
+      assigns
+      |> set_attributes([edit: false], required: [:note])
 
-    {:ok, socket}
+    {:ok, assign(socket, assigns)}
   end
 
   def render(%{edit: true} = assigns) do

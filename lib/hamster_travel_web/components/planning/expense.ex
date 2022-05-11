@@ -3,14 +3,14 @@ defmodule HamsterTravelWeb.Planning.Expense do
   Live component responsible for showing and editing expenses
   """
   use HamsterTravelWeb, :live_component
+  import PhxComponentHelpers
 
-  def update(%{expense: expense}, socket) do
-    socket =
-      socket
-      |> assign(expense: expense)
-      |> assign(edit: false)
+  def update(assigns, socket) do
+    assigns =
+      assigns
+      |> set_attributes([edit: false], required: [:expense])
 
-    {:ok, socket}
+    {:ok, assign(socket, assigns)}
   end
 
   def render(%{edit: true} = assigns) do

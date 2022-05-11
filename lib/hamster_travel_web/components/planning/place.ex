@@ -3,17 +3,17 @@ defmodule HamsterTravelWeb.Planning.Place do
   Live component responsible for showing and editing places (aka cities to visit)
   """
   use HamsterTravelWeb, :live_component
+  import PhxComponentHelpers
 
   import HamsterTravelWeb.Flag
   import HamsterTravelWeb.Inline
 
-  def update(%{place: place}, socket) do
-    socket =
-      socket
-      |> assign(place: place)
-      |> assign(edit: false)
+  def update(assigns, socket) do
+    assigns =
+      assigns
+      |> set_attributes([edit: false], required: [:place])
 
-    {:ok, socket}
+    {:ok, assign(socket, assigns)}
   end
 
   def render(%{edit: true} = assigns) do
@@ -22,12 +22,12 @@ defmodule HamsterTravelWeb.Planning.Place do
     """
   end
 
-  def render(%{edit: false, place: place} = assigns) do
+  def render(%{edit: false} = assigns) do
     ~H"""
     <span>
       <.inline>
-        <.flag size={16} country={place.city.country} />
-        <%= place.city.name %>
+        <.flag size={16} country={@place.city.country} />
+        <%= @place.city.name %>
       </.inline>
     </span>
     """
