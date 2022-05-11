@@ -7,6 +7,7 @@ defmodule HamsterTravelWeb.Packing.IndexBackpacks do
   alias HamsterTravelWeb.Packing.BackpacksList
 
   import HamsterTravelWeb.Gettext
+  import HamsterTravelWeb.Packing.Grid
 
   @impl true
   def mount(_params, _session, socket) do

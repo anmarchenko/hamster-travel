@@ -1,28 +1,21 @@
-defmodule HamsterTravelWeb.Packing.BackpacksList do
+defmodule HamsterTravelWeb.Packing.BackpackCard do
   @moduledoc """
-  This component renders backpack items/cards
+  This component renders backpack card
   """
   use HamsterTravelWeb, :component
+  import PhxComponentHelpers
 
   import HamsterTravelWeb.Inline
   import HamsterTravelWeb.Secondary
 
-  alias HamsterTravelWeb.Packing.BackpackComponents
-
-  def grid(assigns) do
-    ~H"""
-    <section class={"#{standard_container()} p-6 mt-6"}>
-      <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        <%= for backpack <- @backpacks do %>
-          <.backpack_card backpack={backpack} />
-        <% end %>
-      </div>
-    </section>
-    """
+  def backpack_card(assigns) do
+    assigns
+    |> set_attributes([], required: [:backpack])
+    |> render()
   end
 
-  def backpack_card(%{backpack: %{slug: slug}} = assigns) do
-    link = BackpackComponents.backpack_url(slug)
+  defp render(%{backpack: %{slug: slug}} = assigns) do
+    link = backpack_url(slug)
 
     ~H"""
     <UI.card>

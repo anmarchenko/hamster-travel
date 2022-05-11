@@ -22,4 +22,8 @@ defmodule HamsterTravelWeb.Helpers do
   def plan_url(slug, :pdf), do: "/plans/#{slug}/pdf"
   def plan_url(slug, :copy), do: "/plans/#{slug}/copy"
   def plan_url(slug, :delete), do: "/plans/#{slug}/delete"
+
+  def backpack_url(slug), do: "/backpacks/#{slug}"
+  def backpack_url(slug, :edit), do: "/backpacks/#{slug}/edit"
+  def backpack_url(slug, :delete), do: "/backpacks/#{slug}/delete"
 end

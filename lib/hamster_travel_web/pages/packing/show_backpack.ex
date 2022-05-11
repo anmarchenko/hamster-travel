@@ -6,7 +6,6 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
 
   import HamsterTravelWeb.Inline
   import HamsterTravelWeb.Link
-  import HamsterTravelWeb.Packing.BackpackComponents
 
   alias HamsterTravelWeb.Packing.List
 

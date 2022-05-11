@@ -11,7 +11,7 @@ defmodule HamsterTravelWeb.Planning.TabActivity do
   import HamsterTravelWeb.Planning.{DayLabel, PlacesList}
   import HamsterTravelWeb.Secondary
 
-  alias HamsterTravelWeb.Planning.{Activity, Expense, Note, Place}
+  alias HamsterTravelWeb.Planning.{Activity, Expense, Note}
 
   def update(assigns, socket) do
     plan = assigns[:plan]
