@@ -9,15 +9,18 @@ defmodule HamsterTravelWeb.Planning.PlanStatus do
   import HamsterTravelWeb.Inline
   import HamsterTravelWeb.Planning.StatusBadge
 
+  @default_class "gap-3"
+
   def plan_status(assigns) do
     assigns
     |> set_attributes([flags_limit: 100], required: [:plan])
+    |> extend_class(@default_class)
     |> render()
   end
 
   defp render(assigns) do
     ~H"""
-    <.inline class="gap-3">
+    <.inline {@heex_class}>
       <.status_badge status={@plan.status} />
       <%= for country <- Enum.take(@plan.countries, @flags_limit) do %>
         <.flag size={24} country={country} />

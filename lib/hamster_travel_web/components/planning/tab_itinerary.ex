@@ -8,9 +8,10 @@ defmodule HamsterTravelWeb.Planning.TabItinerary do
 
   import HamsterTravelWeb.Icons.Budget
   import HamsterTravelWeb.Inline
+  import HamsterTravelWeb.Planning.{DayLabel, PlacesList}
   import HamsterTravelWeb.Secondary
 
-  alias HamsterTravelWeb.Planning.{Hotel, PlanComponents, Transfer}
+  alias HamsterTravelWeb.Planning.{Hotel, Transfer}
 
   def update(assigns, socket) do
     plan = assigns[:plan]
@@ -31,7 +32,15 @@ defmodule HamsterTravelWeb.Planning.TabItinerary do
     {:ok, assign(socket, assigns)}
   end
 
-  def transfers_list(%{transfers: transfers, day_index: day_index} = assigns) do
+  def places(%{places: places, day_index: day_index} = assigns) do
+    places_for_day = HamsterTravel.filter_places_by_day(places, day_index)
+
+    ~H"""
+    <.places_list places={places_for_day} day_index={day_index} />
+    """
+  end
+
+  def transfers(%{transfers: transfers, day_index: day_index} = assigns) do
     case HamsterTravel.filter_transfers_by_day(transfers, day_index) do
       [] ->
         ~H"""
@@ -54,7 +63,7 @@ defmodule HamsterTravelWeb.Planning.TabItinerary do
     end
   end
 
-  def hotels_list(%{hotels: hotels, day_index: day_index} = assigns) do
+  def hotels(%{hotels: hotels, day_index: day_index} = assigns) do
     case HamsterTravel.filter_hotels_by_day(hotels, day_index) do
       [] ->
         ~H"""
@@ -104,21 +113,21 @@ defmodule HamsterTravelWeb.Planning.TabItinerary do
           <%= for i <- 0..@plan.duration-1 do %>
             <tr class="flex flex-col gap-y-6 mt-10 sm:table-row sm:gap-y-0 sm:mt-0">
               <td class="text-xl font-bold sm:font-normal sm:text-base sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
-                <PlanComponents.day index={i} start_date={@plan.start_date} />
+                <.day_label index={i} start_date={@plan.start_date} />
               </td>
               <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
                 <div class="flex flex-col gap-y-2">
-                  <PlanComponents.places_list places={@places} day_index={i} />
+                  <.places places={@places} day_index={i} />
                 </div>
               </td>
               <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
                 <div class="flex flex-col gap-y-8">
-                  <.transfers_list transfers={@transfers} day_index={i} />
+                  <.transfers transfers={@transfers} day_index={i} />
                 </div>
               </td>
               <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
                 <div class="flex flex-col gap-y-8">
-                  <.hotels_list hotels={@hotels} day_index={i} />
+                  <.hotels hotels={@hotels} day_index={i} />
                 </div>
               </td>
             </tr>

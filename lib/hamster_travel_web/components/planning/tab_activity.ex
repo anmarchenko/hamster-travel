@@ -8,9 +8,10 @@ defmodule HamsterTravelWeb.Planning.TabActivity do
 
   import HamsterTravelWeb.Icons.Budget
   import HamsterTravelWeb.Inline
+  import HamsterTravelWeb.Planning.{DayLabel, PlacesList}
   import HamsterTravelWeb.Secondary
 
-  alias HamsterTravelWeb.Planning.{Activity, Expense, Note, PlanComponents}
+  alias HamsterTravelWeb.Planning.{Activity, Expense, Note, Place}
 
   def update(assigns, socket) do
     plan = assigns[:plan]
@@ -32,7 +33,7 @@ defmodule HamsterTravelWeb.Planning.TabActivity do
     {:ok, assign(socket, assigns)}
   end
 
-  def activities_list(%{activities: activities, day_index: day_index} = assigns) do
+  def activities(%{activities: activities, day_index: day_index} = assigns) do
     case HamsterTravel.filter_activities_by_day(activities, day_index) do
       [] ->
         ~H"""
@@ -56,7 +57,15 @@ defmodule HamsterTravelWeb.Planning.TabActivity do
     end
   end
 
-  def expenses_list(%{expenses: expenses, day_index: day_index} = assigns) do
+  def places(%{places: places, day_index: day_index} = assigns) do
+    places_for_day = HamsterTravel.filter_places_by_day(places, day_index)
+
+    ~H"""
+    <.places_list places={places_for_day} day_index={day_index} />
+    """
+  end
+
+  def expenses(%{expenses: expenses, day_index: day_index} = assigns) do
     expenses_for_day = HamsterTravel.filter_expenses_by_day(expenses, day_index)
 
     ~H"""
@@ -104,15 +113,15 @@ defmodule HamsterTravelWeb.Planning.TabActivity do
         <%= for i <- 0..@plan.duration-1 do %>
           <div class="flex flex-col gap-y-2">
             <div class="text-xl font-semibold">
-              <PlanComponents.day index={i} start_date={@plan.start_date} />
+              <.day_label index={i} start_date={@plan.start_date} />
             </div>
             <div class="flex flex-row gap-x-4">
-              <PlanComponents.places_list places={@places} day_index={i} />
+              <.places places={@places} day_index={i} />
             </div>
             <.note notes={@notes} day_index={i} />
-            <.expenses_list expenses={@expenses} day_index={i} />
+            <.expenses expenses={@expenses} day_index={i} />
             <div class="flex flex-col mt-4">
-              <.activities_list activities={@activities} day_index={i} />
+              <.activities activities={@activities} day_index={i} />
             </div>
             <hr />
           </div>
