@@ -29,22 +29,12 @@ defmodule HamsterTravelWeb.Planning.Activity do
     ~H"""
     <div
       class="flex flex-col gap-y-1 py-1 sm:ml-[-1.5rem] sm:pl-[1.5rem] sm:hover:bg-zinc-100 sm:dark:hover:bg-zinc-700"
-      x-data="{ showButtons: false }"
+      x-data="{ showButtons: false, showContent: false }"
       @mouseover="showButtons = true"
       @mouseleave="showButtons = false"
     >
       <.inline class={"2xl:text-lg #{activity_font(activity.priority)}"}>
-        <span
-          class="cursor-pointer"
-          phx-click={
-            JS.toggle(
-              to: "#activity-content-#{activity.id}",
-              display: "flex",
-              in: {"ease-out duration-300", "opacity-0", "opacity-100"},
-              out: {"ease-out duration-300", "opacity-100", "opacity-0"}
-            )
-          }
-        >
+        <span class="cursor-pointer" @click="showContent = !showContent">
           <%= "#{index + 1}." %>
           <%= activity.name %>
         </span>
@@ -56,7 +46,12 @@ defmodule HamsterTravelWeb.Planning.Activity do
           <Heroicons.Outline.trash class="h-4 w-4" />
         </.activity_button>
       </.inline>
-      <div id={"activity-content-#{activity.id}"} class="hidden flex flex-col gap-y-1">
+      <div
+        class="flex flex-col gap-y-1"
+        x-show="showContent"
+        x-transition.duration.300ms.opacity
+        x-cloak
+      >
         <.external_link link={activity.link} />
         <.activity_feature label={gettext("Address")} value={activity.address} />
         <.activity_feature label={gettext("Opening hours")} value={activity.operation_times} />
@@ -90,8 +85,8 @@ defmodule HamsterTravelWeb.Planning.Activity do
     ~H"""
     <span
       class="cursor-pointer hover:text-zinc-900 hover:dark:text-zinc-100"
-      x-bind:class="!showButtons ? 'sm:hidden' : ''"
-      x-cloak
+      x-show="showButtons"
+      x-transition
     >
       <%= render_slot(@inner_block) %>
     </span>
