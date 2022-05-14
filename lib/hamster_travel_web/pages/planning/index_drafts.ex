@@ -4,6 +4,7 @@ defmodule HamsterTravelWeb.Planning.IndexDrafts do
   """
   use HamsterTravelWeb, :live_view
 
+  import HamsterTravelWeb.Container
   import HamsterTravelWeb.Planning.Grid
 
   @impl true

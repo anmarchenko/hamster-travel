@@ -1,4 +1,4 @@
-<section class={"#{standard_container()} p-6 mt-4"}>
+<.container class="p-6 mt-4">
   <div class="flex flex-col gap-y-4">
     <h1 class="text-xl lg:text-2xl font-semibold"><%= @backpack.name %></h1>
     <.inline class="gap-4">
@@ -16,12 +16,12 @@
       <.link to={backpack_url(@backpack.slug, :delete)} label={gettext("Delete")} />
     </.inline>
   </div>
-</section>
+</.container>
 
-<section class={"#{standard_container()} p-6"}>
+<.container class="p-6">
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     <%= for items_list <- @backpack.packing_lists do %>
       <.live_component module={ItemsList} id={"packing-list-#{items_list.id}"} list={items_list} />
     <% end %>
   </div>
-</section>
+</.container>

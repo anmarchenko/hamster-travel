@@ -10,7 +10,7 @@ defmodule HamsterTravelWeb.LayoutView do
 
   def navbar(assigns) do
     ~H"""
-    <div class={"#{standard_container()} px-6 h-20 flex items-center justify-between"}>
+    <div class="mx-auto max-w-screen-md xl:max-w-screen-lg 2xl:max-w-screen-xl px-6 h-20 flex items-center justify-between">
       <%= live_redirect to: "/" do %>
         <h1 class="font-medium dark:text-white">
           Hamster Travel

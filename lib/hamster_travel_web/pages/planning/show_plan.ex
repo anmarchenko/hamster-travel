@@ -4,6 +4,7 @@ defmodule HamsterTravelWeb.Planning.ShowPlan do
   """
   use HamsterTravelWeb, :live_view
 
+  import HamsterTravelWeb.Container
   import HamsterTravelWeb.Inline
   import HamsterTravelWeb.Link
   import HamsterTravelWeb.Planning.{PlanShorts, PlanStatus, Tabs}
