@@ -9,8 +9,6 @@ defmodule HamsterTravelWeb.Planning.Activity do
   import HamsterTravelWeb.Inline
   import HamsterTravelWeb.Secondary
 
-  alias Phoenix.LiveView.JS
-
   def update(assigns, socket) do
     assigns =
       assigns

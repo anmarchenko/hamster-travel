@@ -1,41 +1,39 @@
 #, elixir-autogen, elixir-format
-#: lib/hamster_travel_web/pages/planning/plans_live.ex:14
-#: lib/hamster_travel_web/views/layout_view.ex:24
-#: lib/hamster_travel_web/views/layout_view.ex:89
+#: lib/hamster_travel_web/pages/planning/index_plans.ex:15
+#: lib/hamster_travel_web/views/layout_view.ex:23
+#: lib/hamster_travel_web/views/layout_view.ex:96
 msgid "Plans"
 msgstr "Планы"
 
 #, elixir-autogen, elixir-format
-#: lib/hamster_travel_web/pages/packing/backpacks_live.ex:16
-#: lib/hamster_travel_web/views/layout_view.ex:30
-#: lib/hamster_travel_web/views/layout_view.ex:95
+#: lib/hamster_travel_web/pages/packing/index_backpacks.ex:16
+#: lib/hamster_travel_web/views/layout_view.ex:29
+#: lib/hamster_travel_web/views/layout_view.ex:102
 msgid "Backpacks"
 msgstr "Рюкзачки"
 
 #, elixir-autogen, elixir-format
-#: lib/hamster_travel_web/pages/home_live.ex:15
-#: lib/hamster_travel_web/views/layout_view.ex:86
+#: lib/hamster_travel_web/pages/home.ex:17
+#: lib/hamster_travel_web/views/layout_view.ex:93
 msgid "Homepage"
 msgstr "Главная"
 
 #, elixir-autogen, elixir-format
-#: lib/hamster_travel_web/pages/home_live.html.heex:2
+#: lib/hamster_travel_web/pages/home.html.heex:3
 msgid "Next travels"
 msgstr "Ближайшие путешествия"
 
 #, elixir-autogen, elixir-format
-#: lib/hamster_travel_web/components/packing/backpacks_list.ex:39
-#: lib/hamster_travel_web/components/planning/plan_components.ex:26
-#: lib/hamster_travel_web/components/planning/plans_list.ex:47
-#: lib/hamster_travel_web/pages/packing/backpack_live.html.heex:10
+#: lib/hamster_travel_web/components/packing/backpack_card.ex:38
+#: lib/hamster_travel_web/components/planning/plan_shorts.ex:33
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:11
 msgid "ppl"
 msgstr "чел"
 
 #, elixir-format, ex-autogen, fuzzy
-#: lib/hamster_travel_web/components/packing/backpacks_list.ex:35
-#: lib/hamster_travel_web/components/planning/plan_components.ex:22
-#: lib/hamster_travel_web/components/planning/plans_list.ex:43
-#: lib/hamster_travel_web/pages/packing/backpack_live.html.heex:6
+#: lib/hamster_travel_web/components/packing/backpack_card.ex:34
+#: lib/hamster_travel_web/components/planning/plan_shorts.ex:29
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:7
 msgid "day"
 msgid_plural "days"
 msgstr[0] "день"
@@ -53,14 +51,14 @@ msgid "draft"
 msgstr "Черновик"
 
 #, elixir-autogen, elixir-format, fuzzy
-#: lib/hamster_travel_web/pages/planning/drafts_live.ex:14
-#: lib/hamster_travel_web/views/layout_view.ex:27
-#: lib/hamster_travel_web/views/layout_view.ex:92
+#: lib/hamster_travel_web/pages/planning/index_drafts.ex:15
+#: lib/hamster_travel_web/views/layout_view.ex:26
+#: lib/hamster_travel_web/views/layout_view.ex:99
 msgid "Drafts"
 msgstr "Черновики"
 
 #, elixir-autogen, elixir-format
-#: lib/hamster_travel_web/components/planning/plan_components.ex:31
+#: lib/hamster_travel_web/pages/planning/show_plan.html.heex:7
 msgid "Edit plan"
 msgstr "Редактировать план"
 
@@ -75,85 +73,90 @@ msgid "This URL is not found."
 msgstr "Ссылка не найдена"
 
 #, elixir-autogen, elixir-format
-#: lib/hamster_travel_web/components/planning/plan_components.ex:37
+#: lib/hamster_travel_web/pages/planning/show_plan.html.heex:9
 msgid "Export as PDF"
 msgstr "Экспорт в PDF"
 
 #, elixir-autogen, elixir-format
-#: lib/hamster_travel_web/components/planning/plan_components.ex:34
+#: lib/hamster_travel_web/pages/planning/show_plan.html.heex:8
 msgid "Make a copy"
 msgstr "Сделать копию"
 
 #, elixir-autogen, elixir-format
-#: lib/hamster_travel_web/components/planning/plan_components.ex:70
-#: lib/hamster_travel_web/views/layout_view.ex:78
+#: lib/hamster_travel_web/components/planning/tabs.ex:43
+#: lib/hamster_travel_web/views/layout_view.ex:82
 msgid "Activities"
 msgstr "Впечатления"
 
 #, elixir-autogen, elixir-format
-#: lib/hamster_travel_web/components/planning/plan_components.ex:64
+#: lib/hamster_travel_web/components/planning/tabs.ex:32
 msgid "Transfers and hotels"
 msgstr "Трансферы и жильё"
 
 #, elixir-autogen, elixir-format, fuzzy
-#: lib/hamster_travel_web/views/layout_view.ex:72
+#: lib/hamster_travel_web/views/layout_view.ex:71
 msgid "Back"
 msgstr "Назад"
 
 #, elixir-autogen, elixir-format, fuzzy
-#: lib/hamster_travel_web/components/planning/tabs/transfers_tab.html.heex:14
+#: lib/hamster_travel_web/components/planning/tab_itinerary.ex:107
 #: lib/hamster_travel_web/views/layout_view.ex:75
 msgid "Transfers"
 msgstr "Трансферы"
 
 #, elixir-autogen, elixir-format
-#: lib/hamster_travel_web/components/planning/plan_components.ex:144
-#: lib/hamster_travel_web/components/planning/tabs/transfers_tab.html.heex:12
+#: lib/hamster_travel_web/components/planning/day_label.ex:17
+#: lib/hamster_travel_web/components/planning/tab_itinerary.ex:102
 msgid "Day"
 msgstr "День"
 
 #, elixir-autogen, elixir-format
-#: lib/hamster_travel_web/components/planning/tabs/transfers_tab.html.heex:15
+#: lib/hamster_travel_web/components/planning/tab_itinerary.ex:109
 msgid "Hotel"
 msgstr "Жильё"
 
 #, elixir-autogen, elixir-format, fuzzy
-#: lib/hamster_travel_web/components/planning/tabs/transfers_tab.html.heex:13
+#: lib/hamster_travel_web/components/planning/tab_itinerary.ex:104
 msgid "Places"
 msgstr "Города"
 
 #, elixir-autogen, elixir-format
-#: lib/hamster_travel_web/components/planning/plan_components.ex:40
-#: lib/hamster_travel_web/pages/packing/backpack_live.html.heex:18
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:16
+#: lib/hamster_travel_web/pages/planning/show_plan.html.heex:10
 msgid "Delete"
 msgstr "Удалить"
 
 #, elixir-autogen, elixir-format
-#: lib/hamster_travel_web/components/planning/tabs/transfers_tab.ex:46
+#: lib/hamster_travel_web/components/planning/tab_itinerary.ex:71
 msgid "No hotels for this day"
 msgstr "На этот день не запланировано проживания"
 
 #, elixir-autogen, elixir-format
-#: lib/hamster_travel_web/components/planning/tabs/transfers_tab.ex:28
+#: lib/hamster_travel_web/components/planning/tab_itinerary.ex:48
 msgid "No transfers planned for this day"
 msgstr "На этот день не запланировано трансферов"
 
 #, elixir-autogen, elixir-format, fuzzy
-#: lib/hamster_travel_web/components/planning/tabs/activities_tab.ex:29
+#: lib/hamster_travel_web/components/planning/tab_activity.ex:41
 msgid "No activities planned for this day"
 msgstr "На этот день не запланировано впечатлений"
 
 #, elixir-autogen, elixir-format
-#: lib/hamster_travel_web/components/planning/activitiy.ex:55
+#: lib/hamster_travel_web/components/planning/activitiy.ex:54
 msgid "Address"
 msgstr "Адрес"
 
 #, elixir-autogen, elixir-format, fuzzy
-#: lib/hamster_travel_web/pages/packing/backpack_live.html.heex:15
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:15
 msgid "Edit"
 msgstr "Редактировать"
 
 #, elixir-autogen, elixir-format
-#: lib/hamster_travel_web/components/planning/activitiy.ex:56
+#: lib/hamster_travel_web/components/planning/activitiy.ex:55
 msgid "Opening hours"
 msgstr "Часы работы"
+
+#, elixir-autogen, elixir-format, fuzzy
+#: lib/hamster_travel_web/pages/home.html.heex:7
+msgid "Last travels"
+msgstr "Последние путешествия"

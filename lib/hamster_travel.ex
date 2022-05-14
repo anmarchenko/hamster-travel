@@ -659,6 +659,23 @@ defmodule HamsterTravel do
     ]
   end
 
+  def next_plans() do
+    Enum.filter(
+      plans(),
+      fn plan ->
+        plan[:status] == "planned"
+      end
+    )
+  end
+
+  def last_plans() do
+    plans()
+    |> Enum.filter(fn plan ->
+      plan[:status] == "finished"
+    end)
+    |> Enum.take(6)
+  end
+
   def find_plan_by_slug(slug) do
     plan =
       Enum.find(plans() ++ drafts(), fn plan ->
