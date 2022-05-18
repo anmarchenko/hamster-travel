@@ -41,6 +41,9 @@ defmodule HamsterTravel.MixProject do
       {:phoenix_live_dashboard, "~> 0.5"},
       {:plug_cowboy, "~> 2.5"},
 
+      # password hashing
+      {:bcrypt_elixir, "~> 3.0"},
+
       # database
       {:phoenix_ecto, "~> 4.4"},
       {:ecto_sql, "~> 3.6"},
