@@ -1,20 +1,20 @@
 #, elixir-autogen, elixir-format
 #: lib/hamster_travel_web/pages/planning/index_plans.ex:15
 #: lib/hamster_travel_web/views/layout_view.ex:23
-#: lib/hamster_travel_web/views/layout_view.ex:96
+#: lib/hamster_travel_web/views/layout_view.ex:102
 msgid "Plans"
-msgstr ""
+msgstr "Travel plans"
 
 #, elixir-autogen, elixir-format
 #: lib/hamster_travel_web/pages/packing/index_backpacks.ex:16
-#: lib/hamster_travel_web/views/layout_view.ex:29
-#: lib/hamster_travel_web/views/layout_view.ex:102
+#: lib/hamster_travel_web/views/layout_view.ex:30
+#: lib/hamster_travel_web/views/layout_view.ex:108
 msgid "Backpacks"
 msgstr ""
 
 #, elixir-autogen, elixir-format
 #: lib/hamster_travel_web/pages/home.ex:17
-#: lib/hamster_travel_web/views/layout_view.ex:93
+#: lib/hamster_travel_web/views/layout_view.ex:99
 msgid "Homepage"
 msgstr "Home"
 
@@ -51,8 +51,8 @@ msgstr ""
 
 #, elixir-autogen, elixir-format, fuzzy
 #: lib/hamster_travel_web/pages/planning/index_drafts.ex:15
-#: lib/hamster_travel_web/views/layout_view.ex:26
-#: lib/hamster_travel_web/views/layout_view.ex:99
+#: lib/hamster_travel_web/views/layout_view.ex:27
+#: lib/hamster_travel_web/views/layout_view.ex:105
 msgid "Drafts"
 msgstr ""
 
@@ -83,7 +83,7 @@ msgstr ""
 
 #, elixir-autogen, elixir-format
 #: lib/hamster_travel_web/components/planning/tabs.ex:43
-#: lib/hamster_travel_web/views/layout_view.ex:82
+#: lib/hamster_travel_web/views/layout_view.ex:88
 msgid "Activities"
 msgstr ""
 
@@ -93,13 +93,13 @@ msgid "Transfers and hotels"
 msgstr ""
 
 #, elixir-autogen, elixir-format, fuzzy
-#: lib/hamster_travel_web/views/layout_view.ex:71
+#: lib/hamster_travel_web/views/layout_view.ex:77
 msgid "Back"
 msgstr ""
 
 #, elixir-autogen, elixir-format, fuzzy
 #: lib/hamster_travel_web/components/planning/tab_itinerary.ex:107
-#: lib/hamster_travel_web/views/layout_view.ex:75
+#: lib/hamster_travel_web/views/layout_view.ex:81
 msgid "Transfers"
 msgstr ""
 
@@ -158,4 +158,9 @@ msgstr ""
 #, elixir-autogen, elixir-format, fuzzy
 #: lib/hamster_travel_web/pages/home.html.heex:7
 msgid "Last travels"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+#: lib/hamster_travel_web/views/layout_view.ex:39
+msgid "Log in"
 msgstr ""

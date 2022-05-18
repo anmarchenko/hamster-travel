@@ -22,12 +22,14 @@ defmodule HamsterTravelWeb.LayoutView do
             <.nav_link to="/plans" active={@active_nav == :plans}>
               <%= gettext("Plans") %>
             </.nav_link>
-            <.nav_link to="/drafts" active={@active_nav == :drafts}>
-              <%= gettext("Drafts") %>
-            </.nav_link>
-            <.nav_link to="/backpacks" active={@active_nav == :backpacks}>
-              <%= gettext("Backpacks") %>
-            </.nav_link>
+            <%= if @current_user do %>
+              <.nav_link to="/drafts" active={@active_nav == :drafts}>
+                <%= gettext("Drafts") %>
+              </.nav_link>
+              <.nav_link to="/backpacks" active={@active_nav == :backpacks}>
+                <%= gettext("Backpacks") %>
+              </.nav_link>
+            <% end %>
           </div>
         </div>
         <%= if @current_user do %>

@@ -1,10 +1,17 @@
-<.container wide class="p-6 mt-6">
-  <.subheader>
-    <%= gettext("Next travels") %>
-  </.subheader>
-  <.grid plans={@next_plans} />
-  <.subheader>
-    <%= gettext("Last travels") %>
-  </.subheader>
-  <.grid plans={@last_plans} />
-</.container>
+<%= if @current_user do %>
+  <.container wide class="p-6 mt-6">
+    <.subheader>
+      <%= gettext("Next travels") %>
+    </.subheader>
+    <.grid plans={@next_plans} />
+    <.subheader>
+      <%= gettext("Last travels") %>
+    </.subheader>
+    <.grid plans={@last_plans} />
+  </.container>
+<% else %>
+  <.container class="p-6 mt-6">
+    <h1 class="my-6 text-2xl text-black dark:text-white">Welcome to hamster travel!</h1>
+    <p>Please <a href="/users/log_in">login</a> or <a href="/users/new">register</a> to see your travels.</p>
+  </.container>
+<% end %>
