@@ -33,7 +33,9 @@ defmodule HamsterTravelWeb.LayoutView do
           </div>
         </div>
         <%= if @current_user do %>
-          <.avatar size="md" src={@current_user.avatar_url} name={@current_user.name} random_color />
+          <.nav_link to="/profile">
+            <.avatar size="md" src={@current_user.avatar_url} name={@current_user.name} random_color />
+          </.nav_link>
         <% else %>
           <.nav_link to="/users/log_in">
             <%= gettext("Log in") %>

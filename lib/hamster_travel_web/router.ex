@@ -32,6 +32,8 @@ defmodule HamsterTravelWeb.Router do
 
       live "/backpacks", Packing.IndexBackpacks
       live "/backpacks/:backpack_slug", Packing.ShowBackpack
+
+      live "/profile", Accounts.Profile
     end
   end
 
