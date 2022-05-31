@@ -2,8 +2,9 @@
   <.navbar current_user={assigns[:current_user]} active_nav={assigns[:active_nav]} active_tab={nil} mobile_menu={nil} />
 </header>
 
-<main class="container">
+<main class="pb-16 sm:pb-0 text-zinc-600 dark:text-zinc-400">
   <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
   <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
+
   <%= @inner_content %>
 </main>

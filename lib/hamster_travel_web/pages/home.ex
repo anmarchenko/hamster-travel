@@ -23,7 +23,7 @@ defmodule HamsterTravelWeb.Home do
 
   def subheader(assigns) do
     ~H"""
-    <h2 class="my-4 text-xl font-semibold text-black dark:text-white">
+    <h2 class="my-8 text-xl font-semibold text-black dark:text-white">
       <%= render_slot(@inner_block) %>
     </h2>
     """

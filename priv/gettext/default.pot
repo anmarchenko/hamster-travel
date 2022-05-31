@@ -31,7 +31,7 @@ msgid "Homepage"
 msgstr ""
 
 #, elixir-autogen, elixir-format
-#: lib/hamster_travel_web/pages/home.html.heex:3
+#: lib/hamster_travel_web/pages/home.html.heex:4
 msgid "Next travels"
 msgstr ""
 
@@ -168,11 +168,42 @@ msgid "Opening hours"
 msgstr ""
 
 #, elixir-autogen, elixir-format
-#: lib/hamster_travel_web/pages/home.html.heex:7
+#: lib/hamster_travel_web/pages/home.html.heex:8
 msgid "Last travels"
 msgstr ""
 
 #, elixir-autogen, elixir-format
+#: lib/hamster_travel_web/templates/user_session/new.html.heex:7
 #: lib/hamster_travel_web/views/layout_view.ex:39
 msgid "Log in"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+#: lib/hamster_travel_web/templates/user_session/new.html.heex:3
+msgid "Email"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+#: lib/hamster_travel_web/templates/user_session/new.html.heex:19
+msgid "Forgot your password?"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+#: lib/hamster_travel_web/controllers/user_session_controller.ex:18
+msgid "Invalid email or password"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+#: lib/hamster_travel_web/controllers/user_session_controller.ex:24
+msgid "Logged out successfully."
+msgstr ""
+
+#, elixir-autogen, elixir-format
+#: lib/hamster_travel_web/templates/user_session/new.html.heex:4
+msgid "Password"
+msgstr ""
+
+#, elixir-autogen, elixir-format
+#: lib/hamster_travel_web/templates/user_session/new.html.heex:18
+msgid "Register"
 msgstr ""

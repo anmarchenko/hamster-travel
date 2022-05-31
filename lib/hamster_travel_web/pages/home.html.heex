@@ -1,5 +1,5 @@
 <%= if @current_user do %>
-  <.container wide class="p-6 mt-6">
+  <.container wide>
     <.subheader>
       <%= gettext("Next travels") %>
     </.subheader>
@@ -10,7 +10,7 @@
     <.grid plans={@last_plans} />
   </.container>
 <% else %>
-  <.container class="p-6 mt-6">
+  <.container>
     <h1 class="my-6 text-2xl text-black dark:text-white">Welcome to hamster travel!</h1>
     <p>Please <a href="/users/log_in">login</a> or <a href="/users/new">register</a> to see your travels.</p>
   </.container>

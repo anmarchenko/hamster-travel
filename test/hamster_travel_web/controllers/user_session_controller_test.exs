@@ -11,9 +11,9 @@ defmodule HamsterTravelWeb.UserSessionControllerTest do
     test "renders log in page", %{conn: conn} do
       conn = get(conn, Routes.user_session_path(conn, :new))
       response = html_response(conn, 200)
-      assert response =~ "<h1>Log in</h1>"
-      assert response =~ "Register</a>"
-      assert response =~ "Forgot your password?</a>"
+      assert response =~ "Log in\n    \n  \n</button>"
+      assert response =~ "Register\n</a>"
+      assert response =~ "Forgot your password?\n</a>"
     end
 
     test "redirects if already logged in", %{conn: conn, user: user} do
@@ -30,20 +30,6 @@ defmodule HamsterTravelWeb.UserSessionControllerTest do
         })
 
       assert get_session(conn, :user_token)
-      assert redirected_to(conn) == "/"
-    end
-
-    test "logs the user in with remember me", %{conn: conn, user: user} do
-      conn =
-        post(conn, Routes.user_session_path(conn, :create), %{
-          "user" => %{
-            "email" => user.email,
-            "password" => valid_user_password(),
-            "remember_me" => "true"
-          }
-        })
-
-      assert conn.resp_cookies["_hamster_travel_web_user_remember_me"]
       assert redirected_to(conn) == "/"
     end
 
@@ -68,7 +54,7 @@ defmodule HamsterTravelWeb.UserSessionControllerTest do
         })
 
       response = html_response(conn, 200)
-      assert response =~ "<h1>Log in</h1>"
+      assert response =~ "Log in\n    \n  \n</button>"
       assert response =~ "Invalid email or password"
     end
   end
