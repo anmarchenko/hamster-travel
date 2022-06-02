@@ -1,20 +1,20 @@
 #, elixir-autogen, elixir-format
 #: lib/hamster_travel_web/pages/planning/index_plans.ex:15
 #: lib/hamster_travel_web/views/layout_view.ex:23
-#: lib/hamster_travel_web/views/layout_view.ex:102
+#: lib/hamster_travel_web/views/layout_view.ex:104
 msgid "Plans"
 msgstr "Путешествия"
 
 #, elixir-autogen, elixir-format
 #: lib/hamster_travel_web/pages/packing/index_backpacks.ex:16
 #: lib/hamster_travel_web/views/layout_view.ex:30
-#: lib/hamster_travel_web/views/layout_view.ex:108
+#: lib/hamster_travel_web/views/layout_view.ex:110
 msgid "Backpacks"
 msgstr "Рюкзачки"
 
 #, elixir-autogen, elixir-format
 #: lib/hamster_travel_web/pages/home.ex:17
-#: lib/hamster_travel_web/views/layout_view.ex:99
+#: lib/hamster_travel_web/views/layout_view.ex:101
 msgid "Homepage"
 msgstr "Главная"
 
@@ -53,7 +53,7 @@ msgstr "Черновик"
 #, elixir-autogen, elixir-format, fuzzy
 #: lib/hamster_travel_web/pages/planning/index_drafts.ex:15
 #: lib/hamster_travel_web/views/layout_view.ex:27
-#: lib/hamster_travel_web/views/layout_view.ex:105
+#: lib/hamster_travel_web/views/layout_view.ex:107
 msgid "Drafts"
 msgstr "Черновики"
 
@@ -84,7 +84,7 @@ msgstr "Сделать копию"
 
 #, elixir-autogen, elixir-format
 #: lib/hamster_travel_web/components/planning/tabs.ex:43
-#: lib/hamster_travel_web/views/layout_view.ex:88
+#: lib/hamster_travel_web/views/layout_view.ex:90
 msgid "Activities"
 msgstr "Впечатления"
 
@@ -94,13 +94,13 @@ msgid "Transfers and hotels"
 msgstr "Трансферы и жильё"
 
 #, elixir-autogen, elixir-format, fuzzy
-#: lib/hamster_travel_web/views/layout_view.ex:77
+#: lib/hamster_travel_web/views/layout_view.ex:79
 msgid "Back"
 msgstr "Назад"
 
 #, elixir-autogen, elixir-format, fuzzy
 #: lib/hamster_travel_web/components/planning/tab_itinerary.ex:107
-#: lib/hamster_travel_web/views/layout_view.ex:81
+#: lib/hamster_travel_web/views/layout_view.ex:83
 msgid "Transfers"
 msgstr "Трансферы"
 
@@ -163,7 +163,7 @@ msgstr "Последние путешествия"
 
 #, elixir-autogen, elixir-format
 #: lib/hamster_travel_web/templates/user_session/new.html.heex:7
-#: lib/hamster_travel_web/views/layout_view.ex:39
+#: lib/hamster_travel_web/views/layout_view.ex:41
 msgid "Log in"
 msgstr "Войти"
 
@@ -196,3 +196,13 @@ msgstr "Пароль"
 #: lib/hamster_travel_web/templates/user_session/new.html.heex:18
 msgid "Register"
 msgstr "Зарегистрироваться"
+
+#, elixir-autogen, elixir-format
+#: lib/hamster_travel_web/pages/accounts/profile.html.heex:3
+msgid "Log out"
+msgstr "Выйти"
+
+#, elixir-autogen, elixir-format
+#: lib/hamster_travel_web/pages/accounts/profile.ex:13
+msgid "My profile"
+msgstr "Мой профиль"

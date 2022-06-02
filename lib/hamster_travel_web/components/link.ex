@@ -9,7 +9,9 @@ defmodule HamsterTravelWeb.Link do
 
   def link(assigns) do
     assigns
-    |> set_attributes([label: "", inner_block: nil, link_type: "live_redirect"], required: [:to])
+    |> set_attributes([label: "", inner_block: nil, link_type: "live_redirect", method: :get],
+      required: [:to]
+    )
     |> extend_class(@default_class)
     |> render()
   end
@@ -35,6 +37,12 @@ defmodule HamsterTravelWeb.Link do
     <a href={@to} target="_blank" rel="noreferer noopener" {@heex_class}>
       <%= if @inner_block, do: render_slot(@inner_block), else: @label %>
     </a>
+    """
+  end
+
+  defp render(%{link_type: "link"} = assigns) do
+    ~H"""
+    <%= link @label, to: @to, method: @method, class: @class %>
     """
   end
 end

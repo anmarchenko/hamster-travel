@@ -1,4 +1,6 @@
 <.container>
-  <%= @current_user.name %>
-  <%# <%= link "Log out", to: Routes.user_session_path(@conn, :delete), method: :delete %>
+  <h1 class="text-xl lg:text-2xl font-semibold"><%= @current_user.name %></h1>
+  <.inline class="mt-4">
+    <.link link_type="link" to={Routes.user_session_path(HamsterTravelWeb.Endpoint, :delete)} label={gettext("Log out")} method={:delete} />
+  </.inline>
 </.container>
