@@ -4,7 +4,7 @@ defmodule HamsterTravelWeb.Accounts.Profile do
   """
   use HamsterTravelWeb, :live_view
 
-  import HamsterTravelWeb.{Container, Inline, Link}
+  import HamsterTravelWeb.{Flag, Inline, Link}
 
   @impl true
   def mount(_params, _session, socket) do

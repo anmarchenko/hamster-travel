@@ -5,11 +5,10 @@ defmodule HamsterTravelWeb.Inline do
   use HamsterTravelWeb, :component
   import PhxComponentHelpers
 
-  @default_class "flex flex-row gap-2 items-center block"
   def inline(assigns) do
     assigns
-    |> set_attributes([], required: [:inner_block])
-    |> extend_class(@default_class)
+    |> set_attributes([wrap: false], required: [:inner_block])
+    |> extend_class(&component_class/1)
     |> render()
   end
 
@@ -20,4 +19,11 @@ defmodule HamsterTravelWeb.Inline do
     </div>
     """
   end
+
+  defp component_class(assigns) do
+    "flex flex-row gap-2 items-center block #{wrap(assigns)}"
+  end
+
+  defp wrap(%{wrap: true}), do: "flex-wrap"
+  defp wrap(_), do: ""
 end
