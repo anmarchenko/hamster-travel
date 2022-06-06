@@ -198,7 +198,7 @@ msgid "Register"
 msgstr "Зарегистрироваться"
 
 #, elixir-autogen, elixir-format
-#: lib/hamster_travel_web/pages/accounts/profile.html.heex:3
+#: lib/hamster_travel_web/pages/accounts/profile.html.heex:36
 msgid "Log out"
 msgstr "Выйти"
 
@@ -206,3 +206,18 @@ msgstr "Выйти"
 #: lib/hamster_travel_web/pages/accounts/profile.ex:13
 msgid "My profile"
 msgstr "Мой профиль"
+
+#, elixir-autogen, elixir-format
+#: lib/hamster_travel_web/pages/accounts/profile.html.heex:47
+msgid "Of cities"
+msgstr "Городов"
+
+#, elixir-autogen, elixir-format
+#: lib/hamster_travel_web/pages/accounts/profile.html.heex:43
+msgid "Of countries"
+msgstr "Стран"
+
+#, elixir-autogen, elixir-format
+#: lib/hamster_travel_web/pages/accounts/profile.html.heex:51
+msgid "Of travels"
+msgstr "Путешествий"
