@@ -14,8 +14,8 @@
     <% end %>
   </.form>
 
-  <.inline class="mt-6 gap-3">
+  <%# <.inline class="mt-6 gap-3">
     <.link link_type="a" to={Routes.user_registration_path(@conn, :new)} label={gettext("Register")} /> |
     <.link link_type="a" to={Routes.user_reset_password_path(@conn, :new)} label={gettext("Forgot your password?")} />
-  </.inline>
+  </.inline> %>
 </.container>

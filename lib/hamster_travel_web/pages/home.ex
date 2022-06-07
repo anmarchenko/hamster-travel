@@ -7,6 +7,8 @@ defmodule HamsterTravelWeb.Home do
 
   import HamsterTravelWeb.Container
   import HamsterTravelWeb.Gettext
+  import HamsterTravelWeb.Header
+  import HamsterTravelWeb.Link
   import HamsterTravelWeb.Planning.Grid
 
   @impl true
