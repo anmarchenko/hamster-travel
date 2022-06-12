@@ -38,7 +38,7 @@ defmodule HamsterTravel.AccountsTest do
   describe "get_user!/1" do
     test "raises if id is invalid" do
       assert_raise Ecto.NoResultsError, fn ->
-        Accounts.get_user!(-1)
+        Accounts.get_user!("2baeb7ba-ea49-11ec-8fea-0242ac120002")
       end
     end
 
