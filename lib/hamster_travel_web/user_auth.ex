@@ -96,6 +96,15 @@ defmodule HamsterTravelWeb.UserAuth do
   def fetch_current_user(conn, _opts) do
     {user_token, conn} = ensure_user_token(conn)
     user = user_token && Accounts.get_user_by_session_token(user_token)
+
+    if user do
+      Gettext.put_locale(HamsterTravelWeb.Gettext, user.locale)
+      {:ok, _} = Cldr.put_locale(HamsterTravelWeb.Cldr, user.locale)
+    else
+      Gettext.put_locale(HamsterTravelWeb.Gettext, "en")
+      {:ok, _} = Cldr.put_locale(HamsterTravelWeb.Cldr, "en")
+    end
+
     assign(conn, :current_user, user)
   end
 

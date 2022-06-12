@@ -8,13 +8,29 @@
 </header>
 
 <main class="pb-16 sm:pb-0 text-zinc-600 dark:text-zinc-400">
-  <p class="alert alert-info" role="alert"
-    phx-click="lv:clear-flash"
-    phx-value-key="info"><%= live_flash(@flash, :info) %></p>
+  <.container nomargin>
+    <%= if live_flash(@flash, :info) do %>
+      <.alert
+        with_icon
+        color="info"
+        close_button_properties={["phx-click": "lv:clear-flash", "phx-value-key": "info"]}
+        x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 2000)"
+      >
+        <%= live_flash(@flash, :info) %>
+      </.alert>
+    <% end %>
 
-  <p class="alert alert-danger" role="alert"
-    phx-click="lv:clear-flash"
-    phx-value-key="error"><%= live_flash(@flash, :error) %></p>
+    <%= if live_flash(@flash, :error) do %>
+      <.alert
+        with_icon
+        color="danger"
+        close_button_properties={["phx-click": "lv:clear-flash", "phx-value-key": "error"]}
+        x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 2000)"
+      >
+        <%= live_flash(@flash, :error) %>
+      </.alert>
+    <% end %>
+  </.container>
 
   <%= @inner_content %>
 </main>

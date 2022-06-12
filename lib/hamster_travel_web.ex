@@ -89,6 +89,7 @@ defmodule HamsterTravelWeb do
       use Phoenix.HTML
 
       # use PETAL components
+      import PetalComponents.Alert
       import PetalComponents.Avatar
       import PetalComponents.Button
       import PetalComponents.Form
