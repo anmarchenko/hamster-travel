@@ -4,4 +4,15 @@
 
 <main class="pb-16 sm:pb-0 text-zinc-600 dark:text-zinc-400">
   <%= @inner_content %>
+  <.container nomargin form>
+    <%= if get_flash(@conn, :error) do %>
+      <.alert
+        with_icon
+        color="danger"
+        x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 2000)"
+      >
+        <%= get_flash(@conn, :error) %>
+      </.alert>
+    <% end %>
+  </.container>
 </main>
