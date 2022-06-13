@@ -10,6 +10,11 @@ defmodule HamsterTravel.PackingTest do
 
     @invalid_attrs %{days: nil, name: nil, people: nil}
 
+    setup do
+      user = HamsterTravel.AccountsFixtures.user_fixture()
+      {:ok, user: user}
+    end
+
     test "list_backpacks/0 returns all backpacks" do
       backpack = backpack_fixture()
       assert Packing.list_backpacks() == [backpack]
@@ -20,8 +25,8 @@ defmodule HamsterTravel.PackingTest do
       assert Packing.get_backpack!(backpack.id) == backpack
     end
 
-    test "create_backpack/1 with valid data creates a backpack" do
-      valid_attrs = %{days: 42, name: "some name", people: 42}
+    test "create_backpack/1 with valid data creates a backpack", %{user: user} do
+      valid_attrs = %{days: 42, name: "some name", people: 42, user_id: user.id}
 
       assert {:ok, %Backpack{} = backpack} = Packing.create_backpack(valid_attrs)
       assert backpack.days == 42

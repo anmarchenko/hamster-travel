@@ -8,7 +8,9 @@ defmodule HamsterTravel.Packing.Backpack do
     field :days, :integer
     field :name, :string
     field :people, :integer
-    field :user, :binary_id
+
+    belongs_to :user, HamsterTravel.Accounts.User
+    has_many :lists, HamsterTravel.Packing.List
 
     timestamps()
   end
@@ -16,7 +18,9 @@ defmodule HamsterTravel.Packing.Backpack do
   @doc false
   def changeset(backpack, attrs) do
     backpack
-    |> cast(attrs, [:name, :days, :people])
-    |> validate_required([:name, :days, :people])
+    |> cast(attrs, [:name, :days, :people, :user_id])
+    |> validate_required([:name, :days, :people, :user_id])
+    |> validate_number(:days, greater_than: 0)
+    |> validate_number(:people, greater_than: 0)
   end
 end

@@ -7,11 +7,11 @@ defmodule HamsterTravel.Repo.Migrations.CreateBackpacks do
       add :name, :string
       add :days, :integer
       add :people, :integer
-      add :user, references(:users, on_delete: :nothing, type: :uuid)
+      add :user_id, references(:users, on_delete: :delete_all, type: :uuid), null: false
 
       timestamps()
     end
 
-    create index(:backpacks, [:user])
+    create index(:backpacks, [:user_id])
   end
 end
