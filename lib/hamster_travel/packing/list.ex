@@ -8,6 +8,7 @@ defmodule HamsterTravel.Packing.List do
     field :name, :string
 
     belongs_to :backpack, HamsterTravel.Packing.Backpack
+    has_many :items, HamsterTravel.Packing.Item, foreign_key: :backpack_list_id
 
     timestamps()
   end

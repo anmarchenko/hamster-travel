@@ -4,9 +4,9 @@ defmodule HamsterTravel.Repo.Migrations.CreateBackpacks do
   def change do
     create table(:backpacks, primary_key: false) do
       add :id, :uuid, primary_key: true
-      add :name, :string
-      add :days, :integer
-      add :people, :integer
+      add :name, :string, null: false
+      add :days, :integer, null: false
+      add :people, :integer, null: false
       add :user_id, references(:users, on_delete: :delete_all, type: :uuid), null: false
 
       timestamps()
