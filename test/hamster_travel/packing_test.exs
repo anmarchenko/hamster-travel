@@ -32,13 +32,35 @@ defmodule HamsterTravel.PackingTest do
       assert backpack.days == 42
       assert backpack.name == "some name"
       assert backpack.people == 42
+      assert backpack.slug == "some-name"
+    end
+
+    test "create_backpack/1 slugifies cyrillic backpack names", %{user: user} do
+      valid_attrs = %{days: 42, name: "Амстердам", people: 42, user_id: user.id}
+
+      assert {:ok, %Backpack{} = backpack} = Packing.create_backpack(valid_attrs)
+      assert backpack.name == "Амстердам"
+      assert backpack.slug == "amsterdam"
+    end
+
+    test "create_backpack/1 changes slug name in case it is occupied", %{user: user} do
+      backpack = backpack_fixture(%{name: "name"})
+      valid_attrs = %{days: 42, name: backpack.name, people: 42, user_id: user.id}
+
+      assert {:ok, %Backpack{} = new_backpack} = Packing.create_backpack(valid_attrs)
+      assert new_backpack.name == "name"
+      assert new_backpack.slug == "name-1"
+
+      assert {:ok, %Backpack{} = newer_backpack} = Packing.create_backpack(valid_attrs)
+      assert newer_backpack.name == "name"
+      assert newer_backpack.slug == "name-2"
     end
 
     test "create_backpack/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Packing.create_backpack(@invalid_attrs)
     end
 
-    test "update_backpack/2 with valid data updates the backpack" do
+    test "update_backpack/2 with valid data updates the backpack and the slug" do
       backpack = backpack_fixture()
       update_attrs = %{days: 43, name: "some updated name", people: 43}
 
@@ -46,6 +68,17 @@ defmodule HamsterTravel.PackingTest do
       assert backpack.days == 43
       assert backpack.name == "some updated name"
       assert backpack.people == 43
+      assert backpack.slug == "some-updated-name"
+    end
+
+    test "update_backpack/2 when there is slug collision finds valid slug" do
+      backpack_fixture(%{name: "some name"})
+      backpack = backpack_fixture(%{name: "name"})
+      update_attrs = %{days: 43, name: "some name", people: 43}
+
+      assert {:ok, %Backpack{} = backpack} = Packing.update_backpack(backpack, update_attrs)
+      assert backpack.name == "some name"
+      assert backpack.slug == "some-name-1"
     end
 
     test "update_backpack/2 with invalid data returns error changeset" do

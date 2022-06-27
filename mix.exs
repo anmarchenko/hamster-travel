@@ -48,6 +48,7 @@ defmodule HamsterTravel.MixProject do
       {:phoenix_ecto, "~> 4.4"},
       {:ecto_sql, "~> 3.6"},
       {:postgrex, ">= 0.0.0"},
+      {:ecto_autoslug_field, "~> 3.0"},
 
       # frontend
       {:petal_components, "~> 0.16"},
