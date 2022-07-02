@@ -69,6 +69,12 @@ defmodule HamsterTravel.MixProject do
       # json
       {:jason, "~> 1.2"},
 
+      # yaml
+      {:yaml_elixir, "~> 2.9"},
+
+      # math
+      {:abacus, "~> 2.0"},
+
       # locale info, dates and money formatting
       {:ex_cldr, "~> 2.23"},
       {:ex_cldr_dates_times, "~> 2.0"},

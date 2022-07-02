@@ -1,0 +1,25 @@
+backpack:
+  - name: Гигиена
+    items:
+      - name: Гель для рук
+        count: 1
+      - name: Влажные салфетки
+        count: 1
+      - name: Зубная паста
+        count: 2
+      - name: Зубная щетка
+        count: '2 * ppl - 1'
+      - name: Крем от загара
+        count: 'days * 2 + 1'
+  - name: С собой
+    items:
+      - name: Паспорта
+        count: 3
+      - name: Страховки
+        count: 3
+  - name: Одежда
+    items:
+      - name: Трусы Андрей
+        count: 'days'
+      - name: Трусы Юля
+        count: 'days'

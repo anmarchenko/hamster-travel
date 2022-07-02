@@ -1,0 +1,16 @@
+backpack:
+  - name: Hygiene
+    items:
+      - name: Napkins
+        count: 1
+      - name: Toothpaste
+        count: '2 * ppl - 1'
+      - name: Toothbrush
+        count: 'days * 2 + 1'
+  - name: Docs
+    items:
+      - name: Passports
+        count: 3
+      - name: Insurance
+        count: 3
+  - name: Clothes

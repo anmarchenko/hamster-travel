@@ -65,7 +65,11 @@ defmodule HamsterTravel.Packing do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_backpack(attrs \\ %{}) do
+  def create_backpack(attrs \\ %{}, _template \\ nil) do
+    # 1. validate changeset
+    # 2. return if invalid
+    # 3. parse template
+    # 4. insert with cast_assoc
     %Backpack{}
     |> Backpack.changeset(attrs)
     |> Repo.insert()
