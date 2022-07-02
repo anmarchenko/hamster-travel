@@ -11,12 +11,7 @@ defmodule HamsterTravel.Packing.Backpack.NameSlug do
   end
 
   defp ensure_unique_slug(slug, attempts) do
-    slug_to_try =
-      if attempts == 0 do
-        slug
-      else
-        "#{slug}-#{attempts}"
-      end
+    slug_to_try = next_slug(slug, attempts)
 
     if Repo.exists?(from b in Backpack, where: b.slug == ^slug_to_try) do
       ensure_unique_slug(slug, attempts + 1)
@@ -24,6 +19,9 @@ defmodule HamsterTravel.Packing.Backpack.NameSlug do
       slug_to_try
     end
   end
+
+  defp next_slug(slug, 0), do: slug
+  defp next_slug(slug, attempts), do: "#{slug}-#{attempts}"
 end
 
 defmodule HamsterTravel.Packing.Backpack do

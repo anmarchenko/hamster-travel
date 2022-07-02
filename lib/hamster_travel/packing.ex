@@ -28,14 +28,30 @@ defmodule HamsterTravel.Packing do
 
   ## Examples
 
-      iex> get_backpack!(123)
+      iex> get_backpack!("32432-fdfgfd43")
+      %Backpack{}
+
+      iex> get_backpack!("fdfdfgfd-4343-fgdgfd-543")
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_backpack!(id), do: Repo.get!(Backpack, id)
+
+  @doc """
+  Gets a single backpack by slug.
+
+  Raises `Ecto.NoResultsError` if the Backpack does not exist.
+
+  ## Examples
+
+      iex> get_backpack_by_slug!(123)
       %Backpack{}
 
       iex> get_backpack!(456)
       ** (Ecto.NoResultsError)
 
   """
-  def get_backpack!(id), do: Repo.get!(Backpack, id)
+  def get_backpack_by_slug!(slug), do: Repo.get_by!(Backpack, slug: slug)
 
   @doc """
   Creates a backpack.

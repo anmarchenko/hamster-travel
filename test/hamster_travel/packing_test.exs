@@ -25,6 +25,11 @@ defmodule HamsterTravel.PackingTest do
       assert Packing.get_backpack!(backpack.id) == backpack
     end
 
+    test "get_backpack_by_slug!/1 returns the backpack with given slug" do
+      backpack = backpack_fixture()
+      assert Packing.get_backpack_by_slug!(backpack.slug) == backpack
+    end
+
     test "create_backpack/1 with valid data creates a backpack", %{user: user} do
       valid_attrs = %{days: 42, name: "some name", people: 42, user_id: user.id}
 
