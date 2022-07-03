@@ -28,12 +28,14 @@ defmodule HamsterTravel.Packing.Template do
           }
         end)
 
-      {:error, _} = error_tuple ->
-        error_tuple
+      {:error, %{message: message}} ->
+        {:error, [message]}
 
-      re ->
-        IO.puts(re)
-        {:error, "invalid template format"}
+      {:error, error} when is_binary(error) ->
+        {:error, [error]}
+
+      _ ->
+        {:error, ["invalid template format"]}
     end
   end
 
