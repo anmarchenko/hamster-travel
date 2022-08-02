@@ -39,6 +39,12 @@ defmodule HamsterTravel.Packing.Template do
     end
   end
 
+  defp parse_items(nil), do: []
+  defp parse_items([]), do: []
+
+  defp parse_items(items) when is_list(items) do
+  end
+
   defp calculate_count(nil, _), do: 1
   defp calculate_count(count, _) when is_integer(count), do: count
 
