@@ -8,7 +8,7 @@ defmodule HamsterTravelWeb.Flag do
   def flag(assigns) do
     assigns
     |> set_attributes([], required: [:country, :size])
-    |> extend_class("")
+    |> extend_class("", prefix_replace: false)
     |> render()
   end
 

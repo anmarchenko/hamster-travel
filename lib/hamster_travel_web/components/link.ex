@@ -12,7 +12,7 @@ defmodule HamsterTravelWeb.Link do
     |> set_attributes([label: "", inner_block: nil, link_type: "live_redirect", method: :get],
       required: [:to]
     )
-    |> extend_class(@default_class)
+    |> extend_class(@default_class, prefix_replace: false)
     |> render()
   end
 
@@ -42,7 +42,7 @@ defmodule HamsterTravelWeb.Link do
 
   defp render(%{link_type: "link"} = assigns) do
     ~H"""
-    <%= link @label, to: @to, method: @method, class: @class %>
+    <%= link(@label, to: @to, method: @method, class: @class) %>
     """
   end
 end

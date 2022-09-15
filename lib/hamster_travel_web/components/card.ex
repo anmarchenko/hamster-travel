@@ -10,7 +10,7 @@ defmodule HamsterTravelWeb.Card do
   def card(assigns) do
     assigns
     |> set_attributes([], required: [:inner_block])
-    |> extend_class(@default_class)
+    |> extend_class(@default_class, prefix_replace: false)
     |> render()
   end
 

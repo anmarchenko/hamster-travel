@@ -1,4 +1,4 @@
-<.container class="mt-4">
+<.container class="!mt-* mt-4">
   <div class="flex flex-col gap-y-4">
     <.header><%= @backpack.name %></.header>
     <.inline class="gap-4">
@@ -18,7 +18,7 @@
   </div>
 </.container>
 
-<.container class="mt-0">
+<.container class="!mt-* mt-0">
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     <%= for items_list <- @backpack.packing_lists do %>
       <.live_component module={ItemsList} id={"packing-list-#{items_list.id}"} list={items_list} />

@@ -7,7 +7,7 @@ defmodule HamsterTravelWeb.Icons.Taxi do
 
   def taxi(assigns) do
     assigns
-    |> extend_class("")
+    |> extend_class("", prefix_replace: false)
     |> render()
   end
 

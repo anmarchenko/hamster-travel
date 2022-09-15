@@ -13,7 +13,7 @@ defmodule HamsterTravelWeb.Planning.PlanShorts do
   def plan_shorts(assigns) do
     assigns
     |> set_attributes([icon_class: ""], required: [:plan])
-    |> extend_class(@default_class)
+    |> extend_class(@default_class, prefix_replace: false)
     |> render()
   end
 

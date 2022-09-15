@@ -10,15 +10,13 @@ defmodule HamsterTravelWeb.Header do
   def header(assigns) do
     assigns
     |> set_attributes([], required: [:inner_block])
-    |> extend_class(@default_class)
+    |> extend_class(@default_class, prefix_replace: false)
     |> render()
   end
 
   defp render(assigns) do
     ~H"""
-    <h1
-      {@heex_class}
-    >
+    <h1 {@heex_class}>
       <%= render_slot(@inner_block) %>
     </h1>
     """

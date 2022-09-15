@@ -14,7 +14,7 @@ defmodule HamsterTravelWeb.Planning.Tabs do
   def plan_tabs(assigns) do
     assigns
     |> set_attributes([], required: [:plan, :active_tab])
-    |> extend_class(@default_class)
+    |> extend_class(@default_class, prefix_replace: false)
     |> render()
   end
 

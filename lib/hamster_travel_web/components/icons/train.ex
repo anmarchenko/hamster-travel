@@ -7,7 +7,7 @@ defmodule HamsterTravelWeb.Icons.Train do
 
   def train(assigns) do
     assigns
-    |> extend_class("")
+    |> extend_class("", prefix_replace: false)
     |> render()
   end
 

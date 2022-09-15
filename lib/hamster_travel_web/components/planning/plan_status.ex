@@ -14,7 +14,7 @@ defmodule HamsterTravelWeb.Planning.PlanStatus do
   def plan_status(assigns) do
     assigns
     |> set_attributes([flags_limit: 100], required: [:plan])
-    |> extend_class(@default_class)
+    |> extend_class(@default_class, prefix_replace: false)
     |> render()
   end
 

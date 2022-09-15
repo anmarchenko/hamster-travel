@@ -8,7 +8,7 @@ defmodule HamsterTravelWeb.Planning.StatusBadge do
   def status_badge(assigns) do
     assigns
     |> set_attributes([], required: [:status])
-    |> extend_class(&component_class/1)
+    |> extend_class(&component_class/1, prefix_replace: false)
     |> render()
   end
 

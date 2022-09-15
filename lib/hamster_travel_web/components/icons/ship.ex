@@ -7,7 +7,7 @@ defmodule HamsterTravelWeb.Icons.Ship do
 
   def ship(assigns) do
     assigns
-    |> extend_class("")
+    |> extend_class("", prefix_replace: false)
     |> render()
   end
 

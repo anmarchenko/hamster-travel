@@ -7,7 +7,7 @@ defmodule HamsterTravelWeb.Icons.HomeSimple do
 
   def home_simple(assigns) do
     assigns
-    |> extend_class("")
+    |> extend_class("", prefix_replace: false)
     |> render()
   end
 

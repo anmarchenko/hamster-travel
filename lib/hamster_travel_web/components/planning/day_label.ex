@@ -8,7 +8,7 @@ defmodule HamsterTravelWeb.Planning.DayLabel do
   def day_label(assigns) do
     assigns
     |> set_attributes([start_date: nil], required: [:index])
-    |> extend_class("")
+    |> extend_class("", prefix_replace: false)
     |> render()
   end
 

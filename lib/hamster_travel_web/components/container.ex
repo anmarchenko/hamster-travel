@@ -8,7 +8,7 @@ defmodule HamsterTravelWeb.Container do
   def container(assigns) do
     assigns
     |> set_attributes([wide: false, form: false, nomargin: false], required: [:inner_block])
-    |> extend_class(&component_class/1)
+    |> extend_class(&component_class/1, prefix_replace: false)
     |> render()
   end
 
@@ -21,7 +21,7 @@ defmodule HamsterTravelWeb.Container do
   end
 
   defp component_class(assigns) do
-    "mx-auto max-w-screen-md #{margins(assigns)}  #{width(assigns)}"
+    "mx-auto max-w-screen-md #{margins(assigns)} #{width(assigns)}"
   end
 
   defp margins(%{nomargin: true}), do: ""

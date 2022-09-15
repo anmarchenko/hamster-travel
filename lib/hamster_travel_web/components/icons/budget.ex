@@ -7,7 +7,7 @@ defmodule HamsterTravelWeb.Icons.Budget do
 
   def budget(assigns) do
     assigns
-    |> extend_class("")
+    |> extend_class("", prefix_replace: false)
     |> render()
   end
 

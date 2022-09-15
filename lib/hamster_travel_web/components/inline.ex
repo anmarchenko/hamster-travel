@@ -8,7 +8,7 @@ defmodule HamsterTravelWeb.Inline do
   def inline(assigns) do
     assigns
     |> set_attributes([wrap: false], required: [:inner_block])
-    |> extend_class(&component_class/1)
+    |> extend_class(&component_class/1, prefix_replace: false)
     |> render()
   end
 
