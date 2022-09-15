@@ -6,30 +6,37 @@ defmodule HamsterTravel.Packing.TemplateTest do
   alias HamsterTravel.Packing.Template
 
   test "it parses a template and returns a list of backpack lists" do
-    assert [
-             %List{
-               name: "Hygiene",
-               items: [
-                 %Item{
-                   name: "Napkins",
-                   count: 2
-                 },
-                 %Item{
-                   name: "Toothpaste",
-                   count: 3
-                 },
-                 %Item{
-                   name: "Toothbrush",
-                   count: 7
-                 }
-               ]
-             },
-             %List{
-               name: "Docs",
-               items: [%Item{name: "Passports", count: 2}, %Item{name: "Insurance", count: 3}]
-             },
-             %List{name: "Clothes"}
-           ] = Template.execute("test", %{days: 3, people: 2})
+    assert {:ok,
+            [
+              %List{
+                name: "Hygiene",
+                items: [
+                  %Item{
+                    name: "Napkins",
+                    count: 2
+                  },
+                  %Item{
+                    name: "Toothpaste",
+                    count: 3
+                  },
+                  %Item{
+                    name: "Toothbrush",
+                    count: 7
+                  }
+                ]
+              },
+              %List{
+                name: "Docs",
+                items: [%Item{name: "Passports", count: 2}, %Item{name: "Insurance", count: 3}]
+              },
+              %List{name: "Clothes"}
+            ]} = Template.execute("test", %{days: 3, people: 2})
+  end
+
+  test "it parses predefined templates" do
+    assert {:ok, _} = Template.execute("hamsters", %{days: 3, people: 2})
+    assert {:ok, _} = Template.execute("common_en", %{days: 3, people: 2})
+    assert {:ok, _} = Template.execute("common_ru", %{days: 3, people: 2})
   end
 
   test "when file does not exists it returns an error" do
@@ -43,7 +50,18 @@ defmodule HamsterTravel.Packing.TemplateTest do
     assert {:error, ["invalid template format"]} = Template.execute("test_not_yaml")
   end
 
-  test "when file does not cotnain a single root list backpack it returns an error" do
+  test "when file does not contain a single root list backpack it returns an error" do
     assert {:error, ["invalid template format"]} = Template.execute("test_invalid_format")
+  end
+
+  test "when file has several expression errors" do
+    assert {:error,
+            [
+              "undefined function var0/0 (there is no such import)",
+              "undefined function var0/0 (there is no such import)",
+              "undefined function var0/0 (there is no such import)",
+              "syntax error before: ",
+              "syntax error before: '+'"
+            ]} = Template.execute("test_invalid_expression")
   end
 end
