@@ -9,6 +9,7 @@ defmodule HamsterTravelWeb.UserAuth do
 
   alias HamsterTravel.Accounts
   alias HamsterTravelWeb.Router.Helpers, as: Routes
+  alias Phoenix.Component
   alias Phoenix.LiveView
 
   def on_mount(:set_current_user, _params, session, socket) do
@@ -16,11 +17,11 @@ defmodule HamsterTravelWeb.UserAuth do
       %{"user_token" => user_token} ->
         user = Accounts.get_user_by_session_token(user_token)
         set_locale(user.locale)
-        {:cont, LiveView.assign_new(socket, :current_user, fn -> user end)}
+        {:cont, Component.assign_new(socket, :current_user, fn -> user end)}
 
       %{} ->
         set_locale("en")
-        {:cont, LiveView.assign(socket, :current_user, nil)}
+        {:cont, Component.assign(socket, :current_user, nil)}
     end
   end
 
@@ -30,7 +31,7 @@ defmodule HamsterTravelWeb.UserAuth do
         user = Accounts.get_user_by_session_token(user_token)
 
         set_locale(user.locale)
-        {:cont, LiveView.assign_new(socket, :current_user, fn -> user end)}
+        {:cont, Component.assign_new(socket, :current_user, fn -> user end)}
 
       %{} ->
         set_locale("en")

@@ -23,7 +23,7 @@ defmodule HamsterTravelWeb.ExternalLink do
     uri = URI.parse(assigns[:link])
 
     ~H"""
-    <.link to={@link} link_type="a" label={uri.host} />
+    <.a to={@link} link_type="a" label={uri.host} />
     """
   end
 end

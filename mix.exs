@@ -10,7 +10,10 @@ defmodule HamsterTravel.MixProject do
       compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      elixirc_options: [
+        warnings_as_errors: true
+      ]
     ]
   end
 
@@ -37,8 +40,8 @@ defmodule HamsterTravel.MixProject do
       {:phoenix, "~> 1.6.0"},
       {:phoenix_html, "~> 3.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 0.17.0"},
-      {:phoenix_live_dashboard, "~> 0.5"},
+      {:phoenix_live_view, "~> 0.18.0"},
+      {:phoenix_live_dashboard, "~> 0.7.0"},
       {:plug_cowboy, "~> 2.5"},
 
       # password hashing
@@ -51,8 +54,8 @@ defmodule HamsterTravel.MixProject do
       {:ecto_autoslug_field, "~> 3.0"},
 
       # frontend
-      {:petal_components, "~> 0.16"},
-      {:phx_component_helpers, "~> 1.1"},
+      {:petal_components, "~> 0.18.0"},
+      {:phx_component_helpers, "~> 1.2.0"},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
 

@@ -12,11 +12,11 @@ defmodule HamsterTravelWeb.LayoutView do
   def navbar(assigns) do
     ~H"""
     <div class="mx-auto max-w-screen-md xl:max-w-screen-lg 2xl:max-w-screen-xl px-6 h-20 flex items-center justify-between">
-      <%= live_redirect to: "/" do %>
+      <.link href="/">
         <h1 class="font-medium dark:text-white">
           Hamster Travel
         </h1>
-      <% end %>
+      </.link>
       <nav class="space-x-6 flex items-center">
         <div class="hidden sm:block">
           <div class="space-x-6 flex items-center">
@@ -118,9 +118,9 @@ defmodule HamsterTravelWeb.LayoutView do
     color = color_classes(assigns)
 
     ~H"""
-    <%= live_redirect to: @to, class: "text-sm #{color}" do %>
+    <.link href={@to} class="text-sm #{color}">
       <%= render_slot(@inner_block) %>
-    <% end %>
+    </.link>
     """
   end
 
@@ -128,10 +128,10 @@ defmodule HamsterTravelWeb.LayoutView do
     color = color_classes(assigns)
 
     ~H"""
-    <%= live_redirect to: @to, class: "#{mobile_nav_classes()} #{color}" do %>
+    <.link href={@to} class="#{mobile_nav_classes()} #{color}">
       <%= render_slot(@inner_block) %>
       <.mobile_nav_label label={@label} />
-    <% end %>
+    </.link>
     """
   end
 
@@ -139,10 +139,10 @@ defmodule HamsterTravelWeb.LayoutView do
     color = color_classes(assigns)
 
     ~H"""
-    <%= live_patch to: @to, class: "#{mobile_nav_classes()} #{color}" do %>
+    <.link patch={@to} class="#{mobile_nav_classes()} #{color}">
       <%= render_slot(@inner_block) %>
       <.mobile_nav_label label={@label} />
-    <% end %>
+    </.link>
     """
   end
 

@@ -7,7 +7,7 @@ defmodule HamsterTravelWeb.Link do
 
   @default_class "underline text-indigo-500 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-100"
 
-  def link(assigns) do
+  def a(assigns) do
     assigns
     |> set_attributes([label: "", inner_block: nil, link_type: "live_redirect", method: :get],
       required: [:to]

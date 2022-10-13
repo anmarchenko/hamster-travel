@@ -6,10 +6,10 @@
       </.header>
       <.plan_shorts plan={@plan} />
       <.inline class="gap-3 text-xs sm:text-base">
-        <.link to={plan_url(@plan.slug, :edit)} label={gettext("Edit plan")} />
-        <.link to={plan_url(@plan.slug, :copy)} label={gettext("Make a copy")} />
-        <.link to={plan_url(@plan.slug, :pdf)} label={gettext("Export as PDF")} />
-        <.link to={plan_url(@plan.slug, :delete)} label={gettext("Delete")} />
+        <.a to={plan_url(@plan.slug, :edit)} label={gettext("Edit plan")} />
+        <.a to={plan_url(@plan.slug, :copy)} label={gettext("Make a copy")} />
+        <.a to={plan_url(@plan.slug, :pdf)} label={gettext("Export as PDF")} />
+        <.a to={plan_url(@plan.slug, :delete)} label={gettext("Delete")} />
       </.inline>
       <.plan_status plan={@plan} />
     </div>
