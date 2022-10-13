@@ -32,58 +32,42 @@ defmodule HamsterTravelWeb.Planning.TabItinerary do
     {:ok, assign(socket, assigns)}
   end
 
-  def places(%{places: places, day_index: day_index} = assigns) do
-    places_for_day = HamsterTravel.filter_places_by_day(places, day_index)
-
+  def transfers(%{transfers: []} = assigns) do
     ~H"""
-    <.places_list places={places_for_day} day_index={day_index} />
+    <.secondary class="sm:hidden">
+      <%= gettext("No transfers planned for this day") %>
+    </.secondary>
     """
   end
 
-  def transfers(%{transfers: transfers, day_index: day_index} = assigns) do
-    case HamsterTravel.filter_transfers_by_day(transfers, day_index) do
-      [] ->
-        ~H"""
-        <.secondary class="sm:hidden">
-          <%= gettext("No transfers planned for this day") %>
-        </.secondary>
-        """
-
-      transfers_for_day ->
-        ~H"""
-        <%= for transfer <- transfers_for_day  do %>
-          <.live_component
-            module={Transfer}
-            id={"transfers-#{transfer.id}-day-#{day_index}"}
-            transfer={transfer}
-            day_index={day_index}
-          />
-        <% end %>
-        """
-    end
+  def transfers(assigns) do
+    ~H"""
+    <.live_component
+      :for={transfer <- @transfers}
+      module={Transfer}
+      id={"transfers-#{transfer.id}-day-#{@day_index}"}
+      transfer={transfer}
+    />
+    """
   end
 
-  def hotels(%{hotels: hotels, day_index: day_index} = assigns) do
-    case HamsterTravel.filter_hotels_by_day(hotels, day_index) do
-      [] ->
-        ~H"""
-        <.secondary class="sm:hidden">
-          <%= gettext("No hotels for this day") %>
-        </.secondary>
-        """
+  def hotels(%{hotels: []} = assigns) do
+    ~H"""
+    <.secondary class="sm:hidden">
+      <%= gettext("No hotels for this day") %>
+    </.secondary>
+    """
+  end
 
-      hotels_for_day ->
-        ~H"""
-        <%= for hotel <- hotels_for_day  do %>
-          <.live_component
-            module={Hotel}
-            id={"hotels-#{hotel.id}-day-#{day_index}"}
-            hotel={hotel}
-            day_index={day_index}
-          />
-        <% end %>
-        """
-    end
+  def hotels(assigns) do
+    ~H"""
+    <.live_component
+      :for={hotel <- @hotels}
+      module={Hotel}
+      id={"hotels-#{hotel.id}-day-#{@day_index}"}
+      hotel={hotel}
+    />
+    """
   end
 
   def render(assigns) do
@@ -110,28 +94,32 @@ defmodule HamsterTravelWeb.Planning.TabItinerary do
           </tr>
         </thead>
         <tbody>
-          <%= for i <- 0..@plan.duration-1 do %>
-            <tr class="flex flex-col gap-y-6 mt-10 sm:table-row sm:gap-y-0 sm:mt-0">
-              <td class="text-xl font-bold sm:font-normal sm:text-base sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
-                <.day_label index={i} start_date={@plan.start_date} />
-              </td>
-              <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
-                <div class="flex flex-col gap-y-2">
-                  <.places places={@places} day_index={i} />
-                </div>
-              </td>
-              <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
-                <div class="flex flex-col gap-y-8">
-                  <.transfers transfers={@transfers} day_index={i} />
-                </div>
-              </td>
-              <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
-                <div class="flex flex-col gap-y-8">
-                  <.hotels hotels={@hotels} day_index={i} />
-                </div>
-              </td>
-            </tr>
-          <% end %>
+          <tr
+            :for={i <- 0..(@plan.duration - 1)}
+            class="flex flex-col gap-y-6 mt-10 sm:table-row sm:gap-y-0 sm:mt-0"
+          >
+            <td class="text-xl font-bold sm:font-normal sm:text-base sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
+              <.day_label day_index={i} start_date={@plan.start_date} />
+            </td>
+            <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
+              <div class="flex flex-col gap-y-2">
+                <.places_list places={HamsterTravel.filter_places_by_day(@places, i)} day_index={i} />
+              </div>
+            </td>
+            <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
+              <div class="flex flex-col gap-y-8">
+                <.transfers
+                  transfers={HamsterTravel.filter_transfers_by_day(@transfers, i)}
+                  day_index={i}
+                />
+              </div>
+            </td>
+            <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
+              <div class="flex flex-col gap-y-8">
+                <.hotels hotels={HamsterTravel.filter_hotels_by_day(@hotels, i)} day_index={i} />
+              </div>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>

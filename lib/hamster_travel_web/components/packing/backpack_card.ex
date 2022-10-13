@@ -15,16 +15,14 @@ defmodule HamsterTravelWeb.Packing.BackpackCard do
     |> render()
   end
 
-  defp render(%{backpack: %{slug: slug}} = assigns) do
-    link = backpack_url(slug)
-
+  defp render(assigns) do
     ~H"""
     <.card>
       <div class="p-4 flex flex-col gap-y-4">
         <p class="text-base font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
-          <%= live_redirect to: link do %>
+          <.link navigate={backpack_url(@backpack.slug)}>
             <%= @backpack.name %>
-          <% end %>
+          </.link>
         </p>
 
         <.secondary tag="div" italic={false}>

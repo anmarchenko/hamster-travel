@@ -69,15 +69,8 @@ defmodule HamsterTravelWeb.LayoutView do
   end
 
   def mobile_nav_plan_tabs(assigns) do
-    back_url =
-      if assigns.active_nav == :plans do
-        "/plans"
-      else
-        "/drafts"
-      end
-
     ~H"""
-    <.mobile_nav_link label={gettext("Back")} to={back_url} active={false}>
+    <.mobile_nav_link label={gettext("Back")} to={back_url(assigns)} active={false}>
       <Heroicons.Outline.arrow_left />
     </.mobile_nav_link>
     <.mobile_nav_link_tab
@@ -115,20 +108,16 @@ defmodule HamsterTravelWeb.LayoutView do
   end
 
   def nav_link(assigns) do
-    color = color_classes(assigns)
-
     ~H"""
-    <.link href={@to} class="text-sm #{color}">
+    <.link navigate={@to} class={"text-sm #{color_classes(assigns)}"}>
       <%= render_slot(@inner_block) %>
     </.link>
     """
   end
 
   def mobile_nav_link(assigns) do
-    color = color_classes(assigns)
-
     ~H"""
-    <.link href={@to} class="#{mobile_nav_classes()} #{color}">
+    <.link navigate={@to} class={"#{mobile_nav_classes()} #{color_classes(assigns)}"}>
       <%= render_slot(@inner_block) %>
       <.mobile_nav_label label={@label} />
     </.link>
@@ -136,10 +125,8 @@ defmodule HamsterTravelWeb.LayoutView do
   end
 
   def mobile_nav_link_tab(assigns) do
-    color = color_classes(assigns)
-
     ~H"""
-    <.link patch={@to} class="#{mobile_nav_classes()} #{color}">
+    <.link patch={@to} class={"#{mobile_nav_classes()} #{color_classes(assigns)}"}>
       <%= render_slot(@inner_block) %>
       <.mobile_nav_label label={@label} />
     </.link>
@@ -161,4 +148,12 @@ defmodule HamsterTravelWeb.LayoutView do
 
   def inactive_class,
     do: "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+
+  def back_url(assigns) do
+    if assigns.active_nav == :plans do
+      "/plans"
+    else
+      "/drafts"
+    end
+  end
 end

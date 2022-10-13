@@ -15,21 +15,19 @@ defmodule HamsterTravelWeb.Planning.PlanCard do
     |> render()
   end
 
-  defp render(%{plan: %{slug: slug}} = assigns) do
-    link = plan_url(slug)
-
+  defp render(assigns) do
     ~H"""
     <.card>
       <div class="shrink-0">
-        <%= live_redirect to: link do %>
+        <.link navigate={plan_url(@plan.slug)}>
           <img src={@plan.cover} class="w-32 h-32 object-cover object-center rounded-l-lg" />
-        <% end %>
+        </.link>
       </div>
       <div class="p-4 max-w-[calc(100%_-_theme(width.32))] flex flex-col justify-between">
         <p class="text-base font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
-          <%= live_redirect to: link do %>
+          <.link navigate={plan_url(@plan.slug)}>
             <%= @plan.name %>
-          <% end %>
+          </.link>
         </p>
         <.secondary tag="div" italic={false} class="font-light">
           <.plan_shorts plan={@plan} class="text-sm sm:text-base" icon_class="hidden sm:block" />

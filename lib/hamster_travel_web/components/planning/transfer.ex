@@ -24,38 +24,38 @@ defmodule HamsterTravelWeb.Planning.Transfer do
     """
   end
 
-  def render(%{edit: false, transfer: transfer} = assigns) do
+  def render(%{edit: false} = assigns) do
     ~H"""
     <div class="flex flex-col gap-y-1">
       <.inline class="text-zinc-400 dark:text-zinc-500">
-        <.transfer_icon type={transfer.type} />
-        <%= transfer.vehicle_id %>
-        <%= transfer.company %>
+        <.transfer_icon type={@transfer.type} />
+        <%= @transfer.vehicle_id %>
+        <%= @transfer.company %>
         <.budget />
-        <%= Formatter.format_money(transfer.price, transfer.price_currency) %>
+        <%= Formatter.format_money(@transfer.price, @transfer.price_currency) %>
       </.inline>
       <div class="flex flex-row text-lg mt-2">
         <div class="flex flex-col gap-y-2 pr-6 border-r-2 font-medium">
-          <div><%= transfer.time_from %></div>
-          <div><%= transfer.time_to %></div>
+          <div><%= @transfer.time_from %></div>
+          <div><%= @transfer.time_to %></div>
         </div>
         <div class="flex flex-col pl-6 gap-y-2">
           <div>
-            <%= transfer.city_from.name %>
-            <.station station={transfer.station_from} />
+            <%= @transfer.city_from.name %>
+            <.station station={@transfer.station_from} />
           </div>
           <div>
-            <%= transfer.city_to.name %>
-            <.station station={transfer.station_to} />
+            <%= @transfer.city_to.name %>
+            <.station station={@transfer.station_to} />
           </div>
         </div>
       </div>
 
       <.secondary>
-        <%= transfer.comment %>
+        <%= @transfer.comment %>
       </.secondary>
 
-      <.external_links links={transfer.links} />
+      <.external_links links={@transfer.links} />
     </div>
     """
   end

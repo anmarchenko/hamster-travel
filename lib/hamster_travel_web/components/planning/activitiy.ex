@@ -23,7 +23,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
     """
   end
 
-  def render(%{edit: false, activity: activity, index: index} = assigns) do
+  def render(%{edit: false} = assigns) do
     ~H"""
     <div
       class="flex flex-col gap-y-1 py-1 sm:ml-[-1.5rem] sm:pl-[1.5rem] sm:hover:bg-zinc-100 sm:dark:hover:bg-zinc-700"
@@ -31,12 +31,12 @@ defmodule HamsterTravelWeb.Planning.Activity do
       @mouseover="showButtons = true"
       @mouseleave="showButtons = false"
     >
-      <.inline class={"2xl:text-lg #{activity_font(activity.priority)}"}>
+      <.inline class={"2xl:text-lg #{activity_font(@activity.priority)}"}>
         <span class="cursor-pointer" @click="showContent = !showContent">
-          <%= "#{index + 1}." %>
-          <%= activity.name %>
+          <%= "#{@index + 1}." %>
+          <%= @activity.name %>
         </span>
-        <%= Formatter.format_money(activity.price, activity.price_currency) %>
+        <%= Formatter.format_money(@activity.price, @activity.price_currency) %>
         <.activity_button>
           <Heroicons.Outline.pencil class="h-4 w-4" />
         </.activity_button>
@@ -50,11 +50,11 @@ defmodule HamsterTravelWeb.Planning.Activity do
         x-transition.duration.300ms.opacity
         x-cloak
       >
-        <.external_link link={activity.link} />
-        <.activity_feature label={gettext("Address")} value={activity.address} />
-        <.activity_feature label={gettext("Opening hours")} value={activity.operation_times} />
+        <.external_link link={@activity.link} />
+        <.activity_feature label={gettext("Address")} value={@activity.address} />
+        <.activity_feature label={gettext("Opening hours")} value={@activity.operation_times} />
         <div class="max-w-prose whitespace-pre-line text-justify text-sm">
-          <%= activity.comment %>
+          <%= @activity.comment %>
         </div>
       </div>
     </div>
@@ -71,10 +71,10 @@ defmodule HamsterTravelWeb.Planning.Activity do
     """
   end
 
-  defp activity_feature(%{value: value, label: label} = assigns) do
+  defp activity_feature(assigns) do
     ~H"""
     <.secondary class="max-w-prose">
-      <%= label %>: <%= value %>
+      <%= @label %>: <%= @value %>
     </.secondary>
     """
   end

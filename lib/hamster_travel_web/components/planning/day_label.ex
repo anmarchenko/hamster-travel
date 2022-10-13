@@ -7,20 +7,20 @@ defmodule HamsterTravelWeb.Planning.DayLabel do
 
   def day_label(assigns) do
     assigns
-    |> set_attributes([start_date: nil], required: [:index])
+    |> set_attributes([start_date: nil], required: [:day_index])
     |> extend_class("", prefix_replace: false)
     |> render()
   end
 
-  defp render(%{index: index, start_date: nil} = assigns) do
+  defp render(%{start_date: nil} = assigns) do
     ~H"""
-    <%= gettext("Day") %> <%= index + 1 %>
+    <%= gettext("Day") %> <%= @day_index + 1 %>
     """
   end
 
-  defp render(%{start_date: start_date, index: index} = assigns) do
+  defp render(assigns) do
     ~H"""
-    <%= Formatter.date_with_weekday(Date.add(start_date, index)) %>
+    <%= Formatter.date_with_weekday(Date.add(@start_date, @day_index)) %>
     """
   end
 end

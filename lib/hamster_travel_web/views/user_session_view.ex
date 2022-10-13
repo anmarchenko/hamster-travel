@@ -1,5 +1,5 @@
 defmodule HamsterTravelWeb.UserSessionView do
   use HamsterTravelWeb, :view
 
-  import HamsterTravelWeb.{Container, Inline, Link}
+  import HamsterTravelWeb.Container
 end
