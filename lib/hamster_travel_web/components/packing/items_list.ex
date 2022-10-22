@@ -37,7 +37,7 @@ defmodule HamsterTravelWeb.Packing.ItemsList do
                         label={item.name}
                         value={item.checked}
                       />
-                      <div class="text-sm"><%= item.name %></div>
+                      <div class="text-sm"><%= item.name %> <%= item.count %></div>
                     </.inline>
                   <% end %>
                 </div>

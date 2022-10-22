@@ -20,7 +20,7 @@ defmodule HamsterTravel.Packing do
 
   """
   def list_backpacks(user) do
-    query = from b in Backpack, where: b.user_id == ^user.id
+    query = from b in Backpack, where: b.user_id == ^user.id, order_by: [desc: b.inserted_at]
 
     Repo.all(query)
   end

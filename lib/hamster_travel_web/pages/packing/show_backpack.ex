@@ -26,7 +26,6 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
           |> assign(backpack: backpack)
 
         {:ok, socket}
-
     end
   end
 end
