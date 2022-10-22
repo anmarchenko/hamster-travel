@@ -6,7 +6,10 @@ defmodule HamsterTravelWeb.Packing.IndexBackpacks do
 
   import HamsterTravelWeb.Container
   import HamsterTravelWeb.Gettext
+  import HamsterTravelWeb.Link
   import HamsterTravelWeb.Packing.Grid
+
+  alias HamsterTravel.Packing
 
   @impl true
   def mount(_params, _session, socket) do
@@ -14,7 +17,7 @@ defmodule HamsterTravelWeb.Packing.IndexBackpacks do
       socket
       |> assign(active_nav: :backpacks)
       |> assign(page_title: gettext("Backpacks"))
-      |> assign(backpacks: HamsterTravel.backpacks())
+      |> assign(backpacks: Packing.list_backpacks(socket.assigns.current_user))
 
     {:ok, socket}
   end

@@ -19,8 +19,10 @@ defmodule HamsterTravel.Packing do
       [%Backpack{}, ...]
 
   """
-  def list_backpacks do
-    Repo.all(Backpack)
+  def list_backpacks(user) do
+    query = from b in Backpack, where: b.user_id == ^user.id
+
+    Repo.all(query)
   end
 
   @doc """
@@ -57,10 +59,14 @@ defmodule HamsterTravel.Packing do
       ** (Ecto.NoResultsError)
 
   """
-  def get_backpack_by_slug!(slug) do
+  def get_backpack_by_slug(slug) do
     Backpack
-    |> Repo.get_by!(slug: slug)
+    |> Repo.get_by(slug: slug)
     |> Repo.preload(lists: :items)
+  end
+
+  def new_backpack() do
+    Backpack.changeset(%Backpack{days: 1, people: 2}, %{})
   end
 
   @doc """
@@ -75,12 +81,12 @@ defmodule HamsterTravel.Packing do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_backpack(attrs \\ %{}, _template \\ nil) do
+  def create_backpack(attrs \\ %{}, user) do
     # 1. validate changeset
     # 2. return if invalid
     # 3. parse template
     # 4. insert with cast_assoc
-    %Backpack{}
+    %Backpack{user_id: user.id}
     |> Backpack.changeset(attrs)
     |> process_template()
     |> Repo.insert()
@@ -144,7 +150,7 @@ defmodule HamsterTravel.Packing do
 
       {:error, messages} ->
         Logger.warn(
-          "[HamsterTravel.Packing] Template #{template} could not be patsed. Errors were: #{inspect(messages)} "
+          "[HamsterTravel.Packing] Template #{template} could not be parsed. Errors were: #{inspect(messages)} "
         )
 
         changeset

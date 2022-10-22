@@ -4,11 +4,11 @@
     <.inline class="gap-4">
       <.inline class="gap-1">
         <Heroicons.Outline.calendar class="h-4 w-4" />
-        <%= @backpack.duration %> <%= ngettext("day", "days", @backpack.duration) %>
+        <%= @backpack.days %> <%= ngettext("day", "days", @backpack.days) %>
       </.inline>
       <.inline class="gap-1">
         <Heroicons.Outline.user class="h-4 w-4" />
-        <%= @backpack.people_count %> <%= gettext("ppl") %>
+        <%= @backpack.people %> <%= gettext("ppl") %>
       </.inline>
     </.inline>
     <.inline class="text-xs gap-4 sm:text-base">
@@ -20,7 +20,7 @@
 
 <.container class="!mt-* mt-0">
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <%= for items_list <- @backpack.packing_lists do %>
+    <%= for items_list <- @backpack.lists do %>
       <.live_component module={ItemsList} id={"packing-list-#{items_list.id}"} list={items_list} />
     <% end %>
   </div>

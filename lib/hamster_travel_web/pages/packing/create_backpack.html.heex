@@ -1,0 +1,35 @@
+<.container form>
+  <.form :let={f} for={@changeset} phx-submit="create_backpack" as={:backpack}>
+    <.form_field
+      type="text_input"
+      form={f}
+      field={:name}
+      label={gettext("Backpack name")}
+      required={true}
+    />
+    <.form_field
+      type="number_input"
+      form={f}
+      field={:days}
+      label={gettext("Backpack days")}
+      required={true}
+    />
+    <.form_field
+      type="number_input"
+      form={f}
+      field={:people}
+      label={gettext("Backpack people")}
+      required={true}
+    />
+
+    <.button>
+      <%= gettext("Create") %>
+    </.button>
+
+    <%= if @error_message do %>
+      <p class="italic text-red-500 my-4">
+        <%= @error_message %>
+      </p>
+    <% end %>
+  </.form>
+</.container>

@@ -9,12 +9,16 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
   import HamsterTravelWeb.Inline
   import HamsterTravelWeb.Link
 
+  alias HamsterTravel.Packing
   alias HamsterTravelWeb.Packing.ItemsList
 
   @impl true
   def mount(%{"backpack_slug" => slug}, _session, socket) do
-    case HamsterTravel.find_backpack_by_slug(slug) do
-      {:ok, backpack} ->
+    case Packing.get_backpack_by_slug(slug) do
+      nil ->
+        {:ok, socket, layout: {HamsterTravelWeb.LayoutView, "not_found.html"}}
+
+      backpack ->
         socket =
           socket
           |> assign(active_nav: :backpacks)
@@ -23,8 +27,6 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
 
         {:ok, socket}
 
-      {:error, :not_found} ->
-        {:ok, socket, layout: {HamsterTravelWeb.LayoutView, "not_found.html"}}
     end
   end
 end
