@@ -9,6 +9,7 @@ defmodule HamsterTravel.Packing.Template do
   def execute(template, vars \\ %{})
   def execute(nil, _), do: []
 
+  @spec execute(String.t(), Map.t()) :: {:ok, list(List.t())} | {:error, list(String.t())}
   def execute(template, vars) do
     filepath = "lib/hamster_travel/packing/templates/#{template}.yml"
 

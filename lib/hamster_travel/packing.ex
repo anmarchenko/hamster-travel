@@ -3,10 +3,12 @@ defmodule HamsterTravel.Packing do
   The Packing context.
   """
 
+  require Logger
+
   import Ecto.Query, warn: false
   alias HamsterTravel.Repo
 
-  alias HamsterTravel.Packing.Backpack
+  alias HamsterTravel.Packing.{Backpack, Template}
 
   @doc """
   Returns the list of backpacks.
@@ -35,7 +37,11 @@ defmodule HamsterTravel.Packing do
       ** (Ecto.NoResultsError)
 
   """
-  def get_backpack!(id), do: Repo.get!(Backpack, id)
+  def get_backpack!(id) do
+    Backpack
+    |> Repo.get!(id)
+    |> Repo.preload(lists: :items)
+  end
 
   @doc """
   Gets a single backpack by slug.
@@ -51,7 +57,11 @@ defmodule HamsterTravel.Packing do
       ** (Ecto.NoResultsError)
 
   """
-  def get_backpack_by_slug!(slug), do: Repo.get_by!(Backpack, slug: slug)
+  def get_backpack_by_slug!(slug) do
+    Backpack
+    |> Repo.get_by!(slug: slug)
+    |> Repo.preload(lists: :items)
+  end
 
   @doc """
   Creates a backpack.
@@ -72,6 +82,7 @@ defmodule HamsterTravel.Packing do
     # 4. insert with cast_assoc
     %Backpack{}
     |> Backpack.changeset(attrs)
+    |> process_template()
     |> Repo.insert()
   end
 
@@ -121,4 +132,24 @@ defmodule HamsterTravel.Packing do
   def change_backpack(%Backpack{} = backpack, attrs \\ %{}) do
     Backpack.changeset(backpack, attrs)
   end
+
+  defp process_template(
+         %Ecto.Changeset{changes: %{template: template, days: days, people: people}} = changeset
+       )
+       when template != nil do
+    case Template.execute(template, %{days: days, people: people}) do
+      {:ok, lists} ->
+        changeset
+        |> Ecto.Changeset.put_assoc(:lists, lists)
+
+      {:error, messages} ->
+        Logger.warn(
+          "[HamsterTravel.Packing] Template #{template} could not be patsed. Errors were: #{inspect(messages)} "
+        )
+
+        changeset
+    end
+  end
+
+  defp process_template(changeset), do: changeset
 end

@@ -26,7 +26,7 @@ defmodule HamsterTravelWeb.Packing.ItemsList do
             <%= @list.name %>
           </div>
           <div class="p-4">
-            <.form let={f} for={:items}>
+            <.form :let={f} for={:items}>
               <%= for item <- @list.items do %>
                 <div class="mt-3">
                   <%= label class: "cursor-pointer" do %>

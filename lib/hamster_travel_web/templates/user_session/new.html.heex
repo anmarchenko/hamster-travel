@@ -1,7 +1,19 @@
 <.container form>
-  <.form let={f} for={@conn} action={Routes.user_session_path(@conn, :create)} as={:user}>
-    <.form_field type="email_input" form={f} field={:email} label={gettext("Email")} required={true}/>
-    <.form_field type="password_input" form={f} field={:password} label={gettext("Password")} required={true} />
+  <.form :let={f} for={@conn} action={Routes.user_session_path(@conn, :create)} as={:user}>
+    <.form_field
+      type="email_input"
+      form={f}
+      field={:email}
+      label={gettext("Email")}
+      required={true}
+    />
+    <.form_field
+      type="password_input"
+      form={f}
+      field={:password}
+      label={gettext("Password")}
+      required={true}
+    />
 
     <.button>
       <%= gettext("Log in") %>
@@ -13,9 +25,4 @@
       </p>
     <% end %>
   </.form>
-
-  <%# <.inline class="mt-6 gap-3">
-    <.link link_type="a" to={Routes.user_registration_path(@conn, :new)} label={gettext("Register")} /> |
-    <.link link_type="a" to={Routes.user_reset_password_path(@conn, :new)} label={gettext("Forgot your password?")} />
-  </.inline> %>
 </.container>

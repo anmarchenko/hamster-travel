@@ -4,7 +4,7 @@ defmodule HamsterTravel.PackingTest do
   alias HamsterTravel.Packing
 
   describe "backpacks" do
-    alias HamsterTravel.Packing.Backpack
+    alias HamsterTravel.Packing.{Backpack, Item, List}
 
     import HamsterTravel.PackingFixtures
 
@@ -20,14 +20,22 @@ defmodule HamsterTravel.PackingTest do
       assert Packing.list_backpacks() == [backpack]
     end
 
-    test "get_backpack!/1 returns the backpack with given id" do
+    test "get_backpack!/1 returns the backpack with given id and preloads" do
       backpack = backpack_fixture()
-      assert Packing.get_backpack!(backpack.id) == backpack
+      db_backpack = Packing.get_backpack!(backpack.id)
+      assert [] == db_backpack.lists
+      assert backpack.name == db_backpack.name
+      assert backpack.days == db_backpack.days
+      assert backpack.people == db_backpack.people
     end
 
-    test "get_backpack_by_slug!/1 returns the backpack with given slug" do
+    test "get_backpack_by_slug!/1 returns the backpack with given slug and preloads" do
       backpack = backpack_fixture()
-      assert Packing.get_backpack_by_slug!(backpack.slug) == backpack
+      db_backpack = Packing.get_backpack_by_slug!(backpack.slug)
+      assert [] == db_backpack.lists
+      assert backpack.name == db_backpack.name
+      assert backpack.days == db_backpack.days
+      assert backpack.people == db_backpack.people
     end
 
     test "create_backpack/1 with valid data creates a backpack", %{user: user} do
@@ -65,6 +73,45 @@ defmodule HamsterTravel.PackingTest do
       assert {:error, %Ecto.Changeset{}} = Packing.create_backpack(@invalid_attrs)
     end
 
+    test "create_backpack/1 with valid data and template creates a backpack with associations", %{
+      user: user
+    } do
+      valid_attrs = %{days: 1, name: "some name", people: 42, user_id: user.id, template: "test"}
+
+      assert {:ok, %Backpack{} = backpack} = Packing.create_backpack(valid_attrs)
+      assert backpack.days == 1
+      assert backpack.name == "some name"
+      assert backpack.people == 42
+      assert backpack.slug == "some-name"
+
+      backpack = Packing.get_backpack!(backpack.id)
+
+      assert [
+               %List{
+                 name: "Hygiene",
+                 items: [
+                   %Item{
+                     name: "Napkins",
+                     count: 2
+                   },
+                   %Item{
+                     name: "Toothpaste",
+                     count: 83
+                   },
+                   %Item{
+                     name: "Toothbrush",
+                     count: 3
+                   }
+                 ]
+               },
+               %List{
+                 name: "Docs",
+                 items: [%Item{name: "Passports", count: 42}, %Item{name: "Insurance", count: 3}]
+               },
+               %List{name: "Clothes"}
+             ] = backpack.lists
+    end
+
     test "update_backpack/2 with valid data updates the backpack and the slug" do
       backpack = backpack_fixture()
       update_attrs = %{days: 43, name: "some updated name", people: 43}
@@ -89,7 +136,11 @@ defmodule HamsterTravel.PackingTest do
     test "update_backpack/2 with invalid data returns error changeset" do
       backpack = backpack_fixture()
       assert {:error, %Ecto.Changeset{}} = Packing.update_backpack(backpack, @invalid_attrs)
-      assert backpack == Packing.get_backpack!(backpack.id)
+
+      db_backpack = Packing.get_backpack!(backpack.id)
+      assert backpack.name == db_backpack.name
+      assert backpack.days == db_backpack.days
+      assert backpack.people == db_backpack.days
     end
 
     test "delete_backpack/1 deletes the backpack" do

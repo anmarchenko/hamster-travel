@@ -38,6 +38,8 @@ defmodule HamsterTravel.Packing.Backpack do
     field :people, :integer
     field :slug, NameSlug.Type
 
+    field :template, :string, virtual: true
+
     belongs_to :user, HamsterTravel.Accounts.User
     has_many :lists, HamsterTravel.Packing.List
 
@@ -47,7 +49,7 @@ defmodule HamsterTravel.Packing.Backpack do
   @doc false
   def changeset(backpack, attrs) do
     backpack
-    |> cast(attrs, [:name, :days, :people, :user_id])
+    |> cast(attrs, [:name, :days, :people, :user_id, :template])
     |> validate_required([:name, :days, :people, :user_id])
     |> validate_number(:days, greater_than: 0)
     |> validate_number(:people, greater_than: 0)

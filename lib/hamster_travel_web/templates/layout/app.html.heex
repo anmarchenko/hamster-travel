@@ -1,5 +1,10 @@
 <header class="dark:border-b dark:border-zinc-800">
-  <.navbar current_user={assigns[:current_user]} active_nav={assigns[:active_nav]} active_tab={nil} mobile_menu={nil} />
+  <.navbar
+    current_user={assigns[:current_user]}
+    active_nav={assigns[:active_nav]}
+    active_tab={nil}
+    mobile_menu={nil}
+  />
 </header>
 
 <main class="pb-16 sm:pb-0 text-zinc-600 dark:text-zinc-400">
@@ -9,7 +14,9 @@
       <.alert
         with_icon
         color="danger"
-        x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 2000)"
+        x-data="{ show: true }"
+        x-show="show"
+        x-init="setTimeout(() => show = false, 2000)"
       >
         <%= get_flash(@conn, :error) %>
       </.alert>
