@@ -46,22 +46,13 @@ defmodule HamsterTravel.Packing do
   end
 
   @doc """
-  Gets a single backpack by slug.
-
-  Raises `Ecto.NoResultsError` if the Backpack does not exist.
-
-  ## Examples
-
-      iex> get_backpack_by_slug!(123)
-      %Backpack{}
-
-      iex> get_backpack!(456)
-      ** (Ecto.NoResultsError)
+  Gets a single backpack by slug accessible by given user.
+  Returns nil if not found.
 
   """
-  def get_backpack_by_slug(slug) do
+  def get_backpack_by_slug(slug, user) do
     Backpack
-    |> Repo.get_by(slug: slug)
+    |> Repo.get_by(slug: slug, user_id: user.id)
     |> Repo.preload(lists: :items)
   end
 
@@ -82,10 +73,6 @@ defmodule HamsterTravel.Packing do
 
   """
   def create_backpack(attrs \\ %{}, user) do
-    # 1. validate changeset
-    # 2. return if invalid
-    # 3. parse template
-    # 4. insert with cast_assoc
     %Backpack{user_id: user.id}
     |> Backpack.changeset(attrs)
     |> process_template()

@@ -1,0 +1,30 @@
+<.container form>
+  <.form :let={f} for={@changeset} phx-submit="update_backpack" as={:backpack}>
+    <.form_field
+      type="text_input"
+      form={f}
+      field={:name}
+      label={gettext("Backpack name")}
+      required={true}
+      autofocus={true}
+    />
+    <.form_field
+      type="number_input"
+      form={f}
+      field={:days}
+      label={gettext("Backpack days")}
+      required={true}
+    />
+    <.form_field
+      type="number_input"
+      form={f}
+      field={:people}
+      label={gettext("Backpack people")}
+      required={true}
+    />
+
+    <.button>
+      <%= gettext("Save") %>
+    </.button>
+  </.form>
+</.container>
