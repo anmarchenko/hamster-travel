@@ -37,9 +37,9 @@ defmodule HamsterTravelWeb.Router do
       live "/drafts", Planning.IndexDrafts
 
       live "/backpacks", Packing.IndexBackpacks
+      live "/backpacks/new", Packing.CreateBackpack
       live "/backpacks/:backpack_slug", Packing.ShowBackpack
       live "/backpacks/:backpack_slug/edit", Packing.UpdateBackpack
-      live "/backpacks/actions/new", Packing.CreateBackpack
 
       live "/profile", Accounts.Profile
     end

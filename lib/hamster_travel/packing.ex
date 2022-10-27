@@ -93,7 +93,7 @@ defmodule HamsterTravel.Packing do
   """
   def update_backpack(%Backpack{} = backpack, attrs) do
     backpack
-    |> Backpack.changeset(attrs)
+    |> Backpack.update_changeset(attrs)
     |> Repo.update()
   end
 
@@ -123,7 +123,7 @@ defmodule HamsterTravel.Packing do
 
   """
   def change_backpack(%Backpack{} = backpack, attrs \\ %{}) do
-    Backpack.changeset(backpack, attrs)
+    Backpack.update_changeset(backpack, attrs)
   end
 
   defp process_template(

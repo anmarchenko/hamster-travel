@@ -19,6 +19,7 @@ defmodule HamsterTravelWeb.Packing.UpdateBackpack do
           socket
           |> assign(active_nav: :backpacks)
           |> assign(page_title: gettext("Update backpack"))
+          |> assign(backpack: backpack)
           |> assign(changeset: Packing.change_backpack(backpack))
 
         {:ok, socket}
@@ -27,7 +28,7 @@ defmodule HamsterTravelWeb.Packing.UpdateBackpack do
 
   @impl true
   def handle_event("update_backpack", %{"backpack" => backpack_params}, socket) do
-    case Packing.update_backpack(backpack_params, socket.assigns.current_user) do
+    case Packing.update_backpack(socket.assigns.backpack, backpack_params) do
       {:ok, backpack} ->
         socket =
           socket

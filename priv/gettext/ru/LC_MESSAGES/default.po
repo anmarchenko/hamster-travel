@@ -5,7 +5,7 @@
 msgid "Plans"
 msgstr "Путешествия"
 
-#: lib/hamster_travel_web/pages/packing/index_backpacks.ex:16
+#: lib/hamster_travel_web/pages/packing/index_backpacks.ex:19
 #: lib/hamster_travel_web/views/layout_view.ex:31
 #: lib/hamster_travel_web/views/layout_view.ex:104
 #, elixir-autogen, elixir-format
@@ -62,12 +62,12 @@ msgstr "Черновики"
 msgid "Edit plan"
 msgstr "Редактировать план"
 
-#: lib/hamster_travel_web/templates/layout/not_found.html.heex:11
+#: lib/hamster_travel_web/templates/layout/not_found.html.heex:16
 #, elixir-autogen, elixir-format
 msgid "Maybe this page was deleted or you have mistyped the address."
 msgstr "Может быть эта страница была удалена или ты ввёл неверный адрес"
 
-#: lib/hamster_travel_web/templates/layout/not_found.html.heex:8
+#: lib/hamster_travel_web/templates/layout/not_found.html.heex:13
 #, elixir-autogen, elixir-format
 msgid "This URL is not found."
 msgstr "Ссылка не найдена"
@@ -212,28 +212,31 @@ msgstr "Стран"
 msgid "Of travels"
 msgstr "Путешествий"
 
-#: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:14
+#: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:15
+#: lib/hamster_travel_web/pages/packing/update_backpack.html.heex:15
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Backpack days"
 msgstr "Сколько дней?"
 
 #: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:7
+#: lib/hamster_travel_web/pages/packing/update_backpack.html.heex:7
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Backpack name"
 msgstr "Название"
 
-#: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:21
+#: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:22
+#: lib/hamster_travel_web/pages/packing/update_backpack.html.heex:22
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Backpack people"
 msgstr "Сколько людей едет?"
 
-#: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:26
+#: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:27
 #, elixir-autogen, elixir-format
 msgid "Create"
 msgstr "Создать"
 
 #: lib/hamster_travel_web/pages/packing/create_backpack.ex:16
-#: lib/hamster_travel_web/pages/packing/index_backpacks.html.heex:3
+#: lib/hamster_travel_web/pages/packing/index_backpacks.html.heex:4
 #, elixir-autogen, elixir-format
 msgid "Create backpack"
 msgstr "Новый рюкзачок"
@@ -242,3 +245,13 @@ msgstr "Новый рюкзачок"
 #, elixir-autogen, elixir-format
 msgid "Please sign in"
 msgstr "Пожалуйста залогиньтесь"
+
+#: lib/hamster_travel_web/pages/packing/update_backpack.html.heex:27
+#, elixir-autogen, elixir-format
+msgid "Save"
+msgstr "Сохранить"
+
+#: lib/hamster_travel_web/pages/packing/update_backpack.ex:21
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Update backpack"
+msgstr "Редактировать рюкзачок"

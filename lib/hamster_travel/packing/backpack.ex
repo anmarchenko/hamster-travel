@@ -56,4 +56,14 @@ defmodule HamsterTravel.Packing.Backpack do
     |> NameSlug.maybe_generate_slug()
     |> NameSlug.unique_constraint()
   end
+
+  def update_changeset(backpack, attrs) do
+    backpack
+    |> cast(attrs, [:name, :days, :people])
+    |> validate_required([:name, :days, :people])
+    |> validate_number(:days, greater_than: 0)
+    |> validate_number(:people, greater_than: 0)
+    |> NameSlug.maybe_generate_slug()
+    |> NameSlug.unique_constraint()
+  end
 end

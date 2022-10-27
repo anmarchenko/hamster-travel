@@ -31,7 +31,7 @@ defmodule HamsterTravel.PackingTest do
 
     test "get_backpack_by_slug/1 returns the backpack with given slug and preloads" do
       backpack = backpack_fixture()
-      db_backpack = Packing.get_backpack_by_slug(backpack.slug)
+      db_backpack = Packing.get_backpack_by_slug(backpack.slug, %{id: backpack.user_id})
       assert [] == db_backpack.lists
       assert backpack.name == db_backpack.name
       assert backpack.days == db_backpack.days
