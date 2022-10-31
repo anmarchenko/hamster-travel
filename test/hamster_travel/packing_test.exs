@@ -8,7 +8,7 @@ defmodule HamsterTravel.PackingTest do
 
     import HamsterTravel.PackingFixtures
 
-    @invalid_attrs %{days: nil, name: nil, people: nil}
+    @invalid_attrs %{days: nil, name: nil, nights: nil}
 
     setup do
       user = HamsterTravel.AccountsFixtures.user_fixture()
@@ -26,7 +26,7 @@ defmodule HamsterTravel.PackingTest do
       assert [] == db_backpack.lists
       assert backpack.name == db_backpack.name
       assert backpack.days == db_backpack.days
-      assert backpack.people == db_backpack.people
+      assert backpack.nights == db_backpack.nights
     end
 
     test "get_backpack_by_slug/1 returns the backpack with given slug and preloads" do
@@ -35,21 +35,21 @@ defmodule HamsterTravel.PackingTest do
       assert [] == db_backpack.lists
       assert backpack.name == db_backpack.name
       assert backpack.days == db_backpack.days
-      assert backpack.people == db_backpack.people
+      assert backpack.nights == db_backpack.nights
     end
 
     test "create_backpack/1 with valid data creates a backpack", %{user: user} do
-      valid_attrs = %{days: 42, name: "some name", people: 42}
+      valid_attrs = %{days: 42, name: "some name", nights: 42}
 
       assert {:ok, %Backpack{} = backpack} = Packing.create_backpack(valid_attrs, user)
       assert backpack.days == 42
       assert backpack.name == "some name"
-      assert backpack.people == 42
+      assert backpack.nights == 42
       assert backpack.slug == "some-name"
     end
 
     test "create_backpack/1 slugifies cyrillic backpack names", %{user: user} do
-      valid_attrs = %{days: 42, name: "Амстердам", people: 42}
+      valid_attrs = %{days: 42, name: "Амстердам", nights: 42}
 
       assert {:ok, %Backpack{} = backpack} = Packing.create_backpack(valid_attrs, user)
       assert backpack.name == "Амстердам"
@@ -58,7 +58,7 @@ defmodule HamsterTravel.PackingTest do
 
     test "create_backpack/1 changes slug name in case it is occupied", %{user: user} do
       backpack = backpack_fixture(%{name: "name"})
-      valid_attrs = %{days: 42, name: backpack.name, people: 42}
+      valid_attrs = %{days: 42, name: backpack.name, nights: 42}
 
       assert {:ok, %Backpack{} = new_backpack} = Packing.create_backpack(valid_attrs, user)
       assert new_backpack.name == "name"
@@ -78,12 +78,12 @@ defmodule HamsterTravel.PackingTest do
     test "create_backpack/1 with valid data and template creates a backpack with associations", %{
       user: user
     } do
-      valid_attrs = %{days: 1, name: "some name", people: 42, template: "test"}
+      valid_attrs = %{days: 1, name: "some name", nights: 42, template: "test"}
 
       assert {:ok, %Backpack{} = backpack} = Packing.create_backpack(valid_attrs, user)
       assert backpack.days == 1
       assert backpack.name == "some name"
-      assert backpack.people == 42
+      assert backpack.nights == 42
       assert backpack.slug == "some-name"
 
       backpack = Packing.get_backpack!(backpack.id)
@@ -116,19 +116,19 @@ defmodule HamsterTravel.PackingTest do
 
     test "update_backpack/2 with valid data updates the backpack and the slug" do
       backpack = backpack_fixture()
-      update_attrs = %{days: 43, name: "some updated name", people: 43}
+      update_attrs = %{days: 43, name: "some updated name", nights: 43}
 
       assert {:ok, %Backpack{} = backpack} = Packing.update_backpack(backpack, update_attrs)
       assert backpack.days == 43
       assert backpack.name == "some updated name"
-      assert backpack.people == 43
+      assert backpack.nights == 43
       assert backpack.slug == "some-updated-name"
     end
 
     test "update_backpack/2 when there is slug collision finds valid slug" do
       backpack_fixture(%{name: "some name"})
       backpack = backpack_fixture(%{name: "name"})
-      update_attrs = %{days: 43, name: "some name", people: 43}
+      update_attrs = %{days: 43, name: "some name", nights: 43}
 
       assert {:ok, %Backpack{} = backpack} = Packing.update_backpack(backpack, update_attrs)
       assert backpack.name == "some name"
@@ -142,7 +142,7 @@ defmodule HamsterTravel.PackingTest do
       db_backpack = Packing.get_backpack!(backpack.id)
       assert backpack.name == db_backpack.name
       assert backpack.days == db_backpack.days
-      assert backpack.people == db_backpack.days
+      assert backpack.nights == db_backpack.nights
     end
 
     test "delete_backpack/1 deletes the backpack" do

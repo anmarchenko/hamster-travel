@@ -35,16 +35,14 @@ msgstr ""
 msgid "Next travels"
 msgstr ""
 
-#: lib/hamster_travel_web/components/packing/backpack_card.ex:36
 #: lib/hamster_travel_web/components/planning/plan_shorts.ex:33
-#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:11
 #, elixir-autogen, elixir-format
 msgid "ppl"
 msgstr ""
 
 #: lib/hamster_travel_web/components/packing/backpack_card.ex:32
 #: lib/hamster_travel_web/components/planning/plan_shorts.ex:29
-#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:7
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:6
 #, elixir-format, ex-autogen
 msgid "day"
 msgid_plural "days"
@@ -131,7 +129,7 @@ msgstr ""
 msgid "Places"
 msgstr ""
 
-#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:16
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:10
 #: lib/hamster_travel_web/pages/planning/show_plan.html.heex:12
 #, elixir-autogen, elixir-format
 msgid "Delete"
@@ -157,7 +155,7 @@ msgstr ""
 msgid "Address"
 msgstr ""
 
-#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:15
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:9
 #, elixir-autogen, elixir-format
 msgid "Edit"
 msgstr ""
@@ -235,12 +233,6 @@ msgstr ""
 msgid "Backpack name"
 msgstr ""
 
-#: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:22
-#: lib/hamster_travel_web/pages/packing/edit_backpack.html.heex:22
-#, elixir-autogen, elixir-format
-msgid "Backpack people"
-msgstr ""
-
 #: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:27
 #, elixir-autogen, elixir-format
 msgid "Create"
@@ -266,3 +258,17 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "Edit backpack"
 msgstr ""
+
+#: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:22
+#: lib/hamster_travel_web/pages/packing/edit_backpack.html.heex:22
+#, elixir-autogen, elixir-format
+msgid "Backpack nights"
+msgstr ""
+
+#: lib/hamster_travel_web/components/packing/backpack_card.ex:32
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:6
+#, elixir-autogen, elixir-format
+msgid "night"
+msgid_plural "nights"
+msgstr[0] ""
+msgstr[1] ""

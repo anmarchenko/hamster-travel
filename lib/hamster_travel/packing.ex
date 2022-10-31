@@ -57,7 +57,7 @@ defmodule HamsterTravel.Packing do
   end
 
   def new_backpack() do
-    Backpack.changeset(%Backpack{days: 1, people: 2}, %{})
+    Backpack.changeset(%Backpack{days: 2, nights: 1}, %{})
   end
 
   @doc """
@@ -127,10 +127,10 @@ defmodule HamsterTravel.Packing do
   end
 
   defp process_template(
-         %Ecto.Changeset{changes: %{template: template, days: days, people: people}} = changeset
+         %Ecto.Changeset{changes: %{template: template, days: days, nights: nights}} = changeset
        )
        when template != nil do
-    case Template.execute(template, %{days: days, people: people}) do
+    case Template.execute(template, %{days: days, nights: nights}) do
       {:ok, lists} ->
         changeset
         |> Ecto.Changeset.put_assoc(:lists, lists)

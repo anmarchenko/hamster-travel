@@ -35,7 +35,7 @@ defmodule HamsterTravel.Packing.Backpack do
   schema "backpacks" do
     field :days, :integer
     field :name, :string
-    field :people, :integer
+    field :nights, :integer
     field :slug, NameSlug.Type
 
     field :template, :string, virtual: true
@@ -49,20 +49,20 @@ defmodule HamsterTravel.Packing.Backpack do
   @doc false
   def changeset(backpack, attrs) do
     backpack
-    |> cast(attrs, [:name, :days, :people, :user_id, :template])
-    |> validate_required([:name, :days, :people, :user_id])
+    |> cast(attrs, [:name, :days, :nights, :user_id, :template])
+    |> validate_required([:name, :days, :nights, :user_id])
     |> validate_number(:days, greater_than: 0)
-    |> validate_number(:people, greater_than: 0)
+    |> validate_number(:nights, greater_than_or_equal_to: 0)
     |> NameSlug.maybe_generate_slug()
     |> NameSlug.unique_constraint()
   end
 
   def update_changeset(backpack, attrs) do
     backpack
-    |> cast(attrs, [:name, :days, :people])
-    |> validate_required([:name, :days, :people])
+    |> cast(attrs, [:name, :days, :nights])
+    |> validate_required([:name, :days, :nights])
     |> validate_number(:days, greater_than: 0)
-    |> validate_number(:people, greater_than: 0)
+    |> validate_number(:nights, greater_than_or_equal_to: 0)
     |> NameSlug.maybe_generate_slug()
     |> NameSlug.unique_constraint()
   end

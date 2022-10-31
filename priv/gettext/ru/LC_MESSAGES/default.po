@@ -23,16 +23,14 @@ msgstr "Главная"
 msgid "Next travels"
 msgstr "Ближайшие путешествия"
 
-#: lib/hamster_travel_web/components/packing/backpack_card.ex:36
 #: lib/hamster_travel_web/components/planning/plan_shorts.ex:33
-#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:11
 #, elixir-autogen, elixir-format
 msgid "ppl"
 msgstr "чел"
 
 #: lib/hamster_travel_web/components/packing/backpack_card.ex:32
 #: lib/hamster_travel_web/components/planning/plan_shorts.ex:29
-#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:7
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:6
 #, elixir-format, ex-autogen, fuzzy
 msgid "day"
 msgid_plural "days"
@@ -120,7 +118,7 @@ msgstr "Жильё"
 msgid "Places"
 msgstr "Города"
 
-#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:16
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:10
 #: lib/hamster_travel_web/pages/planning/show_plan.html.heex:12
 #, elixir-autogen, elixir-format
 msgid "Delete"
@@ -146,7 +144,7 @@ msgstr "На этот день не запланировано впечатле�
 msgid "Address"
 msgstr "Адрес"
 
-#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:15
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:9
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Edit"
 msgstr "Редактировать"
@@ -224,12 +222,6 @@ msgstr "Сколько дней?"
 msgid "Backpack name"
 msgstr "Название"
 
-#: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:22
-#: lib/hamster_travel_web/pages/packing/edit_backpack.html.heex:22
-#, elixir-autogen, elixir-format, fuzzy
-msgid "Backpack people"
-msgstr "Сколько людей едет?"
-
 #: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:27
 #, elixir-autogen, elixir-format
 msgid "Create"
@@ -255,3 +247,18 @@ msgstr "Сохранить"
 #, elixir-autogen, elixir-format
 msgid "Edit backpack"
 msgstr "Редактирование рюкзачка"
+
+#: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:22
+#: lib/hamster_travel_web/pages/packing/edit_backpack.html.heex:22
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Backpack nights"
+msgstr "Ночей"
+
+#: lib/hamster_travel_web/components/packing/backpack_card.ex:32
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:6
+#, elixir-autogen, elixir-format, fuzzy
+msgid "night"
+msgid_plural "nights"
+msgstr[0] "ночь"
+msgstr[1] "ночи"
+msgstr[2] "ночей"

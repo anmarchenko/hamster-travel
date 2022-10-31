@@ -8,7 +8,7 @@ backpack:
       - name: Зубная паста
         count: 2
       - name: Зубная щетка
-        count: '2 * people - 1'
+        count: '2 * nights - 1'
       - name: Крем от загара
         count: 'days * 2 + 1'
   - name: С собой

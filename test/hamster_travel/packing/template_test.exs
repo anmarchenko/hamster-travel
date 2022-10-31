@@ -30,11 +30,11 @@ defmodule HamsterTravel.Packing.TemplateTest do
                 items: [%Item{name: "Passports", count: 2}, %Item{name: "Insurance", count: 3}]
               },
               %List{name: "Clothes"}
-            ]} = Template.execute("test", %{days: 3, people: 2})
+            ]} = Template.execute("test", %{days: 3, nights: 2})
   end
 
   test "it parses predefined templates" do
-    assert {:ok, _} = Template.execute("hamsters", %{days: 3, people: 2})
+    assert {:ok, _} = Template.execute("hamsters", %{days: 3, nights: 2})
   end
 
   test "when file does not exists it returns an error" do

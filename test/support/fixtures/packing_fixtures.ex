@@ -15,7 +15,7 @@ defmodule HamsterTravel.PackingFixtures do
       |> Enum.into(%{
         days: 42,
         name: "some name",
-        people: 42
+        nights: 41
       })
       |> HamsterTravel.Packing.create_backpack(user)
 

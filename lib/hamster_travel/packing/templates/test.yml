@@ -4,13 +4,13 @@ backpack:
       - name: Napkins
         count: 'days + 2 - days'
       - name: Toothpaste
-        count: '2 * people - 1'
+        count: '2 * nights - 1'
       - name: Toothbrush
         count: 'days * 2 + 1'
   - name: Docs
     items:
       - name: Passports
-        count: people
+        count: nights
       - name: Insurance
         count: 3
   - name: Clothes
