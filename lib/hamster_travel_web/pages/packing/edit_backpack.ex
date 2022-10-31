@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.Packing.UpdateBackpack do
+defmodule HamsterTravelWeb.Packing.EditBackpack do
   @moduledoc """
   Create backpack form
   """
@@ -18,7 +18,7 @@ defmodule HamsterTravelWeb.Packing.UpdateBackpack do
         socket =
           socket
           |> assign(active_nav: :backpacks)
-          |> assign(page_title: gettext("Update backpack"))
+          |> assign(page_title: gettext("Edit backpack"))
           |> assign(backpack: backpack)
           |> assign(changeset: Packing.change_backpack(backpack))
 

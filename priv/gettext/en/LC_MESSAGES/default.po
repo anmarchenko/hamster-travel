@@ -212,19 +212,19 @@ msgid "Of travels"
 msgstr "Travels"
 
 #: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:15
-#: lib/hamster_travel_web/pages/packing/update_backpack.html.heex:15
+#: lib/hamster_travel_web/pages/packing/edit_backpack.html.heex:15
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Backpack days"
 msgstr "Days"
 
 #: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:7
-#: lib/hamster_travel_web/pages/packing/update_backpack.html.heex:7
+#: lib/hamster_travel_web/pages/packing/edit_backpack.html.heex:7
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Backpack name"
 msgstr "Name"
 
 #: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:22
-#: lib/hamster_travel_web/pages/packing/update_backpack.html.heex:22
+#: lib/hamster_travel_web/pages/packing/edit_backpack.html.heex:22
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Backpack people"
 msgstr "Number of people"
@@ -245,12 +245,12 @@ msgstr "New backpack"
 msgid "Please sign in"
 msgstr ""
 
-#: lib/hamster_travel_web/pages/packing/update_backpack.html.heex:27
+#: lib/hamster_travel_web/pages/packing/edit_backpack.html.heex:27
 #, elixir-autogen, elixir-format
 msgid "Save"
 msgstr ""
 
-#: lib/hamster_travel_web/pages/packing/update_backpack.ex:21
-#, elixir-autogen, elixir-format, fuzzy
-msgid "Update backpack"
-msgstr "Edit backpack"
+#: lib/hamster_travel_web/pages/packing/edit_backpack.ex:21
+#, elixir-autogen, elixir-format
+msgid "Edit backpack"
+msgstr ""
