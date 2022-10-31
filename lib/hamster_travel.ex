@@ -7,7 +7,7 @@ defmodule HamsterTravel do
   if it comes from the database, an external API or others.
   """
 
-  def plans() do
+  def plans do
     [
       %{
         id: 1,
@@ -524,7 +524,7 @@ defmodule HamsterTravel do
     ]
   end
 
-  def drafts() do
+  def drafts do
     [
       %{
         id: 5,
@@ -579,87 +579,7 @@ defmodule HamsterTravel do
     ]
   end
 
-  def backpacks() do
-    [
-      %{
-        id: 1,
-        slug: "amsterdam",
-        name: "Амстердам",
-        duration: 2,
-        people_count: 1,
-        packing_lists: [
-          %{
-            id: 11,
-            name: "Документы и всякое",
-            items: [
-              %{
-                id: 111,
-                name: "Паспорт",
-                checked: true,
-                count: 1
-              },
-              %{
-                id: 112,
-                name: "Деньги",
-                checked: false,
-                count: 1000
-              }
-            ]
-          },
-          %{
-            id: 12,
-            name: "Одежда",
-            items: [
-              %{
-                id: 113,
-                name: "Носки",
-                checked: false,
-                count: 9
-              },
-              %{
-                id: 114,
-                name: "Трусы",
-                checked: true,
-                count: 8
-              },
-              %{
-                id: 115,
-                name: "Пижама",
-                checked: false,
-                count: 1
-              }
-            ]
-          }
-        ]
-      },
-      %{
-        id: 2,
-        slug: "stokgolm",
-        name: "Стокгольм",
-        duration: 4,
-        people_count: 3,
-        packing_lists: []
-      },
-      %{
-        id: 3,
-        slug: "helgo",
-        name: "Гельголанд: в гости к тюленюшкам!",
-        duration: 5,
-        people_count: 3,
-        packing_lists: []
-      },
-      %{
-        id: 3,
-        slug: "bla",
-        name: "Тест",
-        duration: 1,
-        people_count: 3,
-        packing_lists: []
-      }
-    ]
-  end
-
-  def next_plans() do
+  def next_plans do
     Enum.filter(
       plans(),
       fn plan ->
@@ -668,7 +588,7 @@ defmodule HamsterTravel do
     )
   end
 
-  def last_plans() do
+  def last_plans do
     plans()
     |> Enum.filter(fn plan ->
       plan[:status] == "finished"
@@ -684,19 +604,6 @@ defmodule HamsterTravel do
 
     if plan != nil do
       {:ok, plan}
-    else
-      {:error, :not_found}
-    end
-  end
-
-  def find_backpack_by_slug(slug) do
-    backpack =
-      Enum.find(backpacks(), fn b ->
-        b.slug == slug
-      end)
-
-    if backpack != nil do
-      {:ok, backpack}
     else
       {:error, :not_found}
     end

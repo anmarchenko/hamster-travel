@@ -10,68 +10,28 @@ defmodule HamsterTravel.Packing do
 
   alias HamsterTravel.Packing.{Backpack, Template}
 
-  @doc """
-  Returns the list of backpacks.
-
-  ## Examples
-
-      iex> list_backpacks()
-      [%Backpack{}, ...]
-
-  """
   def list_backpacks(user) do
     query = from b in Backpack, where: b.user_id == ^user.id, order_by: [desc: b.inserted_at]
 
     Repo.all(query)
   end
 
-  @doc """
-  Gets a single backpack.
-
-  Raises `Ecto.NoResultsError` if the Backpack does not exist.
-
-  ## Examples
-
-      iex> get_backpack!("32432-fdfgfd43")
-      %Backpack{}
-
-      iex> get_backpack!("fdfdfgfd-4343-fgdgfd-543")
-      ** (Ecto.NoResultsError)
-
-  """
   def get_backpack!(id) do
     Backpack
     |> Repo.get!(id)
     |> Repo.preload(lists: :items)
   end
 
-  @doc """
-  Gets a single backpack by slug accessible by given user.
-  Returns nil if not found.
-
-  """
   def get_backpack_by_slug(slug, user) do
     Backpack
     |> Repo.get_by(slug: slug, user_id: user.id)
     |> Repo.preload(lists: :items)
   end
 
-  def new_backpack() do
+  def new_backpack do
     Backpack.changeset(%Backpack{days: 2, nights: 1}, %{})
   end
 
-  @doc """
-  Creates a backpack.
-
-  ## Examples
-
-      iex> create_backpack(%{field: value})
-      {:ok, %Backpack{}}
-
-      iex> create_backpack(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
   def create_backpack(attrs \\ %{}, user) do
     %Backpack{user_id: user.id}
     |> Backpack.changeset(attrs)
@@ -79,51 +39,18 @@ defmodule HamsterTravel.Packing do
     |> Repo.insert()
   end
 
-  @doc """
-  Updates a backpack.
+  def change_backpack(%Backpack{} = backpack, attrs \\ %{}) do
+    Backpack.update_changeset(backpack, attrs)
+  end
 
-  ## Examples
-
-      iex> update_backpack(backpack, %{field: new_value})
-      {:ok, %Backpack{}}
-
-      iex> update_backpack(backpack, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
   def update_backpack(%Backpack{} = backpack, attrs) do
     backpack
     |> Backpack.update_changeset(attrs)
     |> Repo.update()
   end
 
-  @doc """
-  Deletes a backpack.
-
-  ## Examples
-
-      iex> delete_backpack(backpack)
-      {:ok, %Backpack{}}
-
-      iex> delete_backpack(backpack)
-      {:error, %Ecto.Changeset{}}
-
-  """
   def delete_backpack(%Backpack{} = backpack) do
     Repo.delete(backpack)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking backpack changes.
-
-  ## Examples
-
-      iex> change_backpack(backpack)
-      %Ecto.Changeset{data: %Backpack{}}
-
-  """
-  def change_backpack(%Backpack{} = backpack, attrs \\ %{}) do
-    Backpack.update_changeset(backpack, attrs)
   end
 
   defp process_template(

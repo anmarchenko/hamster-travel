@@ -13,11 +13,12 @@ defmodule HamsterTravel.Packing.Template do
   def execute(template, vars) do
     filepath = "lib/hamster_travel/packing/templates/#{template}.yml"
 
-    with {:ok, %{"backpack" => lists}} <- YamlElixir.read_from_file(filepath) do
-      lists
-      |> Enum.map(fn list -> parse_list(list, vars) end)
-      |> Result.list_or_errors()
-    else
+    case YamlElixir.read_from_file(filepath) do
+      {:ok, %{"backpack" => lists}} ->
+        lists
+        |> Enum.map(fn list -> parse_list(list, vars) end)
+        |> Result.list_or_errors()
+
       {:error, %{message: message}} ->
         {:error, [message]}
 
@@ -32,12 +33,13 @@ defmodule HamsterTravel.Packing.Template do
   defp parse_list(nil, _), do: %List{}
 
   defp parse_list(list_map, vars) do
-    with {:ok, items} <- parse_items(list_map["items"], vars) do
-      %List{
-        name: list_map["name"],
-        items: items
-      }
-    else
+    case parse_items(list_map["items"], vars) do
+      {:ok, items} ->
+        %List{
+          name: list_map["name"],
+          items: items
+        }
+
       {:error, _} = error_tuple ->
         error_tuple
     end
@@ -55,12 +57,13 @@ defmodule HamsterTravel.Packing.Template do
   defp parse_item(nil, _), do: %Item{}
 
   defp parse_item(item, vars) do
-    with {:ok, num} <- calculate_count(item["count"], vars) do
-      %Item{
-        name: item["name"],
-        count: num
-      }
-    else
+    case calculate_count(item["count"], vars) do
+      {:ok, num} ->
+        %Item{
+          name: item["name"],
+          count: num
+        }
+
       {:error, %{description: description}} ->
         {:error, [description]}
 

@@ -3,7 +3,11 @@
     <.header><%= @backpack.name %></.header>
     <.inline class="gap-4">
       <Heroicons.Outline.calendar class="h-4 w-4" />
-      <%= @backpack.days %> <%= ngettext("day", "days", @backpack.days) %> / <%= @backpack.nights %> <%= ngettext("night", "nights", @backpack.nights) %>
+      <%= @backpack.days %> <%= ngettext("day", "days", @backpack.days) %> / <%= @backpack.nights %> <%= ngettext(
+        "night",
+        "nights",
+        @backpack.nights
+      ) %>
     </.inline>
     <.inline class="text-xs gap-4 sm:text-base">
       <.a to={backpack_url(@backpack.slug, :edit)} label={gettext("Edit")} />
