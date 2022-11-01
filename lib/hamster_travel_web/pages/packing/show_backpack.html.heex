@@ -19,7 +19,7 @@
 <.container class="!mt-* mt-0">
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     <%= for items_list <- @backpack.lists do %>
-      <.live_component module={ItemsList} id={"packing-list-#{items_list.id}"} list={items_list} />
+      <.live_component module={BackpackList} id={"packing-list-#{items_list.id}"} list={items_list} />
     <% end %>
   </div>
 </.container>
