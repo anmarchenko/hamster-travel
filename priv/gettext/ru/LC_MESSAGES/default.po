@@ -118,7 +118,7 @@ msgstr "Жильё"
 msgid "Places"
 msgstr "Города"
 
-#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:10
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:22
 #: lib/hamster_travel_web/pages/planning/show_plan.html.heex:12
 #, elixir-autogen, elixir-format
 msgid "Delete"
@@ -144,7 +144,7 @@ msgstr "На этот день не запланировано впечатле�
 msgid "Address"
 msgstr "Адрес"
 
-#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:9
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:16
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Edit"
 msgstr "Редактировать"
@@ -262,3 +262,8 @@ msgid_plural "nights"
 msgstr[0] "ночь"
 msgstr[1] "ночи"
 msgstr[2] "ночей"
+
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:24
+#, elixir-autogen, elixir-format
+msgid "Are you sure you want to delete backpack?"
+msgstr "Вы уверены, что хотите удалить рюкзачок?"

@@ -9,10 +9,12 @@ defmodule HamsterTravelWeb.Link do
 
   def a(assigns) do
     assigns
-    |> set_phx_attributes()
-    |> set_attributes([label: "", inner_block: nil, link_type: "live_redirect", method: :get],
+    |> set_attributes(
+      [label: "", inner_block: nil, link_type: "live_redirect", method: :get],
       required: [:to]
     )
+    |> set_phx_attributes()
+    |> set_prefixed_attributes(["data-confirm"], into: :confirmation)
     |> extend_class(@default_class, prefix_replace: false)
     |> render()
   end
@@ -35,7 +37,14 @@ defmodule HamsterTravelWeb.Link do
 
   defp render(%{link_type: "a"} = assigns) do
     ~H"""
-    <a href={@to} target="_blank" rel="noreferer noopener" {@heex_class} {@heex_phx_attributes}>
+    <a
+      href={@to}
+      target="_blank"
+      rel="noreferer noopener"
+      {@heex_class}
+      {@heex_phx_attributes}
+      {@heex_confirmation}
+    >
       <%= if @inner_block, do: render_slot(@inner_block), else: @label %>
     </a>
     """

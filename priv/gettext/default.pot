@@ -129,7 +129,7 @@ msgstr ""
 msgid "Places"
 msgstr ""
 
-#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:10
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:22
 #: lib/hamster_travel_web/pages/planning/show_plan.html.heex:12
 #, elixir-autogen, elixir-format
 msgid "Delete"
@@ -155,7 +155,7 @@ msgstr ""
 msgid "Address"
 msgstr ""
 
-#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:9
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:16
 #, elixir-autogen, elixir-format
 msgid "Edit"
 msgstr ""
@@ -272,3 +272,8 @@ msgid "night"
 msgid_plural "nights"
 msgstr[0] ""
 msgstr[1] ""
+
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:24
+#, elixir-autogen, elixir-format
+msgid "Are you sure you want to delete backpack?"
+msgstr ""

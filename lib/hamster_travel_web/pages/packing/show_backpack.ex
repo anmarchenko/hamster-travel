@@ -34,7 +34,8 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
   end
 
   @impl true
-  def handle_event("delete_backpack", _params, _socket) do
+  def handle_event("delete_backpack", _params, socket) do
     Logger.info("deleting backpack")
+    {:noreply, socket}
   end
 end
