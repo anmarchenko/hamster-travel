@@ -10,6 +10,8 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
   import HamsterTravelWeb.Link
 
   alias HamsterTravel.Packing
+  alias HamsterTravel.Packing.Policy
+
   alias HamsterTravelWeb.Packing.BackpackList
 
   @impl true

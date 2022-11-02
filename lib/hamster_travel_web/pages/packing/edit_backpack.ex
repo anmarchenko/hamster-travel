@@ -7,22 +7,28 @@ defmodule HamsterTravelWeb.Packing.EditBackpack do
   import HamsterTravelWeb.Container
 
   alias HamsterTravel.Packing
+  alias HamsterTravel.Packing.Policy
 
   @impl true
   def mount(%{"backpack_slug" => slug}, _session, socket) do
-    case Packing.get_backpack_by_slug(slug, socket.assigns.current_user) do
+    user = socket.assigns.current_user
+
+    with backpack when backpack != nil <- Packing.get_backpack_by_slug(slug, user),
+         true <- Policy.authorized?(:edit, backpack, user) do
+      socket =
+        socket
+        |> assign(active_nav: :backpacks)
+        |> assign(page_title: gettext("Edit backpack"))
+        |> assign(backpack: backpack)
+        |> assign(changeset: Packing.change_backpack(backpack))
+
+      {:ok, socket}
+    else
       nil ->
         {:ok, socket, layout: {HamsterTravelWeb.LayoutView, "not_found.html"}}
 
-      backpack ->
-        socket =
-          socket
-          |> assign(active_nav: :backpacks)
-          |> assign(page_title: gettext("Edit backpack"))
-          |> assign(backpack: backpack)
-          |> assign(changeset: Packing.change_backpack(backpack))
-
-        {:ok, socket}
+      false ->
+        {:ok, socket, layout: {HamsterTravelWeb.LayoutView, "not_found.html"}}
     end
   end
 

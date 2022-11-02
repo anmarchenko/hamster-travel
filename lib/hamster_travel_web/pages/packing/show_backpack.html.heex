@@ -10,8 +10,16 @@
       ) %>
     </.inline>
     <.inline class="text-xs gap-4 sm:text-base">
-      <.a to={backpack_url(@backpack.slug, :edit)} label={gettext("Edit")} />
-      <.a to={backpack_url(@backpack.slug, :delete)} label={gettext("Delete")} />
+      <.a
+        :if={Policy.authorized?(:edit, @backpack, @current_user)}
+        to={backpack_url(@backpack.slug, :edit)}
+        label={gettext("Edit")}
+      />
+      <.a
+        :if={Policy.authorized?(:delete, @backpack, @current_user)}
+        to={backpack_url(@backpack.slug, :delete)}
+        label={gettext("Delete")}
+      />
     </.inline>
   </div>
 </.container>
@@ -19,7 +27,11 @@
 <.container class="!mt-* mt-0">
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     <%= for items_list <- @backpack.lists do %>
-      <.live_component module={BackpackList} id={"packing-list-#{items_list.id}"} list={items_list} />
+      <.live_component
+        module={BackpackList}
+        id={"packing-list-#{items_list.id}"}
+        list={items_list}
+      />
     <% end %>
   </div>
 </.container>
