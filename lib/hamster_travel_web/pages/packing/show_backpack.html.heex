@@ -19,8 +19,8 @@
         :if={Policy.authorized?(:delete, @backpack, @current_user)}
         to={"#"}
         label={gettext("Delete")}
-        phx_click="delete_backpack"
-        data={[confirm: gettext("Are you sure you want to delete backpack?")]}
+        phx-click="delete_backpack"
+        data-cofirm={gettext("Are you sure you want to delete backpack?")}
       />
     </.inline>
   </div>

@@ -9,6 +9,7 @@ defmodule HamsterTravelWeb.Link do
 
   def a(assigns) do
     assigns
+    |> set_phx_attributes()
     |> set_attributes([label: "", inner_block: nil, link_type: "live_redirect", method: :get],
       required: [:to]
     )
