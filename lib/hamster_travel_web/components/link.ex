@@ -34,7 +34,7 @@ defmodule HamsterTravelWeb.Link do
 
   defp render(%{link_type: "a"} = assigns) do
     ~H"""
-    <a href={@to} target="_blank" rel="noreferer noopener" {@heex_class}>
+    <a href={@to} target="_blank" rel="noreferer noopener" {@heex_class} {@heex_phx_attributes}>
       <%= if @inner_block, do: render_slot(@inner_block), else: @label %>
     </a>
     """

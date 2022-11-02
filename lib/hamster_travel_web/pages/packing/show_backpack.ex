@@ -4,6 +4,8 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
   """
   use HamsterTravelWeb, :live_view
 
+  require Logger
+
   import HamsterTravelWeb.Container
   import HamsterTravelWeb.Header
   import HamsterTravelWeb.Inline
@@ -29,5 +31,10 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
 
         {:ok, socket}
     end
+  end
+
+  @impl true
+  def handle_event("delete_backpack", _params, _socket) do
+    Logger.info("deleting backpack")
   end
 end

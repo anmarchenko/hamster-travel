@@ -145,10 +145,16 @@ defmodule HamsterTravel.PackingTest do
       assert backpack.nights == db_backpack.nights
     end
 
-    test "delete_backpack/1 deletes the backpack" do
-      backpack = backpack_fixture()
+    test "delete_backpack/1 deletes the backpack with associations", %{
+      user: user
+    } do
+      valid_attrs = %{days: 1, name: "some name", nights: 42, template: "test"}
+      assert {:ok, %Backpack{} = backpack} = Packing.create_backpack(valid_attrs, user)
+
       assert {:ok, %Backpack{}} = Packing.delete_backpack(backpack)
       assert_raise Ecto.NoResultsError, fn -> Packing.get_backpack!(backpack.id) end
+      assert 0 == Repo.one(from i in "backpack_items", select: count(i.id))
+      assert 0 == Repo.one(from i in "backpack_lists", select: count(i.id))
     end
 
     test "change_backpack/1 returns a backpack changeset" do
