@@ -17,7 +17,13 @@ defmodule HamsterTravel.Packing.Item do
   @doc false
   def changeset(item, attrs) do
     item
-    |> cast(attrs, [:name, :checked, :count])
-    |> validate_required([:name, :checked, :count])
+    |> cast(attrs, [:name, :checked, :count, :backpack_list_id])
+    |> validate_required([:name, :checked, :count, :backpack_list_id])
+  end
+
+  def checked_changeset(item, attrs) do
+    item
+    |> cast(attrs, [:checked])
+    |> validate_required([:checked])
   end
 end

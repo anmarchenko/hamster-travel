@@ -21,4 +21,31 @@ defmodule HamsterTravel.PackingFixtures do
 
     backpack
   end
+
+  def list_fixture(attrs \\ %{}) do
+    backpack = backpack_fixture()
+
+    {:ok, list} =
+      attrs
+      |> Enum.into(%{
+        name: "list name"
+      })
+      |> HamsterTravel.Packing.create_list(backpack)
+
+    list
+  end
+
+  def item_fixture(attrs \\ %{}) do
+    list = list_fixture()
+
+    {:ok, item} =
+      attrs
+      |> Enum.into(%{
+        name: "toothbrushes",
+        count: 2
+      })
+      |> HamsterTravel.Packing.create_item(list)
+
+    item
+  end
 end

@@ -2,12 +2,11 @@ defmodule HamsterTravel.PackingTest do
   use HamsterTravel.DataCase
 
   alias HamsterTravel.Packing
+  alias HamsterTravel.Packing.{Backpack, Item, List}
+
+  import HamsterTravel.PackingFixtures
 
   describe "backpacks" do
-    alias HamsterTravel.Packing.{Backpack, Item, List}
-
-    import HamsterTravel.PackingFixtures
-
     @invalid_attrs %{days: nil, name: nil, nights: nil}
 
     setup do
@@ -160,6 +159,16 @@ defmodule HamsterTravel.PackingTest do
     test "change_backpack/1 returns a backpack changeset" do
       backpack = backpack_fixture()
       assert %Ecto.Changeset{} = Packing.change_backpack(backpack)
+    end
+  end
+
+  describe "items" do
+    test "update_item_checked/2 sets checked property for item" do
+      item = item_fixture()
+      {:ok, item} = Packing.update_item_checked(item, true)
+      assert item.checked
+      {:ok, item} = Packing.update_item_checked(item, false)
+      refute item.checked
     end
   end
 end

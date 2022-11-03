@@ -8,7 +8,12 @@ defmodule HamsterTravel.Packing do
   import Ecto.Query, warn: false
   alias HamsterTravel.Repo
 
-  alias HamsterTravel.Packing.{Backpack, Template}
+  alias HamsterTravel.Packing.Backpack
+  alias HamsterTravel.Packing.Item
+  alias HamsterTravel.Packing.List
+  alias HamsterTravel.Packing.Template
+
+  # BACKPACK
 
   def list_backpacks(user) do
     query = from b in Backpack, where: b.user_id == ^user.id, order_by: [desc: b.inserted_at]
@@ -19,13 +24,13 @@ defmodule HamsterTravel.Packing do
   def get_backpack!(id) do
     Backpack
     |> Repo.get!(id)
-    |> Repo.preload(lists: :items)
+    |> backpack_preloading()
   end
 
   def get_backpack_by_slug(slug, user) do
     Backpack
     |> Repo.get_by(slug: slug, user_id: user.id)
-    |> Repo.preload(lists: :items)
+    |> backpack_preloading()
   end
 
   def new_backpack do
@@ -51,6 +56,38 @@ defmodule HamsterTravel.Packing do
 
   def delete_backpack(%Backpack{} = backpack) do
     Repo.delete(backpack)
+  end
+
+  # LISTS
+
+  def create_list(attrs \\ %{}, %Backpack{} = backpack) do
+    %List{backpack_id: backpack.id}
+    |> List.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  # ITEMS
+
+  def create_item(attrs \\ %{}, %List{} = list) do
+    %Item{backpack_list_id: list.id, checked: false}
+    |> Item.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def update_item_checked(%Item{} = item, checked) do
+    item
+    |> Item.checked_changeset(%{checked: checked})
+    |> Repo.update()
+  end
+
+  defp backpack_preloading(query) do
+    items_preload_query = from i in Item, order_by: [i.inserted_at, i.id]
+
+    lists_preload_query =
+      from l in List, order_by: [l.inserted_at, l.id], preload: [items: ^items_preload_query]
+
+    query
+    |> Repo.preload(lists: lists_preload_query)
   end
 
   defp process_template(
