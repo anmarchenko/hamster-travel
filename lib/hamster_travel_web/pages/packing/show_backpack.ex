@@ -35,7 +35,18 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
 
   @impl true
   def handle_event("delete_backpack", _params, socket) do
-    Logger.info("deleting backpack")
-    {:noreply, socket}
+    %{backpack: backpack, current_user: user} = socket.assigns
+
+    if Policy.authorized?(:delete, backpack, user) do
+      Packing.delete_backpack(backpack)
+
+      socket =
+        socket
+        |> push_redirect(to: Routes.live_path(socket, HamsterTravelWeb.Packing.IndexBackpacks))
+
+      {:noreply, socket}
+    else
+      {:noreply, socket}
+    end
   end
 end
