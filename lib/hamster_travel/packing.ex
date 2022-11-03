@@ -13,6 +13,8 @@ defmodule HamsterTravel.Packing do
   alias HamsterTravel.Packing.List
   alias HamsterTravel.Packing.Template
 
+  @backpack_list_topic "backpack_list"
+
   # BACKPACK
 
   def list_backpacks(user) do
@@ -72,12 +74,14 @@ defmodule HamsterTravel.Packing do
     %Item{backpack_list_id: list.id, checked: false}
     |> Item.changeset(attrs)
     |> Repo.insert()
+    |> notify_list_event([:item, :created], list.id)
   end
 
   def update_item_checked(%Item{} = item, checked) do
     item
     |> Item.checked_changeset(%{checked: checked})
     |> Repo.update()
+    |> notify_list_event([:item, :updated], item.backpack_list_id)
   end
 
   defp backpack_preloading(query) do
@@ -109,4 +113,16 @@ defmodule HamsterTravel.Packing do
   end
 
   defp process_template(changeset), do: changeset
+
+  defp notify_list_event({:ok, result}, event, list_id) do
+    Phoenix.PubSub.broadcast(
+      HamsterTravel.PubSub,
+      @backpack_list_topic,
+      {event, %{list_id: list_id, result: result}}
+    )
+
+    {:ok, result}
+  end
+
+  defp notify_list_event({:error, reason}, _, _), do: {:error, reason}
 end

@@ -43,7 +43,13 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
       <.form :let={f} for={:item} phx-change="checked_item" phx-target={@myself}>
         <%= label class: "cursor-pointer" do %>
           <.inline>
-            <.checkbox form={f} field={:checked} label={@item.name} value={@item.checked} />
+            <.checkbox
+              form={f}
+              id={"item-#{@item.id}"}
+              field={:checked}
+              label={@item.name}
+              value={@item.checked}
+            />
             <div class="text-sm"><%= @item.name %> <%= @item.count %></div>
           </.inline>
         <% end %>

@@ -8,7 +8,19 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
 
   import HamsterTravelWeb.Card
 
+  alias HamsterTravel.Packing.List
+
   alias HamsterTravelWeb.Packing.BackpackItem
+
+  @topic "backpack_list"
+
+  def mount(_params, _session, socket) do
+    if connected?(socket) do
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, @topic)
+    end
+
+    {:ok, socket}
+  end
 
   def update(assigns, socket) do
     assigns =
@@ -16,6 +28,26 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
       |> set_attributes([], required: [:list])
 
     {:ok, assign(socket, assigns)}
+  end
+
+  def handle_info({[:item, :updated], %{list_id: list_id, result: updated_item}}, socket) do
+    IO.inspect("EVENT")
+    list = socket.assigns.list
+    if list.id != list_id do
+      {:noreply, socket}
+    else
+      updated_items =
+        list.items
+        |> Enum.map(fn item ->
+          if item.id == updated_item.id do
+            updated_item
+          else
+            item
+          end
+        end)
+
+      {:noreply, assign(socket, :list, %List{list | items: updated_items})}
+    end
   end
 
   def render(assigns) do
