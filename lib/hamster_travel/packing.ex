@@ -13,7 +13,7 @@ defmodule HamsterTravel.Packing do
   alias HamsterTravel.Packing.List
   alias HamsterTravel.Packing.Template
 
-  @backpack_list_topic "backpack_list"
+  @topic "backpacks"
 
   # BACKPACK
 
@@ -74,14 +74,14 @@ defmodule HamsterTravel.Packing do
     %Item{backpack_list_id: list.id, checked: false}
     |> Item.changeset(attrs)
     |> Repo.insert()
-    |> notify_list_event([:item, :created], list.id)
+    |> notify_event([:item, :created])
   end
 
   def update_item_checked(%Item{} = item, checked) do
     item
     |> Item.checked_changeset(%{checked: checked})
     |> Repo.update()
-    |> notify_list_event([:item, :updated], item.backpack_list_id)
+    |> notify_event([:item, :updated])
   end
 
   defp backpack_preloading(query) do
@@ -114,15 +114,23 @@ defmodule HamsterTravel.Packing do
 
   defp process_template(changeset), do: changeset
 
-  defp notify_list_event({:ok, result}, event, list_id) do
+  defp notify_event({:ok, result}, [:item, _] = event) do
+    list_id = result.backpack_list_id
+
+    backpack_id = Repo.one(from(l in List, select: l.backpack_id, where: l.id == ^list_id))
+
     Phoenix.PubSub.broadcast(
       HamsterTravel.PubSub,
-      @backpack_list_topic,
-      {event, %{list_id: list_id, result: result}}
+      @topic <> ":#{backpack_id}",
+      {event, %{item: result}}
     )
 
     {:ok, result}
   end
 
-  defp notify_list_event({:error, reason}, _, _), do: {:error, reason}
+  defp notify_event({:ok, result}, _) do
+    {:ok, result}
+  end
+
+  defp notify_event({:error, reason}, _), do: {:error, reason}
 end

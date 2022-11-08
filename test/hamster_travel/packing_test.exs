@@ -87,30 +87,38 @@ defmodule HamsterTravel.PackingTest do
 
       backpack = Packing.get_backpack!(backpack.id)
 
+      list_names = backpack.lists |> Enum.map(fn list -> list.name end) |> Enum.sort()
+      assert ["Clothes", "Docs", "Hygiene"] = list_names
+
+      hygiene_items =
+        backpack.lists
+        |> Enum.filter(fn list -> list.name == "Hygiene" end)
+        |> Enum.flat_map(fn list -> list.items end)
+        |> Enum.sort_by(fn item -> item.name end)
+
       assert [
-               %List{
-                 name: "Hygiene",
-                 items: [
-                   %Item{
-                     name: "Napkins",
-                     count: 2
-                   },
-                   %Item{
-                     name: "Toothpaste",
-                     count: 83
-                   },
-                   %Item{
-                     name: "Toothbrush",
-                     count: 3
-                   }
-                 ]
+               %Item{
+                 name: "Napkins",
+                 count: 2
                },
-               %List{
-                 name: "Docs",
-                 items: [%Item{name: "Passports", count: 42}, %Item{name: "Insurance", count: 3}]
+               %Item{
+                 name: "Toothbrush",
+                 count: 3
                },
-               %List{name: "Clothes"}
-             ] = backpack.lists
+               %Item{
+                 name: "Toothpaste",
+                 count: 83
+               }
+             ] = hygiene_items
+
+      docs_items =
+        backpack.lists
+        |> Enum.filter(fn list -> list.name == "Docs" end)
+        |> Enum.flat_map(fn list -> list.items end)
+        |> Enum.sort_by(fn item -> item.name end)
+
+      assert [%Item{name: "Insurance", count: 3}, %Item{name: "Passports", count: 42}] =
+               docs_items
     end
 
     test "update_backpack/2 with valid data updates the backpack and the slug" do

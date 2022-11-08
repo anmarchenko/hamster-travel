@@ -31,8 +31,8 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
   end
 
   def handle_info({[:item, :updated], %{list_id: list_id, result: updated_item}}, socket) do
-    IO.inspect("EVENT")
     list = socket.assigns.list
+
     if list.id != list_id do
       {:noreply, socket}
     else
