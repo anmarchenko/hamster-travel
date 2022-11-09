@@ -178,5 +178,15 @@ defmodule HamsterTravel.PackingTest do
       {:ok, item} = Packing.update_item_checked(item, false)
       refute item.checked
     end
+
+    test "update_item_checked/2 sends pubsub broadcast" do
+      backpack = backpack_fixture()
+      list = list_fixture(%{backpack_id: backpack.id})
+      item = item_fixture(%{backpack_list_id: list.id})
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "backpacks" <> ":#{backpack.id}")
+
+      {:ok, item} = Packing.update_item_checked(item, true)
+      assert_received {[:item, :updated], %{item: ^item}}
+    end
   end
 end

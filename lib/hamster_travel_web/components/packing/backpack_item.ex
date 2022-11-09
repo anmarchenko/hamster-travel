@@ -22,7 +22,9 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
   end
 
   def handle_event("checked_item", %{"item" => %{"checked" => checked}}, socket) do
-    case Packing.update_item_checked(socket.assigns.item, checked) do
+    item_to_update = socket.assigns.item
+
+    case Packing.update_item_checked(item_to_update, checked) do
       {:ok, item} ->
         socket =
           socket
@@ -31,7 +33,9 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
         {:noreply, socket}
 
       {:error, error} ->
-        Logger.error("Could not update item because of #{Kernel.inspect(error)}")
+        Logger.error(
+          "Could not update an item #{item_to_update.id} because of #{Kernel.inspect(error)}"
+        )
 
         {:noreply, socket}
     end
