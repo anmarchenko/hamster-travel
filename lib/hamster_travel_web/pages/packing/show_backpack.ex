@@ -12,6 +12,8 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
   import HamsterTravelWeb.Link
 
   alias HamsterTravel.Packing
+  alias HamsterTravel.Packing.Backpack
+  alias HamsterTravel.Packing.List
   alias HamsterTravel.Packing.Policy
 
   alias HamsterTravelWeb.Packing.BackpackList
@@ -23,6 +25,8 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
         {:ok, socket, layout: {HamsterTravelWeb.LayoutView, "not_found.html"}}
 
       backpack ->
+        Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "backpacks:#{backpack.id}")
+
         socket =
           socket
           |> assign(active_nav: :backpacks)
@@ -31,6 +35,33 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
 
         {:ok, socket}
     end
+  end
+
+  @impl true
+  def handle_info({[:item, :updated], %{item: updated_item}}, socket) do
+    backpack = socket.assigns.backpack
+
+    updated_lists =
+      backpack.lists
+      |> Enum.map(fn list ->
+        if list.id == updated_item.backpack_list_id do
+          updated_items =
+            list.items
+            |> Enum.map(fn item ->
+              if item.id == updated_item.id do
+                updated_item
+              else
+                item
+              end
+            end)
+
+          %List{list | items: updated_items}
+        else
+          list
+        end
+      end)
+
+    {:noreply, assign(socket, :backpack, %Backpack{backpack | lists: updated_lists})}
   end
 
   @impl true
