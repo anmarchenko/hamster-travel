@@ -5,13 +5,12 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
 
   use HamsterTravelWeb, :live_component
 
+  import HamsterTravelWeb.Inline
+  import PhxComponentHelpers
+
   require Logger
 
   alias HamsterTravel.Packing
-
-  import PhxComponentHelpers
-
-  import HamsterTravelWeb.Inline
 
   def update(assigns, socket) do
     assigns =

@@ -6,6 +6,8 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
 
   require Logger
 
+  import HamsterTravel.Collections
+
   import HamsterTravelWeb.Container
   import HamsterTravelWeb.Header
   import HamsterTravelWeb.Inline
@@ -41,27 +43,26 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
   def handle_info({[:item, :updated], %{item: updated_item}}, socket) do
     backpack = socket.assigns.backpack
 
-    updated_lists =
-      backpack.lists
-      |> Enum.map(fn list ->
-        if list.id == updated_item.backpack_list_id do
-          updated_items =
-            list.items
-            |> Enum.map(fn item ->
-              if item.id == updated_item.id do
-                updated_item
-              else
-                item
-              end
-            end)
-
-          %List{list | items: updated_items}
-        else
-          list
-        end
-      end)
-
-    {:noreply, assign(socket, :backpack, %Backpack{backpack | lists: updated_lists})}
+    {:noreply,
+     assign(socket, :backpack, %Backpack{
+       backpack
+       | lists:
+           replace(
+             backpack.lists,
+             fn list -> list.id == updated_item.backpack_list_id end,
+             fn list ->
+               %List{
+                 list
+                 | items:
+                     replace(
+                       list.items,
+                       fn item -> item.id == updated_item.id end,
+                       fn _ -> updated_item end
+                     )
+               }
+             end
+           )
+     })}
   end
 
   @impl true
