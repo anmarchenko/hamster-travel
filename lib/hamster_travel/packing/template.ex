@@ -1,4 +1,6 @@
 defmodule HamsterTravel.Packing.Template do
+  require Logger
+
   alias HamsterTravel.Packing.{Item, List}
   alias HamsterTravel.Result
 
@@ -29,6 +31,26 @@ defmodule HamsterTravel.Packing.Template do
         {:error, ["invalid template format"]}
     end
   end
+
+  def from_changeset(
+        %Ecto.Changeset{changes: %{template: template, days: days, nights: nights}} = changeset
+      )
+      when template != nil do
+    case execute(template, %{days: days, nights: nights}) do
+      {:ok, lists} ->
+        changeset
+        |> Ecto.Changeset.put_assoc(:lists, lists)
+
+      {:error, messages} ->
+        Logger.warn(
+          "[HamsterTravel.Packing] Template #{template} could not be parsed. Errors were: #{inspect(messages)} "
+        )
+
+        changeset
+    end
+  end
+
+  def from_changeset(changeset), do: changeset
 
   defp parse_list(nil, _), do: %List{}
 

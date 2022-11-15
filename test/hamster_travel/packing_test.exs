@@ -160,8 +160,8 @@ defmodule HamsterTravel.PackingTest do
 
       assert {:ok, %Backpack{}} = Packing.delete_backpack(backpack)
       assert_raise Ecto.NoResultsError, fn -> Packing.get_backpack!(backpack.id) end
-      assert 0 == Repo.one(from i in "backpack_items", select: count(i.id))
-      assert 0 == Repo.one(from i in "backpack_lists", select: count(i.id))
+      assert 0 == Repo.one(from(i in "backpack_items", select: count(i.id)))
+      assert 0 == Repo.one(from(i in "backpack_lists", select: count(i.id)))
     end
 
     test "change_backpack/1 returns a backpack changeset" do
@@ -171,6 +171,24 @@ defmodule HamsterTravel.PackingTest do
   end
 
   describe "items" do
+    setup do
+      list = list_fixture()
+      {:ok, list: list}
+    end
+
+    @invalid_attrs %{name: nil, count: nil}
+
+    test "create_item/2 creates a new valid item", %{list: list} do
+      {:ok, item} = Packing.create_item(%{name: "toothbrush", count: 3}, list)
+      refute item.checked
+      assert "toothbrush" = item.name
+      assert 3 = item.count
+    end
+
+    test "create_item/2 returns errors if item is invalid", %{list: list} do
+      # TBD
+    end
+
     test "update_item_checked/2 sets checked property for item" do
       item = item_fixture()
       {:ok, item} = Packing.update_item_checked(item, true)

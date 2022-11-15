@@ -42,7 +42,7 @@ defmodule HamsterTravel.Packing do
   def create_backpack(attrs \\ %{}, user) do
     %Backpack{user_id: user.id}
     |> Backpack.changeset(attrs)
-    |> process_template()
+    |> Template.from_changeset()
     |> Repo.insert()
   end
 
@@ -70,9 +70,14 @@ defmodule HamsterTravel.Packing do
 
   # ITEMS
 
+  def new_item do
+    Item.changeset(%Item{}, %{})
+  end
+
   def create_item(attrs \\ %{}, %List{} = list) do
     %Item{backpack_list_id: list.id, checked: false}
     |> Item.changeset(attrs)
+    |> Item.parse_name()
     |> Repo.insert()
     |> notify_event([:item, :created])
   end
@@ -93,26 +98,6 @@ defmodule HamsterTravel.Packing do
     query
     |> Repo.preload(lists: lists_preload_query)
   end
-
-  defp process_template(
-         %Ecto.Changeset{changes: %{template: template, days: days, nights: nights}} = changeset
-       )
-       when template != nil do
-    case Template.execute(template, %{days: days, nights: nights}) do
-      {:ok, lists} ->
-        changeset
-        |> Ecto.Changeset.put_assoc(:lists, lists)
-
-      {:error, messages} ->
-        Logger.warn(
-          "[HamsterTravel.Packing] Template #{template} could not be parsed. Errors were: #{inspect(messages)} "
-        )
-
-        changeset
-    end
-  end
-
-  defp process_template(changeset), do: changeset
 
   defp notify_event({:ok, result}, [:item, _] = event) do
     list_id = result.backpack_list_id
