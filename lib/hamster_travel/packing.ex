@@ -75,9 +75,10 @@ defmodule HamsterTravel.Packing do
   end
 
   def create_item(attrs \\ %{}, %List{} = list) do
+    processed_attrs = Item.extract_count_from_name(attrs)
+
     %Item{backpack_list_id: list.id, checked: false}
-    |> Item.changeset(attrs)
-    |> Item.parse_name()
+    |> Item.changeset(processed_attrs)
     |> Repo.insert()
     |> notify_event([:item, :created])
   end

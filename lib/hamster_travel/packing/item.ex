@@ -27,19 +27,25 @@ defmodule HamsterTravel.Packing.Item do
     |> validate_required([:checked])
   end
 
-  def parse_name(%Ecto.Changeset{changes: %{name: name, count: nil}} = changeset)
+  def extract_count_from_name(%{name: _, count: count} = attrs)
+      when count != nil do
+    attrs
+  end
+
+  def extract_count_from_name(%{name: name} = attrs)
       when name != nil do
     with name_parts when length(name_parts) > 1 <- String.split(name),
          tail_element when is_binary(tail_element) <- List.last(name_parts),
          {count, _} <- Integer.parse(tail_element) do
-      changeset
-      |> put_change(:count, count)
+      attrs
+      |> Map.put(:count, count)
+      |> Map.put(:name, name |> String.trim_trailing(tail_element) |> String.trim())
     else
       _ ->
-        changeset
-        |> put_change(:count, 1)
+        attrs
+        |> Map.put(:count, 1)
     end
   end
 
-  def parse_name(changeset), do: changeset
+  def extract_count_from_name(attrs), do: attrs
 end

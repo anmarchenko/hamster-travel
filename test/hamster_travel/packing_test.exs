@@ -2,7 +2,7 @@ defmodule HamsterTravel.PackingTest do
   use HamsterTravel.DataCase
 
   alias HamsterTravel.Packing
-  alias HamsterTravel.Packing.{Backpack, Item, List}
+  alias HamsterTravel.Packing.{Backpack, Item}
 
   import HamsterTravel.PackingFixtures
 
@@ -186,7 +186,28 @@ defmodule HamsterTravel.PackingTest do
     end
 
     test "create_item/2 returns errors if item is invalid", %{list: list} do
-      # TBD
+      assert {:error, %Ecto.Changeset{}} = Packing.create_item(@invalid_attrs, list)
+    end
+
+    test "create_item/2 parses name if count is not provided to get count", %{list: list} do
+      {:ok, item} = Packing.create_item(%{name: "toothbrush a b 3"}, list)
+      refute item.checked
+      assert "toothbrush a b" = item.name
+      assert 3 = item.count
+    end
+
+    test "create_item/2 uses 1 as default count if not provided", %{list: list} do
+      {:ok, item} = Packing.create_item(%{name: "toothbrush"}, list)
+      refute item.checked
+      assert "toothbrush" = item.name
+      assert 1 = item.count
+    end
+
+    test "create_item/2 uses 1 as default count if cannot be parsed as int", %{list: list} do
+      {:ok, item} = Packing.create_item(%{name: "toothbrush a b c d"}, list)
+      refute item.checked
+      assert "toothbrush a b c d" = item.name
+      assert 1 = item.count
     end
 
     test "update_item_checked/2 sets checked property for item" do
