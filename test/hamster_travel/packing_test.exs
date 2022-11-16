@@ -185,6 +185,13 @@ defmodule HamsterTravel.PackingTest do
       assert 3 = item.count
     end
 
+    test "create_item/2 sends pubsub event", %{list: list} do
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "backpacks" <> ":#{list.backpack_id}")
+
+      {:ok, item} = Packing.create_item(%{name: "toothbrush", count: 3}, list)
+      assert_received {[:item, :created], %{item: ^item}}
+    end
+
     test "create_item/2 returns errors if item is invalid", %{list: list} do
       assert {:error, %Ecto.Changeset{}} = Packing.create_item(@invalid_attrs, list)
     end
