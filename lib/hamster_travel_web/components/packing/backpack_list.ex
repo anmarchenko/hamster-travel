@@ -8,6 +8,7 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
 
   import HamsterTravelWeb.Card
 
+  alias HamsterTravelWeb.Packing.AddItem
   alias HamsterTravelWeb.Packing.BackpackItem
 
   def update(assigns, socket) do
@@ -33,6 +34,7 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
               id={"item-#{item.id}"}
               item={item}
             />
+            <.live_component module={AddItem} id={"item-add-#{@list.id}"} list={@list} />
           </div>
         </div>
       </.card>

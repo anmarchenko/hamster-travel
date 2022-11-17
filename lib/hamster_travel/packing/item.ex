@@ -32,20 +32,39 @@ defmodule HamsterTravel.Packing.Item do
     attrs
   end
 
+  def extract_count_from_name(%{"name" => _, "count" => count} = attrs)
+      when count != nil do
+    attrs
+  end
+
   def extract_count_from_name(%{name: name} = attrs)
       when name != nil do
-    with name_parts when length(name_parts) > 1 <- String.split(name),
-         tail_element when is_binary(tail_element) <- List.last(name_parts),
-         {count, _} <- Integer.parse(tail_element) do
-      attrs
-      |> Map.put(:count, count)
-      |> Map.put(:name, name |> String.trim_trailing(tail_element) |> String.trim())
-    else
-      _ ->
-        attrs
-        |> Map.put(:count, 1)
-    end
+    {name, count} = parse_name(name)
+
+    attrs
+    |> Map.put(:count, count)
+    |> Map.put(:name, name)
+  end
+
+  def extract_count_from_name(%{"name" => name} = attrs)
+      when name != nil do
+    {name, count} = parse_name(name)
+
+    attrs
+    |> Map.put("count", count)
+    |> Map.put("name", name)
   end
 
   def extract_count_from_name(attrs), do: attrs
+
+  defp parse_name(name) do
+    with name_parts when length(name_parts) > 1 <- String.split(name),
+         tail_element when is_binary(tail_element) <- List.last(name_parts),
+         {count, _} <- Integer.parse(tail_element) do
+      {name |> String.trim_trailing(tail_element) |> String.trim(), count}
+    else
+      _ ->
+        {name, 1}
+    end
+  end
 end

@@ -203,6 +203,13 @@ defmodule HamsterTravel.PackingTest do
       assert 3 = item.count
     end
 
+    test "create_item/2 works with string keys too", %{list: list} do
+      {:ok, item} = Packing.create_item(%{"name" => "toothbrush 3"}, list)
+      refute item.checked
+      assert "toothbrush" = item.name
+      assert 3 = item.count
+    end
+
     test "create_item/2 uses 1 as default count if not provided", %{list: list} do
       {:ok, item} = Packing.create_item(%{name: "toothbrush"}, list)
       refute item.checked

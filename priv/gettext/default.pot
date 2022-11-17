@@ -277,3 +277,8 @@ msgstr[1] ""
 #, elixir-autogen, elixir-format
 msgid "Are you sure you want to delete backpack?"
 msgstr ""
+
+#: lib/hamster_travel_web/components/packing/add_item.ex:46
+#, elixir-autogen, elixir-format
+msgid "Add backpack item"
+msgstr ""
