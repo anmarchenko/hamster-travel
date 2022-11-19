@@ -20,6 +20,7 @@ defmodule HamsterTravelWeb.Packing.AddItem do
       socket
       |> assign(assigns)
       |> assign(changeset: Packing.new_item())
+      |> assign(name: nil)
 
     {:ok, socket}
   end
@@ -32,7 +33,7 @@ defmodule HamsterTravelWeb.Packing.AddItem do
   def handle_event("create_item", %{"item" => item_params}, socket) do
     case Packing.create_item(item_params, socket.assigns.list) do
       {:ok, _} ->
-        {:noreply, assign(socket, %{changeset: Packing.new_item()})}
+        {:noreply, assign(socket, %{changeset: Packing.new_item(), name: nil})}
 
       {:error, changeset} ->
         Logger.warn(
@@ -43,11 +44,22 @@ defmodule HamsterTravelWeb.Packing.AddItem do
     end
   end
 
+  def handle_event("change", %{"item" => %{"name" => name}}, socket) do
+    {:noreply, assign(socket, %{name: name})}
+  end
+
   def render(assigns) do
     ~H"""
     <div class="mt-3">
-      <.form :let={f} for={:item} phx-submit="create_item" phx-target={@myself} as={:item}>
-        <.text_input form={f} field={:name} placeholder={gettext("Add backpack item")} />
+      <.form
+        :let={f}
+        for={@changeset}
+        phx-submit="create_item"
+        phx-change="change"
+        phx-target={@myself}
+        as={:item}
+      >
+        <.text_input form={f} field={:name} placeholder={gettext("Add backpack item")} value={@name} />
       </.form>
     </div>
     """
