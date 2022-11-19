@@ -58,6 +58,8 @@ defmodule HamsterTravel.Packing.Item do
   def extract_count_from_name(attrs), do: attrs
 
   defp parse_name(name) do
+    name = String.trim(name)
+
     with name_parts when length(name_parts) > 1 <- String.split(name),
          tail_element when is_binary(tail_element) <- List.last(name_parts),
          {count, _} <- Integer.parse(tail_element) do

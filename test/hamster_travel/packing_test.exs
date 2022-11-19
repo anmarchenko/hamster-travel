@@ -203,6 +203,13 @@ defmodule HamsterTravel.PackingTest do
       assert 3 = item.count
     end
 
+    test "create_item/2 correctly processes trailing whitespaces", %{list: list} do
+      {:ok, item} = Packing.create_item(%{name: "toothbrush a b 3           "}, list)
+      refute item.checked
+      assert "toothbrush a b" = item.name
+      assert 3 = item.count
+    end
+
     test "create_item/2 works with string keys too", %{list: list} do
       {:ok, item} = Packing.create_item(%{"name" => "toothbrush 3"}, list)
       refute item.checked
