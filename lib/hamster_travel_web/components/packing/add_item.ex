@@ -6,6 +6,7 @@ defmodule HamsterTravelWeb.Packing.AddItem do
   use HamsterTravelWeb, :live_component
 
   import PhxComponentHelpers
+  import HamsterTravelWeb.Inline
 
   require Logger
 
@@ -59,7 +60,17 @@ defmodule HamsterTravelWeb.Packing.AddItem do
         phx-target={@myself}
         as={:item}
       >
-        <.text_input form={f} field={:name} placeholder={gettext("Add backpack item")} value={@name} />
+        <.inline>
+          <.text_input
+            form={f}
+            field={:name}
+            placeholder={gettext("Add backpack item")}
+            value={@name}
+          />
+          <.icon_button link_type="button" size="xs" color="gray">
+            <Heroicons.Outline.plus class="h-4 w-4" />
+          </.icon_button>
+        </.inline>
       </.form>
     </div>
     """
