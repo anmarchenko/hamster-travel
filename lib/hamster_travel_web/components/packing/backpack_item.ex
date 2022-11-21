@@ -44,18 +44,31 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
     ~H"""
     <div class="mt-3">
       <.form :let={f} for={:item} phx-change="checked_item" phx-target={@myself}>
-        <%= label class: "cursor-pointer" do %>
-          <.inline>
-            <.checkbox
-              form={f}
-              id={"item-#{@item.id}"}
-              field={:checked}
-              label={@item.name}
-              value={@item.checked}
-            />
-            <div class="text-sm"><%= @item.name %> <%= @item.count %></div>
-          </.inline>
-        <% end %>
+        <.inline class="!gap gap-1">
+          <%= label class: "cursor-pointer grow mr-2" do %>
+            <.inline>
+              <.checkbox
+                form={f}
+                id={"item-#{@item.id}"}
+                field={:checked}
+                label={@item.name}
+                value={@item.checked}
+              />
+              <div class="text-sm grow"><%= @item.name %></div>
+              <div class="text-sm justify-self-end"><%= @item.count %></div>
+            </.inline>
+          <% end %>
+          <.icon_button link_type="button" size="xs" color="gray" class="justify-self-end">
+            <Heroicons.Outline.pencil class={
+              PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
+            } />
+          </.icon_button>
+          <.icon_button link_type="button" size="xs" color="gray" class="justify-self-end">
+            <Heroicons.Outline.trash class={
+              PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
+            } />
+          </.icon_button>
+        </.inline>
       </.form>
     </div>
     """

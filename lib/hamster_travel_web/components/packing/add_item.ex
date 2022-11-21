@@ -63,12 +63,15 @@ defmodule HamsterTravelWeb.Packing.AddItem do
         <.inline>
           <.text_input
             form={f}
+            id={"add-item-#{@list.id}"}
             field={:name}
             placeholder={gettext("Add backpack item")}
             value={@name}
           />
           <.icon_button link_type="button" size="xs" color="gray">
-            <Heroicons.Outline.plus class="h-4 w-4" />
+            <Heroicons.Outline.plus class={
+              PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
+            } />
           </.icon_button>
         </.inline>
       </.form>
