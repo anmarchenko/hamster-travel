@@ -173,7 +173,8 @@ defmodule HamsterTravel.PackingTest do
   describe "items" do
     setup do
       list = list_fixture()
-      {:ok, list: list}
+      item = item_fixture()
+      {:ok, list: list, item: item}
     end
 
     @invalid_attrs %{name: nil, count: nil}
@@ -247,6 +248,22 @@ defmodule HamsterTravel.PackingTest do
 
       {:ok, item} = Packing.update_item_checked(item, true)
       assert_received {[:item, :updated], %{item: ^item}}
+    end
+
+    test "update_item/2 updates name and count", %{item: item} do
+      assert {:ok, updated_item} = Packing.update_item(item, %{name: "Keks", count: 101})
+      assert "Keks" = updated_item.name
+      assert 101 = updated_item.count
+    end
+
+    test "update_item/2 returns errors when invalid attrs submitted", %{item: item} do
+      assert {:error, %Ecto.Changeset{}} = Packing.update_item(item, @invalid_attrs)
+    end
+
+    test "update_item/2 parses name and count", %{item: item} do
+      assert {:ok, updated_item} = Packing.update_item(item, %{name: "Keks 102"})
+      assert "Keks" = updated_item.name
+      assert 102 = updated_item.count
     end
   end
 end

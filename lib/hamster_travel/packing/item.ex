@@ -27,6 +27,12 @@ defmodule HamsterTravel.Packing.Item do
     |> validate_required([:checked])
   end
 
+  def update_changeset(item, attrs) do
+    item
+    |> cast(attrs, [:name, :count])
+    |> validate_required([:name, :count])
+  end
+
   def extract_count_from_name(%{name: _, count: count} = attrs)
       when count != nil do
     attrs

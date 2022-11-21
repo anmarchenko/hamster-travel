@@ -74,6 +74,10 @@ defmodule HamsterTravel.Packing do
     Item.changeset(%Item{}, %{})
   end
 
+  def format_item(%Item{} = item) do
+    item.name <> " " <> Integer.to_string(item.count)
+  end
+
   def create_item(attrs \\ %{}, %List{} = list) do
     processed_attrs = Item.extract_count_from_name(attrs)
 
@@ -86,6 +90,15 @@ defmodule HamsterTravel.Packing do
   def update_item_checked(%Item{} = item, checked) do
     item
     |> Item.checked_changeset(%{checked: checked})
+    |> Repo.update()
+    |> notify_event([:item, :updated])
+  end
+
+  def update_item(%Item{} = item, attrs) do
+    processed_attrs = Item.extract_count_from_name(attrs)
+
+    item
+    |> Item.update_changeset(processed_attrs)
     |> Repo.update()
     |> notify_event([:item, :updated])
   end
