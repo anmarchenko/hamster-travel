@@ -17,7 +17,9 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
       assigns
       |> set_attributes([], required: [:item])
 
-    {:ok, assign(socket, assigns)}
+    socket = socket |> assign(assigns) |> assign(:edit, false)
+
+    {:ok, socket}
   end
 
   def handle_event("checked_item", %{"item" => %{"checked" => checked}}, socket) do
@@ -40,12 +42,23 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
     end
   end
 
-  def render(assigns) do
+  def handle_event("edit", _, socket) do
+    item = socket.assigns.item
+
+    socket =
+      socket
+      |> assign(:edit, true)
+      |> assign(:name, item.name <> " " <> Integer.to_string(item.count))
+
+    {:noreply, socket}
+  end
+
+  def render(%{edit: false} = assigns) do
     ~H"""
     <div class="mt-3">
-      <.form :let={f} for={:item} phx-change="checked_item" phx-target={@myself}>
-        <.inline class="!gap gap-1">
-          <%= label class: "cursor-pointer grow mr-2" do %>
+      <.inline class="!gap gap-1">
+        <.form :let={f} for={:item} class="grow mr-2" phx-change="checked_item" phx-target={@myself}>
+          <%= label class: "cursor-pointer" do %>
             <.inline>
               <.checkbox
                 form={f}
@@ -58,18 +71,63 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
               <div class="text-sm justify-self-end"><%= @item.count %></div>
             </.inline>
           <% end %>
-          <.icon_button link_type="button" size="xs" color="gray" class="justify-self-end">
-            <Heroicons.Outline.pencil class={
-              PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
-            } />
-          </.icon_button>
-          <.icon_button link_type="button" size="xs" color="gray" class="justify-self-end">
-            <Heroicons.Outline.trash class={
-              PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
-            } />
-          </.icon_button>
-        </.inline>
-      </.form>
+        </.form>
+        <.icon_button
+          link_type="button"
+          size="xs"
+          color="gray"
+          class="justify-self-end"
+          phx-click="edit"
+          phx-target={@myself}
+        >
+          <Heroicons.Outline.pencil class={
+            PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
+          } />
+        </.icon_button>
+        <.icon_button link_type="button" size="xs" color="gray" class="justify-self-end">
+          <Heroicons.Outline.trash class={
+            PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
+          } />
+        </.icon_button>
+      </.inline>
+    </div>
+    """
+  end
+
+  def render(%{edit: true} = assigns) do
+    ~H"""
+    <div class="mt-3">
+      <.inline>
+        <.form
+          :let={f}
+          for={:edit_item}
+          phx-submit="update_item"
+          phx-change="change"
+          phx-target={@myself}
+          as={:item}
+        >
+          <.inline>
+            <.text_input
+              form={f}
+              id={"update-item-#{@item.id}"}
+              field={:name}
+              placeholder={gettext("Add backpack item")}
+              value={@name}
+              autofocus
+            />
+            <.icon_button link_type="button" size="xs" color="gray">
+              <Heroicons.Outline.check class={
+                PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
+              } />
+            </.icon_button>
+          </.inline>
+        </.form>
+        <.icon_button link_type="button" size="xs" color="gray">
+          <Heroicons.Outline.x class={
+            PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
+          } />
+        </.icon_button>
+      </.inline>
     </div>
     """
   end
