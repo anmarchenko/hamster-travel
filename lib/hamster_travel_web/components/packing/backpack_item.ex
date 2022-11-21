@@ -61,10 +61,6 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
     {:noreply, socket}
   end
 
-  def handle_event("change_name", %{"item" => %{"name" => name}}, socket) do
-    {:noreply, assign(socket, %{name: name})}
-  end
-
   def handle_event("update", %{"item" => params}, socket) do
     item_to_update = socket.assigns.item
 
@@ -78,7 +74,7 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
         {:noreply, socket}
 
       {:error, error} ->
-        Logger.error(
+        Logger.warn(
           "Could not update an item #{item_to_update.id} because of #{Kernel.inspect(error)}"
         )
 
@@ -146,14 +142,7 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
     ~H"""
     <div class="mt-3">
       <.inline>
-        <.form
-          :let={f}
-          for={:item}
-          phx-submit="update"
-          phx-change="change_name"
-          phx-target={@myself}
-          as={:item}
-        >
+        <.form :let={f} for={:item} phx-submit="update" phx-target={@myself}>
           <.inline>
             <.text_input
               form={f}
@@ -161,7 +150,7 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
               field={:name}
               placeholder={@name}
               value={@name}
-              autofocus
+              x-init="$el.focus()"
             />
             <.icon_button link_type="button" size="xs" color="gray">
               <Heroicons.Outline.check class={
