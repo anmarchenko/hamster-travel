@@ -88,6 +88,13 @@ defmodule HamsterTravelWeb do
       # Use all HTML functionality (forms, tags, etc)
       use Phoenix.HTML
 
+      # routes
+      # TODO: add verified routes
+      alias HamsterTravelWeb.Router.Helpers, as: Routes
+
+      # set of the most important UI components
+      import HamsterTravelWeb.CoreComponents
+
       # use PETAL components
       import PetalComponents.Alert
       import PetalComponents.Avatar
@@ -95,20 +102,23 @@ defmodule HamsterTravelWeb do
       import PetalComponents.Form
       import PetalComponents.Tabs
 
+      # TODO: migrate to V2
       alias PetalComponents.HeroiconsV1, as: Heroicons
 
       # Import LiveView and .heex helpers (live_render, live_patch, <.form>, etc)
+      # TODO: remove it??????
       import Phoenix.Component
 
       # Import basic rendering functionality (render, render_layout, etc)
+      # TODO: remove it??????
       import Phoenix.View
 
+      # TODO: do I use it even?
       import HamsterTravelWeb.ErrorHelpers
-      import HamsterTravelWeb.Gettext
-      import HamsterTravelWeb.Helpers
 
+      # I18n
+      import HamsterTravelWeb.Gettext
       alias HamsterTravelWeb.Cldr, as: Formatter
-      alias HamsterTravelWeb.Router.Helpers, as: Routes
     end
   end
 

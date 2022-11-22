@@ -109,30 +109,16 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
             </.inline>
           <% end %>
         </.form>
-        <.icon_button
-          link_type="button"
-          size="xs"
-          color="gray"
-          class="justify-self-end"
-          phx-click="edit"
-          phx-target={@myself}
-        >
+        <.ht_icon_button class="justify-self-end" click="edit" target={@myself}>
           <Heroicons.Outline.pencil class={
             PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
           } />
-        </.icon_button>
-        <.icon_button
-          link_type="button"
-          size="xs"
-          color="gray"
-          class="justify-self-end"
-          phx-click="delete"
-          phx-target={@myself}
-        >
+        </.ht_icon_button>
+        <.ht_icon_button class="justify-self-end" click="delete" target={@myself}>
           <Heroicons.Outline.trash class={
             PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
           } />
-        </.icon_button>
+        </.ht_icon_button>
       </.inline>
     </div>
     """
@@ -152,24 +138,18 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
               value={@name}
               x-init="$el.focus()"
             />
-            <.icon_button link_type="button" size="xs" color="gray">
+            <.ht_icon_button>
               <Heroicons.Outline.check class={
                 PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
               } />
-            </.icon_button>
+            </.ht_icon_button>
           </.inline>
         </.form>
-        <.icon_button
-          link_type="button"
-          size="xs"
-          color="gray"
-          phx-click="cancel"
-          phx-target={@myself}
-        >
+        <.ht_icon_button click="cancel" target={@myself}>
           <Heroicons.Outline.x class={
             PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
           } />
-        </.icon_button>
+        </.ht_icon_button>
       </.inline>
     </div>
     """

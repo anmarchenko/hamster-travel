@@ -1,7 +1,8 @@
-defmodule HamsterTravelWeb.Helpers do
-  @moduledoc """
-  style and classes helpers
-  """
+defmodule HamsterTravelWeb.CoreComponents do
+  use Phoenix.Component
+
+  alias PetalComponents.Button, as: PetalButton
+
   def plan_url(slug), do: "/plans/#{slug}"
   def plan_url(slug, :itinerary), do: "/plans/#{slug}?tab=itinerary"
   def plan_url(slug, :activities), do: "/plans/#{slug}?tab=activities"
@@ -16,4 +17,25 @@ defmodule HamsterTravelWeb.Helpers do
   def backpack_url(slug), do: "/backpacks/#{slug}"
   def backpack_url(slug, :edit), do: "/backpacks/#{slug}/edit"
   def backpack_url(slug, :delete), do: "/backpacks/#{slug}/delete"
+
+  attr :class, :string, default: nil
+  attr :click, :string, default: nil
+  attr :target, :any, default: nil
+
+  slot(:inner_block, required: true)
+
+  def ht_icon_button(assigns) do
+    ~H"""
+    <PetalButton.icon_button
+      link_type="button"
+      size="xs"
+      color="gray"
+      class={@class}
+      phx-click={@click}
+      phx-target={@target}
+    >
+      <%= render_slot(@inner_block) %>
+    </PetalButton.icon_button>
+    """
+  end
 end
