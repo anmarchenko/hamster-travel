@@ -21,6 +21,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   attr :class, :string, default: nil
   attr :click, :string, default: nil
   attr :target, :any, default: nil
+  attr :color, :string, default: "gray"
 
   slot(:inner_block, required: true)
 
@@ -29,7 +30,7 @@ defmodule HamsterTravelWeb.CoreComponents do
     <PetalButton.icon_button
       link_type="button"
       size="xs"
-      color="gray"
+      color={@color}
       class={@class}
       phx-click={@click}
       phx-target={@target}

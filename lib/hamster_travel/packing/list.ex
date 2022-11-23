@@ -19,4 +19,10 @@ defmodule HamsterTravel.Packing.List do
     |> cast(attrs, [:name, :backpack_id])
     |> validate_required([:name, :backpack_id])
   end
+
+  def update_changeset(list, attrs \\ %{}) do
+    list
+    |> cast(attrs, [:name])
+    |> validate_required([:name])
+  end
 end

@@ -68,6 +68,10 @@ defmodule HamsterTravel.Packing do
     |> Repo.insert()
   end
 
+  def change_list(%List{} = list) do
+    List.update_changeset(list)
+  end
+
   # ITEMS
 
   def new_item do
