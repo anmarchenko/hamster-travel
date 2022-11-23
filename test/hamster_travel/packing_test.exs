@@ -3,6 +3,7 @@ defmodule HamsterTravel.PackingTest do
 
   alias HamsterTravel.Packing
   alias HamsterTravel.Packing.{Backpack, Item}
+  alias HamsterTravel.Repo
 
   import HamsterTravel.PackingFixtures
 
@@ -264,6 +265,22 @@ defmodule HamsterTravel.PackingTest do
       assert {:ok, updated_item} = Packing.update_item(item, %{name: "Keks 102"})
       assert "Keks" = updated_item.name
       assert 102 = updated_item.count
+    end
+
+    test "delete_item/1 deletes an item", %{item: item} do
+      assert {:ok, deleted_item} = Packing.delete_item(item)
+      assert nil == Repo.get(Item, deleted_item.id)
+    end
+
+    test "delete_item/1 sends pubsub event" do
+      backpack = backpack_fixture()
+      list = list_fixture(%{backpack_id: backpack.id})
+      item = item_fixture(%{backpack_list_id: list.id})
+
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "backpacks" <> ":#{backpack.id}")
+
+      {:ok, deleted_item} = Packing.delete_item(item)
+      assert_received {[:item, :deleted], %{item: ^deleted_item}}
     end
   end
 end

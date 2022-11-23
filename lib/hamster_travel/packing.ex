@@ -103,6 +103,11 @@ defmodule HamsterTravel.Packing do
     |> notify_event([:item, :updated])
   end
 
+  def delete_item(%Item{} = item) do
+    Repo.delete(item)
+    |> notify_event([:item, :deleted])
+  end
+
   defp backpack_preloading(query) do
     items_preload_query = from i in Item, order_by: [i.inserted_at, i.id]
 
