@@ -110,12 +110,12 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
             </.inline>
           <% end %>
         </.form>
-        <.ht_icon_button class="justify-self-end" click="edit" target={@myself}>
+        <.ht_icon_button class="justify-self-end" phx-click="edit" phx-target={@myself}>
           <Heroicons.Outline.pencil class={
             PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
           } />
         </.ht_icon_button>
-        <.ht_icon_button class="justify-self-end" click="delete" target={@myself}>
+        <.ht_icon_button class="justify-self-end" phx-click="delete" phx-target={@myself}>
           <Heroicons.Outline.trash class={
             PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
           } />
@@ -146,7 +146,7 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
             </.ht_icon_button>
           </.inline>
         </.form>
-        <.ht_icon_button click="cancel" target={@myself}>
+        <.ht_icon_button phx-click="cancel" phx-target={@myself}>
           <Heroicons.Outline.x class={
             PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
           } />
