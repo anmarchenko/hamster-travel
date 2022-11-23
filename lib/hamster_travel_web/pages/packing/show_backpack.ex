@@ -87,6 +87,31 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
      })}
   end
 
+  def handle_info({[:item, :deleted], %{item: deleted_item}}, socket) do
+    backpack = socket.assigns.backpack
+
+    {:noreply,
+     assign(socket, :backpack, %Backpack{
+       backpack
+       | lists:
+           replace(
+             backpack.lists,
+             fn list -> list.id == deleted_item.backpack_list_id end,
+             fn list ->
+               %List{
+                 list
+                 | items:
+                     replace(
+                       list.items,
+                       fn item -> item.id == deleted_item.id end,
+                       fn _ -> nil end
+                     )
+               }
+             end
+           )
+     })}
+  end
+
   @impl true
   def handle_event("delete_backpack", _params, socket) do
     %{backpack: backpack, current_user: user} = socket.assigns

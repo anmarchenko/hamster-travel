@@ -87,6 +87,7 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
   end
 
   def handle_event("delete", _, socket) do
+    Packing.delete_item(socket.assigns.item)
     {:noreply, socket}
   end
 

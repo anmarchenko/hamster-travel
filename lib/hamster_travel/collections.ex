@@ -12,5 +12,6 @@ defmodule HamsterTravel.Collections do
         item
       end
     end)
+    |> Enum.filter(fn item -> item != nil end)
   end
 end
