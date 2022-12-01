@@ -54,16 +54,8 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
           <div class="p-4 bg-violet-700 dark:bg-violet-900 rounded-t-lg">
             <.inline>
               <div class="grow text-white dark:text-zinc-300"><%= @list.name %></div>
-              <.ht_icon_button color="white" phx-click="edit" phx-target={@myself}>
-                <Heroicons.Outline.pencil class={
-                  PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
-                } />
-              </.ht_icon_button>
-              <.ht_icon_button color="white" phx-click="delete" phx-target={@myself}>
-                <Heroicons.Outline.trash class={
-                  PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
-                } />
-              </.ht_icon_button>
+              <.ht_icon_button icon={:pencil} color="white" phx-click="edit" phx-target={@myself} />
+              <.ht_icon_button icon={:trash} color="white" phx-click="delete" phx-target={@myself} />
             </.inline>
           </div>
           <div class="p-4">
@@ -96,18 +88,10 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
                     field={:name}
                     x-init="$el.focus()"
                   />
-                  <.ht_icon_button color="white">
-                    <Heroicons.Outline.check class={
-                      PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
-                    } />
-                  </.ht_icon_button>
+                  <.ht_icon_button icon={:check} color="white" />
                 </.inline>
               </.form>
-              <.ht_icon_button color="white" phx-click="cancel" phx-target={@myself}>
-                <Heroicons.Outline.x class={
-                  PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
-                } />
-              </.ht_icon_button>
+              <.ht_icon_button icon={:x} color="white" phx-click="cancel" phx-target={@myself} />
             </.inline>
           </div>
           <div class="p-4">

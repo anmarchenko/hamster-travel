@@ -110,16 +110,18 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
             </.inline>
           <% end %>
         </.form>
-        <.ht_icon_button class="justify-self-end" phx-click="edit" phx-target={@myself}>
-          <Heroicons.Outline.pencil class={
-            PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
-          } />
-        </.ht_icon_button>
-        <.ht_icon_button class="justify-self-end" phx-click="delete" phx-target={@myself}>
-          <Heroicons.Outline.trash class={
-            PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
-          } />
-        </.ht_icon_button>
+        <.ht_icon_button
+          icon={:pencil}
+          class="justify-self-end"
+          phx-click="edit"
+          phx-target={@myself}
+        />
+        <.ht_icon_button
+          icon={:trash}
+          class="justify-self-end"
+          phx-click="delete"
+          phx-target={@myself}
+        />
       </.inline>
     </div>
     """
@@ -139,18 +141,10 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
               value={@name}
               x-init="$el.focus()"
             />
-            <.ht_icon_button>
-              <Heroicons.Outline.check class={
-                PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
-              } />
-            </.ht_icon_button>
+            <.ht_icon_button icon={:check} />
           </.inline>
         </.form>
-        <.ht_icon_button phx-click="cancel" phx-target={@myself}>
-          <Heroicons.Outline.x class={
-            PetalComponents.Button.get_icon_button_spinner_size_classes("xs")
-          } />
-        </.ht_icon_button>
+        <.ht_icon_button icon={:x} phx-click="cancel" phx-target={@myself} />
       </.inline>
     </div>
     """

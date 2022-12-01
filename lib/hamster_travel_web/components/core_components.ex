@@ -1,6 +1,8 @@
 defmodule HamsterTravelWeb.CoreComponents do
   use Phoenix.Component
 
+  alias PetalComponents.HeroiconsV1, as: Heroicons
+
   def plan_url(slug), do: "/plans/#{slug}"
   def plan_url(slug, :itinerary), do: "/plans/#{slug}?tab=itinerary"
   def plan_url(slug, :activities), do: "/plans/#{slug}?tab=activities"
@@ -22,14 +24,14 @@ defmodule HamsterTravelWeb.CoreComponents do
     |> Enum.join(" ")
   end
 
-  attr :class, :string, default: nil
-  attr :"phx-click", :string, default: nil
-  attr :"phx-target", :any, default: nil
-  attr :disabled, :boolean, default: false
+  attr :icon, :atom, required: true
   attr :color, :string, default: "gray"
   attr :size, :string, default: "xs"
+  attr :class, :string, default: nil
 
-  slot(:inner_block, required: true)
+  attr :disabled, :boolean, default: false
+  attr :"phx-click", :string, default: nil
+  attr :"phx-target", :any, default: nil
 
   def ht_icon_button(assigns) do
     ~H"""
@@ -44,10 +46,19 @@ defmodule HamsterTravelWeb.CoreComponents do
           @class
         ])
       }
-      {assigns_to_attributes(assigns, [:class, :color, :size])}
+      {assigns_to_attributes(assigns, [:icon, :color, :size, :class])}
     >
-      <%= render_slot(@inner_block) %>
+      <.icon icon={@icon} class={get_icon_button_pic_size_classes(@size)} />
     </button>
+    """
+  end
+
+  attr :icon, :atom, required: true
+  attr :rest, :global, default: %{class: "w-5 h-5"}
+
+  defp icon(assigns) do
+    ~H"""
+    <%= apply(Heroicons.Outline, @icon, [assigns]) %>
     """
   end
 
@@ -57,10 +68,16 @@ defmodule HamsterTravelWeb.CoreComponents do
   defp get_icon_button_size_classes("lg"), do: "w-12 h-12"
   defp get_icon_button_size_classes("xl"), do: "w-14 h-14"
 
+  defp get_icon_button_pic_size_classes("xs"), do: "w-5 h-5"
+  defp get_icon_button_pic_size_classes("sm"), do: "w-6 h-6"
+  defp get_icon_button_pic_size_classes("md"), do: "w-7 h-7"
+  defp get_icon_button_pic_size_classes("lg"), do: "w-8 h-8"
+  defp get_icon_button_pic_size_classes("xl"), do: "w-10 h-10"
+
   defp get_icon_button_color_classes("primary"), do: "text-primary-600 dark:text-primary-500"
 
   defp get_icon_button_color_classes("white"),
-    do: "text-white dark:text-white-400 dark:hover:text-white-900"
+    do: "text-white dark:text-zinc-400 dark:hover:text-zinc-200"
 
   defp get_icon_button_color_classes("secondary"),
     do: "text-secondary-600 dark:text-secondary-500"
