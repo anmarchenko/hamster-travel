@@ -257,6 +257,17 @@ defmodule HamsterTravel.PackingTest do
       assert 101 = updated_item.count
     end
 
+    test "update_item/2 sends pubsub braodcast" do
+      backpack = backpack_fixture()
+      list = list_fixture(%{backpack_id: backpack.id})
+      item = item_fixture(%{backpack_list_id: list.id})
+
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "backpacks" <> ":#{backpack.id}")
+
+      assert {:ok, updated_item} = Packing.update_item(item, %{name: "Keks", count: 101})
+      assert_received {[:item, :updated], %{value: ^updated_item}}
+    end
+
     test "update_item/2 returns errors when invalid attrs submitted", %{item: item} do
       assert {:error, %Ecto.Changeset{}} = Packing.update_item(item, @invalid_attrs)
     end
@@ -298,15 +309,31 @@ defmodule HamsterTravel.PackingTest do
       assert "clothes" = list.name
     end
 
-    test "create_item/2 sends pubsub event", %{backpack: backpack} do
+    test "create_list/2 sends pubsub event", %{backpack: backpack} do
       Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "backpacks" <> ":#{backpack.id}")
 
       {:ok, list} = Packing.create_list(%{name: "clothes"}, backpack)
       assert_received {[:list, :created], %{value: ^list}}
     end
 
-    test "create_item/2 returns errors if item is invalid", %{backpack: backpack} do
+    test "create_list/2 returns errors if attrs are invalid", %{backpack: backpack} do
       assert {:error, %Ecto.Changeset{}} = Packing.create_list(@invalid_attrs, backpack)
+    end
+
+    test "update_list/2 updates name", %{list: list} do
+      assert {:ok, updated_list} = Packing.update_list(list, %{name: "Hygiene items"})
+      assert "Hygiene items" = updated_list.name
+    end
+
+    test "update_list/2 sends pubsub braodcast", %{backpack: backpack, list: list} do
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "backpacks" <> ":#{backpack.id}")
+
+      assert {:ok, updated_list} = Packing.update_list(list, %{name: "Food"})
+      assert_received {[:list, :updated], %{value: ^updated_list}}
+    end
+
+    test "update_list/2 returns errors when invalid attrs submitted", %{list: list} do
+      assert {:error, %Ecto.Changeset{}} = Packing.update_list(list, @invalid_attrs)
     end
   end
 end
