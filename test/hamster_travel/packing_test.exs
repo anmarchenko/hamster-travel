@@ -191,7 +191,7 @@ defmodule HamsterTravel.PackingTest do
       Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "backpacks" <> ":#{list.backpack_id}")
 
       {:ok, item} = Packing.create_item(%{name: "toothbrush", count: 3}, list)
-      assert_received {[:item, :created], %{item: ^item}}
+      assert_received {[:item, :created], %{value: ^item}}
     end
 
     test "create_item/2 returns errors if item is invalid", %{list: list} do
@@ -248,7 +248,7 @@ defmodule HamsterTravel.PackingTest do
       Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "backpacks" <> ":#{backpack.id}")
 
       {:ok, item} = Packing.update_item_checked(item, true)
-      assert_received {[:item, :updated], %{item: ^item}}
+      assert_received {[:item, :updated], %{value: ^item}}
     end
 
     test "update_item/2 updates name and count", %{item: item} do
@@ -280,7 +280,33 @@ defmodule HamsterTravel.PackingTest do
       Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "backpacks" <> ":#{backpack.id}")
 
       {:ok, deleted_item} = Packing.delete_item(item)
-      assert_received {[:item, :deleted], %{item: ^deleted_item}}
+      assert_received {[:item, :deleted], %{value: ^deleted_item}}
+    end
+  end
+
+  describe "lists" do
+    setup do
+      backpack = backpack_fixture()
+      list = list_fixture(%{backpack_id: backpack.id})
+      {:ok, list: list, backpack: backpack}
+    end
+
+    @invalid_attrs %{name: nil}
+
+    test "create_list/2 creates a new valid list", %{backpack: backpack} do
+      {:ok, list} = Packing.create_list(%{name: "clothes"}, backpack)
+      assert "clothes" = list.name
+    end
+
+    test "create_item/2 sends pubsub event", %{backpack: backpack} do
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "backpacks" <> ":#{backpack.id}")
+
+      {:ok, list} = Packing.create_list(%{name: "clothes"}, backpack)
+      assert_received {[:list, :created], %{value: ^list}}
+    end
+
+    test "create_item/2 returns errors if item is invalid", %{backpack: backpack} do
+      assert {:error, %Ecto.Changeset{}} = Packing.create_list(@invalid_attrs, backpack)
     end
   end
 end

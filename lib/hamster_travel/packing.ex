@@ -66,10 +66,18 @@ defmodule HamsterTravel.Packing do
     %List{backpack_id: backpack.id}
     |> List.changeset(attrs)
     |> Repo.insert()
+    |> notify_event([:list, :created])
   end
 
   def change_list(%List{} = list) do
     List.update_changeset(list)
+  end
+
+  def update_list(%List{} = list, attrs) do
+    list
+    |> List.update_changeset(attrs)
+    |> Repo.update()
+    |> notify_event([:list, :updated])
   end
 
   # ITEMS
@@ -130,7 +138,19 @@ defmodule HamsterTravel.Packing do
     Phoenix.PubSub.broadcast(
       HamsterTravel.PubSub,
       @topic <> ":#{backpack_id}",
-      {event, %{item: result}}
+      {event, %{value: result}}
+    )
+
+    {:ok, result}
+  end
+
+  defp notify_event({:ok, result}, [:list, _] = event) do
+    backpack_id = result.backpack_id
+
+    Phoenix.PubSub.broadcast(
+      HamsterTravel.PubSub,
+      @topic <> ":#{backpack_id}",
+      {event, %{value: result}}
     )
 
     {:ok, result}
