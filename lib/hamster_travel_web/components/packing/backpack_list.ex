@@ -3,6 +3,8 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
   Live component responsible for showing and editing packing list
   """
 
+  require Logger
+
   use HamsterTravelWeb, :live_component
 
   import HamsterTravelWeb.Card
@@ -45,6 +47,31 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
       |> assign(:edit, false)
 
     {:noreply, socket}
+  end
+
+  def handle_event("update", %{"list" => params}, socket) do
+    list_to_update = socket.assigns.list
+
+    case Packing.update_list(list_to_update, params) do
+      {:ok, list} ->
+        socket =
+          socket
+          |> assign(:list, list)
+          |> assign(:edit, false)
+
+        {:noreply, socket}
+
+      {:error, error} ->
+        Logger.warn(
+          "Could not update an list #{list_to_update.id} because of #{Kernel.inspect(error)}"
+        )
+
+        socket =
+          socket
+          |> assign(:edit, false)
+
+        {:noreply, socket}
+    end
   end
 
   def render(assigns) do
