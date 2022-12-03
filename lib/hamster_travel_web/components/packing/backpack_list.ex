@@ -4,10 +4,10 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
   """
 
   use HamsterTravelWeb, :live_component
-  import PhxComponentHelpers
 
   import HamsterTravelWeb.Card
   import HamsterTravelWeb.Inline
+  import PhxComponentHelpers
 
   alias HamsterTravel.Packing
 
@@ -22,6 +22,7 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
     socket =
       socket
       |> assign(:edit, false)
+      |> assign(:changeset, Packing.change_list(assigns.list))
       |> assign(assigns)
 
     {:ok, socket}
@@ -46,17 +47,13 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
     {:noreply, socket}
   end
 
-  def render(%{edit: false} = assigns) do
+  def render(assigns) do
     ~H"""
     <span>
       <.card>
         <div class="flex flex-col w-full">
           <div class="p-4 bg-violet-700 dark:bg-violet-900 rounded-t-lg">
-            <.inline>
-              <div class="grow text-white dark:text-zinc-300"><%= @list.name %></div>
-              <.ht_icon_button icon={:pencil} color="white" phx-click="edit" phx-target={@myself} />
-              <.ht_icon_button icon={:trash} color="white" phx-click="delete" phx-target={@myself} />
-            </.inline>
+            <.header edit={@edit} changeset={@changeset} list={@list} phx-target={@myself} />
           </div>
           <div class="p-4">
             <.live_component
@@ -73,39 +70,48 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
     """
   end
 
-  def render(%{edit: true} = assigns) do
+  attr :edit, :boolean, required: true
+  attr :list, :any, required: true
+  attr :"phx-target", :any, required: true
+  attr :changeset, :any, default: nil
+
+  def header(%{edit: false} = assigns) do
     ~H"""
-    <span>
-      <.card>
-        <div class="flex flex-col w-full">
-          <div class="p-4 bg-violet-700 dark:bg-violet-900 rounded-t-lg">
-            <.inline>
-              <.form :let={f} for={@changeset} phx-submit="update" phx-target={@myself} as={:list}>
-                <.inline>
-                  <.text_input
-                    form={f}
-                    id={"update-item-#{@list.id}"}
-                    field={:name}
-                    x-init="$el.focus()"
-                  />
-                  <.ht_icon_button icon={:check} color="white" />
-                </.inline>
-              </.form>
-              <.ht_icon_button icon={:x} color="white" phx-click="cancel" phx-target={@myself} />
-            </.inline>
-          </div>
-          <div class="p-4">
-            <.live_component
-              :for={item <- @list.items}
-              module={BackpackItem}
-              id={"item-#{item.id}"}
-              item={item}
-            />
-            <.live_component module={AddItem} id={"item-add-#{@list.id}"} list={@list} />
-          </div>
-        </div>
-      </.card>
-    </span>
+    <.inline>
+      <div class="grow text-white dark:text-zinc-300"><%= @list.name %></div>
+      <.ht_icon_button
+        icon={:pencil}
+        color="white"
+        phx-click="edit"
+        phx-target={assigns[:"phx-target"]}
+      />
+      <.ht_icon_button
+        icon={:trash}
+        color="white"
+        phx-click="delete"
+        phx-target={assigns[:"phx-target"]}
+      />
+    </.inline>
+    """
+  end
+
+  def header(%{edit: true} = assigns) do
+    ~H"""
+    <.inline>
+      <.form
+        :let={f}
+        for={@changeset}
+        phx-submit="update"
+        phx-target={assigns[:"phx-target"]}
+        as={:list}
+      >
+        <.inline>
+          <.text_input form={f} id={"update-item-#{@list.id}"} field={:name} x-init="$el.focus()" />
+          <.ht_icon_button icon={:check} color="white" />
+        </.inline>
+      </.form>
+      <.ht_icon_button icon={:x} color="white" phx-click="cancel" phx-target={assigns[:"phx-target"]} />
+    </.inline>
     """
   end
 end
