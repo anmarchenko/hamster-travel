@@ -268,7 +268,12 @@ msgstr[2] "ночей"
 msgid "Are you sure you want to delete backpack?"
 msgstr "Вы уверены, что хотите удалить рюкзачок?"
 
-#: lib/hamster_travel_web/components/packing/add_item.ex:46
+#: lib/hamster_travel_web/components/packing/add_item.ex:68
 #, elixir-autogen, elixir-format
 msgid "Add backpack item"
 msgstr "Что ещё берём?"
+
+#: lib/hamster_travel_web/components/packing/backpack_list.ex:120
+#, elixir-autogen, elixir-format
+msgid "Are you sure you want to delete this list? All items will be lost"
+msgstr "Вы уверены, что хотите удалить список? Все вещи в списке будут удалены"

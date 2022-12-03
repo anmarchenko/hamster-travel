@@ -80,6 +80,11 @@ defmodule HamsterTravel.Packing do
     |> notify_event([:list, :updated])
   end
 
+  def delete_list(%List{} = list) do
+    Repo.delete(list)
+    |> notify_event([:list, :deleted])
+  end
+
   # ITEMS
 
   def new_item do

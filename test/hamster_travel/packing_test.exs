@@ -2,7 +2,7 @@ defmodule HamsterTravel.PackingTest do
   use HamsterTravel.DataCase
 
   alias HamsterTravel.Packing
-  alias HamsterTravel.Packing.{Backpack, Item}
+  alias HamsterTravel.Packing.{Backpack, Item, List}
   alias HamsterTravel.Repo
 
   import HamsterTravel.PackingFixtures
@@ -334,6 +334,18 @@ defmodule HamsterTravel.PackingTest do
 
     test "update_list/2 returns errors when invalid attrs submitted", %{list: list} do
       assert {:error, %Ecto.Changeset{}} = Packing.update_list(list, @invalid_attrs)
+    end
+
+    test "delete_list/1 deletes a list", %{list: list} do
+      assert {:ok, deleted_list} = Packing.delete_list(list)
+      assert nil == Repo.get(List, deleted_list.id)
+    end
+
+    test "delete_list/1 sends pubsub event", %{list: list, backpack: backpack} do
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "backpacks" <> ":#{backpack.id}")
+
+      {:ok, deleted_list} = Packing.delete_list(list)
+      assert_received {[:list, :deleted], %{value: ^deleted_list}}
     end
   end
 end

@@ -32,6 +32,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   attr :disabled, :boolean, default: false
   attr :"phx-click", :string, default: nil
   attr :"phx-target", :any, default: nil
+  attr :"data-confirm", :string, default: nil
 
   def ht_icon_button(assigns) do
     ~H"""

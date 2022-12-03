@@ -74,6 +74,11 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
     end
   end
 
+  def handle_event("delete", _, socket) do
+    Packing.delete_list(socket.assigns.list)
+    {:noreply, socket}
+  end
+
   def render(assigns) do
     ~H"""
     <span>
@@ -117,6 +122,7 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
         color="white"
         phx-click="delete"
         phx-target={assigns[:"phx-target"]}
+        data-confirm={gettext("Are you sure you want to delete this list? All items will be lost")}
       />
     </.inline>
     """
