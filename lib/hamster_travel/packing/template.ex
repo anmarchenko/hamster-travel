@@ -73,6 +73,7 @@ defmodule HamsterTravel.Packing.Template do
   defp parse_items(items, vars) when is_list(items) do
     items
     |> Enum.map(fn item -> parse_item(item, vars) end)
+    |> Enum.filter(fn res -> res != nil end)
     |> Result.list_or_errors()
   end
 
@@ -80,6 +81,9 @@ defmodule HamsterTravel.Packing.Template do
 
   defp parse_item(item, vars) do
     case calculate_count(item["count"], vars) do
+      {:ok, 0} ->
+        nil
+
       {:ok, num} ->
         %Item{
           name: item["name"],
@@ -107,6 +111,12 @@ defmodule HamsterTravel.Packing.Template do
         end
       )
 
-    Abacus.eval(expression)
+    case Abacus.eval(expression) do
+      {:ok, float_num} when is_float(float_num) ->
+        {:ok, round(float_num)}
+
+      rest ->
+        rest
+    end
   end
 end

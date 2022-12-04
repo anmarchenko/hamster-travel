@@ -13,4 +13,9 @@ backpack:
         count: nights
       - name: Insurance
         count: 3
+      - name: Not needed
+        count: 0
   - name: Clothes
+    items:
+      - name: Shirts
+        count: 'days / 2'

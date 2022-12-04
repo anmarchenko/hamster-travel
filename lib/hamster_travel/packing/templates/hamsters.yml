@@ -5,21 +5,117 @@ backpack:
         count: 1
       - name: Влажные салфетки
         count: 1
+      - name: Зубная щетка
+        count: 3
       - name: Зубная паста
         count: 2
-      - name: Зубная щетка
-        count: '2 * nights - 1'
+      - name: Шампунь
+        count: 2
+      - name: Детский шампунь
+        count: 1
+      - name: Крем для рук
+        count: 1
+      - name: Крем для лица
+        count: 1
+      - name: Крем для Дианы
+        count: 1
       - name: Крем от загара
-        count: 'days * 2 + 1'
+        count: 1
+      - name: Гигиеничка
+        count: 1
+      - name: Резинки для волос
+        count: 1
+      - name: Заколка
+        count: 1
+      - name: Резинки для волос Диана
+        count: 3
+      - name: Заколка Диана
+        count: 2
+      - name: Расческа
+        count: 1
+      - name: Ополаскиватель для рта
+        count: 1
+      - name: Щипчики
+        count: 1
+      - name: Бритвы
+        count: 2
+      - name: Носовые платочки
+        count: 1
   - name: С собой
     items:
       - name: Паспорта
         count: 3
+      - name: ПМЖ
+        count: 2
+      - name: Деньги
+        count: 500
       - name: Страховки
         count: 3
+      - name: Кредитка
+        count: 2
+      - name: Наушники Юля
+        count: 1
+      - name: Фотоаппарат
+        count: 1
+      - name: Зарядка для телефона
+        count: 2
+      - name: Путеводитель
+        count: 1
+      - name: Билеты
+        count: 6
+      - name: Солнечные очки
+        count: 2
+      - name: Зарядка для фотоаппарата
+        count: 1
+      - name: Аккумулятор
+        count: 1
+      - name: Наушники для Дианы
+        count: 1
+      - name: Переходник для наушников
+        count: 1
+      - name: Зарядка для часов
+        count: 2
+      - name: Иголочка от айфона
+        count: 1
+      - name: Маски
+        count: 6
+      - name: Видеоняня
+        count: 1
+      - name: Планшет
+        count: 1
   - name: Одежда
     items:
+      - name: Носки Андрей
+        count: 'nights'
       - name: Трусы Андрей
-        count: 'days'
+        count: 'nights'
+      - name: Носки Юля
+        count: 'nights'
       - name: Трусы Юля
-        count: 'days'
+        count: 'nights'
+      - name: Плавки
+        count: 1
+      - name: Купальник
+        count: 1
+      - name: Джинсы Андрей
+        count: 1
+      - name: Штаны Юля
+        count: 1
+      - name: Футболки Андрей
+        count: 'days / 2'
+      - name: Футболки Юля
+        count: 'days / 2'
+      - name: Кофта Андрей
+        count: 1
+      - name: Кофта Юля
+        count: 1
+      - name: Футболки для сна
+        count: 2
+  - name: Обувь
+    items:
+      - name: Тапочки
+        count: 3
+  - name: Одежда для Дианы
+    items:
+      - name: Тапочки
+        count: 3

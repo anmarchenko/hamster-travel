@@ -29,7 +29,7 @@ defmodule HamsterTravel.Packing.TemplateTest do
                 name: "Docs",
                 items: [%Item{name: "Passports", count: 2}, %Item{name: "Insurance", count: 3}]
               },
-              %List{name: "Clothes"}
+              %List{name: "Clothes", items: [%Item{name: "Shirts", count: 2}]}
             ]} = Template.execute("test", %{days: 3, nights: 2})
   end
 
