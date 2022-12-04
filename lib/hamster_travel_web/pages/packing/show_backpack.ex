@@ -114,6 +114,18 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
   end
 
   @impl true
+  def handle_info({[:list, :created], %{value: created_list}}, socket) do
+    # TODO: refetch from database after implementing ordering
+    backpack = socket.assigns.backpack
+
+    {:noreply,
+     assign(socket, :backpack, %Backpack{
+       backpack
+       | lists: backpack.lists ++ [%List{created_list | items: []}]
+     })}
+  end
+
+  @impl true
   def handle_info({[:list, :updated], %{value: updated_list}}, socket) do
     backpack = socket.assigns.backpack
 

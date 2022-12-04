@@ -278,7 +278,12 @@ msgstr "Что ещё берём?"
 msgid "Are you sure you want to delete this list? All items will be lost"
 msgstr "Вы уверены, что хотите удалить список? Все вещи в списке будут удалены"
 
-#: lib/hamster_travel_web/components/packing/add_list.ex:34
+#: lib/hamster_travel_web/components/packing/add_list.ex:45
 #, elixir-autogen, elixir-format
 msgid "Add list"
 msgstr "Добавить список"
+
+#: lib/hamster_travel_web/components/packing/add_list.ex:61
+#, elixir-autogen, elixir-format
+msgid "List name"
+msgstr "Название списка"

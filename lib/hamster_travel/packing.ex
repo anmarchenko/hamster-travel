@@ -62,6 +62,10 @@ defmodule HamsterTravel.Packing do
 
   # LISTS
 
+  def new_list do
+    List.changeset(%List{}, %{})
+  end
+
   def create_list(attrs \\ %{}, %Backpack{} = backpack) do
     %List{backpack_id: backpack.id}
     |> List.changeset(attrs)
