@@ -28,13 +28,13 @@
 </.container>
 
 <.container class="!mt-* mt-0">
+  <.live_component module={AddList} id={"add_item-#{@backpack.id}"} backpack={@backpack} />
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <%= for items_list <- @backpack.lists do %>
-      <.live_component
-        module={BackpackList}
-        id={"packing-list-#{items_list.id}"}
-        list={items_list}
-      />
-    <% end %>
+    <.live_component
+      :for={items_list <- @backpack.lists}
+      module={BackpackList}
+      id={"packing-list-#{items_list.id}"}
+      list={items_list}
+    />
   </div>
 </.container>
