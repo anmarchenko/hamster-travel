@@ -117,5 +117,27 @@ backpack:
         count: 3
   - name: Одежда для Дианы
     items:
-      - name: Тапочки
-        count: 3
+      - name: Штаны и колкотки
+        count: 'nights'
+      - name: Футболки
+        count: 'days / 2'
+      - name: Трусы
+        count: 'nights'
+      - name: Носки
+        count: 'nights'
+      - name: Купальник
+        count: 1
+      - name: Шапка
+        count: 1
+      - name: Перчатки
+        count: 2
+      - name: Кепка
+        count: 1
+      - name: Желтые штаны
+        count: 1
+      - name: Платье
+        count: 2
+      - name: Тонкая кофта
+        count: 1
+      - name: Кофта
+        count: 1
