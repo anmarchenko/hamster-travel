@@ -51,17 +51,6 @@ defmodule HamsterTravelWeb.Packing.AddList do
     end
   end
 
-  def render(%{edit: false} = assigns) do
-    ~H"""
-    <div class="mb-5">
-      <.button color="secondary" phx-click="edit" phx-target={@myself}>
-        <Heroicons.Solid.plus class="w-5 h-5 mr-2" />
-        <%= gettext("Add list") %>
-      </.button>
-    </div>
-    """
-  end
-
   def render(%{edit: true} = assigns) do
     ~H"""
     <div class="mb-5">
@@ -80,6 +69,17 @@ defmodule HamsterTravelWeb.Packing.AddList do
         </.form>
         <.ht_icon_button icon={:x} phx-click="cancel" phx-target={@myself} />
       </.inline>
+    </div>
+    """
+  end
+
+  def render(assigns) do
+    ~H"""
+    <div class="mb-5">
+      <.button color="secondary" phx-click="edit" phx-target={@myself}>
+        <Heroicons.Solid.plus class="w-5 h-5 mr-2" />
+        <%= gettext("Add list") %>
+      </.button>
     </div>
     """
   end
