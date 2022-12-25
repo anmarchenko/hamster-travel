@@ -91,9 +91,32 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
     {:noreply, socket}
   end
 
-  def render(%{edit: false} = assigns) do
+  def render(%{edit: true} = assigns) do
     ~H"""
-    <div class="mt-3">
+    <div class="mt-1">
+      <.inline>
+        <.form :let={f} for={:item} phx-submit="update" phx-target={@myself}>
+          <.inline>
+            <.text_input
+              form={f}
+              id={"update-item-#{@item.id}"}
+              field={:name}
+              placeholder={@name}
+              value={@name}
+              x-init="$el.focus()"
+            />
+            <.ht_icon_button icon={:check} />
+          </.inline>
+        </.form>
+        <.ht_icon_button icon={:x} phx-click="cancel" phx-target={@myself} />
+      </.inline>
+    </div>
+    """
+  end
+
+  def render(assigns) do
+    ~H"""
+    <div class="mt-1">
       <.inline class="!gap gap-1">
         <.form :let={f} for={:item} class="grow mr-2" phx-change="check" phx-target={@myself}>
           <%= label class: "cursor-pointer" do %>
@@ -122,29 +145,6 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
           phx-click="delete"
           phx-target={@myself}
         />
-      </.inline>
-    </div>
-    """
-  end
-
-  def render(%{edit: true} = assigns) do
-    ~H"""
-    <div class="mt-3">
-      <.inline>
-        <.form :let={f} for={:item} phx-submit="update" phx-target={@myself}>
-          <.inline>
-            <.text_input
-              form={f}
-              id={"update-item-#{@item.id}"}
-              field={:name}
-              placeholder={@name}
-              value={@name}
-              x-init="$el.focus()"
-            />
-            <.ht_icon_button icon={:check} />
-          </.inline>
-        </.form>
-        <.ht_icon_button icon={:x} phx-click="cancel" phx-target={@myself} />
       </.inline>
     </div>
     """
