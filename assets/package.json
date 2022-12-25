@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "alpinejs": "^3.9.0"
+    "alpinejs": "^3.9.0",
+    "magic-grid": "^3.2.4"
   }
 }
