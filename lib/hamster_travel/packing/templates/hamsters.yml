@@ -141,3 +141,55 @@ backpack:
         count: 1
       - name: Кофта
         count: 1
+  - name: В чем едем
+    items:
+      - name: Куртка Юля
+        count: 1
+      - name: Куртка Андрей
+        count: 1
+      - name: Куртка Диана
+        count: 1
+      - name: Ботинки Юля
+        count: 1
+      - name: Ботинки Андрей
+        count: 1
+      - name: Ботинки Диана
+        count: 1
+      - name: Штаны Юля
+        count: 1
+      - name: Штаны Андрей
+        count: 1
+      - name: Штаны Диана
+        count: 1
+      - name: Футболка Юля
+        count: 1
+      - name: Футболка Андрей
+        count: 1
+      - name: Футболка Диана
+        count: 1
+      - name: Кофта Юля
+        count: 1
+      - name: Кофта Андрей
+        count: 1
+      - name: Кофта Диана
+        count: 1
+  - name: Аптечка
+    items:
+      - name: Ибупрофен
+        count: 8
+      - name: Парацетамол
+        count: 2
+      - name: Пластырь
+        count: 4
+      - name: Таблетки от мигрени
+        count: 2
+      - name: Momegalen
+        count: 1
+      - name: Ацикловир
+        count: 1
+      - name: Градусник
+        count: 1
+      - name: Капли в нос
+        count: 1
+      - name: Капли в глаза
+        count: 1
