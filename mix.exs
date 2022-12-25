@@ -12,7 +12,7 @@ defmodule HamsterTravel.MixProject do
       aliases: aliases(),
       deps: deps(),
       elixirc_options: [
-        warnings_as_errors: true
+        warnings_as_errors: false
       ]
     ]
   end
@@ -54,7 +54,7 @@ defmodule HamsterTravel.MixProject do
       {:ecto_autoslug_field, "~> 3.0"},
 
       # frontend
-      {:petal_components, "~> 0.18.0"},
+      {:petal_components, "~> 0.19.0"},
       {:phx_component_helpers, "~> 1.2.0"},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
