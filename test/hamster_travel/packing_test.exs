@@ -7,6 +7,8 @@ defmodule HamsterTravel.PackingTest do
 
   import HamsterTravel.PackingFixtures
 
+  import HamsterTravel.AccountsFixtures
+
   describe "backpacks" do
     @invalid_attrs %{days: nil, name: nil, nights: nil}
 
@@ -88,8 +90,9 @@ defmodule HamsterTravel.PackingTest do
 
       backpack = Packing.get_backpack!(backpack.id)
 
-      list_names = backpack.lists |> Enum.map(fn list -> list.name end) |> Enum.sort()
-      assert ["Clothes", "Docs", "Hygiene"] = list_names
+      # sorted correctly
+      assert ["Hygiene", "Docs", "Clothes"] = Enum.map(backpack.lists, fn list -> list.name end)
+      refute Enum.any?(backpack.lists, fn list -> list.rank == nil end)
 
       hygiene_items =
         backpack.lists
@@ -307,6 +310,25 @@ defmodule HamsterTravel.PackingTest do
     test "create_list/2 creates a new valid list", %{backpack: backpack} do
       {:ok, list} = Packing.create_list(%{name: "clothes"}, backpack)
       assert "clothes" = list.name
+    end
+
+    test "create_list/2 adds a list to the end of lists", %{backpack: backpack} do
+      {:ok, list} = Packing.create_list(%{name: "clothes"}, backpack)
+      {:ok, list2} = Packing.create_list(%{name: "tools"}, backpack)
+
+      assert list.rank < list2.rank
+    end
+
+    test "create_list/2 adds a list to the end of lists even when there are template lists already" do
+      user = user_fixture()
+      valid_attrs = %{days: 1, name: "backpack", nights: 2, template: "test"}
+
+      assert {:ok, %Backpack{} = backpack} = Packing.create_backpack(valid_attrs, user)
+
+      {:ok, list} = Packing.create_list(%{name: "e"}, backpack)
+      {:ok, list2} = Packing.create_list(%{name: "r"}, backpack)
+
+      assert list.rank < list2.rank
     end
 
     test "create_list/2 sends pubsub event", %{backpack: backpack} do

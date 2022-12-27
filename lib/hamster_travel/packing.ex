@@ -133,7 +133,7 @@ defmodule HamsterTravel.Packing do
     items_preload_query = from i in Item, order_by: [i.inserted_at, i.id]
 
     lists_preload_query =
-      from l in List, order_by: [l.inserted_at, l.id], preload: [items: ^items_preload_query]
+      from l in List, order_by: [l.rank], preload: [items: ^items_preload_query]
 
     query
     |> Repo.preload(lists: lists_preload_query)

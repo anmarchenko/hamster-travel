@@ -61,6 +61,15 @@ defmodule HamsterTravel.EctoOrdered do
     end)
   end
 
+  def fill_ranks(records) when is_list(records) do
+    {mapped_list, _} =
+      Enum.map_reduce(records, 0, fn record, pos ->
+        {Map.put(record, :rank, pos), pos + 1_000_000}
+      end)
+
+    mapped_list
+  end
+
   @doc false
   def before_insert(cs, position_field, rank_field, scope_field) do
     options = %Options{

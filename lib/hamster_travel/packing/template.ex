@@ -20,6 +20,7 @@ defmodule HamsterTravel.Packing.Template do
         lists
         |> Enum.map(fn list -> parse_list(list, vars) end)
         |> Result.list_or_errors()
+        |> fill_ranks()
 
       {:error, %{message: message}} ->
         {:error, [message]}
@@ -119,4 +120,10 @@ defmodule HamsterTravel.Packing.Template do
         rest
     end
   end
+
+  defp fill_ranks({:ok, list}) do
+    {:ok, HamsterTravel.EctoOrdered.fill_ranks(list)}
+  end
+
+  defp fill_ranks(rest), do: rest
 end
