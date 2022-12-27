@@ -111,10 +111,6 @@ backpack:
         count: 1
       - name: Футболки для сна
         count: 2
-  - name: Обувь
-    items:
-      - name: Тапочки
-        count: 3
   - name: Одежда для Дианы
     items:
       - name: Штаны и колкотки
@@ -193,3 +189,7 @@ backpack:
         count: 1
       - name: Капли в глаза
         count: 1
+  - name: Обувь
+    items:
+      - name: Тапочки
+        count: 3
