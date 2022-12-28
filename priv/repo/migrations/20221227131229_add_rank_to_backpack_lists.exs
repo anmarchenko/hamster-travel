@@ -3,7 +3,7 @@ defmodule HamsterTravel.Repo.Migrations.AddRankToBackpackLists do
 
   def change do
     alter table("backpack_lists") do
-      add :rank, :integer
+      add :rank, :integer, null: false
     end
   end
 end
