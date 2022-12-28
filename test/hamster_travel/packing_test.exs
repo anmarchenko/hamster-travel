@@ -5,9 +5,8 @@ defmodule HamsterTravel.PackingTest do
   alias HamsterTravel.Packing.{Backpack, Item, List}
   alias HamsterTravel.Repo
 
-  import HamsterTravel.PackingFixtures
-
   import HamsterTravel.AccountsFixtures
+  import HamsterTravel.PackingFixtures
 
   describe "backpacks" do
     @invalid_attrs %{days: nil, name: nil, nights: nil}
