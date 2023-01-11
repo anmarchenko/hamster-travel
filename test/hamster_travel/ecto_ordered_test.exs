@@ -7,8 +7,14 @@ defmodule HamsterTravel.EctoOrderedTest do
   import Ecto.Query
   import HamsterTravel.PackingFixtures
 
-  def ranked_ids(model) do
-    from(m in model, select: m.id, order_by: m.rank) |> Repo.all()
+  def ranked_ids(model, scope) do
+    from(
+      m in model,
+      select: m.id,
+      where: m.backpack_id == ^scope,
+      order_by: m.rank
+    )
+    |> Repo.all()
   end
 
   test "scoped: inserting item with no position" do
@@ -39,396 +45,184 @@ defmodule HamsterTravel.EctoOrderedTest do
     end
   end
 
-  # Insertion
-  # test "scoped: inserting item with a correct appending position" do
-  #   Model.changeset(%Model{scope: 10, title: "item with no position, going to be #1"}, %{})
-  #   |> Repo.insert()
+  test "scoped: inserting item with a correct appending position" do
+    paris = backpack_fixture(%{name: "Paris"})
+    berlin = backpack_fixture(%{name: "Berlin"})
 
-  #   Model.changeset(%Model{scope: 11, title: "item #2"}, %{}) |> Repo.insert()
+    List.changeset(
+      %List{backpack_id: paris.id, name: "item with no position, going to be #1"},
+      %{}
+    )
+    |> Repo.insert!()
 
-  #   model =
-  #     Model.changeset(%Model{scope: 10, title: "item #2", scoped_position: 2}, %{})
-  #     |> Repo.insert!()
+    List.changeset(
+      %List{backpack_id: berlin.id, name: "item #2"},
+      %{}
+    )
+    |> Repo.insert()
 
-  #   assert from(m in Model, where: m.scope == 10, select: m.id, offset: 1) |> Repo.one() ==
-  #            model.id
-  # end
+    list =
+      List.changeset(%List{backpack_id: paris.id, name: "item #2"}, %{position: 2})
+      |> Repo.insert!()
 
-  # test "inserting item with a gapped position" do
-  #   %Model{title: "item with no position, going to be #1"}
-  #   |> Model.changeset(%{})
-  #   |> Repo.insert()
+    assert from(l in List,
+             where: l.backpack_id == ^paris.id,
+             select: l.id,
+             offset: 1,
+             order_by: [asc: :rank]
+           )
+           |> Repo.one() ==
+             list.id
+  end
 
-  #   model =
-  #     %Model{title: "item #10", position: 10}
-  #     |> Model.changeset(%{})
-  #     |> Repo.insert!()
+  test "scoped: inserting item with an inserting position" do
+    paris = backpack_fixture(%{name: "Paris"})
 
-  #   assert from(m in Model, select: m.title, order_by: m.rank, offset: 1, limit: 1)
-  #          |> Repo.one() == model.title
-  # end
+    model1 =
+      List.changeset(%List{backpack_id: paris.id, name: "no position, going to be #1"}, %{})
+      |> Repo.insert!()
 
-  # test "inserting item with an inserting position" do
-  #   model1 =
-  #     Model.changeset(%Model{}, %{title: "item with no position, going to be #1"})
-  #     |> Repo.insert!()
+    model2 =
+      List.changeset(%List{backpack_id: paris.id, name: "no position, going to be #2"}, %{})
+      |> Repo.insert!()
 
-  #   model2 =
-  #     Model.changeset(%Model{title: "item with no position, going to be #2"}, %{})
-  #     |> Repo.insert!()
+    model3 =
+      List.changeset(%List{backpack_id: paris.id, name: "no position, going to be #3"}, %{})
+      |> Repo.insert!()
 
-  #   model3 =
-  #     Model.changeset(%Model{title: "item with no position, going to be #3"}, %{})
-  #     |> Repo.insert!()
+    model =
+      List.changeset(%List{backpack_id: paris.id, name: "item #2"}, %{position: 1})
+      |> Repo.insert!()
 
-  #   model =
-  #     Model.changeset(%Model{title: "item #2", position: 1}, %{})
-  #     |> Repo.insert!()
+    assert ranked_ids(List, paris.id) == [model1.id, model.id, model2.id, model3.id]
+  end
 
-  #   assert ranked_ids(Model) == [model1.id, model.id, model2.id, model3.id]
-  # end
+  test "scoped: inserting item with an inserting position at #1" do
+    paris = backpack_fixture(%{name: "Paris"})
 
-  # test "inserting item with an inserting position at index 0" do
-  #   model1 =
-  #     Model.changeset(%Model{title: "item with no position, going to be index 0"}, %{})
-  #     |> Repo.insert!()
+    model1 =
+      List.changeset(%List{backpack_id: paris.id, name: "no position, going to be #1"}, %{})
+      |> Repo.insert!()
 
-  #   model2 =
-  #     Model.changeset(%Model{title: "item with no position, going to be index 1"}, %{})
-  #     |> Repo.insert!()
+    model2 =
+      List.changeset(%List{backpack_id: paris.id, name: "no position, going to be #2"}, %{})
+      |> Repo.insert!()
 
-  #   model3 =
-  #     Model.changeset(%Model{title: "item with no position, going to be index 2"}, %{})
-  #     |> Repo.insert!()
+    model3 =
+      List.changeset(%List{backpack_id: paris.id, name: "no position, going to be #3"}, %{})
+      |> Repo.insert!()
 
-  #   model =
-  #     Model.changeset(%Model{title: "new item index 0", position: 0}, %{})
-  #     |> Repo.insert!()
+    model =
+      List.changeset(%List{backpack_id: paris.id, name: "item #2"}, %{position: 0})
+      |> Repo.insert!()
 
-  #   assert ranked_ids(Model) == [model.id, model1.id, model2.id, model3.id]
-  # end
+    assert ranked_ids(List, paris.id) == [model.id, model1.id, model2.id, model3.id]
+  end
 
-  # ## Moving
+  # Moving
+  test "scoped: updating item with the same position" do
+    paris = backpack_fixture(%{name: "Paris"})
 
-  # test "updating item with the same position" do
-  #   model =
-  #     Model.changeset(%Model{title: "item with no position"}, %{})
-  #     |> Repo.insert!()
+    model =
+      List.changeset(%List{backpack_id: paris.id, name: "no position"}, %{})
+      |> Repo.insert!()
 
-  #   model1 =
-  #     Model.changeset(%Model{model | title: "item with a position"}, %{})
-  #     |> Repo.update!()
+    model1 =
+      List.changeset(model, %{name: "item with a position", backpack_id: paris.id})
+      |> Repo.update!()
 
-  #   assert model.rank == model1.rank
-  # end
+    assert model.rank == model1.rank
+  end
 
-  # test "moving an item when nothing is ranked" do
-  #   model1 = %Model{title: "item #1"} |> Repo.insert!()
-  #   model2 = %Model{title: "item #2"} |> Repo.insert!()
+  test "scoped: replacing an item below" do
+    paris = backpack_fixture(%{name: "Paris"})
 
-  #   model2 |> Model.changeset(%{move: :up}) |> Repo.update!()
+    model1 = List.changeset(%List{backpack_id: paris.id, name: "item #1"}, %{}) |> Repo.insert!()
+    model2 = List.changeset(%List{backpack_id: paris.id, name: "item #2"}, %{}) |> Repo.insert!()
+    model3 = List.changeset(%List{backpack_id: paris.id, name: "item #3"}, %{}) |> Repo.insert!()
+    model4 = List.changeset(%List{backpack_id: paris.id, name: "item #4"}, %{}) |> Repo.insert!()
+    model5 = List.changeset(%List{backpack_id: paris.id, name: "item #5"}, %{}) |> Repo.insert!()
 
-  #   Repo.all(Model)
-  #   assert ranked_ids(Model) == [model2.id, model1.id]
-  # end
+    model2 |> List.changeset(%{position: 3}) |> Repo.update()
 
-  # test "replacing an item below" do
-  #   model1 = Model.changeset(%Model{title: "item #1"}, %{}) |> Repo.insert!()
-  #   model2 = Model.changeset(%Model{title: "item #2"}, %{}) |> Repo.insert!()
-  #   model3 = Model.changeset(%Model{title: "item #3"}, %{}) |> Repo.insert!()
-  #   model4 = Model.changeset(%Model{title: "item #4"}, %{}) |> Repo.insert!()
-  #   model5 = Model.changeset(%Model{title: "item #5"}, %{}) |> Repo.insert!()
+    assert ranked_ids(List, paris.id) == [model1.id, model3.id, model4.id, model2.id, model5.id]
+  end
 
-  #   model2 |> Model.changeset(%{position: 2}) |> Repo.update!()
+  test "scoped: replacing an item above" do
+    paris = backpack_fixture(%{name: "Paris"})
 
-  #   assert ranked_ids(Model) == [model1.id, model3.id, model2.id, model4.id, model5.id]
-  # end
+    model1 = List.changeset(%List{backpack_id: paris.id, name: "item #1"}, %{}) |> Repo.insert!()
+    model2 = List.changeset(%List{backpack_id: paris.id, name: "item #2"}, %{}) |> Repo.insert!()
+    model3 = List.changeset(%List{backpack_id: paris.id, name: "item #3"}, %{}) |> Repo.insert!()
+    model4 = List.changeset(%List{backpack_id: paris.id, name: "item #4"}, %{}) |> Repo.insert!()
+    model5 = List.changeset(%List{backpack_id: paris.id, name: "item #5"}, %{}) |> Repo.insert!()
 
-  # test "replacing an item above" do
-  #   model1 = Model.changeset(%Model{title: "item #1"}, %{}) |> Repo.insert!()
-  #   model2 = Model.changeset(%Model{title: "item #2"}, %{}) |> Repo.insert!()
-  #   model3 = Model.changeset(%Model{title: "item #3"}, %{}) |> Repo.insert!()
-  #   model4 = Model.changeset(%Model{title: "item #4"}, %{}) |> Repo.insert!()
-  #   model5 = Model.changeset(%Model{title: "item #5"}, %{}) |> Repo.insert!()
+    model4 |> List.changeset(%{position: 1}) |> Repo.update()
 
-  #   model4 |> Model.changeset(%{position: 1}) |> Repo.update!()
+    assert ranked_ids(List, paris.id) == [model1.id, model4.id, model2.id, model3.id, model5.id]
+  end
 
-  #   assert ranked_ids(Model) == [model1.id, model4.id, model2.id, model3.id, model5.id]
-  # end
+  test "scoped: updating item with a tail position" do
+    paris = backpack_fixture(%{name: "Paris"})
 
-  # test "updating item with a tail position" do
-  #   model1 = Model.changeset(%Model{title: "item #1"}, %{}) |> Repo.insert!()
-  #   model2 = Model.changeset(%Model{title: "item #2"}, %{}) |> Repo.insert!()
-  #   model3 = Model.changeset(%Model{title: "item #3"}, %{}) |> Repo.insert!()
+    model1 = List.changeset(%List{backpack_id: paris.id, name: "item #1"}, %{}) |> Repo.insert!()
+    model2 = List.changeset(%List{backpack_id: paris.id, name: "item #2"}, %{}) |> Repo.insert!()
+    model3 = List.changeset(%List{backpack_id: paris.id, name: "item #3"}, %{}) |> Repo.insert!()
 
-  #   model2 |> Model.changeset(%{position: 4}) |> Repo.update!()
+    model2 |> List.changeset(%{position: 4}) |> Repo.update()
 
-  #   assert ranked_ids(Model) == [model1.id, model3.id, model2.id]
-  # end
+    assert ranked_ids(List, paris.id) == [model1.id, model3.id, model2.id]
+  end
 
-  # test "moving an item up" do
-  #   model1 = Model.changeset(%Model{title: "item #1"}, %{}) |> Repo.insert!()
-  #   model2 = Model.changeset(%Model{title: "item #2"}, %{}) |> Repo.insert!()
-  #   model3 = Model.changeset(%Model{title: "item #3"}, %{}) |> Repo.insert!()
+  test "scoped: moving between scopes" do
+    paris = backpack_fixture(%{name: "Paris"})
+    berlin = backpack_fixture(%{name: "Berlin"})
 
-  #   model2 |> Model.changeset(%{move: :up}) |> Repo.update!()
+    scope1_model1 =
+      List.changeset(%List{backpack_id: paris.id, name: "item #1"}, %{}) |> Repo.insert!()
 
-  #   assert ranked_ids(Model) == [model2.id, model1.id, model3.id]
-  # end
+    scope1_model2 =
+      List.changeset(%List{backpack_id: paris.id, name: "item #2"}, %{}) |> Repo.insert!()
 
-  # test "moving an item down using the :down position symbol" do
-  #   model1 = Model.changeset(%Model{title: "item #1"}, %{}) |> Repo.insert!()
-  #   model2 = Model.changeset(%Model{title: "item #2"}, %{}) |> Repo.insert!()
-  #   model3 = Model.changeset(%Model{title: "item #3"}, %{}) |> Repo.insert!()
+    scope1_model3 =
+      List.changeset(%List{backpack_id: paris.id, name: "item #3"}, %{}) |> Repo.insert!()
 
-  #   model2 |> Model.changeset(%{move: :down}) |> Repo.update!()
+    scope2_model1 =
+      List.changeset(%List{backpack_id: berlin.id, name: "item #1"}, %{}) |> Repo.insert!()
 
-  #   assert ranked_ids(Model) == [model1.id, model3.id, model2.id]
-  # end
+    scope2_model2 =
+      List.changeset(%List{backpack_id: berlin.id, name: "item #2"}, %{}) |> Repo.insert!()
 
-  # test "moving an item :up when its already first" do
-  #   model1 = Model.changeset(%Model{title: "item #1"}, %{}) |> Repo.insert!()
-  #   model2 = Model.changeset(%Model{title: "item #2"}, %{}) |> Repo.insert!()
-  #   model3 = Model.changeset(%Model{title: "item #3"}, %{}) |> Repo.insert!()
+    scope2_model3 =
+      List.changeset(%List{backpack_id: berlin.id, name: "item #3"}, %{}) |> Repo.insert!()
 
-  #   model1 |> Model.changeset(%{move: :up}) |> Repo.update!()
+    scope1_model2 |> List.changeset(%{position: 4, backpack_id: berlin.id}) |> Repo.update()
 
-  #   assert ranked_ids(Model) == [model1.id, model2.id, model3.id]
-  #   assert Repo.get(Model, model1.id).rank == model1.rank
-  # end
+    assert Repo.get(List, scope1_model1.id).backpack_id == paris.id
+    assert Repo.get(List, scope1_model3.id).backpack_id == paris.id
+    assert ranked_ids(List, paris.id) == [scope1_model1.id, scope1_model3.id]
 
-  # test "moving an item :down when it's already last" do
-  #   model1 = Model.changeset(%Model{title: "item #1"}, %{}) |> Repo.insert!()
-  #   model2 = Model.changeset(%Model{title: "item #2"}, %{}) |> Repo.insert!()
-  #   model3 = Model.changeset(%Model{title: "item #3"}, %{}) |> Repo.insert!()
+    assert ranked_ids(List, berlin.id) == [
+             scope2_model1.id,
+             scope2_model2.id,
+             scope2_model3.id,
+             scope1_model2.id
+           ]
+  end
 
-  #   model3 |> Model.changeset(%{move: :down}) |> Repo.update!()
+  ## Deletion
 
-  #   assert ranked_ids(Model) == [model1.id, model2.id, model3.id]
-  #   assert Repo.get(Model, model3.id).rank == model3.rank
-  # end
+  test "scoped: deleting an item" do
+    paris = backpack_fixture(%{name: "Paris"})
 
-  # ## Deletion
+    model1 = List.changeset(%List{backpack_id: paris.id, name: "item #1"}, %{}) |> Repo.insert!()
+    model2 = List.changeset(%List{backpack_id: paris.id, name: "item #2"}, %{}) |> Repo.insert!()
+    model3 = List.changeset(%List{backpack_id: paris.id, name: "item #3"}, %{}) |> Repo.insert!()
+    model4 = List.changeset(%List{backpack_id: paris.id, name: "item #4"}, %{}) |> Repo.insert!()
+    model5 = List.changeset(%List{backpack_id: paris.id, name: "item #5"}, %{}) |> Repo.insert!()
 
-  # test "deleting an item" do
-  #   model1 = Model.changeset(%Model{title: "item #1"}, %{}) |> Repo.insert!()
-  #   model2 = Model.changeset(%Model{title: "item #2"}, %{}) |> Repo.insert!()
-  #   model3 = Model.changeset(%Model{title: "item #3"}, %{}) |> Repo.insert!()
-  #   model4 = Model.changeset(%Model{title: "item #4"}, %{}) |> Repo.insert!()
-  #   model5 = Model.changeset(%Model{title: "item #5"}, %{}) |> Repo.insert!()
+    model2 |> Repo.delete()
 
-  #   model2 |> Repo.delete()
-
-  #   assert ranked_ids(Model) == [model1.id, model3.id, model4.id, model5.id]
-  # end
-
-  # test "collision handling at max" do
-  #   for _ <- 1..100 do
-  #     Model.changeset(%Model{}, %{position: 0}) |> Repo.insert()
-  #   end
-
-  #   for _ <- 1..100 do
-  #     Model.changeset(%Model{}, %{}) |> Repo.insert!()
-  #   end
-
-  #   ranks = from(m in Model, order_by: m.rank, select: m.rank) |> Repo.all()
-
-  #   assert ranks == Enum.uniq(ranks)
-  # end
-
-  # test "collision handling at min" do
-  #   for _ <- 1..100 do
-  #     Model.changeset(%Model{}, %{position: 0}) |> Repo.insert()
-  #   end
-
-  #   ranks = from(m in Model, order_by: m.rank, select: m.rank) |> Repo.all()
-
-  #   assert ranks == Enum.uniq(ranks)
-  # end
-
-  # test "collision handling in the middle" do
-  #   for _ <- 1..25 do
-  #     Model.changeset(%Model{}, %{position: 0}) |> Repo.insert!()
-  #   end
-
-  #   for _ <- 1..25 do
-  #     Model.changeset(%Model{}, %{position: 1000}) |> Repo.insert!()
-  #   end
-
-  #   ranks = from(m in Model, order_by: m.rank, select: m.rank) |> Repo.all()
-
-  #   assert ranks == Enum.uniq(ranks)
-  # end
+    assert ranked_ids(List, paris.id) == [model1.id, model3.id, model4.id, model5.id]
+  end
 end
-
-# defmodule EctoOrderedTest.Scoped do
-#   import Ecto.Query
-
-#   defmodule Model do
-#     use Ecto.Schema
-#     import Ecto.Changeset
-#     import EctoOrdered
-
-#     schema "scoped_model" do
-#       field :title, :string
-#       field :scope, :integer
-#       field :scoped_position, :integer, virtual: true
-#       field :scoped_rank, :integer
-#     end
-
-#     def changeset(model, params) do
-#       model
-#       |> cast(params, [:scope, :scoped_position, :title])
-#       |> set_order(:scoped_position, :scoped_rank, :scope)
-#     end
-#   end
-
-#   setup do
-#     :ok = Ecto.Adapters.SQL.Sandbox.checkout(EctoOrderedTest.Repo)
-#     :ok
-#   end
-
-#   def ranked_ids(model, scope) do
-#     from(m in model, where: m.scope == ^scope, select: m.id, order_by: m.scoped_rank)
-#     |> Repo.all()
-#   end
-
-#   # Insertion
-
-#   test "scoped: inserting item with a correct appending position" do
-#     Model.changeset(%Model{scope: 10, title: "item with no position, going to be #1"}, %{})
-#     |> Repo.insert()
-
-#     Model.changeset(%Model{scope: 11, title: "item #2"}, %{}) |> Repo.insert()
-
-#     model =
-#       Model.changeset(%Model{scope: 10, title: "item #2", scoped_position: 2}, %{})
-#       |> Repo.insert!()
-
-#     assert from(m in Model, where: m.scope == 10, select: m.id, offset: 1) |> Repo.one() ==
-#              model.id
-#   end
-
-#   test "scoped: inserting item with an inserting position" do
-#     model1 =
-#       Model.changeset(%Model{scope: 1, title: "no position, going to be #1"}, %{})
-#       |> Repo.insert!()
-
-#     model2 =
-#       Model.changeset(%Model{scope: 1, title: "no position, going to be #2"}, %{})
-#       |> Repo.insert!()
-
-#     model3 =
-#       Model.changeset(%Model{scope: 1, title: "no position, going to be #3"}, %{})
-#       |> Repo.insert!()
-
-#     model =
-#       Model.changeset(%Model{scope: 1, title: "item #2", scoped_position: 1}, %{})
-#       |> Repo.insert!()
-
-#     assert ranked_ids(Model, 1) == [model1.id, model.id, model2.id, model3.id]
-#   end
-
-#   test "scoped: inserting item with an inserting position at #1" do
-#     model1 =
-#       Model.changeset(%Model{scope: 1, title: "no position, going to be #1"}, %{})
-#       |> Repo.insert!()
-
-#     model2 =
-#       Model.changeset(%Model{scope: 1, title: "no position, going to be #2"}, %{})
-#       |> Repo.insert!()
-
-#     model3 =
-#       Model.changeset(%Model{scope: 1, title: "no position, going to be #3"}, %{})
-#       |> Repo.insert!()
-
-#     model =
-#       Model.changeset(%Model{scope: 1, title: "item #1", scoped_position: 0}, %{})
-#       |> Repo.insert!()
-
-#     assert ranked_ids(Model, 1) == [model.id, model1.id, model2.id, model3.id]
-#   end
-
-#   ## Moving
-
-#   test "scoped: updating item with the same position" do
-#     model = Model.changeset(%Model{scope: 1, title: "no position"}, %{}) |> Repo.insert!()
-
-#     model1 =
-#       Model.changeset(model, %{title: "item with a position", scope: 1})
-#       |> Repo.update!()
-
-#     assert model.scoped_rank == model1.scoped_rank
-#   end
-
-#   test "scoped: replacing an item below" do
-#     model1 = Model.changeset(%Model{scope: 1, title: "item #1"}, %{}) |> Repo.insert!()
-#     model2 = Model.changeset(%Model{scope: 1, title: "item #2"}, %{}) |> Repo.insert!()
-#     model3 = Model.changeset(%Model{scope: 1, title: "item #3"}, %{}) |> Repo.insert!()
-#     model4 = Model.changeset(%Model{scope: 1, title: "item #4"}, %{}) |> Repo.insert!()
-#     model5 = Model.changeset(%Model{scope: 1, title: "item #5"}, %{}) |> Repo.insert!()
-
-#     model2 |> Model.changeset(%{scoped_position: 3}) |> Repo.update()
-
-#     assert ranked_ids(Model, 1) == [model1.id, model3.id, model4.id, model2.id, model5.id]
-#   end
-
-#   test "scoped: replacing an item above" do
-#     model1 = Model.changeset(%Model{scope: 1, title: "item #1"}, %{}) |> Repo.insert!()
-#     model2 = Model.changeset(%Model{scope: 1, title: "item #2"}, %{}) |> Repo.insert!()
-#     model3 = Model.changeset(%Model{scope: 1, title: "item #3"}, %{}) |> Repo.insert!()
-#     model4 = Model.changeset(%Model{scope: 1, title: "item #4"}, %{}) |> Repo.insert!()
-#     model5 = Model.changeset(%Model{scope: 1, title: "item #5"}, %{}) |> Repo.insert!()
-
-#     model4 |> Model.changeset(%{scoped_position: 1}) |> Repo.update()
-
-#     assert ranked_ids(Model, 1) == [model1.id, model4.id, model2.id, model3.id, model5.id]
-#   end
-
-#   test "scoped: updating item with a tail position" do
-#     model1 = Model.changeset(%Model{scope: 1, title: "item #1"}, %{}) |> Repo.insert!()
-#     model2 = Model.changeset(%Model{scope: 1, title: "item #2"}, %{}) |> Repo.insert!()
-#     model3 = Model.changeset(%Model{scope: 1, title: "item #3"}, %{}) |> Repo.insert!()
-
-#     model2 |> Model.changeset(%{scoped_position: 4}) |> Repo.update()
-
-#     assert ranked_ids(Model, 1) == [model1.id, model3.id, model2.id]
-#   end
-
-#   test "scoped: moving between scopes" do
-#     scope1_model1 = Model.changeset(%Model{scope: 1, title: "item #1"}, %{}) |> Repo.insert!()
-#     scope1_model2 = Model.changeset(%Model{scope: 1, title: "item #2"}, %{}) |> Repo.insert!()
-#     scope1_model3 = Model.changeset(%Model{scope: 1, title: "item #3"}, %{}) |> Repo.insert!()
-
-#     scope2_model1 = Model.changeset(%Model{scope: 2, title: "item #1"}, %{}) |> Repo.insert!()
-#     scope2_model2 = Model.changeset(%Model{scope: 2, title: "item #2"}, %{}) |> Repo.insert!()
-#     scope2_model3 = Model.changeset(%Model{scope: 2, title: "item #3"}, %{}) |> Repo.insert!()
-
-#     scope1_model2 |> Model.changeset(%{scoped_position: 4, scope: 2}) |> Repo.update()
-
-#     assert Repo.get(Model, scope1_model1.id).scope == 1
-#     assert Repo.get(Model, scope1_model3.id).scope == 1
-#     assert ranked_ids(Model, 1) == [scope1_model1.id, scope1_model3.id]
-
-#     assert ranked_ids(Model, 2) == [
-#              scope2_model1.id,
-#              scope2_model2.id,
-#              scope2_model3.id,
-#              scope1_model2.id
-#            ]
-#   end
-
-#   ## Deletion
-
-#   test "scoped: deleting an item" do
-#     model1 = Model.changeset(%Model{title: "item #1", scope: 1}, %{}) |> Repo.insert!()
-#     model2 = Model.changeset(%Model{title: "item #2", scope: 1}, %{}) |> Repo.insert!()
-#     model3 = Model.changeset(%Model{title: "item #3", scope: 1}, %{}) |> Repo.insert!()
-#     model4 = Model.changeset(%Model{title: "item #4", scope: 1}, %{}) |> Repo.insert!()
-#     model5 = Model.changeset(%Model{title: "item #5", scope: 1}, %{}) |> Repo.insert!()
-
-#     model2 |> Repo.delete()
-
-#     assert ranked_ids(Model, 1) == [model1.id, model3.id, model4.id, model5.id]
-#   end
-# end
