@@ -76,6 +76,7 @@ defmodule HamsterTravel.Packing.Template do
     |> Enum.map(fn item -> parse_item(item, vars) end)
     |> Enum.filter(fn res -> res != nil end)
     |> Result.list_or_errors()
+    |> fill_ranks()
   end
 
   defp parse_item(nil, _), do: %Item{}

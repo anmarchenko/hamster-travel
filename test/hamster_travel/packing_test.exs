@@ -97,7 +97,8 @@ defmodule HamsterTravel.PackingTest do
         backpack.lists
         |> Enum.filter(fn list -> list.name == "Hygiene" end)
         |> Enum.flat_map(fn list -> list.items end)
-        |> Enum.sort_by(fn item -> item.name end)
+
+      refute Enum.any?(hygiene_items, fn item -> item.rank == nil end)
 
       assert [
                %Item{
@@ -105,12 +106,12 @@ defmodule HamsterTravel.PackingTest do
                  count: 2
                },
                %Item{
-                 name: "Toothbrush",
-                 count: 3
-               },
-               %Item{
                  name: "Toothpaste",
                  count: 83
+               },
+               %Item{
+                 name: "Toothbrush",
+                 count: 3
                }
              ] = hygiene_items
 
@@ -233,6 +234,27 @@ defmodule HamsterTravel.PackingTest do
       refute item.checked
       assert "toothbrush a b c d" = item.name
       assert 1 = item.count
+    end
+
+    test "create_item/2 adds an item to the end of lists", %{list: list} do
+      {:ok, item} = Packing.create_item(%{name: "socks"}, list)
+      {:ok, item2} = Packing.create_item(%{name: "pants"}, list)
+
+      assert item.rank < item2.rank
+    end
+
+    test "create_item/2 adds an item to the end of items even when there are template items already" do
+      user = user_fixture()
+      valid_attrs = %{days: 1, name: "backpack", nights: 2, template: "test"}
+
+      assert {:ok, %Backpack{} = backpack} = Packing.create_backpack(valid_attrs, user)
+
+      list = Enum.at(backpack.lists, 0)
+
+      {:ok, item} = Packing.create_item(%{name: "creme"}, list)
+      {:ok, item2} = Packing.create_item(%{name: "stuff"}, list)
+
+      assert item.rank < item2.rank
     end
 
     test "update_item_checked/2 sets checked property for item" do

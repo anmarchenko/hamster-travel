@@ -130,7 +130,7 @@ defmodule HamsterTravel.Packing do
   end
 
   defp backpack_preloading(query) do
-    items_preload_query = from i in Item, order_by: [i.inserted_at, i.id]
+    items_preload_query = from i in Item, order_by: [i.rank]
 
     lists_preload_query =
       from l in List, order_by: [l.rank], preload: [items: ^items_preload_query]
