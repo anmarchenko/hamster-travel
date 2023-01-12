@@ -1,8 +1,9 @@
 <.container>
   <div class="mb-8">
-    <.a to="backpacks/new">
+    <.button link_type="live_redirect" to="backpacks/new" color="primary">
+      <Heroicons.Solid.plus class="w-5 h-5 mr-2" />
       <%= gettext("Create backpack") %>
-    </.a>
+    </.button>
   </div>
   <.grid backpacks={@backpacks} />
 </.container>
