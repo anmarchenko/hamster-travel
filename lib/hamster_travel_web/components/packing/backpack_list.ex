@@ -83,11 +83,11 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
     ~H"""
     <span>
       <.card>
-        <div class="flex flex-col w-full">
+        <div class="flex flex-col w-full" x-data="{ showItems: true }">
           <div class="p-4 bg-violet-700 dark:bg-violet-900 rounded-t-lg">
             <.header edit={@edit} changeset={@changeset} list={@list} phx-target={@myself} />
           </div>
-          <div class="p-4">
+          <div class="p-4" x-show="showItems">
             <.live_component
               :for={item <- @list.items}
               module={BackpackItem}
@@ -123,6 +123,18 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
         phx-click="delete"
         phx-target={assigns[:"phx-target"]}
         data-confirm={gettext("Are you sure you want to delete this list? All items will be lost")}
+      />
+      <.ht_icon_button
+        icon={:chevron_down}
+        color="white"
+        x-show="showItems"
+        @click="showItems = !showItems"
+      />
+      <.ht_icon_button
+        icon={:chevron_right}
+        color="white"
+        x-show="!showItems"
+        @click="showItems = !showItems"
       />
     </.inline>
     """
