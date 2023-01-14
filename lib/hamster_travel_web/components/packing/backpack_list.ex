@@ -24,6 +24,7 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
     socket =
       socket
       |> assign(:edit, false)
+      |> assign(:done, Packing.all_checked?(assigns.list.items))
       |> assign(:changeset, Packing.change_list(assigns.list))
       |> assign(assigns)
 
@@ -87,7 +88,7 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
           class="flex flex-col w-full"
           x-data={"{ showItems: $persist(true).as('list-#{@list.id}') }"}
         >
-          <div class="p-4 bg-violet-700 dark:bg-violet-900 rounded-t-lg">
+          <div class={"p-4 rounded-t-lg #{decoration_classes(@done)}"}>
             <.header edit={@edit} changeset={@changeset} list={@list} phx-target={@myself} />
           </div>
           <div class="p-4" x-show="showItems" x-transition.duration.300ms>
@@ -162,4 +163,7 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
     </.inline>
     """
   end
+
+  defp decoration_classes(true), do: "bg-violet-500 dark:bg-violet-800 line-through"
+  defp decoration_classes(_), do: "bg-violet-700 dark:bg-violet-900"
 end

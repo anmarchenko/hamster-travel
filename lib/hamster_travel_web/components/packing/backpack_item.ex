@@ -120,7 +120,7 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
       <.inline class="!gap gap-1">
         <.form :let={f} for={:item} class="grow mr-2" phx-change="check" phx-target={@myself}>
           <%= label class: "cursor-pointer" do %>
-            <.inline>
+            <.inline class={decoration_classes(@item.checked)}>
               <.checkbox
                 form={f}
                 id={"item-#{@item.id}"}
@@ -149,4 +149,7 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
     </div>
     """
   end
+
+  defp decoration_classes(true), do: "line-through"
+  defp decoration_classes(_), do: ""
 end

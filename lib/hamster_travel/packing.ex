@@ -124,6 +124,10 @@ defmodule HamsterTravel.Packing do
     |> notify_event([:item, :updated])
   end
 
+  def all_checked?(items) do
+    !Enum.empty?(items) && Enum.all?(items, & &1.checked)
+  end
+
   def delete_item(%Item{} = item) do
     Repo.delete(item)
     |> notify_event([:item, :deleted])
