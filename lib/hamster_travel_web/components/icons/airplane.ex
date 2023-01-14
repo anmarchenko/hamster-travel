@@ -14,8 +14,8 @@ defmodule HamsterTravelWeb.Icons.Airplane do
   defp render(assigns) do
     ~H"""
     <svg
-      width="18"
-      height="18"
+      width="20"
+      height="20"
       stroke-width="1.5"
       viewBox="0 0 24 24"
       fill="none"

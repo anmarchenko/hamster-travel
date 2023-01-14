@@ -39,7 +39,7 @@ defmodule HamsterTravelWeb.Planning.Tabs do
         link_type="live_patch"
       >
         <.inline>
-          <Heroicons.Outline.clipboard_list />
+          <Heroicons.Outline.clipboard_list class="h-5 w-5" />
           <%= gettext("Activities") %>
         </.inline>
       </.tab>
