@@ -159,13 +159,13 @@ msgstr "Часы работы"
 msgid "Last travels"
 msgstr "Последние путешествия"
 
-#: lib/hamster_travel_web/templates/user_session/new.html.heex:19
+#: lib/hamster_travel_web/templates/user_session/new.html.heex:76
 #: lib/hamster_travel_web/views/layout_view.ex:42
 #, elixir-autogen, elixir-format
 msgid "Log in"
 msgstr "Войти"
 
-#: lib/hamster_travel_web/templates/user_session/new.html.heex:7
+#: lib/hamster_travel_web/templates/user_session/new.html.heex:30
 #, elixir-autogen, elixir-format
 msgid "Email"
 msgstr "Email"
@@ -180,7 +180,7 @@ msgstr "Неверный email или пароль"
 msgid "Logged out successfully."
 msgstr "Выход из системы успешен"
 
-#: lib/hamster_travel_web/templates/user_session/new.html.heex:14
+#: lib/hamster_travel_web/templates/user_session/new.html.heex:41
 #, elixir-autogen, elixir-format
 msgid "Password"
 msgstr "Пароль"
@@ -228,7 +228,7 @@ msgid "Create"
 msgstr "Создать"
 
 #: lib/hamster_travel_web/pages/packing/create_backpack.ex:16
-#: lib/hamster_travel_web/pages/packing/index_backpacks.html.heex:4
+#: lib/hamster_travel_web/pages/packing/index_backpacks.html.heex:5
 #, elixir-autogen, elixir-format
 msgid "Create backpack"
 msgstr "Новый рюкзачок"
@@ -273,17 +273,22 @@ msgstr "Вы уверены, что хотите удалить рюкзачок
 msgid "Add backpack item"
 msgstr "Что ещё берём?"
 
-#: lib/hamster_travel_web/components/packing/backpack_list.ex:125
+#: lib/hamster_travel_web/components/packing/backpack_list.ex:129
 #, elixir-autogen, elixir-format
 msgid "Are you sure you want to delete this list? All items will be lost"
 msgstr "Вы уверены, что хотите удалить список? Все вещи в списке будут удалены"
 
-#: lib/hamster_travel_web/components/packing/add_list.ex:45
+#: lib/hamster_travel_web/components/packing/add_list.ex:81
 #, elixir-autogen, elixir-format
 msgid "Add list"
 msgstr "Добавить список"
 
-#: lib/hamster_travel_web/components/packing/add_list.ex:61
+#: lib/hamster_travel_web/components/packing/add_list.ex:64
 #, elixir-autogen, elixir-format
 msgid "List name"
 msgstr "Название списка"
+
+#: lib/hamster_travel_web/templates/user_session/new.html.heex:5
+#, elixir-autogen, elixir-format
+msgid "Sign in to your account"
+msgstr ""
