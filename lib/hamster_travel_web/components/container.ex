@@ -7,7 +7,7 @@ defmodule HamsterTravelWeb.Container do
 
   def container(assigns) do
     assigns
-    |> set_attributes([wide: false, form: false, nomargin: false], required: [:inner_block])
+    |> set_attributes([wide: false, nomargin: false], required: [:inner_block])
     |> extend_class(&component_class/1, prefix_replace: false)
     |> render()
   end
@@ -28,6 +28,5 @@ defmodule HamsterTravelWeb.Container do
   defp margins(_), do: "p-6 mt-6"
 
   defp width(%{wide: true}), do: "xl:max-w-screen-xl 2xl:max-w-screen-2xl"
-  defp width(%{form: true}), do: "max-w-screen-md"
   defp width(_), do: "xl:max-w-screen-lg 2xl:max-w-screen-xl"
 end

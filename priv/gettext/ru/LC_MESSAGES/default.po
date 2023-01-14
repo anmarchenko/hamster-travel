@@ -214,7 +214,7 @@ msgstr "Путешествий"
 #: lib/hamster_travel_web/pages/packing/edit_backpack.html.heex:15
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Backpack days"
-msgstr "Сколько дней?"
+msgstr "Дней"
 
 #: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:7
 #: lib/hamster_travel_web/pages/packing/edit_backpack.html.heex:7

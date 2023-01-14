@@ -4,8 +4,6 @@ defmodule HamsterTravelWeb.Packing.CreateBackpack do
   """
   use HamsterTravelWeb, :live_view
 
-  import HamsterTravelWeb.Container
-
   alias HamsterTravel.Packing
 
   @impl true
