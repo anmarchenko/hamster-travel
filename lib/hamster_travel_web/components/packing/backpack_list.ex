@@ -83,7 +83,10 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
     ~H"""
     <div>
       <.card>
-        <div class="flex flex-col w-full" x-data="{ showItems: true }">
+        <div
+          class="flex flex-col w-full"
+          x-data={"{ showItems: $persist(true).as('list-#{@list.id}') }"}
+        >
           <div class="p-4 bg-violet-700 dark:bg-violet-900 rounded-t-lg">
             <.header edit={@edit} changeset={@changeset} list={@list} phx-target={@myself} />
           </div>
