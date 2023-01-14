@@ -81,13 +81,13 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
 
   def render(assigns) do
     ~H"""
-    <span>
+    <div>
       <.card>
         <div class="flex flex-col w-full" x-data="{ showItems: true }">
           <div class="p-4 bg-violet-700 dark:bg-violet-900 rounded-t-lg">
             <.header edit={@edit} changeset={@changeset} list={@list} phx-target={@myself} />
           </div>
-          <div class="p-4" x-show="showItems">
+          <div class="p-4" x-show="showItems" x-transition.duration.300ms>
             <.live_component
               :for={item <- @list.items}
               module={BackpackItem}
@@ -98,7 +98,7 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
           </div>
         </div>
       </.card>
-    </span>
+    </div>
     """
   end
 
