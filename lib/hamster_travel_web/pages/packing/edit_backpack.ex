@@ -4,8 +4,6 @@ defmodule HamsterTravelWeb.Packing.EditBackpack do
   """
   use HamsterTravelWeb, :live_view
 
-  import HamsterTravelWeb.Container
-
   alias HamsterTravel.Packing
   alias HamsterTravel.Packing.Policy
 

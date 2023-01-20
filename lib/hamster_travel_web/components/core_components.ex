@@ -3,6 +3,8 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   alias PetalComponents.HeroiconsV1, as: Heroicons
 
+  alias HamsterTravelWeb.Router.Helpers, as: Routes
+
   def plan_url(slug), do: "/plans/#{slug}"
   def plan_url(slug, :itinerary), do: "/plans/#{slug}?tab=itinerary"
   def plan_url(slug, :activities), do: "/plans/#{slug}?tab=activities"
@@ -17,6 +19,19 @@ defmodule HamsterTravelWeb.CoreComponents do
   def backpack_url(slug), do: "/backpacks/#{slug}"
   def backpack_url(slug, :edit), do: "/backpacks/#{slug}/edit"
 
+  def placeholder_image(id) when is_binary(id) do
+    id
+    |> :erlang.phash2()
+    |> rem(9)
+    |> placeholder_image_url()
+  end
+
+  def placeholder_image(id) when is_integer(id) do
+    id
+    |> rem(9)
+    |> placeholder_image_url()
+  end
+
   def build_class(classes) do
     classes
     |> Enum.filter(fn class -> class != nil && class != "" end)
@@ -24,17 +39,17 @@ defmodule HamsterTravelWeb.CoreComponents do
     |> Enum.join(" ")
   end
 
-  attr :icon, :atom, required: true
-  attr :color, :string, default: "gray"
-  attr :size, :string, default: "xs"
-  attr :class, :string, default: nil
+  attr(:icon, :atom, required: true)
+  attr(:color, :string, default: "gray")
+  attr(:size, :string, default: "xs")
+  attr(:class, :string, default: nil)
 
-  attr :disabled, :boolean, default: false
-  attr :"phx-click", :string, default: nil
-  attr :"phx-target", :any, default: nil
-  attr :"@click", :string, default: nil
-  attr :"x-show", :string, default: nil
-  attr :"data-confirm", :string, default: nil
+  attr(:disabled, :boolean, default: false)
+  attr(:"phx-click", :string, default: nil)
+  attr(:"phx-target", :any, default: nil)
+  attr(:"@click", :string, default: nil)
+  attr(:"x-show", :string, default: nil)
+  attr(:"data-confirm", :string, default: nil)
 
   def ht_icon_button(assigns) do
     ~H"""
@@ -66,8 +81,8 @@ defmodule HamsterTravelWeb.CoreComponents do
     """
   end
 
-  attr :icon, :atom, required: true
-  attr :rest, :global, default: %{class: "w-5 h-5"}
+  attr(:icon, :atom, required: true)
+  attr(:rest, :global, default: %{class: "w-5 h-5"})
 
   defp icon(assigns) do
     ~H"""
@@ -129,4 +144,9 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   defp get_disabled_classes(true), do: "disabled cursor-not-allowed opacity-50"
   defp get_disabled_classes(false), do: ""
+
+  defp placeholder_image_url(number) do
+    image_name = "placeholder-#{number}"
+    Routes.static_path(HamsterTravelWeb.Endpoint, "/images/#{image_name}.jpg")
+  end
 end

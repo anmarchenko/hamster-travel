@@ -6,12 +6,25 @@ defmodule HamsterTravelWeb.Packing.IndexBackpacks do
 
   import HamsterTravelWeb.Container
   import HamsterTravelWeb.Gettext
-  import HamsterTravelWeb.Link
   import HamsterTravelWeb.Packing.Grid
 
   alias HamsterTravel.Packing
 
   @impl true
+  @spec mount(
+          any,
+          any,
+          atom
+          | %{
+              :assigns =>
+                atom
+                | %{
+                    :current_user => atom | %{:id => any, optional(any) => any},
+                    optional(any) => any
+                  },
+              optional(any) => any
+            }
+        ) :: {:ok, any}
   def mount(_params, _session, socket) do
     socket =
       socket

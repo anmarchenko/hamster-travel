@@ -15,8 +15,9 @@
     </div>
     <div class="">
       <img
+        :if={@plan[:cover]}
         class="max-h-52 mb-4 sm:mb-0 sm:h-36 sm:w-auto sm:max-h-full shadow-lg rounded-md"
-        src={@plan.cover}
+        src={@plan[:cover]}
       />
     </div>
   </div>

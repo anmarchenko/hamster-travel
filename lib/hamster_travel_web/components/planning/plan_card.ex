@@ -20,7 +20,10 @@ defmodule HamsterTravelWeb.Planning.PlanCard do
     <.card>
       <div class="shrink-0">
         <.link navigate={plan_url(@plan.slug)}>
-          <img src={@plan.cover} class="w-32 h-32 object-cover object-center rounded-l-lg" />
+          <img
+            src={@plan[:cover] || placeholder_image(@plan.id)}
+            class="w-32 h-32 object-cover object-center rounded-l-lg"
+          />
         </.link>
       </div>
       <div class="p-4 max-w-[calc(100%_-_theme(width.32))] flex flex-col justify-between">
