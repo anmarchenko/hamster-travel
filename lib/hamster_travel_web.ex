@@ -113,7 +113,6 @@ defmodule HamsterTravelWeb do
       # TODO: remove it??????
       import Phoenix.View
 
-      # TODO: do I use it even?
       import HamsterTravelWeb.ErrorHelpers
 
       # I18n
