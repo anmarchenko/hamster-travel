@@ -13,7 +13,7 @@ defmodule HamsterTravel.Packing.Template do
 
   @spec execute(String.t(), Map.t()) :: {:ok, list(List.t())} | {:error, list(String.t())}
   def execute(template, vars) do
-    filepath = "lib/hamster_travel/packing/templates/#{template}.yml"
+    filepath = Application.app_dir(:hamster_travel, "priv/templates/#{template}.yml")
 
     case YamlElixir.read_from_file(filepath) do
       {:ok, %{"backpack" => lists}} ->

@@ -38,10 +38,7 @@ defmodule HamsterTravel.Packing.TemplateTest do
   end
 
   test "when file does not exists it returns an error" do
-    assert {:error,
-            [
-              "Failed to open file \"lib/hamster_travel/packing/templates/non_existing.yml\": no such file or directory"
-            ]} = Template.execute("non_existing")
+    assert {:error, _} = Template.execute("non_existing")
   end
 
   test "when file is not a correct yaml it returns an error" do
