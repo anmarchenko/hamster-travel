@@ -102,6 +102,7 @@ defmodule HamsterTravel.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.deploy": [
+        "tailwind default --minify",
         "cmd --cd assets npm install",
         "esbuild default --minify",
         "phx.digest"
