@@ -10,14 +10,13 @@ processes = []
 
 [env]
   PHX_HOST = "hamster-travel.fly.dev"
-  PORT = "8080"
 
 [experimental]
   auto_rollback = true
 
 [[services]]
   http_checks = []
-  internal_port = 8080
+  internal_port = 4000
   processes = ["app"]
   protocol = "tcp"
   script_checks = []
