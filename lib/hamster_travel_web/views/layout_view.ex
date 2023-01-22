@@ -1,7 +1,6 @@
 defmodule HamsterTravelWeb.LayoutView do
   use HamsterTravelWeb, :view
 
-  import HamsterTravelWeb.Container
   import HamsterTravelWeb.Gettext
   import HamsterTravelWeb.Icons.Airplane
 

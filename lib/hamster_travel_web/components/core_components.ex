@@ -66,6 +66,31 @@ defmodule HamsterTravelWeb.CoreComponents do
     """
   end
 
+  attr(:wide, :boolean, default: false)
+  attr(:nomargin, :boolean, default: false)
+  attr(:class, :string, default: nil)
+
+  slot(:inner_block, required: true)
+
+  def container(assigns) do
+    ~H"""
+    <section class={[
+      "mx-auto max-w-screen-md",
+      container_margins(assigns),
+      container_width(assigns),
+      @class
+    ]}>
+      <%= render_slot(@inner_block) %>
+    </section>
+    """
+  end
+
+  defp container_margins(%{nomargin: true}), do: ""
+  defp container_margins(_), do: "p-6 mt-6"
+
+  defp container_width(%{wide: true}), do: "xl:max-w-screen-xl 2xl:max-w-screen-2xl"
+  defp container_width(_), do: "xl:max-w-screen-lg 2xl:max-w-screen-xl"
+
   slot(:inner_block, required: true)
 
   def form_container(assigns) do

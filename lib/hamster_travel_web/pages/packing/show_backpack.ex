@@ -8,7 +8,6 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
 
   import HamsterTravel.Collections
 
-  import HamsterTravelWeb.Container
   import HamsterTravelWeb.Header
   import HamsterTravelWeb.Inline
   import HamsterTravelWeb.Link

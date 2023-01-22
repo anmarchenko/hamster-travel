@@ -1,19 +1,19 @@
-#: lib/hamster_travel_web/pages/planning/index_plans.ex:15
-#: lib/hamster_travel_web/views/layout_view.ex:24
-#: lib/hamster_travel_web/views/layout_view.ex:98
+#: lib/hamster_travel_web/pages/planning/index_plans.ex:14
+#: lib/hamster_travel_web/views/layout_view.ex:23
+#: lib/hamster_travel_web/views/layout_view.ex:97
 #, elixir-autogen, elixir-format
 msgid "Plans"
 msgstr "Путешествия"
 
-#: lib/hamster_travel_web/pages/packing/index_backpacks.ex:19
-#: lib/hamster_travel_web/views/layout_view.ex:31
-#: lib/hamster_travel_web/views/layout_view.ex:104
+#: lib/hamster_travel_web/pages/packing/index_backpacks.ex:31
+#: lib/hamster_travel_web/views/layout_view.ex:30
+#: lib/hamster_travel_web/views/layout_view.ex:103
 #, elixir-autogen, elixir-format
 msgid "Backpacks"
 msgstr "Рюкзачки"
 
-#: lib/hamster_travel_web/pages/home.ex:19
-#: lib/hamster_travel_web/views/layout_view.ex:95
+#: lib/hamster_travel_web/pages/home.ex:18
+#: lib/hamster_travel_web/views/layout_view.ex:94
 #, elixir-autogen, elixir-format
 msgid "Homepage"
 msgstr "Главная"
@@ -28,7 +28,7 @@ msgstr "Ближайшие путешествия"
 msgid "ppl"
 msgstr "чел"
 
-#: lib/hamster_travel_web/components/packing/backpack_card.ex:32
+#: lib/hamster_travel_web/components/packing/backpack_card.ex:31
 #: lib/hamster_travel_web/components/planning/plan_shorts.ex:29
 #: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:6
 #, elixir-format, ex-autogen, fuzzy
@@ -48,9 +48,9 @@ msgstr "Планируемое"
 msgid "draft"
 msgstr "Черновик"
 
-#: lib/hamster_travel_web/pages/planning/index_drafts.ex:15
-#: lib/hamster_travel_web/views/layout_view.ex:28
-#: lib/hamster_travel_web/views/layout_view.ex:101
+#: lib/hamster_travel_web/pages/planning/index_drafts.ex:14
+#: lib/hamster_travel_web/views/layout_view.ex:27
+#: lib/hamster_travel_web/views/layout_view.ex:100
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Drafts"
 msgstr "Черновики"
@@ -81,7 +81,7 @@ msgid "Make a copy"
 msgstr "Сделать копию"
 
 #: lib/hamster_travel_web/components/planning/tabs.ex:43
-#: lib/hamster_travel_web/views/layout_view.ex:84
+#: lib/hamster_travel_web/views/layout_view.ex:83
 #, elixir-autogen, elixir-format
 msgid "Activities"
 msgstr "Впечатления"
@@ -91,13 +91,13 @@ msgstr "Впечатления"
 msgid "Transfers and hotels"
 msgstr "Трансферы и жильё"
 
-#: lib/hamster_travel_web/views/layout_view.ex:73
+#: lib/hamster_travel_web/views/layout_view.ex:72
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Back"
 msgstr "Назад"
 
 #: lib/hamster_travel_web/components/planning/tab_itinerary.ex:91
-#: lib/hamster_travel_web/views/layout_view.ex:77
+#: lib/hamster_travel_web/views/layout_view.ex:76
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Transfers"
 msgstr "Трансферы"
@@ -159,13 +159,13 @@ msgstr "Часы работы"
 msgid "Last travels"
 msgstr "Последние путешествия"
 
-#: lib/hamster_travel_web/templates/user_session/new.html.heex:76
-#: lib/hamster_travel_web/views/layout_view.ex:42
+#: lib/hamster_travel_web/templates/user_session/new.html.heex:75
+#: lib/hamster_travel_web/views/layout_view.ex:41
 #, elixir-autogen, elixir-format
 msgid "Log in"
 msgstr "Войти"
 
-#: lib/hamster_travel_web/templates/user_session/new.html.heex:30
+#: lib/hamster_travel_web/templates/user_session/new.html.heex:29
 #, elixir-autogen, elixir-format
 msgid "Email"
 msgstr "Email"
@@ -180,7 +180,7 @@ msgstr "Неверный email или пароль"
 msgid "Logged out successfully."
 msgstr "Выход из системы успешен"
 
-#: lib/hamster_travel_web/templates/user_session/new.html.heex:41
+#: lib/hamster_travel_web/templates/user_session/new.html.heex:40
 #, elixir-autogen, elixir-format
 msgid "Password"
 msgstr "Пароль"
@@ -210,19 +210,19 @@ msgstr "Стран"
 msgid "Of travels"
 msgstr "Путешествий"
 
-#: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:15
-#: lib/hamster_travel_web/pages/packing/edit_backpack.html.heex:15
+#: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:19
+#: lib/hamster_travel_web/pages/packing/edit_backpack.html.heex:19
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Backpack days"
 msgstr "Дней"
 
-#: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:7
-#: lib/hamster_travel_web/pages/packing/edit_backpack.html.heex:7
+#: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:9
+#: lib/hamster_travel_web/pages/packing/edit_backpack.html.heex:9
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Backpack name"
 msgstr "Название"
 
-#: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:27
+#: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:37
 #, elixir-autogen, elixir-format
 msgid "Create"
 msgstr "Создать"
@@ -238,23 +238,23 @@ msgstr "Новый рюкзачок"
 msgid "Please sign in"
 msgstr "Пожалуйста залогиньтесь"
 
-#: lib/hamster_travel_web/pages/packing/edit_backpack.html.heex:27
+#: lib/hamster_travel_web/pages/packing/edit_backpack.html.heex:35
 #, elixir-autogen, elixir-format
 msgid "Save"
 msgstr "Сохранить"
 
-#: lib/hamster_travel_web/pages/packing/edit_backpack.ex:21
+#: lib/hamster_travel_web/pages/packing/edit_backpack.ex:19
 #, elixir-autogen, elixir-format
 msgid "Edit backpack"
 msgstr "Редактирование рюкзачка"
 
-#: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:22
-#: lib/hamster_travel_web/pages/packing/edit_backpack.html.heex:22
+#: lib/hamster_travel_web/pages/packing/create_backpack.html.heex:30
+#: lib/hamster_travel_web/pages/packing/edit_backpack.html.heex:28
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Backpack nights"
 msgstr "Ночей"
 
-#: lib/hamster_travel_web/components/packing/backpack_card.ex:32
+#: lib/hamster_travel_web/components/packing/backpack_card.ex:31
 #: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:6
 #, elixir-autogen, elixir-format, fuzzy
 msgid "night"
@@ -273,7 +273,7 @@ msgstr "Вы уверены, что хотите удалить рюкзачок
 msgid "Add backpack item"
 msgstr "Что ещё берём?"
 
-#: lib/hamster_travel_web/components/packing/backpack_list.ex:129
+#: lib/hamster_travel_web/components/packing/backpack_list.ex:128
 #, elixir-autogen, elixir-format
 msgid "Are you sure you want to delete this list? All items will be lost"
 msgstr "Вы уверены, что хотите удалить список? Все вещи в списке будут удалены"
@@ -288,7 +288,7 @@ msgstr "Добавить список"
 msgid "List name"
 msgstr "Название списка"
 
-#: lib/hamster_travel_web/templates/user_session/new.html.heex:5
+#: lib/hamster_travel_web/templates/user_session/new.html.heex:4
 #, elixir-autogen, elixir-format
 msgid "Sign in to your account"
 msgstr ""

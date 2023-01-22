@@ -9,7 +9,7 @@
 
 <main class="pb-16 sm:pb-0 text-zinc-600 dark:text-zinc-300">
   <%= @inner_content %>
-  <.container nomargin form>
+  <.container nomargin>
     <%= if get_flash(@conn, :error) do %>
       <.alert
         with_icon

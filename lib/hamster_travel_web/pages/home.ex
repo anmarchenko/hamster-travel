@@ -5,7 +5,6 @@ defmodule HamsterTravelWeb.Home do
   """
   use HamsterTravelWeb, :live_view
 
-  import HamsterTravelWeb.Container
   import HamsterTravelWeb.Gettext
   import HamsterTravelWeb.Header
   import HamsterTravelWeb.Link
