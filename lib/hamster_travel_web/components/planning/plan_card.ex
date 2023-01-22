@@ -5,7 +5,6 @@ defmodule HamsterTravelWeb.Planning.PlanCard do
   use HamsterTravelWeb, :component
   import PhxComponentHelpers
 
-  import HamsterTravelWeb.Card
   import HamsterTravelWeb.Planning.{PlanShorts, PlanStatus}
   import HamsterTravelWeb.Secondary
 

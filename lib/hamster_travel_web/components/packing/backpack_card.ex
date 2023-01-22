@@ -5,7 +5,6 @@ defmodule HamsterTravelWeb.Packing.BackpackCard do
   use HamsterTravelWeb, :component
   import PhxComponentHelpers
 
-  import HamsterTravelWeb.Card
   import HamsterTravelWeb.Inline
   import HamsterTravelWeb.Secondary
 

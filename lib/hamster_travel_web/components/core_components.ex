@@ -1,5 +1,5 @@
 defmodule HamsterTravelWeb.CoreComponents do
-  use Phoenix.Component
+  use Phoenix.Component, global_prefixes: ~w(x- data-)
 
   alias PetalComponents.HeroiconsV1, as: Heroicons
 
@@ -43,13 +43,8 @@ defmodule HamsterTravelWeb.CoreComponents do
   attr(:color, :string, default: "gray")
   attr(:size, :string, default: "xs")
   attr(:class, :string, default: nil)
-
   attr(:disabled, :boolean, default: false)
-  attr(:"phx-click", :string, default: nil)
-  attr(:"phx-target", :any, default: nil)
-  attr(:"@click", :string, default: nil)
-  attr(:"x-show", :string, default: nil)
-  attr(:"data-confirm", :string, default: nil)
+  attr(:rest, :global, include: ~w(@click x-show))
 
   def ht_icon_button(assigns) do
     ~H"""
@@ -64,12 +59,14 @@ defmodule HamsterTravelWeb.CoreComponents do
           @class
         ])
       }
-      {assigns_to_attributes(assigns, [:icon, :color, :size, :class])}
+      {@rest}
     >
       <.icon icon={@icon} class={get_icon_button_pic_size_classes(@size)} />
     </button>
     """
   end
+
+  slot(:inner_block, required: true)
 
   def form_container(assigns) do
     ~H"""
@@ -77,6 +74,23 @@ defmodule HamsterTravelWeb.CoreComponents do
       <div class="w-full max-w-md space-y-8">
         <%= render_slot(@inner_block) %>
       </div>
+    </div>
+    """
+  end
+
+  attr(:class, :string, default: nil)
+
+  slot(:inner_block, required: true)
+
+  def card(assigns) do
+    ~H"""
+    <div class={
+      build_class([
+        "flex flex-row bg-zinc-50 dark:bg-zinc-900 dark:border dark:border-zinc-600 shadow-md rounded-lg hover:shadow-lg hover:bg-white hover:dark:bg-zinc-800",
+        @class
+      ])
+    }>
+      <%= render_slot(@inner_block) %>
     </div>
     """
   end
