@@ -15,6 +15,14 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
   alias HamsterTravelWeb.Packing.AddItem
   alias HamsterTravelWeb.Packing.BackpackItem
 
+  def mount(socket) do
+    socket =
+      socket
+      |> assign(edit: false)
+
+    {:ok, socket}
+  end
+
   def update(assigns, socket) do
     assigns =
       assigns
@@ -22,7 +30,6 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
 
     socket =
       socket
-      |> assign(:edit, false)
       |> assign(:done, Packing.all_checked?(assigns.list.items))
       |> assign(:changeset, Packing.change_list(assigns.list))
       |> assign(assigns)
