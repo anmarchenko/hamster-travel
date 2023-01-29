@@ -1,5 +1,11 @@
 <.form_container>
-  <.form :let={f} for={@changeset} phx-submit="create_backpack" as={:backpack}>
+  <.form
+    :let={f}
+    for={@changeset}
+    as={:backpack}
+    phx-submit="create_backpack"
+    phx-change="form_changed"
+  >
     <div class="grid grid-cols-6 gap-x-6">
       <div class="col-span-6">
         <.form_field
@@ -18,7 +24,6 @@
           field={:days}
           label={gettext("Backpack days")}
           required={true}
-          phx_change="days-changed"
         />
       </div>
 

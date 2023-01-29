@@ -39,6 +39,10 @@ defmodule HamsterTravel.Packing do
     Backpack.changeset(%Backpack{days: 2, nights: 1}, %{})
   end
 
+  def backpack_changeset(params) do
+    Backpack.changeset(%Backpack{}, params)
+  end
+
   def create_backpack(attrs \\ %{}, user) do
     %Backpack{user_id: user.id}
     |> Backpack.changeset(attrs)

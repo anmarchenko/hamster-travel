@@ -74,12 +74,14 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   def container(assigns) do
     ~H"""
-    <section class={[
-      "mx-auto max-w-screen-md",
-      container_margins(assigns),
-      container_width(assigns),
-      @class
-    ]}>
+    <section class={
+      build_class([
+        "mx-auto max-w-screen-md",
+        container_margins(assigns),
+        container_width(assigns),
+        @class
+      ])
+    }>
       <%= render_slot(@inner_block) %>
     </section>
     """
