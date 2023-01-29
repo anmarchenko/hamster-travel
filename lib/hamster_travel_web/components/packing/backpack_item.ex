@@ -12,12 +12,20 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
 
   alias HamsterTravel.Packing
 
+  def mount(socket) do
+    socket =
+      socket
+      |> assign(edit: false)
+
+    {:ok, socket}
+  end
+
   def update(assigns, socket) do
     assigns =
       assigns
       |> set_attributes([], required: [:item])
 
-    socket = socket |> assign(assigns) |> assign(:edit, false)
+    socket = socket |> assign(assigns)
 
     {:ok, socket}
   end
