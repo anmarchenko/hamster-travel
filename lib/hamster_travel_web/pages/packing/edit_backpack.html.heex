@@ -1,38 +1,7 @@
-<.form_container>
-  <.form :let={f} for={@changeset} phx-submit="update_backpack" as={:backpack}>
-    <div class="grid grid-cols-6 gap-x-6">
-      <div class="col-span-6">
-        <.form_field
-          type="text_input"
-          form={f}
-          field={:name}
-          label={gettext("Backpack name")}
-          required={true}
-          autofocus={true}
-        />
-      </div>
-      <div class="col-span-3">
-        <.form_field
-          type="number_input"
-          form={f}
-          field={:days}
-          label={gettext("Backpack days")}
-          required={true}
-        />
-      </div>
-      <div class="col-span-3">
-        <.form_field
-          type="number_input"
-          form={f}
-          field={:nights}
-          label={gettext("Backpack nights")}
-          required={true}
-        />
-      </div>
-    </div>
-
-    <.button>
-      <%= gettext("Save") %>
-    </.button>
-  </.form>
-</.form_container>
+<.live_component
+  module={BackpackForm}
+  id="create-backpack-form"
+  backpack={@backpack}
+  changeset={@changeset}
+  on_submit={&update_backpack/2}
+/>

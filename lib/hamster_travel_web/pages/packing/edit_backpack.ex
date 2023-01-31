@@ -7,6 +7,8 @@ defmodule HamsterTravelWeb.Packing.EditBackpack do
   alias HamsterTravel.Packing
   alias HamsterTravel.Packing.Policy
 
+  alias HamsterTravelWeb.Packing.BackpackForm
+
   @impl true
   def mount(%{"backpack_slug" => slug}, _session, socket) do
     user = socket.assigns.current_user
@@ -30,8 +32,7 @@ defmodule HamsterTravelWeb.Packing.EditBackpack do
     end
   end
 
-  @impl true
-  def handle_event("update_backpack", %{"backpack" => backpack_params}, socket) do
+  def update_backpack(socket, backpack_params) do
     case Packing.update_backpack(socket.assigns.backpack, backpack_params) do
       {:ok, backpack} ->
         socket =
