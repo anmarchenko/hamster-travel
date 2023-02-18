@@ -7,7 +7,8 @@ defmodule HamsterTravelWeb.Endpoint do
   @session_options [
     store: :cookie,
     key: "_hamster_travel_key",
-    signing_salt: "EgoTh/Qh"
+    signing_salt: "EgoTh/Qh",
+    max_age: 365 * 24 * 60 * 60
   ]
 
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]

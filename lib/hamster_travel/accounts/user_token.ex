@@ -11,7 +11,7 @@ defmodule HamsterTravel.Accounts.UserToken do
   @reset_password_validity_in_days 1
   @confirm_validity_in_days 60
   @change_email_validity_in_days 60
-  @session_validity_in_days 356
+  @session_validity_in_days 365
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
