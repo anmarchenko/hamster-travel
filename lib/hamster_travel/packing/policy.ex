@@ -9,4 +9,8 @@ defmodule HamsterTravel.Packing.Policy do
   def authorized?(:delete, %Backpack{} = backpack, %User{} = user) do
     backpack.user_id == user.id
   end
+
+  def authorized?(:copy, %Backpack{} = backpack, %User{} = user) do
+    backpack.user_id == user.id
+  end
 end

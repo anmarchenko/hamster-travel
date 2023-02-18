@@ -21,6 +21,20 @@ defmodule HamsterTravel.PackingTest do
       assert [%Backpack{name: ^name}] = Packing.list_backpacks(%{id: user_id})
     end
 
+    test "get_backpack/1 returns the backpack with given id and preloads" do
+      backpack = backpack_fixture()
+      db_backpack = Packing.get_backpack(backpack.id)
+      assert [] == db_backpack.lists
+      assert backpack.name == db_backpack.name
+      assert backpack.days == db_backpack.days
+      assert backpack.nights == db_backpack.nights
+    end
+
+    test "get_backpack/1 returns nil if backpack does not exist" do
+      backpack = backpack_fixture()
+      assert Packing.get_backpack(Ecto.UUID.generate()) == nil
+    end
+
     test "get_backpack!/1 returns the backpack with given id and preloads" do
       backpack = backpack_fixture()
       db_backpack = Packing.get_backpack!(backpack.id)
@@ -28,6 +42,27 @@ defmodule HamsterTravel.PackingTest do
       assert backpack.name == db_backpack.name
       assert backpack.days == db_backpack.days
       assert backpack.nights == db_backpack.nights
+    end
+
+    test "new_backpack/1 copies backpack into new changeset" do
+      %Backpack{
+        days: days,
+        name: name,
+        nights: nights
+      } = backpack = backpack_fixture()
+
+      expected_name = "#{name} (Copy)"
+
+      new = Packing.new_backpack(backpack)
+
+      assert %Ecto.Changeset{
+               data: %{
+                 id: nil,
+                 days: ^days,
+                 nights: ^nights,
+                 name: ^expected_name
+               }
+             } = new
     end
 
     test "get_backpack_by_slug/1 returns the backpack with given slug and preloads" do

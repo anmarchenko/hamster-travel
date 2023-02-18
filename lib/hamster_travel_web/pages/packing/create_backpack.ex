@@ -5,16 +5,28 @@ defmodule HamsterTravelWeb.Packing.CreateBackpack do
   use HamsterTravelWeb, :live_view
 
   alias HamsterTravel.Packing
+  alias HamsterTravel.Packing.Policy
 
   alias HamsterTravelWeb.Packing.BackpackForm
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
+    socket =
+      with %{"copy" => backpack_id} <- params,
+           backpack when backpack != nil <- Packing.get_backpack(backpack_id),
+           true <- Policy.authorized?(:copy, backpack, socket.assigns.current_user) do
+        socket
+        |> assign(changeset: Packing.new_backpack(backpack))
+        |> assign(copy_from: backpack)
+      else
+        _ ->
+          assign(socket, changeset: Packing.new_backpack())
+      end
+
     socket =
       socket
       |> assign(active_nav: :backpacks)
       |> assign(page_title: gettext("Create backpack"))
-      |> assign(changeset: Packing.new_backpack())
 
     {:ok, socket}
   end

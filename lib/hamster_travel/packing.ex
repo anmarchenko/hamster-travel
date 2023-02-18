@@ -6,6 +6,8 @@ defmodule HamsterTravel.Packing do
   require Logger
 
   import Ecto.Query, warn: false
+  import HamsterTravelWeb.Gettext
+
   alias HamsterTravel.Repo
 
   alias HamsterTravel.Packing.Backpack
@@ -23,6 +25,12 @@ defmodule HamsterTravel.Packing do
     Repo.all(query)
   end
 
+  def get_backpack(id) do
+    Backpack
+    |> Repo.get(id)
+    |> backpack_preloading()
+  end
+
   def get_backpack!(id) do
     Backpack
     |> Repo.get!(id)
@@ -37,6 +45,11 @@ defmodule HamsterTravel.Packing do
 
   def new_backpack do
     Backpack.changeset(%Backpack{days: 2, nights: 1}, %{})
+  end
+
+  def new_backpack(backpack) do
+    name = "#{backpack.name} (#{gettext("Copy")})"
+    Backpack.changeset(%Backpack{days: backpack.days, nights: backpack.nights, name: name}, %{})
   end
 
   def backpack_changeset(params) do
