@@ -8,6 +8,7 @@ defmodule HamsterTravel.Packing do
   import Ecto.Query, warn: false
   import HamsterTravelWeb.Gettext
 
+  alias HamsterTravel.EctoOrdered
   alias HamsterTravel.Repo
 
   alias HamsterTravel.Packing.Backpack
@@ -60,6 +61,31 @@ defmodule HamsterTravel.Packing do
     %Backpack{user_id: user.id}
     |> Backpack.changeset(attrs)
     |> Template.from_changeset()
+    |> Repo.insert()
+  end
+
+  def create_backpack(attrs, user, backpack) do
+    %Backpack{user_id: user.id}
+    |> Backpack.changeset(attrs)
+    |> Ecto.Changeset.put_assoc(
+      :lists,
+      backpack.lists
+      |> Enum.map(fn list ->
+        %List{
+          name: list.name,
+          items:
+            list.items
+            |> Enum.map(fn item ->
+              %Item{
+                name: item.name,
+                count: item.count
+              }
+            end)
+            |> EctoOrdered.fill_ranks()
+        }
+      end)
+      |> EctoOrdered.fill_ranks()
+    )
     |> Repo.insert()
   end
 

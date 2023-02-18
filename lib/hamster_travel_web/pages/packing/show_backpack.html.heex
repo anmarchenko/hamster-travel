@@ -16,18 +16,18 @@
         label={gettext("Edit")}
       />
       <.a
+        :if={Policy.authorized?(:copy, @backpack, @current_user)}
+        link_type="a"
+        to={"/backpacks/new?copy=#{@backpack.id}"}
+        label={gettext("Make a copy")}
+      />
+      <.a
         :if={Policy.authorized?(:delete, @backpack, @current_user)}
         link_type="a"
         to="#"
         label={gettext("Delete")}
         phx-click="delete_backpack"
         data-confirm={gettext("Are you sure you want to delete backpack?")}
-      />
-      <.a
-        :if={Policy.authorized?(:copy, @backpack, @current_user)}
-        link_type="a"
-        to={"/backpacks/new?copy=#{@backpack.id}"}
-        label={gettext("Make a copy")}
       />
     </.inline>
   </div>

@@ -74,7 +74,7 @@ defmodule HamsterTravel.PackingTest do
       assert backpack.nights == db_backpack.nights
     end
 
-    test "create_backpack/1 with valid data creates a backpack", %{user: user} do
+    test "create_backpack/2 with valid data creates a backpack", %{user: user} do
       valid_attrs = %{days: 42, name: "some name", nights: 42}
 
       assert {:ok, %Backpack{} = backpack} = Packing.create_backpack(valid_attrs, user)
@@ -84,7 +84,7 @@ defmodule HamsterTravel.PackingTest do
       assert backpack.slug == "some-name"
     end
 
-    test "create_backpack/1 slugifies cyrillic backpack names", %{user: user} do
+    test "create_backpack/2 slugifies cyrillic backpack names", %{user: user} do
       valid_attrs = %{days: 42, name: "Амстердам", nights: 42}
 
       assert {:ok, %Backpack{} = backpack} = Packing.create_backpack(valid_attrs, user)
@@ -92,7 +92,7 @@ defmodule HamsterTravel.PackingTest do
       assert backpack.slug == "amsterdam"
     end
 
-    test "create_backpack/1 changes slug name in case it is occupied", %{user: user} do
+    test "create_backpack/2 changes slug name in case it is occupied", %{user: user} do
       backpack = backpack_fixture(%{name: "name"})
       valid_attrs = %{days: 42, name: backpack.name, nights: 42}
 
@@ -105,13 +105,13 @@ defmodule HamsterTravel.PackingTest do
       assert newer_backpack.slug == "name-2"
     end
 
-    test "create_backpack/1 with invalid data returns error changeset", %{
+    test "create_backpack/2 with invalid data returns error changeset", %{
       user: user
     } do
       assert {:error, %Ecto.Changeset{}} = Packing.create_backpack(@invalid_attrs, user)
     end
 
-    test "create_backpack/1 with valid data and template creates a backpack with associations", %{
+    test "create_backpack/2 with valid data and template creates a backpack with associations", %{
       user: user
     } do
       valid_attrs = %{days: 1, name: "some name", nights: 42, template: "test"}
@@ -158,6 +158,41 @@ defmodule HamsterTravel.PackingTest do
 
       assert [%Item{name: "Insurance", count: 3}, %Item{name: "Passports", count: 42}] =
                docs_items
+    end
+
+    test "create_backpack/3 with valid data creates a backpack copying associations from existing",
+         %{
+           user: user
+         } do
+      backpack = backpack_fixture()
+      {:ok, list} = Packing.create_list(%{name: "L"}, backpack)
+      {:ok, item} = Packing.create_item(%{name: "I 3"}, list)
+      Packing.update_item_checked(item, true)
+      backpack = Packing.get_backpack!(backpack.id)
+
+      valid_attrs = %{days: 1, name: "some new name", nights: 42, template: "test"}
+
+      assert {:ok, %Backpack{} = backpack} = Packing.create_backpack(valid_attrs, user, backpack)
+      assert backpack.days == 1
+      assert backpack.name == "some new name"
+      assert backpack.nights == 42
+      assert backpack.slug == "some-new-name"
+
+      new_backpack = Packing.get_backpack!(backpack.id)
+
+      assert ["L"] = Enum.map(backpack.lists, fn list -> list.name end)
+
+      items =
+        backpack.lists
+        |> Enum.flat_map(fn list -> list.items end)
+
+      assert [
+               %Item{
+                 name: "I",
+                 count: 3,
+                 checked: false
+               }
+             ] = items
     end
 
     test "update_backpack/2 with valid data updates the backpack and the slug" do

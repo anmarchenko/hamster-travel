@@ -20,7 +20,9 @@ defmodule HamsterTravelWeb.Packing.CreateBackpack do
         |> assign(copy_from: backpack)
       else
         _ ->
-          assign(socket, changeset: Packing.new_backpack())
+          socket
+          |> assign(changeset: Packing.new_backpack())
+          |> assign(copy_from: nil)
       end
 
     socket =
@@ -31,21 +33,31 @@ defmodule HamsterTravelWeb.Packing.CreateBackpack do
     {:ok, socket}
   end
 
+  def create_backpack(%{assigns: %{copy_from: backpack}} = socket, backpack_params)
+      when backpack != nil do
+    backpack_params
+    |> Packing.create_backpack(socket.assigns.current_user, backpack)
+    |> result(socket)
+  end
+
   def create_backpack(socket, backpack_params) do
-    backpack_params = Map.put(backpack_params, "template", "hamsters")
+    backpack_params
+    |> Map.put("template", "hamsters")
+    |> Packing.create_backpack(socket.assigns.current_user)
+    |> result(socket)
+  end
 
-    case Packing.create_backpack(backpack_params, socket.assigns.current_user) do
-      {:ok, backpack} ->
-        socket =
-          socket
-          |> push_redirect(
-            to: Routes.live_path(socket, HamsterTravelWeb.Packing.ShowBackpack, backpack.slug)
-          )
+  def result({:ok, backpack}, socket) do
+    socket =
+      socket
+      |> push_redirect(
+        to: Routes.live_path(socket, HamsterTravelWeb.Packing.ShowBackpack, backpack.slug)
+      )
 
-        {:noreply, socket}
+    {:noreply, socket}
+  end
 
-      {:error, changeset} ->
-        {:noreply, assign(socket, %{changeset: changeset})}
-    end
+  def result({:error, changeset}, socket) do
+    {:noreply, assign(socket, %{changeset: changeset})}
   end
 end
