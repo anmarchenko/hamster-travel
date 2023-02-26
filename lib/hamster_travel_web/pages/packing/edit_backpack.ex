@@ -13,7 +13,7 @@ defmodule HamsterTravelWeb.Packing.EditBackpack do
   def mount(%{"backpack_slug" => slug}, _session, socket) do
     user = socket.assigns.current_user
 
-    with backpack when backpack != nil <- Packing.get_backpack_by_slug(slug, user),
+    with backpack when backpack != nil <- Packing.fetch_backpack(slug, user),
          true <- Policy.authorized?(:edit, backpack, user) do
       socket =
         socket

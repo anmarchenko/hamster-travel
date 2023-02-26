@@ -22,7 +22,7 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
 
   @impl true
   def mount(%{"backpack_slug" => slug}, _session, socket) do
-    case Packing.get_backpack_by_slug(slug, socket.assigns.current_user) do
+    case Packing.fetch_backpack(slug, socket.assigns.current_user) do
       nil ->
         {:ok, socket, layout: {HamsterTravelWeb.LayoutView, "not_found.html"}}
 

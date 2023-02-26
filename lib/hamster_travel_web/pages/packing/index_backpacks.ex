@@ -10,20 +10,6 @@ defmodule HamsterTravelWeb.Packing.IndexBackpacks do
   alias HamsterTravel.Packing
 
   @impl true
-  @spec mount(
-          any,
-          any,
-          atom
-          | %{
-              :assigns =>
-                atom
-                | %{
-                    :current_user => atom | %{:id => any, optional(any) => any},
-                    optional(any) => any
-                  },
-              optional(any) => any
-            }
-        ) :: {:ok, any}
   def mount(_params, _session, socket) do
     socket =
       socket

@@ -26,6 +26,17 @@ defmodule HamsterTravel.Packing do
     Repo.all(query)
   end
 
+  def fetch_backpack(slug, user) do
+    query =
+      from b in Backpack,
+        where: b.user_id == ^user.id and b.slug == ^slug,
+        order_by: [desc: b.inserted_at]
+
+    query
+    |> Repo.one()
+    |> backpack_preloading()
+  end
+
   def get_backpack(id) do
     Backpack
     |> Repo.get(id)
@@ -35,12 +46,6 @@ defmodule HamsterTravel.Packing do
   def get_backpack!(id) do
     Backpack
     |> Repo.get!(id)
-    |> backpack_preloading()
-  end
-
-  def get_backpack_by_slug(slug, user) do
-    Backpack
-    |> Repo.get_by(slug: slug, user_id: user.id)
     |> backpack_preloading()
   end
 
