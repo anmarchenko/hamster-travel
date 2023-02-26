@@ -36,12 +36,9 @@ defmodule HamsterTravel.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      # phoenix
+      # phoenix base
       {:phoenix, "~> 1.6.0"},
-      {:phoenix_html, "~> 3.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 0.18.0"},
-      {:phoenix_live_dashboard, "~> 0.7.0"},
       {:plug_cowboy, "~> 2.5"},
 
       # password hashing
@@ -54,6 +51,8 @@ defmodule HamsterTravel.MixProject do
       {:ecto_autoslug_field, "~> 3.0"},
 
       # frontend
+      {:phoenix_html, "~> 3.0"},
+      {:phoenix_live_view, "~> 0.18.0"},
       {:petal_components, "~> 0.19.0"},
       {:phx_component_helpers, "~> 1.2.0"},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
@@ -62,7 +61,8 @@ defmodule HamsterTravel.MixProject do
       # mails
       {:swoosh, "~> 1.3"},
 
-      # telemetry
+      # observability
+      {:phoenix_live_dashboard, "~> 0.7.0"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
 
