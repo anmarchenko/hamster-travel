@@ -1,6 +1,7 @@
 defmodule HamsterTravel.PackingTest do
   use HamsterTravel.DataCase
 
+  alias HamsterTravel.Accounts.User
   alias HamsterTravel.Packing
   alias HamsterTravel.Packing.{Backpack, Item, List}
   alias HamsterTravel.Repo
@@ -18,7 +19,7 @@ defmodule HamsterTravel.PackingTest do
 
     test "list_backpacks/1 returns all backpacks" do
       %{name: name, user_id: user_id} = backpack_fixture()
-      assert [%Backpack{name: ^name}] = Packing.list_backpacks(%{id: user_id})
+      assert [%Backpack{name: ^name}] = Packing.list_backpacks(%User{id: user_id})
     end
 
     test "get_backpack/1 returns the backpack with given id and preloads" do
@@ -67,7 +68,7 @@ defmodule HamsterTravel.PackingTest do
 
     test "fetch_backpack/2 returns the backpack with given slug and preloads" do
       backpack = backpack_fixture()
-      db_backpack = Packing.fetch_backpack(backpack.slug, %{id: backpack.user_id})
+      db_backpack = Packing.fetch_backpack(backpack.slug, %User{id: backpack.user_id})
       assert [] == db_backpack.lists
       assert backpack.name == db_backpack.name
       assert backpack.days == db_backpack.days

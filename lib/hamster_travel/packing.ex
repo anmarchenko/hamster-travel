@@ -9,6 +9,7 @@ defmodule HamsterTravel.Packing do
   import HamsterTravelWeb.Gettext
 
   alias HamsterTravel.EctoOrdered
+  alias HamsterTravel.Packing.Policy
   alias HamsterTravel.Repo
 
   alias HamsterTravel.Packing.Backpack
@@ -21,18 +22,20 @@ defmodule HamsterTravel.Packing do
   # BACKPACK
 
   def list_backpacks(user) do
-    query = from b in Backpack, where: b.user_id == ^user.id, order_by: [desc: b.inserted_at]
+    query = from b in Backpack, order_by: [desc: b.inserted_at]
 
-    Repo.all(query)
+    query
+    |> Policy.user_scope(user)
+    |> Repo.all()
   end
 
   def fetch_backpack(slug, user) do
     query =
       from b in Backpack,
-        where: b.user_id == ^user.id and b.slug == ^slug,
-        order_by: [desc: b.inserted_at]
+        where: b.slug == ^slug
 
     query
+    |> Policy.user_scope(user)
     |> Repo.one()
     |> backpack_preloading()
   end
