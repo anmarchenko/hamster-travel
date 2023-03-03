@@ -231,7 +231,10 @@ defmodule HamsterTravel.Accounts do
   """
   def get_user_by_session_token(token) do
     {:ok, query} = UserToken.verify_session_token_query(token)
-    Repo.one(query)
+
+    query
+    |> Repo.one()
+    |> user_preloading()
   end
 
   @doc """
@@ -349,5 +352,9 @@ defmodule HamsterTravel.Accounts do
       {:ok, %{user: user}} -> {:ok, user}
       {:error, :user, changeset, _} -> {:error, changeset}
     end
+  end
+
+  defp user_preloading(user) do
+    Repo.preload(user, :friendships)
   end
 end

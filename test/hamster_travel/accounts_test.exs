@@ -2,6 +2,8 @@ defmodule HamsterTravel.AccountsTest do
   use HamsterTravel.DataCase
 
   alias HamsterTravel.Accounts
+  alias HamsterTravel.Social
+  alias HamsterTravel.Social.Friendship
 
   import HamsterTravel.AccountsFixtures
   alias HamsterTravel.Accounts.{User, UserToken}
@@ -334,13 +336,16 @@ defmodule HamsterTravel.AccountsTest do
   describe "get_user_by_session_token/1" do
     setup do
       user = user_fixture()
+      friend = user_fixture()
+      Social.add_friends(user.id, friend.id)
       token = Accounts.generate_user_session_token(user)
       %{user: user, token: token}
     end
 
-    test "returns user by token", %{user: user, token: token} do
+    test "returns user by token and preload friendships", %{user: user, token: token} do
       assert session_user = Accounts.get_user_by_session_token(token)
       assert session_user.id == user.id
+      assert [%Friendship{}] = session_user.friendships
     end
 
     test "does not return user for invalid token" do

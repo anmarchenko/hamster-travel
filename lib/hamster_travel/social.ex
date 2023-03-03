@@ -46,6 +46,16 @@ defmodule HamsterTravel.Social do
     |> Repo.transaction()
   end
 
+  def user_in_friends_circle?(current_user, user_id) do
+    current_user
+    |> extract_policy_user_ids()
+    |> Enum.member?(user_id)
+  end
+
+  def extract_policy_user_ids(user) do
+    [user.id] ++ Enum.map(user.friendships, fn fr -> fr.friend_id end)
+  end
+
   @spec get_friendship!(String) :: %Friendship{}
   @doc """
   Gets a single friendship.

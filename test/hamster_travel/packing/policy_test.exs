@@ -6,6 +6,7 @@ defmodule HamsterTravel.PolicyTest do
   import HamsterTravel.PackingFixtures
 
   alias HamsterTravel.Packing.{Backpack, Policy}
+  alias HamsterTravel.Repo
   alias HamsterTravel.Social
 
   setup do
@@ -14,7 +15,11 @@ defmodule HamsterTravel.PolicyTest do
     backpack = backpack_fixture(%{user_id: author.id})
     Social.add_friends(author.id, friend.id)
 
-    %{author: author, friend: friend, backpack: backpack}
+    %{
+      author: Repo.preload(author, :friendships),
+      friend: Repo.preload(friend, :friendships),
+      backpack: backpack
+    }
   end
 
   test "authorized?/3 :edit allows author", %{author: author, backpack: backpack} do
@@ -39,17 +44,17 @@ defmodule HamsterTravel.PolicyTest do
     assert Policy.authorized?(:copy, backpack, author)
   end
 
-  test "authorized?/3 :copy disallows author's friend", %{
+  test "authorized?/3 :copy allows author's friend", %{
     friend: friend,
     backpack: backpack
   } do
-    assert !Policy.authorized?(:copy, backpack, friend)
+    assert Policy.authorized?(:copy, backpack, friend)
   end
 
   test "authorized?/3 :copy disallows any user", %{
     backpack: backpack
   } do
-    user = user_fixture()
+    user = user_fixture() |> Repo.preload(:friendships)
     assert !Policy.authorized?(:copy, backpack, user)
   end
 
@@ -64,13 +69,13 @@ defmodule HamsterTravel.PolicyTest do
     assert !Policy.authorized?(:delete, backpack, friend)
   end
 
-  test "user_scope/2 returns author's backpacks only", %{
+  test "user_scope/2 returns backpacks from the whole friends circle", %{
     author: author,
     friend: friend,
     backpack: backpack
   } do
     query = from(b in Backpack, order_by: [desc: b.inserted_at])
     backpack_fixture(%{user_id: friend.id})
-    assert [backpack] == query |> Policy.user_scope(author) |> Repo.all()
+    assert [%Backpack{}, %Backpack{}] = query |> Policy.user_scope(author) |> Repo.all()
   end
 end

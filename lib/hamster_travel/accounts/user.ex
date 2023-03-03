@@ -13,6 +13,8 @@ defmodule HamsterTravel.Accounts.User do
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
 
+    has_many :friendships, HamsterTravel.Social.Friendship, foreign_key: :user_id
+
     timestamps()
   end
 
