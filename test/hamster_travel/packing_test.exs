@@ -5,6 +5,7 @@ defmodule HamsterTravel.PackingTest do
   alias HamsterTravel.Packing
   alias HamsterTravel.Packing.{Backpack, Item, List}
   alias HamsterTravel.Repo
+  alias HamsterTravel.Social
 
   import HamsterTravel.AccountsFixtures
   import HamsterTravel.PackingFixtures
@@ -13,13 +14,21 @@ defmodule HamsterTravel.PackingTest do
     @invalid_attrs %{days: nil, name: nil, nights: nil}
 
     setup do
-      user = HamsterTravel.AccountsFixtures.user_fixture()
-      {:ok, user: user}
+      user = user_fixture()
+      friend = user_fixture()
+      Social.add_friends(user.id, friend.id)
+      {:ok, user: Repo.preload(user, :friendships), friend: Repo.preload(friend, :friendships)}
     end
 
-    test "list_backpacks/1 returns all backpacks" do
-      %{name: name, user_id: user_id} = backpack_fixture()
-      assert [%Backpack{name: ^name}] = Packing.list_backpacks(%User{id: user_id})
+    test "list_backpacks/1 returns all backpacks including ones from friends", %{
+      user: user,
+      friend: friend
+    } do
+      %{name: name} = backpack_fixture(%{user_id: user.id})
+      %{name: friend_name} = backpack_fixture(%{user_id: friend.id})
+
+      assert [%Backpack{name: ^friend_name}, %Backpack{name: ^name}] =
+               Packing.list_backpacks(user)
     end
 
     test "get_backpack/1 returns the backpack with given id and preloads" do
@@ -66,13 +75,23 @@ defmodule HamsterTravel.PackingTest do
              } = new
     end
 
-    test "fetch_backpack/2 returns the backpack with given slug and preloads" do
-      backpack = backpack_fixture()
-      db_backpack = Packing.fetch_backpack(backpack.slug, %User{id: backpack.user_id})
+    test "fetch_backpack/2 returns the backpack with given slug and preloads", %{user: user} do
+      backpack = backpack_fixture(%{user_id: user.id})
+      db_backpack = Packing.fetch_backpack(backpack.slug, user)
       assert [] == db_backpack.lists
       assert backpack.name == db_backpack.name
       assert backpack.days == db_backpack.days
       assert backpack.nights == db_backpack.nights
+    end
+
+    test "fetch_backpack/2 returns the backpack from friend", %{
+      user: user,
+      friend: friend
+    } do
+      backpack = backpack_fixture(%{user_id: friend.id})
+      db_backpack = Packing.fetch_backpack(backpack.slug, user)
+      assert [] == db_backpack.lists
+      assert backpack.name == db_backpack.name
     end
 
     test "create_backpack/2 with valid data creates a backpack", %{user: user} do
