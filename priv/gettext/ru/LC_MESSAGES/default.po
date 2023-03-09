@@ -5,7 +5,7 @@
 msgid "Plans"
 msgstr "Путешествия"
 
-#: lib/hamster_travel_web/pages/packing/index_backpacks.ex:31
+#: lib/hamster_travel_web/pages/packing/index_backpacks.ex:17
 #: lib/hamster_travel_web/views/layout_view.ex:30
 #: lib/hamster_travel_web/views/layout_view.ex:103
 #, elixir-autogen, elixir-format
@@ -75,7 +75,7 @@ msgstr "Ссылка не найдена"
 msgid "Export as PDF"
 msgstr "Экспорт в PDF"
 
-#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:30
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:22
 #: lib/hamster_travel_web/pages/planning/show_plan.html.heex:10
 #, elixir-autogen, elixir-format
 msgid "Make a copy"
@@ -119,7 +119,7 @@ msgstr "Жильё"
 msgid "Places"
 msgstr "Города"
 
-#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:22
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:28
 #: lib/hamster_travel_web/pages/planning/show_plan.html.heex:12
 #, elixir-autogen, elixir-format
 msgid "Delete"
@@ -221,12 +221,7 @@ msgstr "Дней"
 msgid "Backpack name"
 msgstr "Название"
 
-#: lib/hamster_travel_web/components/packing/backpack_form.ex:55
-#, elixir-autogen, elixir-format
-msgid "Create"
-msgstr "Создать"
-
-#: lib/hamster_travel_web/pages/packing/create_backpack.ex:34
+#: lib/hamster_travel_web/pages/packing/create_backpack.ex:31
 #: lib/hamster_travel_web/pages/packing/index_backpacks.html.heex:5
 #, elixir-autogen, elixir-format
 msgid "Create backpack"
@@ -256,7 +251,7 @@ msgstr[0] "ночь"
 msgstr[1] "ночи"
 msgstr[2] "ночей"
 
-#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:24
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:30
 #, elixir-autogen, elixir-format
 msgid "Are you sure you want to delete backpack?"
 msgstr "Вы уверены, что хотите удалить рюкзачок?"
@@ -286,7 +281,17 @@ msgstr "Название списка"
 msgid "Sign in to your account"
 msgstr ""
 
-#: lib/hamster_travel/packing.ex:51
+#: lib/hamster_travel/packing.ex:60
 #, elixir-autogen, elixir-format
 msgid "Copy"
 msgstr "Копия"
+
+#: lib/hamster_travel_web/components/packing/backpack_form.ex:55
+#, elixir-autogen, elixir-format
+msgid "Save"
+msgstr "Сохранить"
+
+#: lib/hamster_travel_web/components/packing/backpack_form.ex:58
+#, elixir-autogen, elixir-format
+msgid "Cancel"
+msgstr "Отмена"

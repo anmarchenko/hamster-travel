@@ -51,9 +51,14 @@ defmodule HamsterTravelWeb.Packing.BackpackForm do
             </div>
           </div>
 
-          <.button>
-            <%= gettext("Create") %>
-          </.button>
+          <div class="flex justify-between">
+            <.button link_type="live_redirect" to={@back_url} color="white">
+              <%= gettext("Cancel") %>
+            </.button>
+            <.button color="primary">
+              <%= gettext("Save") %>
+            </.button>
+          </div>
         </.form>
       </.form_container>
     </div>
