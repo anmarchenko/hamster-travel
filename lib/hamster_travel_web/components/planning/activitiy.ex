@@ -63,7 +63,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
 
   defp activity_font("must"), do: "font-bold"
   defp activity_font("should"), do: "font-normal"
-  defp activity_font("irrelevant"), do: "italic font-light text-zinc-400 dark:text-zinc-500"
+  defp activity_font("irrelevant"), do: "italic font-light text-zinc-400"
 
   defp activity_feature(%{value: nil} = assigns) do
     ~H"""

@@ -29,7 +29,7 @@ defmodule HamsterTravelWeb.Secondary do
   end
 
   defp component_class(assigns) do
-    "text-zinc-400 dark:text-zinc-500 #{italic(assigns)}"
+    "text-zinc-400 #{italic(assigns)}"
   end
 
   defp italic(%{italic: true}), do: "italic"

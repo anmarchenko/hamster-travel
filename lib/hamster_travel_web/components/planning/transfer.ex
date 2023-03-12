@@ -27,13 +27,15 @@ defmodule HamsterTravelWeb.Planning.Transfer do
   def render(%{edit: false} = assigns) do
     ~H"""
     <div class="flex flex-col gap-y-1">
-      <.inline class="text-zinc-400 dark:text-zinc-500">
-        <.transfer_icon type={@transfer.type} />
-        <%= @transfer.vehicle_id %>
-        <%= @transfer.company %>
-        <.budget />
-        <%= Formatter.format_money(@transfer.price, @transfer.price_currency) %>
-      </.inline>
+      <.secondary italic={false} tag="div">
+        <.inline>
+          <.transfer_icon type={@transfer.type} />
+          <%= @transfer.vehicle_id %>
+          <%= @transfer.company %>
+          <.budget />
+          <%= Formatter.format_money(@transfer.price, @transfer.price_currency) %>
+        </.inline>
+      </.secondary>
       <div class="flex flex-row text-lg mt-2">
         <div class="flex flex-col gap-y-2 pr-6 border-r-2 font-medium">
           <div><%= @transfer.time_from %></div>
