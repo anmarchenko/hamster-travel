@@ -76,7 +76,7 @@ defmodule HamsterTravelWeb.Packing.AddList do
   def render(assigns) do
     ~H"""
     <div class="mb-5">
-      <.button color="secondary" phx-click="edit" phx-target={@myself}>
+      <.button color="primary" phx-click="edit" phx-target={@myself}>
         <Heroicons.Solid.plus class="w-5 h-5 mr-2" />
         <%= gettext("Add list") %>
       </.button>

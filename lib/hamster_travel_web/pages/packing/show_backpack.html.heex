@@ -10,25 +10,30 @@
       ) %>
     </.inline>
     <.inline class="text-xs gap-4 sm:text-base">
-      <.a
+      <.button
         :if={Policy.authorized?(:edit, @backpack, @current_user)}
+        link_type="live_redirect"
         to={backpack_url(@backpack.slug, :edit)}
-        label={gettext("Edit")}
-      />
-      <.a
+        color="secondary"
+      >
+        <.icon_text icon={:pencil_alt} label={gettext("Edit")} />
+      </.button>
+      <.button
         :if={Policy.authorized?(:copy, @backpack, @current_user)}
-        link_type="a"
+        link_type="live_redirect"
         to={"/backpacks/new?copy=#{@backpack.id}"}
-        label={gettext("Make a copy")}
-      />
-      <.a
+        color="secondary"
+      >
+        <.icon_text icon={:duplicate} label={gettext("Make a copy")} />
+      </.button>
+      <.button
         :if={Policy.authorized?(:delete, @backpack, @current_user)}
-        link_type="a"
-        to="#"
-        label={gettext("Delete")}
         phx-click="delete_backpack"
         data-confirm={gettext("Are you sure you want to delete backpack?")}
-      />
+        color="danger"
+      >
+        <.icon_text icon={:trash} label={gettext("Delete")} />
+      </.button>
     </.inline>
   </div>
 </.container>

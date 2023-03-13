@@ -18,11 +18,13 @@ defmodule HamsterTravelWeb.Packing.CreateBackpack do
         socket
         |> assign(changeset: Packing.new_backpack(backpack))
         |> assign(copy_from: backpack)
+        |> assign(back_url: "/backpacks/#{backpack.slug}")
       else
         _ ->
           socket
           |> assign(changeset: Packing.new_backpack())
           |> assign(copy_from: nil)
+          |> assign(back_url: "/backpacks")
       end
 
     socket =

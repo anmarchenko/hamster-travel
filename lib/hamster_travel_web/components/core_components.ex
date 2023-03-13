@@ -61,7 +61,7 @@ defmodule HamsterTravelWeb.CoreComponents do
       }
       {@rest}
     >
-      <.icon icon={@icon} class={get_icon_button_pic_size_classes(@size)} />
+      <.icon name={@icon} class={get_icon_button_pic_size_classes(@size)} />
     </button>
     """
   end
@@ -122,12 +122,36 @@ defmodule HamsterTravelWeb.CoreComponents do
     """
   end
 
+  attr(:label, :string, required: true)
   attr(:icon, :atom, required: true)
-  attr(:rest, :global, default: %{class: "w-5 h-5"})
+  attr(:style, :atom, default: :solid)
+
+  def icon_text(assigns) do
+    ~H"""
+    <.icon name={@icon} style={@style} />
+    <span class="hidden sm:inline ml-2">
+      <%= @label %>
+    </span>
+    """
+  end
+
+  attr(:name, :atom, required: true)
+  attr(:style, :atom, default: :outline)
+  attr(:class, :string, default: "w-5 h-5")
+  attr(:rest, :global)
 
   defp icon(assigns) do
+    module =
+      if assigns.style == :outline do
+        Heroicons.Outline
+      else
+        Heroicons.Solid
+      end
+
+    assigns = assign(assigns, module: module)
+
     ~H"""
-    <%= apply(Heroicons.Outline, @icon, [assigns]) %>
+    <%= apply(@module, @name, [assigns]) %>
     """
   end
 
