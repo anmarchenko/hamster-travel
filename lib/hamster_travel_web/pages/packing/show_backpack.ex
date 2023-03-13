@@ -10,7 +10,6 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
 
   import HamsterTravelWeb.Header
   import HamsterTravelWeb.Inline
-  import HamsterTravelWeb.Link
 
   alias HamsterTravel.Packing
   alias HamsterTravel.Packing.Backpack

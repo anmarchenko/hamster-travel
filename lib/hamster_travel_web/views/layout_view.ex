@@ -46,7 +46,12 @@ defmodule HamsterTravelWeb.LayoutView do
     <div class="sm:hidden">
       <nav class="w-full border-t bg-orange-50 dark:bg-zinc-900 dark:border-zinc-800 fixed bottom-0">
         <div class="mx-auto px-6 max-w-md h-16 flex items-center justify-around">
-          <.mobile_nav mobile_menu={@mobile_menu} active_tab={@active_tab} active_nav={@active_nav} />
+          <.mobile_nav
+            current_user={@current_user}
+            mobile_menu={@mobile_menu}
+            active_tab={@active_tab}
+            active_nav={@active_nav}
+          />
         </div>
       </nav>
     </div>
@@ -62,7 +67,7 @@ defmodule HamsterTravelWeb.LayoutView do
 
       nil ->
         ~H"""
-        <.mobile_nav_global active_nav={@active_nav} />
+        <.mobile_nav_global current_user={@current_user} active_nav={@active_nav} />
         """
     end
   end
@@ -97,10 +102,20 @@ defmodule HamsterTravelWeb.LayoutView do
     <.mobile_nav_link label={gettext("Plans")} to="/plans" active={@active_nav == :plans}>
       <Heroicons.Outline.book_open class="w-6 h-6" />
     </.mobile_nav_link>
-    <.mobile_nav_link label={gettext("Drafts")} to="/drafts" active={@active_nav == :drafts}>
+    <.mobile_nav_link
+      :if={@current_user}
+      label={gettext("Drafts")}
+      to="/drafts"
+      active={@active_nav == :drafts}
+    >
       <Heroicons.Outline.light_bulb class="w-6 h-6" />
     </.mobile_nav_link>
-    <.mobile_nav_link label={gettext("Backpacks")} to="/backpacks" active={@active_nav == :backpacks}>
+    <.mobile_nav_link
+      :if={@current_user}
+      label={gettext("Backpacks")}
+      to="/backpacks"
+      active={@active_nav == :backpacks}
+    >
       <Heroicons.Outline.briefcase class="w-6 h-6" />
     </.mobile_nav_link>
     """
