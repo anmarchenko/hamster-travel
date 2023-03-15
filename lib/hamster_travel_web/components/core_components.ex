@@ -76,7 +76,7 @@ defmodule HamsterTravelWeb.CoreComponents do
     ~H"""
     <section class={
       build_class([
-        "mx-auto max-w-screen-md",
+        "mx-auto max-w-screen-md lg:max-w-screen-lg xl:max-w-screen-lg",
         container_margins(assigns),
         container_width(assigns),
         @class
@@ -90,8 +90,8 @@ defmodule HamsterTravelWeb.CoreComponents do
   defp container_margins(%{nomargin: true}), do: ""
   defp container_margins(_), do: "p-6 mt-6"
 
-  defp container_width(%{wide: true}), do: "xl:max-w-screen-xl 2xl:max-w-screen-2xl"
-  defp container_width(_), do: "xl:max-w-screen-lg 2xl:max-w-screen-xl"
+  defp container_width(%{wide: true}), do: "2xl:max-w-screen-2xl"
+  defp container_width(_), do: "2xl:max-w-screen-xl"
 
   slot(:inner_block, required: true)
 

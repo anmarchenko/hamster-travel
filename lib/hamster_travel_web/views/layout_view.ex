@@ -10,7 +10,7 @@ defmodule HamsterTravelWeb.LayoutView do
 
   def navbar(assigns) do
     ~H"""
-    <div class="mx-auto max-w-screen-md xl:max-w-screen-lg 2xl:max-w-screen-xl px-6 h-20 flex items-center justify-between">
+    <.container nomargin class="px-6 h-20 flex items-center justify-between">
       <.link href="/">
         <h1 class="font-medium dark:text-white">
           Hamster Travel
@@ -42,7 +42,7 @@ defmodule HamsterTravelWeb.LayoutView do
           </.nav_link>
         <% end %>
       </nav>
-    </div>
+    </.container>
     <div class="sm:hidden">
       <nav class="w-full border-t bg-orange-50 dark:bg-zinc-900 dark:border-zinc-800 fixed bottom-0">
         <div class="mx-auto px-6 max-w-md h-16 flex items-center justify-around">

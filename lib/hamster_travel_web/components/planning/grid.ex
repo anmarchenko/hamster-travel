@@ -15,10 +15,8 @@ defmodule HamsterTravelWeb.Planning.Grid do
 
   defp render(assigns) do
     ~H"""
-    <div class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8">
-      <%= for plan <- @plans do %>
-        <.plan_card plan={plan} />
-      <% end %>
+    <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-8">
+      <.plan_card :for={plan <- @plans} plan={plan} />
     </div>
     """
   end

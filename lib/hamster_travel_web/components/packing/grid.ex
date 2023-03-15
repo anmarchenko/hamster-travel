@@ -15,10 +15,8 @@ defmodule HamsterTravelWeb.Packing.Grid do
 
   defp render(assigns) do
     ~H"""
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-      <%= for backpack <- @backpacks do %>
-        <.backpack_card backpack={backpack} />
-      <% end %>
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+      <.backpack_card :for={backpack <- @backpacks} backpack={backpack} />
     </div>
     """
   end
