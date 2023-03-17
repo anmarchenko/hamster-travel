@@ -6,7 +6,6 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
   use HamsterTravelWeb, :live_component
 
   import HamsterTravelWeb.Inline
-  import PhxComponentHelpers
 
   require Logger
 
@@ -20,17 +19,7 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
     {:ok, socket}
   end
 
-  def update(assigns, socket) do
-    assigns =
-      assigns
-      |> set_attributes([], required: [:item])
-
-    socket = socket |> assign(assigns)
-
-    {:ok, socket}
-  end
-
-  def handle_event("check", %{"item" => %{"checked" => checked}}, socket) do
+  def handle_event("check", %{"checked" => checked}, socket) do
     item_to_update = socket.assigns.item
 
     case Packing.update_item_checked(item_to_update, checked) do
@@ -69,7 +58,7 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
     {:noreply, socket}
   end
 
-  def handle_event("update", %{"item" => params}, socket) do
+  def handle_event("update", params, socket) do
     item_to_update = socket.assigns.item
 
     case Packing.update_item(item_to_update, params) do
@@ -103,7 +92,7 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
     ~H"""
     <div class="mt-1">
       <.inline>
-        <.form :let={f} for={:item} phx-submit="update" phx-target={@myself}>
+        <.form :let={f} for={%{}} phx-submit="update" phx-target={@myself}>
           <.inline>
             <.text_input
               form={f}
@@ -126,7 +115,7 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
     ~H"""
     <div class="mt-1">
       <.inline class="!gap gap-1">
-        <.form :let={f} for={:item} class="grow mr-2" phx-change="check" phx-target={@myself}>
+        <.form :let={f} for={%{}} class="grow mr-2" phx-change="check" phx-target={@myself}>
           <%= label class: "cursor-pointer" do %>
             <.inline class={decoration_classes(@item.checked)}>
               <.checkbox
