@@ -6,10 +6,12 @@
       </.header>
       <.plan_shorts plan={@plan} />
       <.inline class="gap-3 text-xs sm:text-base">
-        <.a to={plan_url(@plan.slug, :edit)} label={gettext("Edit plan")} />
-        <.a to={plan_url(@plan.slug, :copy)} label={gettext("Make a copy")} />
-        <.a to={plan_url(@plan.slug, :pdf)} label={gettext("Export as PDF")} />
-        <.a to={plan_url(@plan.slug, :delete)} label={gettext("Delete")} />
+        <.button link_type="live_redirect" to={plan_url(@plan.slug, :edit)} color="secondary">
+          <.icon_text icon={:pencil_alt} label={gettext("Edit")} />
+        </.button>
+        <.a disabled={true} to={plan_url(@plan.slug, :copy)} label={gettext("Make a copy")} />
+        <.a disabled={true} to={plan_url(@plan.slug, :pdf)} label={gettext("Export as PDF")} />
+        <.a disabled={true} to={plan_url(@plan.slug, :delete)} label={gettext("Delete")} />
       </.inline>
       <.plan_status plan={@plan} />
     </div>

@@ -5,8 +5,6 @@ defmodule HamsterTravelWeb.ExternalLinks do
   use HamsterTravelWeb, :component
   import PhxComponentHelpers
 
-  import HamsterTravelWeb.ExternalLink
-
   def external_links(assigns) do
     assigns
     |> set_attributes([], required: [:links])

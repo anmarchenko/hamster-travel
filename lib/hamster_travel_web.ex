@@ -101,6 +101,7 @@ defmodule HamsterTravelWeb do
       import PetalComponents.Button
       import PetalComponents.Form
       import PetalComponents.Tabs
+      import PetalComponents.Link
 
       # TODO: migrate to V2
       alias PetalComponents.HeroiconsV1, as: Heroicons

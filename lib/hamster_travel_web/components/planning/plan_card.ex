@@ -27,7 +27,7 @@ defmodule HamsterTravelWeb.Planning.PlanCard do
       </div>
       <div class="p-4 max-w-[calc(100%_-_theme(width.32))] flex flex-col justify-between">
         <p class="text-base font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
-          <.link navigate={plan_url(@plan.slug)}>
+          <.link navigate={plan_url(@plan.slug)} class="!text-*">
             <%= @plan.name %>
           </.link>
         </p>

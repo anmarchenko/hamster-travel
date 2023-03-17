@@ -5,7 +5,6 @@ defmodule HamsterTravelWeb.Packing.AddItem do
 
   use HamsterTravelWeb, :live_component
 
-  import PhxComponentHelpers
   import HamsterTravelWeb.Inline
 
   require Logger
@@ -13,10 +12,6 @@ defmodule HamsterTravelWeb.Packing.AddItem do
   alias HamsterTravel.Packing
 
   def update(assigns, socket) do
-    assigns =
-      assigns
-      |> set_attributes([], required: [:list])
-
     socket =
       socket
       |> assign(assigns)

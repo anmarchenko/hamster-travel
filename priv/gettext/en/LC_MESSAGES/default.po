@@ -1,19 +1,19 @@
 #: lib/hamster_travel_web/pages/planning/index_plans.ex:14
 #: lib/hamster_travel_web/views/layout_view.ex:23
-#: lib/hamster_travel_web/views/layout_view.ex:97
+#: lib/hamster_travel_web/views/layout_view.ex:102
 #, elixir-autogen, elixir-format
 msgid "Plans"
 msgstr "Travels"
 
 #: lib/hamster_travel_web/pages/packing/index_backpacks.ex:17
 #: lib/hamster_travel_web/views/layout_view.ex:30
-#: lib/hamster_travel_web/views/layout_view.ex:103
+#: lib/hamster_travel_web/views/layout_view.ex:115
 #, elixir-autogen, elixir-format
 msgid "Backpacks"
 msgstr ""
 
-#: lib/hamster_travel_web/pages/home.ex:18
-#: lib/hamster_travel_web/views/layout_view.ex:94
+#: lib/hamster_travel_web/pages/home.ex:17
+#: lib/hamster_travel_web/views/layout_view.ex:99
 #, elixir-autogen, elixir-format
 msgid "Homepage"
 msgstr "Home"
@@ -49,14 +49,9 @@ msgstr ""
 
 #: lib/hamster_travel_web/pages/planning/index_drafts.ex:14
 #: lib/hamster_travel_web/views/layout_view.ex:27
-#: lib/hamster_travel_web/views/layout_view.ex:100
+#: lib/hamster_travel_web/views/layout_view.ex:107
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Drafts"
-msgstr ""
-
-#: lib/hamster_travel_web/pages/planning/show_plan.html.heex:9
-#, elixir-autogen, elixir-format
-msgid "Edit plan"
 msgstr ""
 
 #: lib/hamster_travel_web/templates/layout/not_found.html.heex:16
@@ -69,19 +64,19 @@ msgstr ""
 msgid "This URL is not found."
 msgstr ""
 
-#: lib/hamster_travel_web/pages/planning/show_plan.html.heex:11
+#: lib/hamster_travel_web/pages/planning/show_plan.html.heex:13
 #, elixir-autogen, elixir-format
 msgid "Export as PDF"
 msgstr ""
 
-#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:22
-#: lib/hamster_travel_web/pages/planning/show_plan.html.heex:10
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:27
+#: lib/hamster_travel_web/pages/planning/show_plan.html.heex:12
 #, elixir-autogen, elixir-format
 msgid "Make a copy"
 msgstr ""
 
 #: lib/hamster_travel_web/components/planning/tabs.ex:43
-#: lib/hamster_travel_web/views/layout_view.ex:83
+#: lib/hamster_travel_web/views/layout_view.ex:88
 #, elixir-autogen, elixir-format
 msgid "Activities"
 msgstr ""
@@ -91,13 +86,13 @@ msgstr ""
 msgid "Transfers and hotels"
 msgstr ""
 
-#: lib/hamster_travel_web/views/layout_view.ex:72
+#: lib/hamster_travel_web/views/layout_view.ex:77
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Back"
 msgstr ""
 
 #: lib/hamster_travel_web/components/planning/tab_itinerary.ex:91
-#: lib/hamster_travel_web/views/layout_view.ex:76
+#: lib/hamster_travel_web/views/layout_view.ex:81
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Transfers"
 msgstr ""
@@ -118,8 +113,8 @@ msgstr ""
 msgid "Places"
 msgstr ""
 
-#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:28
-#: lib/hamster_travel_web/pages/planning/show_plan.html.heex:12
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:35
+#: lib/hamster_travel_web/pages/planning/show_plan.html.heex:14
 #, elixir-autogen, elixir-format
 msgid "Delete"
 msgstr ""
@@ -139,17 +134,18 @@ msgstr ""
 msgid "No activities planned for this day"
 msgstr ""
 
-#: lib/hamster_travel_web/components/planning/activitiy.ex:54
+#: lib/hamster_travel_web/components/planning/activitiy.ex:53
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Address"
 msgstr ""
 
-#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:16
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:19
+#: lib/hamster_travel_web/pages/planning/show_plan.html.heex:10
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Edit"
 msgstr ""
 
-#: lib/hamster_travel_web/components/planning/activitiy.ex:55
+#: lib/hamster_travel_web/components/planning/activitiy.ex:54
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Opening hours"
 msgstr ""
@@ -220,7 +216,7 @@ msgstr "Days"
 msgid "Backpack name"
 msgstr "Name"
 
-#: lib/hamster_travel_web/pages/packing/create_backpack.ex:31
+#: lib/hamster_travel_web/pages/packing/create_backpack.ex:33
 #: lib/hamster_travel_web/pages/packing/index_backpacks.html.heex:5
 #, elixir-autogen, elixir-format
 msgid "Create backpack"
@@ -249,12 +245,12 @@ msgid_plural "nights"
 msgstr[0] ""
 msgstr[1] ""
 
-#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:30
+#: lib/hamster_travel_web/pages/packing/show_backpack.html.heex:32
 #, elixir-autogen, elixir-format
 msgid "Are you sure you want to delete backpack?"
 msgstr ""
 
-#: lib/hamster_travel_web/components/packing/add_item.ex:68
+#: lib/hamster_travel_web/components/packing/add_item.ex:63
 #, elixir-autogen, elixir-format
 msgid "Add backpack item"
 msgstr "What else to pack?"
@@ -284,12 +280,12 @@ msgstr ""
 msgid "Copy"
 msgstr ""
 
-#: lib/hamster_travel_web/components/packing/backpack_form.ex:55
+#: lib/hamster_travel_web/components/packing/backpack_form.ex:59
 #, elixir-autogen, elixir-format
 msgid "Save"
 msgstr ""
 
-#: lib/hamster_travel_web/components/packing/backpack_form.ex:58
+#: lib/hamster_travel_web/components/packing/backpack_form.ex:56
 #, elixir-autogen, elixir-format
 msgid "Cancel"
 msgstr ""

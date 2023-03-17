@@ -5,7 +5,6 @@ defmodule HamsterTravelWeb.Planning.Activity do
   use HamsterTravelWeb, :live_component
   import PhxComponentHelpers
 
-  import HamsterTravelWeb.ExternalLink
   import HamsterTravelWeb.Inline
   import HamsterTravelWeb.Secondary
 

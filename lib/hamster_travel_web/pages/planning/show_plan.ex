@@ -6,7 +6,6 @@ defmodule HamsterTravelWeb.Planning.ShowPlan do
 
   import HamsterTravelWeb.Header
   import HamsterTravelWeb.Inline
-  import HamsterTravelWeb.Link
   import HamsterTravelWeb.Planning.{PlanShorts, PlanStatus, Tabs}
 
   alias HamsterTravelWeb.Planning.TabActivity
