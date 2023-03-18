@@ -5,7 +5,6 @@ defmodule HamsterTravelWeb.Planning.Transfer do
   use HamsterTravelWeb, :live_component
   import PhxComponentHelpers
 
-  import HamsterTravelWeb.ExternalLinks
   import HamsterTravelWeb.Icons.{Airplane, Budget, Bus, Car, Ship, Taxi, Train}
   import HamsterTravelWeb.Inline
   import HamsterTravelWeb.Secondary

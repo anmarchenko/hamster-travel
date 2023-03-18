@@ -6,7 +6,6 @@ defmodule HamsterTravelWeb.Home do
   use HamsterTravelWeb, :live_view
 
   import HamsterTravelWeb.Gettext
-  import HamsterTravelWeb.Header
   import HamsterTravelWeb.Planning.Grid
 
   @impl true

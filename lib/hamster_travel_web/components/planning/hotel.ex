@@ -5,7 +5,6 @@ defmodule HamsterTravelWeb.Planning.Hotel do
   use HamsterTravelWeb, :live_component
   import PhxComponentHelpers
 
-  import HamsterTravelWeb.ExternalLinks
   import HamsterTravelWeb.Icons.{Budget, HomeSimple}
   import HamsterTravelWeb.Inline
   import HamsterTravelWeb.Secondary

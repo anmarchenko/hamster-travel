@@ -95,7 +95,7 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
           x-data={"{ showItems: $persist(true).as('list-#{@list.id}') }"}
         >
           <div class={"p-4 rounded-t-lg #{decoration_classes(@done)}"}>
-            <.header edit={@edit} changeset={@changeset} list={@list} phx-target={@myself} />
+            <.card_header edit={@edit} changeset={@changeset} list={@list} phx-target={@myself} />
           </div>
           <div class="p-4" x-show="showItems" x-transition.duration.300ms>
             <.live_component
@@ -117,7 +117,7 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
   attr :"phx-target", :any, required: true
   attr :changeset, :any, default: nil
 
-  def header(%{edit: false} = assigns) do
+  def card_header(%{edit: false} = assigns) do
     ~H"""
     <.inline>
       <div class="grow text-white dark:text-zinc-300"><%= @list.name %></div>
@@ -150,7 +150,7 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
     """
   end
 
-  def header(%{edit: true} = assigns) do
+  def card_header(%{edit: true} = assigns) do
     ~H"""
     <.inline>
       <.form

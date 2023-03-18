@@ -150,6 +150,42 @@ defmodule HamsterTravelWeb.CoreComponents do
     """
   end
 
+  attr(:links, :list, required: true)
+
+  def external_links(assigns) do
+    ~H"""
+    <%= for link <- @links do %>
+      <.external_link link={link} />
+    <% end %>
+    """
+  end
+
+  attr(:country, :string, required: true)
+  attr(:flag, :integer, required: true)
+  attr(:class, :string, default: "")
+
+  def flag(assigns) do
+    ~H"""
+    <img
+      class={@class}
+      src={Routes.static_path(HamsterTravelWeb.Endpoint, "/images/flags/#{@size}/#{@country}.png")}
+      alt={"Country #{@country}"}
+      style={"width: #{@size}px;  height: #{@size}px"}
+    />
+    """
+  end
+
+  attr(:class, :string, default: nil)
+  slot(:inner_block, required: true)
+
+  def header(assigns) do
+    ~H"""
+    <h1 class={build_class(["text-xl lg:text-2xl font-semibold", @class])}>
+      <%= render_slot(@inner_block) %>
+    </h1>
+    """
+  end
+
   attr(:name, :atom, required: true)
   attr(:style, :atom, default: :outline)
   attr(:class, :string, default: "w-5 h-5")

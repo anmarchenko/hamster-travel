@@ -5,7 +5,6 @@ defmodule HamsterTravelWeb.Planning.PlanStatus do
   use HamsterTravelWeb, :component
   import PhxComponentHelpers
 
-  import HamsterTravelWeb.Flag
   import HamsterTravelWeb.Inline
   import HamsterTravelWeb.Planning.StatusBadge
 

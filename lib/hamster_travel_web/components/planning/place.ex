@@ -5,7 +5,6 @@ defmodule HamsterTravelWeb.Planning.Place do
   use HamsterTravelWeb, :live_component
   import PhxComponentHelpers
 
-  import HamsterTravelWeb.Flag
   import HamsterTravelWeb.Inline
 
   def update(assigns, socket) do
