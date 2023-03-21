@@ -1,7 +1,6 @@
 defmodule HamsterTravel.PackingTest do
   use HamsterTravel.DataCase
 
-  alias HamsterTravel.Accounts.User
   alias HamsterTravel.Packing
   alias HamsterTravel.Packing.{Backpack, Item, List}
   alias HamsterTravel.Repo
@@ -41,7 +40,6 @@ defmodule HamsterTravel.PackingTest do
     end
 
     test "get_backpack/1 returns nil if backpack does not exist" do
-      backpack = backpack_fixture()
       assert Packing.get_backpack(Ecto.UUID.generate()) == nil
     end
 
@@ -200,10 +198,10 @@ defmodule HamsterTravel.PackingTest do
 
       new_backpack = Packing.get_backpack!(backpack.id)
 
-      assert ["L"] = Enum.map(backpack.lists, fn list -> list.name end)
+      assert ["L"] = Enum.map(new_backpack.lists, fn list -> list.name end)
 
       items =
-        backpack.lists
+        new_backpack.lists
         |> Enum.flat_map(fn list -> list.items end)
 
       assert [

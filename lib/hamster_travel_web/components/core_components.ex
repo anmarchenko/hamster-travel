@@ -161,7 +161,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   end
 
   attr(:country, :string, required: true)
-  attr(:flag, :integer, required: true)
+  attr(:size, :integer, required: true, values: [16, 24, 32, 48])
   attr(:class, :string, default: "")
 
   def flag(assigns) do

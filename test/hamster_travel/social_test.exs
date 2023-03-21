@@ -4,11 +4,7 @@ defmodule HamsterTravel.SocialTest do
   alias HamsterTravel.Social
 
   describe "friendships" do
-    alias HamsterTravel.Social.Friendship
-
     import HamsterTravel.AccountsFixtures
-
-    @invalid_attrs %{user_id: nil}
 
     test "list_friend_ids/1 returns all friend ids for given user" do
       user = user_fixture()

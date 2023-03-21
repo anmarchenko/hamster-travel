@@ -71,8 +71,7 @@ defmodule HamsterTravel.PolicyTest do
 
   test "user_scope/2 returns backpacks from the whole friends circle", %{
     author: author,
-    friend: friend,
-    backpack: backpack
+    friend: friend
   } do
     query = from(b in Backpack, order_by: [desc: b.inserted_at])
     backpack_fixture(%{user_id: friend.id})
