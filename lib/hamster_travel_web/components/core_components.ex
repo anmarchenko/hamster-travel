@@ -186,6 +186,53 @@ defmodule HamsterTravelWeb.CoreComponents do
     """
   end
 
+  attr(:tag, :string, default: "p")
+  attr(:italic, :boolean, default: true)
+  attr(:class, :string, default: nil)
+  slot(:inner_block, required: true)
+
+  def secondary(%{tag: "div"} = assigns) do
+    ~H"""
+    <div class={build_class([secondary_component_class(assigns), @class])}>
+      <%= render_slot(@inner_block) %>
+    </div>
+    """
+  end
+
+  def secondary(%{tag: "p"} = assigns) do
+    ~H"""
+    <p class={build_class([secondary_component_class(assigns), @class])}>
+      <%= render_slot(@inner_block) %>
+    </p>
+    """
+  end
+
+  defp secondary_component_class(assigns) do
+    "text-zinc-400 #{secondary_italic_class(assigns)}"
+  end
+
+  defp secondary_italic_class(%{italic: true}), do: "italic"
+  defp secondary_italic_class(_), do: ""
+
+  attr(:wrap, :boolean, default: false)
+  attr(:class, :string, default: nil)
+  slot(:inner_block, required: true)
+
+  def inline(assigns) do
+    ~H"""
+    <div class={build_class([inline_component_class(assigns), @class])}>
+      <%= render_slot(@inner_block) %>
+    </div>
+    """
+  end
+
+  defp inline_component_class(assigns) do
+    "flex flex-row gap-2 items-center block #{inline_wrap(assigns)}"
+  end
+
+  defp inline_wrap(%{wrap: true}), do: "flex-wrap"
+  defp inline_wrap(_), do: ""
+
   attr(:name, :atom, required: true)
   attr(:style, :atom, default: :outline)
   attr(:class, :string, default: "w-5 h-5")

@@ -6,7 +6,6 @@ defmodule HamsterTravelWeb.Planning.PlanShorts do
   import PhxComponentHelpers
 
   import HamsterTravelWeb.Icons.Budget
-  import HamsterTravelWeb.Inline
 
   @default_class "gap-4"
 

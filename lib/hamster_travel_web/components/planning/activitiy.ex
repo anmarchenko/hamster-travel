@@ -5,9 +5,6 @@ defmodule HamsterTravelWeb.Planning.Activity do
   use HamsterTravelWeb, :live_component
   import PhxComponentHelpers
 
-  import HamsterTravelWeb.Inline
-  import HamsterTravelWeb.Secondary
-
   def update(assigns, socket) do
     assigns =
       assigns
@@ -49,7 +46,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
         x-transition.duration.300ms.opacity
         x-cloak
       >
-        <.external_link link={@activity.link} />
+        <.external_link :if={@activity.link} link={@activity.link} />
         <.activity_feature label={gettext("Address")} value={@activity.address} />
         <.activity_feature label={gettext("Opening hours")} value={@activity.operation_times} />
         <div class="max-w-prose whitespace-pre-line text-justify text-sm">

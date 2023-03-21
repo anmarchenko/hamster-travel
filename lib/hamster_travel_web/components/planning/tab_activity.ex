@@ -7,9 +7,7 @@ defmodule HamsterTravelWeb.Planning.TabActivity do
   import PhxComponentHelpers
 
   import HamsterTravelWeb.Icons.Budget
-  import HamsterTravelWeb.Inline
   import HamsterTravelWeb.Planning.{DayLabel, PlacesList}
-  import HamsterTravelWeb.Secondary
 
   alias HamsterTravelWeb.Planning.{Activity, Expense, Note}
 

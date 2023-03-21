@@ -7,8 +7,6 @@ defmodule HamsterTravelWeb.Packing.AddList do
 
   use HamsterTravelWeb, :live_component
 
-  import HamsterTravelWeb.Inline
-
   alias HamsterTravel.Packing
 
   def update(assigns, socket) do

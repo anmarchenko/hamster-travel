@@ -4,8 +4,6 @@ defmodule HamsterTravelWeb.Accounts.Profile do
   """
   use HamsterTravelWeb, :live_view
 
-  import HamsterTravelWeb.Inline
-
   @impl true
   def mount(_params, _session, socket) do
     socket =

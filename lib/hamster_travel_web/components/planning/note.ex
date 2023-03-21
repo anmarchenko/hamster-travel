@@ -5,8 +5,6 @@ defmodule HamsterTravelWeb.Planning.Note do
   use HamsterTravelWeb, :live_component
   import PhxComponentHelpers
 
-  import HamsterTravelWeb.Secondary
-
   def update(assigns, socket) do
     assigns =
       assigns

@@ -38,15 +38,14 @@ defmodule HamsterTravel.MixProject do
     [
       # phoenix base
       {:phoenix, "~> 1.6.0"},
-      {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:plug_cowboy, "~> 2.5"},
 
       # password hashing
       {:bcrypt_elixir, "~> 3.0"},
 
       # database
-      {:phoenix_ecto, "~> 4.4"},
       {:ecto_sql, "~> 3.6"},
+      {:phoenix_ecto, "~> 4.4"},
       {:postgrex, ">= 0.0.0"},
       {:ecto_autoslug_field, "~> 3.0"},
 
@@ -72,7 +71,7 @@ defmodule HamsterTravel.MixProject do
       # json
       {:jason, "~> 1.2"},
 
-      # yaml
+      # yaml parsing
       {:yaml_elixir, "~> 2.9"},
 
       # math
@@ -83,7 +82,8 @@ defmodule HamsterTravel.MixProject do
       {:ex_cldr_dates_times, "~> 2.0"},
       {:ex_cldr_numbers, "~> 2.0"},
 
-      # test/lint
+      # test/lint/dev tools
+      {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:floki, ">= 0.30.0", only: :test},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false}
     ]

@@ -8,8 +8,6 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
 
   import HamsterTravel.Collections
 
-  import HamsterTravelWeb.Inline
-
   alias HamsterTravel.Packing
   alias HamsterTravel.Packing.Backpack
   alias HamsterTravel.Packing.List

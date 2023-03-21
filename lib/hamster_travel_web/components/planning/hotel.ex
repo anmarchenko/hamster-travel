@@ -6,8 +6,6 @@ defmodule HamsterTravelWeb.Planning.Hotel do
   import PhxComponentHelpers
 
   import HamsterTravelWeb.Icons.{Budget, HomeSimple}
-  import HamsterTravelWeb.Inline
-  import HamsterTravelWeb.Secondary
 
   def update(assigns, socket) do
     assigns =

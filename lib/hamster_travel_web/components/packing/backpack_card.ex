@@ -5,9 +5,6 @@ defmodule HamsterTravelWeb.Packing.BackpackCard do
   use HamsterTravelWeb, :component
   import PhxComponentHelpers
 
-  import HamsterTravelWeb.Inline
-  import HamsterTravelWeb.Secondary
-
   def backpack_card(assigns) do
     assigns
     |> set_attributes([], required: [:backpack])

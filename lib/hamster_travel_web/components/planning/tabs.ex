@@ -7,7 +7,6 @@ defmodule HamsterTravelWeb.Planning.Tabs do
   import PhxComponentHelpers
 
   import HamsterTravelWeb.Icons.Airplane
-  import HamsterTravelWeb.Inline
 
   @default_class "hidden sm:flex"
 

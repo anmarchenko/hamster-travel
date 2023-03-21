@@ -6,8 +6,6 @@ defmodule HamsterTravelWeb.Planning.Transfer do
   import PhxComponentHelpers
 
   import HamsterTravelWeb.Icons.{Airplane, Budget, Bus, Car, Ship, Taxi, Train}
-  import HamsterTravelWeb.Inline
-  import HamsterTravelWeb.Secondary
 
   def update(assigns, socket) do
     assigns =

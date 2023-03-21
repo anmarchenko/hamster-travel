@@ -7,7 +7,6 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
 
   use HamsterTravelWeb, :live_component
 
-  import HamsterTravelWeb.Inline
   import PhxComponentHelpers
 
   alias HamsterTravel.Packing

@@ -5,8 +5,6 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
 
   use HamsterTravelWeb, :live_component
 
-  import HamsterTravelWeb.Inline
-
   require Logger
 
   alias HamsterTravel.Packing
