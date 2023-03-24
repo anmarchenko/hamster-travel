@@ -7,8 +7,6 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
 
   use HamsterTravelWeb, :live_component
 
-  import PhxComponentHelpers
-
   alias HamsterTravel.Packing
 
   alias HamsterTravelWeb.Packing.AddItem
@@ -23,10 +21,6 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
   end
 
   def update(assigns, socket) do
-    assigns =
-      assigns
-      |> set_attributes([], required: [:list])
-
     socket =
       socket
       |> assign(:done, Packing.all_checked?(assigns.list.items))

@@ -3,17 +3,12 @@ defmodule HamsterTravelWeb.Packing.Grid do
   Parses plan cards as a grid
   """
   use HamsterTravelWeb, :component
-  import PhxComponentHelpers
 
   import HamsterTravelWeb.Packing.BackpackCard
 
-  def grid(assigns) do
-    assigns
-    |> set_attributes([], required: [:backpacks])
-    |> render()
-  end
+  attr(:backpacks, :list, required: true)
 
-  defp render(assigns) do
+  def grid(assigns) do
     ~H"""
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
       <.backpack_card :for={backpack <- @backpacks} backpack={backpack} />

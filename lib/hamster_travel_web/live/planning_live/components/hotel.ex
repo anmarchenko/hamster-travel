@@ -3,16 +3,15 @@ defmodule HamsterTravelWeb.Planning.Hotel do
   Live component responsible for showing and editing hotels
   """
   use HamsterTravelWeb, :live_component
-  import PhxComponentHelpers
 
   import HamsterTravelWeb.Icons.{Budget, HomeSimple}
 
-  def update(assigns, socket) do
-    assigns =
-      assigns
-      |> set_attributes([edit: false], required: [:hotel])
+  def mount(socket) do
+    socket =
+      socket
+      |> assign(edit: false)
 
-    {:ok, assign(socket, assigns)}
+    {:ok, socket}
   end
 
   def render(%{edit: true} = assigns) do

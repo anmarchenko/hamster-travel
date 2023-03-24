@@ -3,22 +3,23 @@ defmodule HamsterTravelWeb.Planning.PlanShorts do
   Shorts stats about a plan (days, people, budget)
   """
   use HamsterTravelWeb, :component
-  import PhxComponentHelpers
+
+  alias HamsterTravelWeb.CoreComponents
 
   import HamsterTravelWeb.Icons.Budget
 
-  @default_class "gap-4"
+  attr(:plan, :map, required: true)
+  attr(:icon_class, :string, default: nil)
+  attr(:class, :string, default: nil)
 
   def plan_shorts(assigns) do
-    assigns
-    |> set_attributes([icon_class: ""], required: [:plan])
-    |> extend_class(@default_class, prefix_replace: false)
-    |> render()
-  end
-
-  defp render(assigns) do
     ~H"""
-    <.inline {@heex_class}>
+    <.inline class={
+      CoreComponents.build_class([
+        "gap-4",
+        @class
+      ])
+    }>
       <.inline class="gap-1">
         <.budget class={@icon_class} />
         <%= Formatter.format_money(@plan.budget, @plan.currency) %>

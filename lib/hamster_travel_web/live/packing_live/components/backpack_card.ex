@@ -3,15 +3,10 @@ defmodule HamsterTravelWeb.Packing.BackpackCard do
   This component renders backpack card
   """
   use HamsterTravelWeb, :component
-  import PhxComponentHelpers
+
+  attr(:backpack, HamsterTravel.Packing.Backpack, required: true)
 
   def backpack_card(assigns) do
-    assigns
-    |> set_attributes([], required: [:backpack])
-    |> render()
-  end
-
-  defp render(assigns) do
     ~H"""
     <.card>
       <div class="p-4 flex flex-col gap-y-4">

@@ -3,13 +3,12 @@ defmodule HamsterTravelWeb.Planning.DayLabel do
   Label for a day in planning (could be date with a week day or just a number)
   """
   use HamsterTravelWeb, :component
-  import PhxComponentHelpers
+
+  attr(:start_date, Date, default: nil)
+  attr(:day_index, :integer, required: true)
 
   def day_label(assigns) do
-    assigns
-    |> set_attributes([start_date: nil], required: [:day_index])
-    |> extend_class("", prefix_replace: false)
-    |> render()
+    render(assigns)
   end
 
   defp render(%{start_date: nil} = assigns) do

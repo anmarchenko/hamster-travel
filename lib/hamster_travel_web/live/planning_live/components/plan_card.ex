@@ -3,17 +3,12 @@ defmodule HamsterTravelWeb.Planning.PlanCard do
   Renders plan card for a list of plans
   """
   use HamsterTravelWeb, :component
-  import PhxComponentHelpers
 
   import HamsterTravelWeb.Planning.{PlanShorts, PlanStatus}
 
-  def plan_card(assigns) do
-    assigns
-    |> set_attributes([], required: [:plan])
-    |> render()
-  end
+  attr(:plan, :map, required: true)
 
-  defp render(assigns) do
+  def plan_card(assigns) do
     ~H"""
     <.card>
       <div class="shrink-0">
