@@ -3,15 +3,10 @@ defmodule HamsterTravelWeb.Icons.Train do
   Train icon
   """
   use HamsterTravelWeb, :component
-  import PhxComponentHelpers
+
+  attr(:class, :string, default: nil)
 
   def train(assigns) do
-    assigns
-    |> extend_class("", prefix_replace: false)
-    |> render()
-  end
-
-  defp render(assigns) do
     ~H"""
     <svg
       width="18"
@@ -20,7 +15,7 @@ defmodule HamsterTravelWeb.Icons.Train do
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      {@heex_class}
+      class={@class}
     >
       <path
         d="M9.6087 7H14.3913C15.832 7 17 8.16795 17 9.6087C17 9.82481 16.8248 10 16.6087 10H7.3913C7.17519 10 7 9.82481 7 9.6087C7 8.16795 8.16795 7 9.6087 7Z"

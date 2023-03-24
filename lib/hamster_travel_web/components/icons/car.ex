@@ -3,15 +3,10 @@ defmodule HamsterTravelWeb.Icons.Car do
   Car icon
   """
   use HamsterTravelWeb, :component
-  import PhxComponentHelpers
+
+  attr(:class, :string, default: nil)
 
   def car(assigns) do
-    assigns
-    |> extend_class("", prefix_replace: false)
-    |> render()
-  end
-
-  defp render(assigns) do
     ~H"""
     <svg
       width="18"
@@ -20,7 +15,7 @@ defmodule HamsterTravelWeb.Icons.Car do
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      {@heex_class}
+      class={@class}
     >
       <path d="M8 10L16 10" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
       <path d="M7 14L8 14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />

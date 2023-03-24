@@ -3,15 +3,10 @@ defmodule HamsterTravelWeb.Icons.Bus do
   Bus icon
   """
   use HamsterTravelWeb, :component
-  import PhxComponentHelpers
+
+  attr(:class, :string, default: nil)
 
   def bus(assigns) do
-    assigns
-    |> extend_class("", prefix_replace: false)
-    |> render()
-  end
-
-  defp render(assigns) do
     ~H"""
     <svg
       width="18"
@@ -20,7 +15,7 @@ defmodule HamsterTravelWeb.Icons.Bus do
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      {@heex_class}
+      class={@class}
     >
       <path
         d="M7 16.01L7.01 15.9989"
