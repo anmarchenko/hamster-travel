@@ -3,16 +3,15 @@ defmodule HamsterTravelWeb.Planning.Transfer do
   Live component responsible for showing and editing transfers
   """
   use HamsterTravelWeb, :live_component
-  import PhxComponentHelpers
 
   import HamsterTravelWeb.Icons.{Airplane, Budget, Bus, Car, Ship, Taxi, Train}
 
-  def update(assigns, socket) do
-    assigns =
-      assigns
-      |> set_attributes([edit: false], required: [:transfer])
+  def mount(socket) do
+    socket =
+      socket
+      |> assign(edit: false)
 
-    {:ok, assign(socket, assigns)}
+    {:ok, socket}
   end
 
   def render(%{edit: true} = assigns) do

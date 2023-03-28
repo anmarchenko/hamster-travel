@@ -3,18 +3,20 @@ defmodule HamsterTravelWeb.Planning.StatusBadge do
   Renders badge with plan state (draft/planned/finished)
   """
   use HamsterTravelWeb, :component
-  import PhxComponentHelpers
+
+  alias HamsterTravelWeb.CoreComponents
+
+  attr(:status, :string, required: true)
+  attr(:class, :string, default: nil)
 
   def status_badge(assigns) do
-    assigns
-    |> set_attributes([], required: [:status])
-    |> extend_class(&component_class/1, prefix_replace: false)
-    |> render()
-  end
-
-  defp render(assigns) do
     ~H"""
-    <span {@heex_class}>
+    <span class={
+      CoreComponents.build_class([
+        component_class(assigns),
+        @class
+      ])
+    }>
       <%= Gettext.gettext(HamsterTravelWeb.Gettext, @status) %>
     </span>
     """

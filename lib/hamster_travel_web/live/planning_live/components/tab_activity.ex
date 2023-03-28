@@ -4,8 +4,6 @@ defmodule HamsterTravelWeb.Planning.TabActivity do
   """
   use HamsterTravelWeb, :live_component
 
-  import PhxComponentHelpers
-
   import HamsterTravelWeb.Icons.Budget
   import HamsterTravelWeb.Planning.{DayLabel, PlacesList}
 
@@ -15,20 +13,18 @@ defmodule HamsterTravelWeb.Planning.TabActivity do
     plan = assigns[:plan]
     budget = HamsterTravel.fetch_budget(plan, :activities)
 
-    assigns =
-      assigns
-      |> set_attributes(
-        [
-          budget: budget,
-          places: plan.places,
-          activities: plan.activities,
-          notes: plan.notes,
-          expenses: plan.expenses
-        ],
-        required: [:plan]
+    socket =
+      socket
+      |> assign(assigns)
+      |> assign(
+        budget: budget,
+        places: plan.places,
+        activities: plan.activities,
+        notes: plan.notes,
+        expenses: plan.expenses
       )
 
-    {:ok, assign(socket, assigns)}
+    {:ok, socket}
   end
 
   def activities(%{activities: []} = assigns) do

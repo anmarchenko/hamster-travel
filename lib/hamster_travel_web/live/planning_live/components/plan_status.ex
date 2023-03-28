@@ -3,22 +3,23 @@ defmodule HamsterTravelWeb.Planning.PlanStatus do
   Renders status row for plan (badge, flags, author)
   """
   use HamsterTravelWeb, :component
-  import PhxComponentHelpers
+
+  alias HamsterTravelWeb.CoreComponents
 
   import HamsterTravelWeb.Planning.StatusBadge
 
-  @default_class "gap-3"
+  attr(:plan, :map, required: true)
+  attr(:class, :string, default: nil)
+  attr(:flags_limit, :integer, default: 100)
 
   def plan_status(assigns) do
-    assigns
-    |> set_attributes([flags_limit: 100], required: [:plan])
-    |> extend_class(@default_class, prefix_replace: false)
-    |> render()
-  end
-
-  defp render(assigns) do
     ~H"""
-    <.inline {@heex_class}>
+    <.inline class={
+      CoreComponents.build_class([
+        "gap-3",
+        @class
+      ])
+    }>
       <.status_badge status={@plan.status} />
       <%= for country <- Enum.take(@plan.countries, @flags_limit) do %>
         <.flag size={24} country={country} />

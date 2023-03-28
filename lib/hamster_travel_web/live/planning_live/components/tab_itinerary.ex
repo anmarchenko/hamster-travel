@@ -4,8 +4,6 @@ defmodule HamsterTravelWeb.Planning.TabItinerary do
   """
   use HamsterTravelWeb, :live_component
 
-  import PhxComponentHelpers
-
   import HamsterTravelWeb.Icons.Budget
   import HamsterTravelWeb.Planning.{DayLabel, PlacesList}
 
@@ -15,19 +13,17 @@ defmodule HamsterTravelWeb.Planning.TabItinerary do
     plan = assigns[:plan]
     budget = HamsterTravel.fetch_budget(plan, :transfers)
 
-    assigns =
-      assigns
-      |> set_attributes(
-        [
-          budget: budget,
-          places: plan.places,
-          transfers: plan.transfers,
-          hotels: plan.hotels
-        ],
-        required: [:plan]
+    socket =
+      socket
+      |> assign(assigns)
+      |> assign(
+        budget: budget,
+        places: plan.places,
+        transfers: plan.transfers,
+        hotels: plan.hotels
       )
 
-    {:ok, assign(socket, assigns)}
+    {:ok, socket}
   end
 
   def transfers(%{transfers: []} = assigns) do

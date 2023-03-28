@@ -4,22 +4,25 @@ defmodule HamsterTravelWeb.Planning.Tabs do
   """
   use HamsterTravelWeb, :component
 
-  import PhxComponentHelpers
+  alias HamsterTravelWeb.CoreComponents
 
   import HamsterTravelWeb.Icons.Airplane
 
-  @default_class "hidden sm:flex"
+  attr(:plan, :map, required: true)
+  attr(:active_tab, :string, required: true)
+  attr(:class, :string, default: nil)
 
   def plan_tabs(assigns) do
-    assigns
-    |> set_attributes([], required: [:plan, :active_tab])
-    |> extend_class(@default_class, prefix_replace: false)
-    |> render()
-  end
-
-  defp render(assigns) do
     ~H"""
-    <.tabs underline {@heex_class}>
+    <.tabs
+      underline
+      class={
+        CoreComponents.build_class([
+          "hidden sm:flex",
+          @class
+        ])
+      }
+    >
       <.tab
         underline
         to={plan_url(@plan.slug, :itinerary)}

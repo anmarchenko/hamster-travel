@@ -53,7 +53,6 @@ defmodule HamsterTravel.MixProject do
       {:phoenix_html, "~> 3.0"},
       {:phoenix_live_view, "~> 0.18.0"},
       {:petal_components, "~> 0.19.0"},
-      {:phx_component_helpers, "~> 1.2.0"},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
 
