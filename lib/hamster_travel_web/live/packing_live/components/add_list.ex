@@ -65,7 +65,7 @@ defmodule HamsterTravelWeb.Packing.AddList do
             <.ht_icon_button icon={:check} />
           </.inline>
         </.form>
-        <.ht_icon_button icon={:x} phx-click="cancel" phx-target={@myself} />
+        <.ht_icon_button icon={:x_mark} phx-click="cancel" phx-target={@myself} />
       </.inline>
     </div>
     """
@@ -75,7 +75,7 @@ defmodule HamsterTravelWeb.Packing.AddList do
     ~H"""
     <div class="mb-5">
       <.button color="primary" phx-click="edit" phx-target={@myself}>
-        <Heroicons.Solid.plus class="w-5 h-5 mr-2" />
+        <.icon name={:plus} solid={true} class="w-5 h-5 mr-2" />
         <%= gettext("Add list") %>
       </.button>
     </div>

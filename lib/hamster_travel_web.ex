@@ -102,9 +102,7 @@ defmodule HamsterTravelWeb do
       import PetalComponents.Form
       import PetalComponents.Tabs
       import PetalComponents.Link
-
-      # TODO: migrate to V2
-      alias PetalComponents.HeroiconsV1, as: Heroicons
+      import PetalComponents.Icon
 
       # Import LiveView and .heex helpers (live_render, live_patch, <.form>, etc)
       # TODO: remove it??????

@@ -2,8 +2,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   use Phoenix.Component, global_prefixes: ~w(x- data-)
 
   import PetalComponents.Link
-
-  alias PetalComponents.HeroiconsV1, as: Heroicons
+  import PetalComponents.Icon
 
   alias HamsterTravelWeb.Router.Helpers, as: Routes
 
@@ -63,7 +62,7 @@ defmodule HamsterTravelWeb.CoreComponents do
       }
       {@rest}
     >
-      <.icon name={@icon} class={get_icon_button_pic_size_classes(@size)} />
+      <.icon name={@icon} outline={true} class={get_icon_button_pic_size_classes(@size)} />
     </button>
     """
   end
@@ -127,10 +126,12 @@ defmodule HamsterTravelWeb.CoreComponents do
   attr(:label, :string, required: true)
   attr(:icon, :atom, required: true)
   attr(:style, :atom, default: :solid)
+  attr(:class, :string, default: "w-5 h-5")
+  attr(:rest, :global)
 
   def icon_text(assigns) do
     ~H"""
-    <.icon name={@icon} style={@style} />
+    <.icon name={@icon} outline={@style == :outline} solid={@style == :solid} class={@class} {@rest} />
     <span class="hidden sm:inline ml-2">
       <%= @label %>
     </span>
@@ -232,26 +233,6 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   defp inline_wrap(%{wrap: true}), do: "flex-wrap"
   defp inline_wrap(_), do: ""
-
-  attr(:name, :atom, required: true)
-  attr(:style, :atom, default: :outline)
-  attr(:class, :string, default: "w-5 h-5")
-  attr(:rest, :global)
-
-  defp icon(assigns) do
-    module =
-      if assigns.style == :outline do
-        Heroicons.Outline
-      else
-        Heroicons.Solid
-      end
-
-    assigns = assign(assigns, module: module)
-
-    ~H"""
-    <%= apply(@module, @name, [assigns]) %>
-    """
-  end
 
   defp get_icon_button_size_classes("xs"), do: "w-9 h-9"
   defp get_icon_button_size_classes("sm"), do: "w-10 h-10"

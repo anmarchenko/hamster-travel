@@ -41,7 +41,7 @@ defmodule HamsterTravelWeb.Planning.Tabs do
         link_type="live_patch"
       >
         <.inline>
-          <Heroicons.Outline.clipboard_list class="h-5 w-5" />
+          <.icon name={:clipboard_document_list} outline={true} class="h-5 w-5" />
           <%= gettext("Activities") %>
         </.inline>
       </.tab>

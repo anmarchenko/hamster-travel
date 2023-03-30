@@ -25,11 +25,11 @@ defmodule HamsterTravelWeb.Planning.PlanShorts do
         <%= Formatter.format_money(@plan.budget, @plan.currency) %>
       </.inline>
       <.inline class="gap-1">
-        <Heroicons.Outline.calendar class={"h-4 w-4 #{@icon_class}"} />
+        <.icon name={:calendar} outline={true} class={"h-4 w-4 #{@icon_class}"} />
         <%= @plan.duration %> <%= ngettext("day", "days", @plan.duration) %>
       </.inline>
       <.inline class="gap-1">
-        <Heroicons.Outline.user class={"h-4 w-4 #{@icon_class}"} />
+        <.icon name={:user} outline={true} class={"h-4 w-4 #{@icon_class}"} />
         <%= @plan.people_count %> <%= gettext("ppl") %>
       </.inline>
     </.inline>

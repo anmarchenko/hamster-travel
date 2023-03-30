@@ -158,7 +158,12 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
           <.ht_icon_button icon={:check} color="white" />
         </.inline>
       </.form>
-      <.ht_icon_button icon={:x} color="white" phx-click="cancel" phx-target={assigns[:"phx-target"]} />
+      <.ht_icon_button
+        icon={:x_mark}
+        color="white"
+        phx-click="cancel"
+        phx-target={assigns[:"phx-target"]}
+      />
     </.inline>
     """
   end

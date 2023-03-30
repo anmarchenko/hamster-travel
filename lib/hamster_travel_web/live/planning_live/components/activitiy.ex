@@ -33,10 +33,10 @@ defmodule HamsterTravelWeb.Planning.Activity do
         </span>
         <%= Formatter.format_money(@activity.price, @activity.price_currency) %>
         <.activity_button>
-          <Heroicons.Outline.pencil class="h-4 w-4" />
+          <.icon name={:pencil} outline={true} class="h-4 w-4" />
         </.activity_button>
         <.activity_button>
-          <Heroicons.Outline.trash class="h-4 w-4" />
+          <.icon name={:trash} outline={true} class="h-4 w-4" />
         </.activity_button>
       </.inline>
       <div

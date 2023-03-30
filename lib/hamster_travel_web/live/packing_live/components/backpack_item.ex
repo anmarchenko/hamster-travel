@@ -103,7 +103,7 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
             <.ht_icon_button icon={:check} />
           </.inline>
         </.form>
-        <.ht_icon_button icon={:x} phx-click="cancel" phx-target={@myself} />
+        <.ht_icon_button icon={:x_mark} phx-click="cancel" phx-target={@myself} />
       </.inline>
     </div>
     """

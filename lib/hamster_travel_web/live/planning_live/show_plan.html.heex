@@ -7,7 +7,7 @@
       <.plan_shorts plan={@plan} />
       <.inline class="gap-3 text-xs sm:text-base">
         <.button link_type="live_redirect" to={plan_url(@plan.slug, :edit)} color="secondary">
-          <.icon_text icon={:pencil_alt} label={gettext("Edit")} />
+          <.icon_text icon={:pencil} label={gettext("Edit")} />
         </.button>
         <.a disabled={true} to={plan_url(@plan.slug, :copy)} label={gettext("Make a copy")} />
         <.a disabled={true} to={plan_url(@plan.slug, :pdf)} label={gettext("Export as PDF")} />
