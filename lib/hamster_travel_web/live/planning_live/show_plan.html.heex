@@ -9,9 +9,15 @@
         <.button link_type="live_redirect" to={plan_url(@plan.slug, :edit)} color="secondary">
           <.icon_text icon={:pencil} label={gettext("Edit")} />
         </.button>
-        <.a disabled={true} to={plan_url(@plan.slug, :copy)} label={gettext("Make a copy")} />
-        <.a disabled={true} to={plan_url(@plan.slug, :pdf)} label={gettext("Export as PDF")} />
-        <.a disabled={true} to={plan_url(@plan.slug, :delete)} label={gettext("Delete")} />
+        <.link href={plan_url(@plan.slug, :copy)}>
+          <%= gettext("Make a copy") %>
+        </.link>
+        <.link href={plan_url(@plan.slug, :pdf)}>
+          <%= gettext("Export as PDF") %>
+        </.link>
+        <.link href={plan_url(@plan.slug, :delete)}>
+          <%= gettext("Delete") %>
+        </.link>
       </.inline>
       <.plan_status plan={@plan} />
     </div>

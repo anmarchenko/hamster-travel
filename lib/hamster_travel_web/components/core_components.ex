@@ -1,7 +1,6 @@
 defmodule HamsterTravelWeb.CoreComponents do
   use Phoenix.Component, global_prefixes: ~w(x- data-)
 
-  import PetalComponents.Link
   import PetalComponents.Icon
 
   alias HamsterTravelWeb.Router.Helpers, as: Routes
@@ -142,12 +141,12 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   def external_link(assigns) do
     ~H"""
-    <.a
-      to={@link}
-      link_type="a"
-      label={URI.parse(@link).host}
+    <.link
+      href={@link}
       class="underline text-indigo-500 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-100"
-    />
+    >
+      <%= URI.parse(@link).host %>
+    </.link>
     """
   end
 

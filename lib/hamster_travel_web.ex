@@ -101,7 +101,6 @@ defmodule HamsterTravelWeb do
       import PetalComponents.Button
       import PetalComponents.Form
       import PetalComponents.Tabs
-      import PetalComponents.Link
       import PetalComponents.Icon
 
       # Import LiveView and .heex helpers (live_render, live_patch, <.form>, etc)
