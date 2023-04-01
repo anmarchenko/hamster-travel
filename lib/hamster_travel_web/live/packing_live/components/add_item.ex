@@ -61,12 +61,8 @@ defmodule HamsterTravelWeb.Packing.AddItem do
             placeholder={gettext("Add backpack item")}
             value={@name}
           />
-          <.icon_button link_type="button" size="xs" color="gray">
-            <.icon
-              name={:plus}
-              outline={true}
-              class={PetalComponents.Button.get_icon_button_spinner_size_classes("xs")}
-            />
+          <.icon_button size="md">
+            <.icon name={:plus} outline={true} />
           </.icon_button>
         </.inline>
       </.form>

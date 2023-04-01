@@ -62,10 +62,14 @@ defmodule HamsterTravelWeb.Packing.AddList do
               placeholder={gettext("List name")}
               x-init="$el.focus()"
             />
-            <.ht_icon_button icon={:check} />
+            <.icon_button>
+              <.icon name={:check} />
+            </.icon_button>
           </.inline>
         </.form>
-        <.ht_icon_button icon={:x_mark} phx-click="cancel" phx-target={@myself} />
+        <.icon_button phx-click="cancel" phx-target={@myself}>
+          <.icon name={:x_mark} />
+        </.icon_button>
       </.inline>
     </div>
     """

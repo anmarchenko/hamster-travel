@@ -12,6 +12,8 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
   alias HamsterTravelWeb.Packing.AddItem
   alias HamsterTravelWeb.Packing.BackpackItem
 
+  @button_color "text-white dark:text-zinc-400 hover:bg-primary-600 dark:hover:bg-primary-800"
+
   def mount(socket) do
     socket =
       socket
@@ -114,31 +116,40 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
     ~H"""
     <.inline>
       <div class="grow text-white dark:text-zinc-300"><%= @list.name %></div>
-      <.ht_icon_button
-        icon={:pencil}
-        color="white"
+      <.icon_button
+        size="xs"
+        class={button_color()}
         phx-click="edit"
         phx-target={assigns[:"phx-target"]}
-      />
-      <.ht_icon_button
-        icon={:trash}
-        color="white"
+      >
+        <.icon name={:pencil} />
+      </.icon_button>
+      <.icon_button
+        size="xs"
+        class={button_color()}
         phx-click="delete"
         phx-target={assigns[:"phx-target"]}
         data-confirm={gettext("Are you sure you want to delete this list? All items will be lost")}
-      />
-      <.ht_icon_button
-        icon={:chevron_down}
-        color="white"
+      >
+        <.icon name={:trash} />
+      </.icon_button>
+      <.icon_button
+        size="xs"
+        class={button_color()}
         x-show="showItems"
         @click="showItems = !showItems"
-      />
-      <.ht_icon_button
-        icon={:chevron_right}
-        color="white"
+      >
+        <.icon name={:chevron_down} />
+      </.icon_button>
+
+      <.icon_button
+        size="xs"
+        class={button_color()}
         x-show="!showItems"
         @click="showItems = !showItems"
-      />
+      >
+        <.icon name={:chevron_right} />
+      </.icon_button>
     </.inline>
     """
   end
@@ -155,19 +166,20 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
       >
         <.inline>
           <.text_input form={f} id={"update-item-#{@list.id}"} field={:name} x-init="$el.focus()" />
-          <.ht_icon_button icon={:check} color="white" />
+          <.icon_button class={button_color()}>
+            <.icon name={:check} />
+          </.icon_button>
         </.inline>
       </.form>
-      <.ht_icon_button
-        icon={:x_mark}
-        color="white"
-        phx-click="cancel"
-        phx-target={assigns[:"phx-target"]}
-      />
+      <.icon_button class={button_color()} phx-click="cancel" phx-target={assigns[:"phx-target"]}>
+        <.icon name={:x_mark} />
+      </.icon_button>
     </.inline>
     """
   end
 
   defp decoration_classes(true), do: "bg-violet-500 dark:bg-violet-800 line-through"
   defp decoration_classes(_), do: "bg-violet-700 dark:bg-violet-900"
+
+  defp button_color, do: @button_color
 end
