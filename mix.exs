@@ -65,7 +65,7 @@ defmodule HamsterTravel.MixProject do
       {:telemetry_poller, "~> 1.0"},
 
       # i18n
-      {:gettext, "~> 0.21.0"},
+      {:gettext, "~> 0.22"},
 
       # json
       {:jason, "~> 1.2"},
