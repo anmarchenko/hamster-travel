@@ -21,7 +21,7 @@
       <.button
         :if={Policy.authorized?(:copy, @backpack, @current_user)}
         link_type="live_redirect"
-        to={"/backpacks/new?copy=#{@backpack.id}"}
+        to={backpack_url(@backpack.id, :copy)}
         color="secondary"
       >
         <.icon_text icon={:document_duplicate} label={gettext("Make a copy")} />

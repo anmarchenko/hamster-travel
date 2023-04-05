@@ -4,5 +4,5 @@
   backpack={@backpack}
   changeset={@changeset}
   on_submit={&update_backpack/2}
-  back_url={"/backpacks/#{@backpack.slug}"}
+  back_url={backpack_url(@backpack.slug)}
 />

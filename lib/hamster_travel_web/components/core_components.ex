@@ -1,19 +1,37 @@
 defmodule HamsterTravelWeb.CoreComponents do
+  @moduledoc """
+  Provides core UI components.
+
+  At the first glance, this module may seem daunting, but its goal is
+  to provide some core building blocks in your application, such modals,
+  tables, and forms. The components are mostly markup and well documented
+  with doc strings and declarative assigns. You may customize and style
+  them in any way you want, based on your application growth and needs.
+
+  The default components use Tailwind CSS, a utility-first CSS framework.
+  See the [Tailwind CSS documentation](https://tailwindcss.com) to learn
+  how to customize them or feel free to swap in another framework altogether.
+
+  Icons are provided by [heroicons](https://heroicons.com). See `icon/1` for usage.
+  """
   use Phoenix.Component, global_prefixes: ~w(x- data-)
+  use HamsterTravelWeb, :verified_routes
 
   import PetalComponents.Icon
 
   alias HamsterTravelWeb.Router.Helpers, as: Routes
 
-  def plan_url(slug), do: "/plans/#{slug}"
+  def plan_url(slug), do: ~p"/plans/#{slug}"
   def plan_url(slug, :show), do: plan_url(slug)
-  def plan_url(slug, :itinerary), do: "/plans/#{slug}?tab=itinerary"
-  def plan_url(slug, :activities), do: "/plans/#{slug}?tab=activities"
+  def plan_url(slug, :itinerary), do: ~p"/plans/#{slug}?tab=itinerary"
+  def plan_url(slug, :activities), do: ~p"/plans/#{slug}?tab=activities"
   def plan_url(slug, _), do: plan_url(slug)
 
-  def backpack_url(slug), do: "/backpacks/#{slug}"
+  def backpack_url(slug), do: ~p"/backpacks/#{slug}"
   def backpack_url(slug, :show), do: backpack_url(slug)
-  def backpack_url(slug, :edit), do: "/backpacks/#{slug}/edit"
+  def backpack_url(slug, :edit), do: ~p"/backpacks/#{slug}/edit"
+  def backpack_url(id, :copy), do: ~p"/backpacks/new?copy=#{id}"
+  def backpacks_url, do: ~p"/backpacks"
 
   def placeholder_image(id) when is_binary(id) do
     id

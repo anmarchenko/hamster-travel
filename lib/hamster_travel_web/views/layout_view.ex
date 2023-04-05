@@ -11,7 +11,7 @@ defmodule HamsterTravelWeb.LayoutView do
   def navbar(assigns) do
     ~H"""
     <.container nomargin class="px-6 h-20 flex items-center justify-between">
-      <.link href="/">
+      <.link href={~p"/"}>
         <h1 class="font-medium dark:text-white">
           Hamster Travel
         </h1>
@@ -19,25 +19,25 @@ defmodule HamsterTravelWeb.LayoutView do
       <nav class="space-x-6 flex items-center">
         <div class="hidden sm:block">
           <div class="space-x-6 flex items-center">
-            <.nav_link to="/plans" active={@active_nav == :plans}>
+            <.nav_link to={~p"/plans"} active={@active_nav == :plans}>
               <%= gettext("Plans") %>
             </.nav_link>
             <%= if @current_user do %>
-              <.nav_link to="/drafts" active={@active_nav == :drafts}>
+              <.nav_link to={~p"/drafts"} active={@active_nav == :drafts}>
                 <%= gettext("Drafts") %>
               </.nav_link>
-              <.nav_link to="/backpacks" active={@active_nav == :backpacks}>
+              <.nav_link to={backpacks_url()} active={@active_nav == :backpacks}>
                 <%= gettext("Backpacks") %>
               </.nav_link>
             <% end %>
           </div>
         </div>
         <%= if @current_user do %>
-          <.nav_link to="/profile">
+          <.nav_link to={~p"/profile"}>
             <.avatar size="md" src={@current_user.avatar_url} name={@current_user.name} random_color />
           </.nav_link>
         <% else %>
-          <.nav_link to="/users/log_in">
+          <.nav_link to={~p"/users/log_in"}>
             <%= gettext("Log in") %>
           </.nav_link>
         <% end %>
@@ -96,16 +96,16 @@ defmodule HamsterTravelWeb.LayoutView do
 
   def mobile_nav_global(assigns) do
     ~H"""
-    <.mobile_nav_link label={gettext("Homepage")} to="/" active={@active_nav == :home}>
+    <.mobile_nav_link label={gettext("Homepage")} to={~p"/"} active={@active_nav == :home}>
       <.icon name={:home} outline={true} class="w-6 h-6" />
     </.mobile_nav_link>
-    <.mobile_nav_link label={gettext("Plans")} to="/plans" active={@active_nav == :plans}>
+    <.mobile_nav_link label={gettext("Plans")} to={~p"/plans"} active={@active_nav == :plans}>
       <.icon name={:book_open} outline={true} class="w-6 h-6" />
     </.mobile_nav_link>
     <.mobile_nav_link
       :if={@current_user}
       label={gettext("Drafts")}
-      to="/drafts"
+      to={~p"/drafts"}
       active={@active_nav == :drafts}
     >
       <.icon name={:light_bulb} outline={true} class="w-6 h-6" />
@@ -113,7 +113,7 @@ defmodule HamsterTravelWeb.LayoutView do
     <.mobile_nav_link
       :if={@current_user}
       label={gettext("Backpacks")}
-      to="/backpacks"
+      to={backpacks_url()}
       active={@active_nav == :backpacks}
     >
       <.icon name={:briefcase} outline={true} class="w-6 h-6" />

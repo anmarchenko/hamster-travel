@@ -16,6 +16,9 @@ defmodule HamsterTravelWeb do
   below. Instead, define any helper function in modules
   and import those modules here.
   """
+  def static_paths,
+    do:
+      ~w(assets fonts images favicon.ico robots.txt manifest.json favicon-16x16.png favicon-32x32.png android-chrome-512x512.png android-chrome-192x192.png apple-touch-icon.png)
 
   def controller do
     quote do
@@ -24,6 +27,8 @@ defmodule HamsterTravelWeb do
       import Plug.Conn
       import HamsterTravelWeb.Gettext
       alias HamsterTravelWeb.Router.Helpers, as: Routes
+
+      unquote(verified_routes())
     end
   end
 
@@ -116,6 +121,17 @@ defmodule HamsterTravelWeb do
       # I18n
       import HamsterTravelWeb.Gettext
       alias HamsterTravelWeb.Cldr, as: Formatter
+
+      unquote(verified_routes())
+    end
+  end
+
+  def verified_routes do
+    quote do
+      use Phoenix.VerifiedRoutes,
+        endpoint: HamsterTravelWeb.Endpoint,
+        router: HamsterTravelWeb.Router,
+        statics: HamsterTravelWeb.static_paths()
     end
   end
 

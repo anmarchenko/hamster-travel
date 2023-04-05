@@ -21,8 +21,7 @@ defmodule HamsterTravelWeb.Endpoint do
     at: "/",
     from: :hamster_travel,
     gzip: true,
-    only:
-      ~w(assets fonts images favicon.ico robots.txt manifest.json favicon-16x16.png favicon-32x32.png android-chrome-512x512.png android-chrome-192x192.png apple-touch-icon.png)
+    only: HamsterTravelWeb.static_paths()
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.

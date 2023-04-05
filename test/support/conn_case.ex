@@ -16,6 +16,7 @@ defmodule HamsterTravelWeb.ConnCase do
   """
 
   use ExUnit.CaseTemplate
+  use HamsterTravelWeb, :verified_routes
 
   using do
     quote do
