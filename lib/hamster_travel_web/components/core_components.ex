@@ -155,7 +155,12 @@ defmodule HamsterTravelWeb.CoreComponents do
     ~H"""
     <img
       class={@class}
-      src={Routes.static_path(HamsterTravelWeb.Endpoint, "/images/flags/#{@size}/#{@country}.png")}
+      src={
+        Routes.static_path(
+          HamsterTravelWeb.Endpoint,
+          ~p"/images/flags/#{@size}/#{@country <> ".png"}"
+        )
+      }
       alt={"Country #{@country}"}
       style={"width: #{@size}px;  height: #{@size}px"}
     />
@@ -221,7 +226,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   defp inline_wrap(_), do: ""
 
   defp placeholder_image_url(number) do
-    image_name = "placeholder-#{number}"
-    Routes.static_path(HamsterTravelWeb.Endpoint, "/images/#{image_name}.jpg")
+    image_name = "placeholder-#{number}.jpg"
+    Routes.static_path(HamsterTravelWeb.Endpoint, ~p"/images/#{image_name}")
   end
 end
