@@ -62,6 +62,9 @@ defmodule HamsterTravel.MixProject do
       # mails
       {:swoosh, "~> 1.3"},
 
+      # http client
+      {:finch, "~> 0.13"},
+
       # observability
       {:phoenix_live_dashboard, "~> 0.7.0"},
       {:telemetry_metrics, "~> 0.6"},
@@ -99,10 +102,12 @@ defmodule HamsterTravel.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup"],
+      setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
+      "assets.build": ["tailwind default", "cmd --cd assets npm install", "esbuild default"],
       "assets.deploy": [
         "tailwind default --minify",
         "cmd --cd assets npm install",
