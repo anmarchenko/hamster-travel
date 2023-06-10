@@ -51,7 +51,7 @@ defmodule HamsterTravel.MixProject do
 
       # frontend
       {:phoenix_html, "~> 3.0"},
-      {:phoenix_live_view, "~> 0.18.0"},
+      {:phoenix_live_view, "~> 0.19.0"},
       {:petal_components, "~> 1.0"},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
@@ -63,7 +63,7 @@ defmodule HamsterTravel.MixProject do
       {:finch, "~> 0.13"},
 
       # observability
-      {:phoenix_live_dashboard, "~> 0.7.0"},
+      {:phoenix_live_dashboard, "~> 0.8"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
 
