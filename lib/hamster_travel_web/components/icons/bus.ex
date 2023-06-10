@@ -2,7 +2,7 @@ defmodule HamsterTravelWeb.Icons.Bus do
   @moduledoc """
   Bus icon
   """
-  use HamsterTravelWeb, :component
+  use HamsterTravelWeb, :html
 
   attr(:class, :string, default: nil)
 

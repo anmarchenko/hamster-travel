@@ -2,7 +2,7 @@ defmodule HamsterTravelWeb.Planning.Tabs do
   @moduledoc """
   Renders plan tabs
   """
-  use HamsterTravelWeb, :component
+  use HamsterTravelWeb, :html
 
   alias HamsterTravelWeb.CoreComponents
 

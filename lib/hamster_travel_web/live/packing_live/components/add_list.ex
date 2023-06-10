@@ -1,6 +1,6 @@
 defmodule HamsterTravelWeb.Packing.AddList do
   @moduledoc """
-  Live component responsible for create a new backpack list
+  Live component responsible for creating a new backpack list
   """
 
   require Logger

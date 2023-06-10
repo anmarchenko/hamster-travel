@@ -2,7 +2,7 @@ defmodule HamsterTravelWeb.Planning.PlanStatus do
   @moduledoc """
   Renders status row for plan (badge, flags, author)
   """
-  use HamsterTravelWeb, :component
+  use HamsterTravelWeb, :html
 
   alias HamsterTravelWeb.CoreComponents
 

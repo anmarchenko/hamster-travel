@@ -2,7 +2,7 @@ defmodule HamsterTravelWeb.Planning.PlanCard do
   @moduledoc """
   Renders plan card for a list of plans
   """
-  use HamsterTravelWeb, :component
+  use HamsterTravelWeb, :html
 
   import HamsterTravelWeb.Planning.{PlanShorts, PlanStatus}
 

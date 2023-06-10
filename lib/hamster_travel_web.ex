@@ -20,62 +20,11 @@ defmodule HamsterTravelWeb do
     do:
       ~w(assets fonts images favicon.ico robots.txt manifest.json favicon-16x16.png favicon-32x32.png android-chrome-512x512.png android-chrome-192x192.png apple-touch-icon.png)
 
-  def controller do
-    quote do
-      use Phoenix.Controller, namespace: HamsterTravelWeb
-
-      import Plug.Conn
-      import HamsterTravelWeb.Gettext
-      alias HamsterTravelWeb.Router.Helpers, as: Routes
-
-      unquote(verified_routes())
-    end
-  end
-
-  def view do
-    quote do
-      use Phoenix.View,
-        root: "lib/hamster_travel_web/templates",
-        namespace: HamsterTravelWeb
-
-      # Import convenience functions from controllers
-      import Phoenix.Controller,
-        only: [get_flash: 1, get_flash: 2, view_module: 1, view_template: 1]
-
-      # Include shared imports and aliases for views
-      unquote(view_helpers())
-    end
-  end
-
-  def live_view do
-    quote do
-      use Phoenix.LiveView,
-        layout: {HamsterTravelWeb.LayoutView, :live}
-
-      unquote(view_helpers())
-    end
-  end
-
-  def component do
-    quote do
-      use Phoenix.Component
-
-      unquote(view_helpers())
-    end
-  end
-
-  def live_component do
-    quote do
-      use Phoenix.LiveComponent
-
-      unquote(view_helpers())
-    end
-  end
-
   def router do
     quote do
-      use Phoenix.Router
+      use Phoenix.Router, helpers: false
 
+      # Import common connection and controller functions to use in pipelines
       import Plug.Conn
       import Phoenix.Controller
       import Phoenix.LiveView.Router
@@ -88,40 +37,73 @@ defmodule HamsterTravelWeb do
     end
   end
 
-  defp view_helpers do
+  def controller do
     quote do
-      # Use all HTML functionality (forms, tags, etc)
-      use Phoenix.HTML
+      use Phoenix.Controller,
+        formats: [:html, :json],
+        layouts: [html: HamsterTravelWeb.Layouts]
 
-      # routes
-      # TODO: add verified routes
-      alias HamsterTravelWeb.Router.Helpers, as: Routes
+      import Plug.Conn
+      import HamsterTravelWeb.Gettext
 
-      # set of the most important UI components
+      unquote(verified_routes())
+    end
+  end
+
+  def live_view do
+    quote do
+      use Phoenix.LiveView,
+        layout: {HamsterTravelWeb.Layouts, :app}
+
+      unquote(html_helpers())
+    end
+  end
+
+  def live_component do
+    quote do
+      use Phoenix.LiveComponent
+
+      unquote(html_helpers())
+    end
+  end
+
+  def html do
+    quote do
+      use Phoenix.Component
+
+      # Import convenience functions from controllers
+      import Phoenix.Controller,
+        only: [get_csrf_token: 0, view_module: 1, view_template: 1]
+
+      # Include general helpers for rendering HTML
+      unquote(html_helpers())
+    end
+  end
+
+  defp html_helpers do
+    quote do
+      # HTML escaping functionality
+      import Phoenix.HTML
+      # Core UI components and translation
       import HamsterTravelWeb.CoreComponents
+      import HamsterTravelWeb.Gettext
 
       # use PETAL components
       import PetalComponents.Alert
       import PetalComponents.Avatar
       import PetalComponents.Button
       import PetalComponents.Form
+      import PetalComponents.Field
       import PetalComponents.Tabs
       import PetalComponents.Icon
 
-      # Import LiveView and .heex helpers (live_render, live_patch, <.form>, etc)
-      # TODO: remove it??????
-      import Phoenix.Component
-
-      # Import basic rendering functionality (render, render_layout, etc)
-      # TODO: remove it??????
-      import Phoenix.View
-
-      import HamsterTravelWeb.ErrorHelpers
-
-      # I18n
-      import HamsterTravelWeb.Gettext
+      # I18n format for everything
       alias HamsterTravelWeb.Cldr, as: Formatter
 
+      # Shortcut for generating JS commands
+      alias Phoenix.LiveView.JS
+
+      # Routes generation with the ~p sigil
       unquote(verified_routes())
     end
   end

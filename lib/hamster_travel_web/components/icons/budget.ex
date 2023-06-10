@@ -2,7 +2,7 @@ defmodule HamsterTravelWeb.Icons.Budget do
   @moduledoc """
   Budget icon
   """
-  use HamsterTravelWeb, :component
+  use HamsterTravelWeb, :html
 
   attr(:class, :string, default: nil)
 

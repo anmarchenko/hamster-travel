@@ -118,7 +118,7 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
     <div class="mt-1">
       <.inline class="!gap gap-1">
         <.form :let={f} for={%{}} class="grow mr-2" phx-change="check" phx-target={@myself}>
-          <%= label class: "cursor-pointer" do %>
+          <label class="cursor-pointer">
             <.inline class={decoration_classes(@item.checked)}>
               <.checkbox
                 form={f}
@@ -130,7 +130,7 @@ defmodule HamsterTravelWeb.Packing.BackpackItem do
               <div class="text-sm grow"><%= @item.name %></div>
               <div class="text-sm justify-self-end"><%= @item.count %></div>
             </.inline>
-          <% end %>
+          </label>
         </.form>
         <.icon_button size="xs" class="justify-self-end" phx-click="edit" phx-target={@myself}>
           <.icon name={:pencil} class="w-5 h-5" />

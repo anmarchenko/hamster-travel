@@ -2,7 +2,7 @@ defmodule HamsterTravelWeb.Packing.Grid do
   @moduledoc """
   Parses plan cards as a grid
   """
-  use HamsterTravelWeb, :component
+  use HamsterTravelWeb, :html
 
   import HamsterTravelWeb.Packing.BackpackCard
 

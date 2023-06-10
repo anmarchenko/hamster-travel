@@ -165,7 +165,7 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
 
       socket =
         socket
-        |> push_redirect(to: Routes.live_path(socket, HamsterTravelWeb.Packing.IndexBackpacks))
+        |> push_redirect(to: ~p"/backpacks")
 
       {:noreply, socket}
     else

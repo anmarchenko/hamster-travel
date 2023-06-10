@@ -1,12 +1,9 @@
-defmodule HamsterTravelWeb.LayoutView do
-  use HamsterTravelWeb, :view
+defmodule HamsterTravelWeb.Layouts do
+  use HamsterTravelWeb, :html
 
-  import HamsterTravelWeb.Gettext
   import HamsterTravelWeb.Icons.Airplane
 
-  # Phoenix LiveDashboard is available only in development by default,
-  # so we instruct Elixir to not warn if the dashboard route is missing.
-  @compile {:no_warn_undefined, {Routes, :live_dashboard_path, 2}}
+  embed_templates "layouts/*"
 
   def navbar(assigns) do
     ~H"""

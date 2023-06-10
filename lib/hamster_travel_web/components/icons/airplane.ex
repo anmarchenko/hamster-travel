@@ -2,7 +2,7 @@ defmodule HamsterTravelWeb.Icons.Airplane do
   @moduledoc """
   Airplane icon
   """
-  use HamsterTravelWeb, :component
+  use HamsterTravelWeb, :html
 
   attr(:class, :string, default: nil)
 

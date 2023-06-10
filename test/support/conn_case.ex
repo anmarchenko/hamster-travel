@@ -20,12 +20,12 @@ defmodule HamsterTravelWeb.ConnCase do
 
   using do
     quote do
+      use HamsterTravelWeb, :verified_routes
+
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
       import HamsterTravelWeb.ConnCase
-
-      alias HamsterTravelWeb.Router.Helpers, as: Routes
 
       # The default endpoint for testing
       @endpoint HamsterTravelWeb.Endpoint

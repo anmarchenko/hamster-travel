@@ -2,7 +2,7 @@ defmodule HamsterTravelWeb.Planning.PlacesList do
   @moduledoc """
   Renders list of places live components
   """
-  use HamsterTravelWeb, :component
+  use HamsterTravelWeb, :html
 
   alias HamsterTravelWeb.Planning.Place
 

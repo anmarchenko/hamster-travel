@@ -2,7 +2,7 @@ defmodule HamsterTravelWeb.Packing.BackpackCard do
   @moduledoc """
   This component renders backpack card
   """
-  use HamsterTravelWeb, :component
+  use HamsterTravelWeb, :html
 
   attr(:backpack, HamsterTravel.Packing.Backpack, required: true)
 

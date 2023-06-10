@@ -2,7 +2,7 @@ defmodule HamsterTravelWeb.Icons.HomeSimple do
   @moduledoc """
   Simple home icon
   """
-  use HamsterTravelWeb, :component
+  use HamsterTravelWeb, :html
 
   attr(:class, :string, default: nil)
 

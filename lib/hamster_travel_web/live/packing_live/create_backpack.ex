@@ -52,9 +52,7 @@ defmodule HamsterTravelWeb.Packing.CreateBackpack do
   def result({:ok, backpack}, socket) do
     socket =
       socket
-      |> push_redirect(
-        to: Routes.live_path(socket, HamsterTravelWeb.Packing.ShowBackpack, backpack.slug)
-      )
+      |> push_redirect(to: ~p"/backpacks/#{backpack.slug}")
 
     {:noreply, socket}
   end

@@ -1,54 +1,18 @@
 defmodule HamsterTravelWeb.UserAuth do
-  @moduledoc """
-  Helpers for the user authentication
-  """
+  use HamsterTravelWeb, :verified_routes
 
   import HamsterTravelWeb.Gettext
-  import Plug.Conn
   import Phoenix.Controller
+  import Plug.Conn
 
   alias HamsterTravel.Accounts
-  alias HamsterTravelWeb.Router.Helpers, as: Routes
-  alias Phoenix.Component
-  alias Phoenix.LiveView
 
-  def on_mount(:set_current_user, _params, session, socket) do
-    case session do
-      %{"user_token" => user_token} ->
-        user = Accounts.get_user_by_session_token(user_token)
-        set_locale(user.locale)
-        {:cont, Component.assign_new(socket, :current_user, fn -> user end)}
-
-      %{} ->
-        set_locale("en")
-        {:cont, Component.assign(socket, :current_user, nil)}
-    end
-  end
-
-  def on_mount(:ensure_authenticated, _params, session, socket) do
-    case session do
-      %{"user_token" => user_token} ->
-        user = Accounts.get_user_by_session_token(user_token)
-
-        set_locale(user.locale)
-        {:cont, Component.assign_new(socket, :current_user, fn -> user end)}
-
-      %{} ->
-        set_locale("en")
-        {:halt, redirect_require_login(socket)}
-    end
-  end
-
-  defp set_locale(locale) do
-    Gettext.put_locale(HamsterTravelWeb.Gettext, locale)
-    {:ok, _} = Cldr.put_locale(HamsterTravelWeb.Cldr, locale)
-  end
-
-  defp redirect_require_login(socket) do
-    socket
-    |> LiveView.put_flash(:error, gettext("Please sign in"))
-    |> LiveView.redirect(to: Routes.user_session_path(socket, :new))
-  end
+  # Make the remember me cookie valid for 365 days.
+  # If you want bump or reduce this value, also change
+  # the token expiry itself in UserToken.
+  @max_age 365 * 60 * 24 * 60
+  @remember_me_cookie "_hamster_travel_web_user_remember_me"
+  @remember_me_options [sign: true, max_age: @max_age, same_site: "Lax"]
 
   @doc """
   Logs the user in.
@@ -62,15 +26,19 @@ defmodule HamsterTravelWeb.UserAuth do
   disconnected on log out. The line can be safely removed
   if you are not using LiveView.
   """
-  def log_in_user(conn, user) do
+  def log_in_user(conn, user, params \\ %{}) do
     token = Accounts.generate_user_session_token(user)
     user_return_to = get_session(conn, :user_return_to)
 
     conn
     |> renew_session()
-    |> put_session(:user_token, token)
-    |> put_session(:live_socket_id, "users_sessions:#{Base.url_encode64(token)}")
+    |> put_token_in_session(token)
+    |> maybe_write_remember_me_cookie(token, params)
     |> redirect(to: user_return_to || signed_in_path(conn))
+  end
+
+  defp maybe_write_remember_me_cookie(conn, token, _) do
+    put_resp_cookie(conn, @remember_me_cookie, token, @remember_me_options)
   end
 
   # This function renews the session ID and erases the whole
@@ -101,7 +69,7 @@ defmodule HamsterTravelWeb.UserAuth do
   """
   def log_out_user(conn) do
     user_token = get_session(conn, :user_token)
-    user_token && Accounts.delete_session_token(user_token)
+    user_token && Accounts.delete_user_session_token(user_token)
 
     if live_socket_id = get_session(conn, :live_socket_id) do
       HamsterTravelWeb.Endpoint.broadcast(live_socket_id, "disconnect", %{})
@@ -109,31 +77,111 @@ defmodule HamsterTravelWeb.UserAuth do
 
     conn
     |> renew_session()
-    |> redirect(to: "/")
+    |> delete_resp_cookie(@remember_me_cookie)
+    |> redirect(to: ~p"/")
   end
 
   @doc """
   Authenticates the user by looking into the session
+  and remember me token.
   """
   def fetch_current_user(conn, _opts) do
     {user_token, conn} = ensure_user_token(conn)
     user = user_token && Accounts.get_user_by_session_token(user_token)
-
-    if user do
-      set_locale(user.locale)
-    else
-      set_locale("en")
-    end
-
     assign(conn, :current_user, user)
   end
 
   defp ensure_user_token(conn) do
-    if user_token = get_session(conn, :user_token) do
-      {user_token, conn}
+    if token = get_session(conn, :user_token) do
+      {token, conn}
     else
-      {nil, conn}
+      conn = fetch_cookies(conn, signed: [@remember_me_cookie])
+
+      if token = conn.cookies[@remember_me_cookie] do
+        {token, put_token_in_session(conn, token)}
+      else
+        {nil, conn}
+      end
     end
+  end
+
+  @doc """
+  Handles mounting and authenticating the current_user in LiveViews.
+
+  ## `on_mount` arguments
+
+    * `:mount_current_user` - Assigns current_user
+      to socket assigns based on user_token, or nil if
+      there's no user_token or no matching user.
+
+    * `:ensure_authenticated` - Authenticates the user from the session,
+      and assigns the current_user to socket assigns based
+      on user_token.
+      Redirects to login page if there's no logged user.
+
+    * `:redirect_if_user_is_authenticated` - Authenticates the user from the session.
+      Redirects to signed_in_path if there's a logged user.
+
+  ## Examples
+
+  Use the `on_mount` lifecycle macro in LiveViews to mount or authenticate
+  the current_user:
+
+      defmodule HamsterTravelWeb.PageLive do
+        use HamsterTravelWeb, :live_view
+
+        on_mount {HamsterTravelWeb.UserAuth, :mount_current_user}
+        ...
+      end
+
+  Or use the `live_session` of your router to invoke the on_mount callback:
+
+      live_session :authenticated, on_mount: [{HamsterTravelWeb.UserAuth, :ensure_authenticated}] do
+        live "/profile", ProfileLive, :index
+      end
+  """
+  def on_mount(:mount_current_user, _params, session, socket) do
+    {:cont, mount_current_user(session, socket)}
+  end
+
+  def on_mount(:ensure_authenticated, _params, session, socket) do
+    socket = mount_current_user(session, socket)
+
+    if socket.assigns.current_user do
+      {:cont, socket}
+    else
+      socket =
+        socket
+        |> Phoenix.LiveView.put_flash(:error, "Please sign in")
+        |> Phoenix.LiveView.redirect(to: ~p"/users/log_in")
+
+      {:halt, socket}
+    end
+  end
+
+  def on_mount(:redirect_if_user_is_authenticated, _params, session, socket) do
+    socket = mount_current_user(session, socket)
+
+    if socket.assigns.current_user do
+      {:halt, Phoenix.LiveView.redirect(socket, to: signed_in_path(socket))}
+    else
+      {:cont, socket}
+    end
+  end
+
+  defp mount_current_user(session, socket) do
+    Phoenix.Component.assign_new(socket, :current_user, fn ->
+      user_token = session["user_token"]
+      user = user_token && Accounts.get_user_by_session_token(user_token)
+
+      if user do
+        set_locale(user.locale)
+      else
+        set_locale("en")
+      end
+
+      user
+    end)
   end
 
   @doc """
@@ -160,11 +208,17 @@ defmodule HamsterTravelWeb.UserAuth do
       conn
     else
       conn
-      |> put_flash(:error, "You must log in to access this page.")
+      |> put_flash(:error, gettext("Please sign in"))
       |> maybe_store_return_to()
-      |> redirect(to: Routes.user_session_path(conn, :new))
+      |> redirect(to: ~p"/users/log_in")
       |> halt()
     end
+  end
+
+  defp put_token_in_session(conn, token) do
+    conn
+    |> put_session(:user_token, token)
+    |> put_session(:live_socket_id, "users_sessions:#{Base.url_encode64(token)}")
   end
 
   defp maybe_store_return_to(%{method: "GET"} = conn) do
@@ -173,5 +227,10 @@ defmodule HamsterTravelWeb.UserAuth do
 
   defp maybe_store_return_to(conn), do: conn
 
-  defp signed_in_path(_conn), do: "/"
+  defp signed_in_path(_conn), do: ~p"/"
+
+  defp set_locale(locale) do
+    Gettext.put_locale(HamsterTravelWeb.Gettext, locale)
+    {:ok, _} = Cldr.put_locale(HamsterTravelWeb.Cldr, locale)
+  end
 end

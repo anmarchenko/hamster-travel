@@ -2,7 +2,7 @@ defmodule HamsterTravelWeb.Icons.Train do
   @moduledoc """
   Train icon
   """
-  use HamsterTravelWeb, :component
+  use HamsterTravelWeb, :html
 
   attr(:class, :string, default: nil)
 

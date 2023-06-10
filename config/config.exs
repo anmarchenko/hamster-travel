@@ -13,7 +13,7 @@ config :hamster_travel,
 # Configures the endpoint
 config :hamster_travel, HamsterTravelWeb.Endpoint,
   url: [host: "localhost"],
-  render_errors: [view: HamsterTravelWeb.ErrorView, accepts: ~w(html json), layout: false],
+  render_errors: [html: HamsterTravelWeb.ErrorHTML, json: HamsterTravelWeb.ErrorJSON],
   pubsub_server: HamsterTravel.PubSub,
   live_view: [signing_salt: "ZN8HpKjW"]
 
@@ -56,7 +56,7 @@ config :phoenix, :json_library, Jason
 
 config :petal_components,
        :error_translator_function,
-       {HamsterTravelWeb.ErrorHelpers, :translate_error}
+       {HamsterTravelWeb.CoreComponents, :translate_error}
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

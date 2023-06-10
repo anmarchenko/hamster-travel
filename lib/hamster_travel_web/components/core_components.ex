@@ -20,7 +20,6 @@ defmodule HamsterTravelWeb.CoreComponents do
   import PetalComponents.Icon
   import HamsterTravelWeb.Gettext
 
-  alias HamsterTravelWeb.Router.Helpers, as: Routes
   alias Phoenix.LiveView.JS
 
   def plan_url(slug), do: ~p"/plans/#{slug}"
@@ -72,10 +71,10 @@ defmodule HamsterTravelWeb.CoreComponents do
      </.modal>
 
   """
-  attr :id, :string, required: true
-  attr :show, :boolean, default: false
-  attr :on_cancel, JS, default: %JS{}
-  slot :inner_block, required: true
+  attr(:id, :string, required: true)
+  attr(:show, :boolean, default: false)
+  attr(:on_cancel, JS, default: %JS{})
+  slot(:inner_block, required: true)
 
   def modal(assigns) do
     ~H"""
@@ -133,13 +132,13 @@ defmodule HamsterTravelWeb.CoreComponents do
        <.flash kind={:info} flash={@flash} />
       <.flash kind={:info} phx-mounted={show("#flash")}>Welcome Back!</.flash>
   """
-  attr :id, :string, default: "flash", doc: "the optional id of flash container"
-  attr :flash, :map, default: %{}, doc: "the map of flash messages to display"
-  attr :title, :string, default: nil
-  attr :kind, :atom, values: [:info, :error], doc: "used for styling and flash lookup"
-  attr :rest, :global, doc: "the arbitrary HTML attributes to add to the flash container"
+  attr(:id, :string, default: "flash", doc: "the optional id of flash container")
+  attr(:flash, :map, default: %{}, doc: "the map of flash messages to display")
+  attr(:title, :string, default: nil)
+  attr(:kind, :atom, values: [:info, :error], doc: "used for styling and flash lookup")
+  attr(:rest, :global, doc: "the arbitrary HTML attributes to add to the flash container")
 
-  slot :inner_block, doc: "the optional inner block that renders the flash message"
+  slot(:inner_block, doc: "the optional inner block that renders the flash message")
 
   def flash(assigns) do
     ~H"""
@@ -175,7 +174,7 @@ defmodule HamsterTravelWeb.CoreComponents do
 
        <.flash_group flash={@flash} />
   """
-  attr :flash, :map, required: true, doc: "the map of flash messages"
+  attr(:flash, :map, required: true, doc: "the map of flash messages")
 
   def flash_group(assigns) do
     ~H"""
@@ -204,20 +203,21 @@ defmodule HamsterTravelWeb.CoreComponents do
         <:col :let={user} label="username"><%= user.username %></:col>
       </.table>
   """
-  attr :id, :string, required: true
-  attr :rows, :list, required: true
-  attr :row_id, :any, default: nil, doc: "the function for generating the row id"
-  attr :row_click, :any, default: nil, doc: "the function for handling phx-click on each row"
+  attr(:id, :string, required: true)
+  attr(:rows, :list, required: true)
+  attr(:row_id, :any, default: nil, doc: "the function for generating the row id")
+  attr(:row_click, :any, default: nil, doc: "the function for handling phx-click on each row")
 
-  attr :row_item, :any,
+  attr(:row_item, :any,
     default: &Function.identity/1,
     doc: "the function for mapping each row before calling the :col and :action slots"
+  )
 
   slot :col, required: true do
-    attr :label, :string
+    attr(:label, :string)
   end
 
-  slot :action, doc: "the slot for showing user actions in the last table column"
+  slot(:action, doc: "the slot for showing user actions in the last table column")
 
   def table(assigns) do
     assigns =
@@ -281,7 +281,7 @@ defmodule HamsterTravelWeb.CoreComponents do
       </.list>
   """
   slot :item, required: true do
-    attr :title, :string, required: true
+    attr(:title, :string, required: true)
   end
 
   def list(assigns) do
@@ -399,26 +399,62 @@ defmodule HamsterTravelWeb.CoreComponents do
     ~H"""
     <img
       class={@class}
-      src={
-        Routes.static_path(
-          HamsterTravelWeb.Endpoint,
-          ~p"/images/flags/#{@size}/#{@country <> ".png"}"
-        )
-      }
+      src={~p"/images/flags/#{@size}/#{@country <> ".png"}"}
       alt={"Country #{@country}"}
       style={"width: #{@size}px;  height: #{@size}px"}
     />
     """
   end
 
-  attr(:class, :string, default: nil)
-  slot(:inner_block, required: true)
+  @doc """
+  Renders a header with title.
+  """
+  attr :class, :string, default: nil
+
+  slot :inner_block, required: true
+  slot :subtitle
+  slot :actions
 
   def header(assigns) do
     ~H"""
-    <h1 class={build_class(["text-xl lg:text-2xl font-semibold", @class])}>
+    <header class={[@actions != [] && "flex items-center justify-between gap-6", @class]}>
+      <div>
+        <h1 class="text-lg font-semibold leading-8 text-zinc-800">
+          <%= render_slot(@inner_block) %>
+        </h1>
+        <p :if={@subtitle != []} class="mt-2 text-sm leading-6 text-zinc-600">
+          <%= render_slot(@subtitle) %>
+        </p>
+      </div>
+      <div class="flex-none"><%= render_slot(@actions) %></div>
+    </header>
+    """
+  end
+
+  @doc """
+  Renders a label.
+  """
+  attr :for, :string, default: nil
+  slot :inner_block, required: true
+
+  def label(assigns) do
+    ~H"""
+    <label for={@for} class="block text-sm font-semibold leading-6 text-zinc-800">
       <%= render_slot(@inner_block) %>
-    </h1>
+    </label>
+    """
+  end
+
+  @doc """
+  Generates a generic error message.
+  """
+  slot :inner_block, required: true
+
+  def error(assigns) do
+    ~H"""
+    <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600 phx-no-feedback:hidden">
+      <%= render_slot(@inner_block) %>
+    </p>
     """
   end
 
@@ -509,6 +545,41 @@ defmodule HamsterTravelWeb.CoreComponents do
     """
   end
 
+  @doc """
+  Translates an error message using gettext.
+  """
+  def translate_error({msg, opts}) do
+    # When using gettext, we typically pass the strings we want
+    # to translate as a static argument:
+    #
+    #     # Translate "is invalid" in the "errors" domain
+    #     dgettext("errors", "is invalid")
+    #
+    #     # Translate the number of files with plural rules
+    #     dngettext("errors", "1 file", "%{count} files", count)
+    #
+    # Because the error messages we show in our forms and APIs
+    # are defined inside Ecto, we need to translate them dynamically.
+    # This requires us to call the Gettext module passing our gettext
+    # backend as first argument.
+    #
+    # Note we use the "errors" domain, which means translations
+    # should be written to the errors.po file. The :count option is
+    # set by Ecto and indicates we should also apply plural rules.
+    if count = opts[:count] do
+      Gettext.dngettext(HamsterTravelWeb.Gettext, "errors", msg, msg, count, opts)
+    else
+      Gettext.dgettext(HamsterTravelWeb.Gettext, "errors", msg, opts)
+    end
+  end
+
+  @doc """
+  Translates the errors for a field from a keyword list of errors.
+  """
+  def translate_errors(errors, field) when is_list(errors) do
+    for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
+  end
+
   defp inline_component_class(assigns) do
     "flex flex-row gap-2 items-center block #{inline_wrap(assigns)}"
   end
@@ -518,6 +589,7 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   defp placeholder_image_url(number) do
     image_name = "placeholder-#{number}.jpg"
-    Routes.static_path(HamsterTravelWeb.Endpoint, ~p"/images/#{image_name}")
+
+    ~p"/images/#{image_name}"
   end
 end

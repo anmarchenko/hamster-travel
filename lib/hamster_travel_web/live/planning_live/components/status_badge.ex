@@ -2,7 +2,7 @@ defmodule HamsterTravelWeb.Planning.StatusBadge do
   @moduledoc """
   Renders badge with plan state (draft/planned/finished)
   """
-  use HamsterTravelWeb, :component
+  use HamsterTravelWeb, :html
 
   alias HamsterTravelWeb.CoreComponents
 

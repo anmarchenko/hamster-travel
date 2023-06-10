@@ -8,6 +8,31 @@ defmodule HamsterTravel.AccountsTest do
   import HamsterTravel.AccountsFixtures
   alias HamsterTravel.Accounts.{User, UserToken}
 
+  describe "get_user_by_session_token/1" do
+    setup do
+      user = user_fixture()
+      friend = user_fixture()
+      Social.add_friends(user.id, friend.id)
+      token = Accounts.generate_user_session_token(user)
+      %{user: user, token: token}
+    end
+
+    test "returns user by token and preload friendships", %{user: user, token: token} do
+      assert session_user = Accounts.get_user_by_session_token(token)
+      assert session_user.id == user.id
+      assert [%Friendship{}] = session_user.friendships
+    end
+
+    test "does not return user for invalid token" do
+      refute Accounts.get_user_by_session_token("oops")
+    end
+
+    test "does not return user for expired token", %{token: token} do
+      {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
+      refute Accounts.get_user_by_session_token(token)
+    end
+  end
+
   describe "get_user_by_email/1" do
     test "does not return the user if the email does not exist" do
       refute Accounts.get_user_by_email("unknown@example.com")
@@ -40,7 +65,7 @@ defmodule HamsterTravel.AccountsTest do
   describe "get_user!/1" do
     test "raises if id is invalid" do
       assert_raise Ecto.NoResultsError, fn ->
-        Accounts.get_user!("2baeb7ba-ea49-11ec-8fea-0242ac120002")
+        Accounts.get_user!(Ecto.UUID.generate())
       end
     end
 
@@ -154,9 +179,9 @@ defmodule HamsterTravel.AccountsTest do
 
     test "validates email uniqueness", %{user: user} do
       %{email: email} = user_fixture()
+      password = valid_user_password()
 
-      {:error, changeset} =
-        Accounts.apply_user_email(user, valid_user_password(), %{email: email})
+      {:error, changeset} = Accounts.apply_user_email(user, password, %{email: email})
 
       assert "has already been taken" in errors_on(changeset).email
     end
@@ -176,7 +201,7 @@ defmodule HamsterTravel.AccountsTest do
     end
   end
 
-  describe "deliver_update_email_instructions/3" do
+  describe "deliver_user_update_email_instructions/3" do
     setup do
       %{user: user_fixture()}
     end
@@ -184,7 +209,7 @@ defmodule HamsterTravel.AccountsTest do
     test "sends token through notification", %{user: user} do
       token =
         extract_user_token(fn url ->
-          Accounts.deliver_update_email_instructions(user, "current@example.com", url)
+          Accounts.deliver_user_update_email_instructions(user, "current@example.com", url)
         end)
 
       {:ok, token} = Base.url_decode64(token, padding: false)
@@ -202,7 +227,7 @@ defmodule HamsterTravel.AccountsTest do
 
       token =
         extract_user_token(fn url ->
-          Accounts.deliver_update_email_instructions(%{user | email: email}, user.email, url)
+          Accounts.deliver_user_update_email_instructions(%{user | email: email}, user.email, url)
         end)
 
       %{user: user, token: token, email: email}
@@ -333,36 +358,11 @@ defmodule HamsterTravel.AccountsTest do
     end
   end
 
-  describe "get_user_by_session_token/1" do
-    setup do
-      user = user_fixture()
-      friend = user_fixture()
-      Social.add_friends(user.id, friend.id)
-      token = Accounts.generate_user_session_token(user)
-      %{user: user, token: token}
-    end
-
-    test "returns user by token and preload friendships", %{user: user, token: token} do
-      assert session_user = Accounts.get_user_by_session_token(token)
-      assert session_user.id == user.id
-      assert [%Friendship{}] = session_user.friendships
-    end
-
-    test "does not return user for invalid token" do
-      refute Accounts.get_user_by_session_token("oops")
-    end
-
-    test "does not return user for expired token", %{token: token} do
-      {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
-      refute Accounts.get_user_by_session_token(token)
-    end
-  end
-
-  describe "delete_session_token/1" do
+  describe "delete_user_session_token/1" do
     test "deletes the token" do
       user = user_fixture()
       token = Accounts.generate_user_session_token(user)
-      assert Accounts.delete_session_token(token) == :ok
+      assert Accounts.delete_user_session_token(token) == :ok
       refute Accounts.get_user_by_session_token(token)
     end
   end
@@ -505,7 +505,7 @@ defmodule HamsterTravel.AccountsTest do
     end
   end
 
-  describe "inspect/2" do
+  describe "inspect/2 for the User module" do
     test "does not include password" do
       refute inspect(%User{password: "123456"}) =~ "password: \"123456\""
     end

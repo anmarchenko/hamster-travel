@@ -2,7 +2,7 @@ defmodule HamsterTravelWeb.Planning.DayLabel do
   @moduledoc """
   Label for a day in planning (could be date with a week day or just a number)
   """
-  use HamsterTravelWeb, :component
+  use HamsterTravelWeb, :html
 
   attr(:start_date, Date, default: nil)
   attr(:day_index, :integer, required: true)

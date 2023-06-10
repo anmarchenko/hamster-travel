@@ -2,7 +2,7 @@ defmodule HamsterTravelWeb.Icons.Ship do
   @moduledoc """
   Ship icon
   """
-  use HamsterTravelWeb, :component
+  use HamsterTravelWeb, :html
 
   attr(:class, :string, default: nil)
 

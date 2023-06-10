@@ -2,7 +2,7 @@ defmodule HamsterTravelWeb.Planning.PlanShorts do
   @moduledoc """
   Shorts stats about a plan (days, people, budget)
   """
-  use HamsterTravelWeb, :component
+  use HamsterTravelWeb, :html
 
   alias HamsterTravelWeb.CoreComponents
 

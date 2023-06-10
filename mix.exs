@@ -40,9 +40,6 @@ defmodule HamsterTravel.MixProject do
       {:phoenix, "~> 1.7.0"},
       {:plug_cowboy, "~> 2.5"},
 
-      # temp before upgrade is done
-      {:phoenix_view, "~> 2.0"},
-
       # password hashing
       {:bcrypt_elixir, "~> 3.0"},
 
