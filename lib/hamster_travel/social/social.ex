@@ -56,7 +56,7 @@ defmodule HamsterTravel.Social do
     [user.id] ++ Enum.map(user.friendships, fn fr -> fr.friend_id end)
   end
 
-  @spec get_friendship!(String) :: %Friendship{}
+  @spec get_friendship!(String) :: Friendship.t()
   @doc """
   Gets a single friendship.
 

@@ -25,7 +25,7 @@ admin2 =
     email: "admin2@mail.test",
     confirmed_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
     hashed_password: Bcrypt.hash_pwd_salt("test1234"),
-    locale: "ru"
+    locale: "en"
   })
 
 HamsterTravel.Repo.insert!(%HamsterTravel.Accounts.User{
@@ -33,7 +33,7 @@ HamsterTravel.Repo.insert!(%HamsterTravel.Accounts.User{
   email: "admin3@mail.test",
   confirmed_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
   hashed_password: Bcrypt.hash_pwd_salt("test1234"),
-  locale: "ru"
+  locale: "en"
 })
 
 HamsterTravel.Social.add_friends(admin1.id, admin2.id)
