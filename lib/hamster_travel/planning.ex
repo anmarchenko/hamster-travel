@@ -6,6 +6,7 @@ defmodule HamsterTravel.Planning do
   import Ecto.Query, warn: false
   alias HamsterTravel.Repo
 
+  alias HamsterTravel.Planning.Policy
   alias HamsterTravel.Planning.Trip
 
   @doc """
@@ -17,9 +18,15 @@ defmodule HamsterTravel.Planning do
       [%Trip{}, ...]
 
   """
-  def list_trips do
-    Repo.all(Trip)
+  def list_trips(user) do
+    query = from t in Trip, order_by: [desc: t.inserted_at]
+
+    query
+    |> Policy.user_scope(user)
+    |> Repo.all()
   end
+
+  def get_trip(id), do: Repo.get(Trip, id)
 
   @doc """
   Gets a single trip.
@@ -37,6 +44,16 @@ defmodule HamsterTravel.Planning do
   """
   def get_trip!(id), do: Repo.get!(Trip, id)
 
+  def get_user_trip_by_slug(slug, user) do
+    query =
+      from t in Trip,
+        where: t.slug == ^slug
+
+    query
+    |> Policy.user_scope(user)
+    |> Repo.one()
+  end
+
   @doc """
   Creates a trip.
 
@@ -49,8 +66,8 @@ defmodule HamsterTravel.Planning do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_trip(attrs \\ %{}) do
-    %Trip{}
+  def create_trip(attrs \\ %{}, user) do
+    %Trip{author_id: user.id}
     |> Trip.changeset(attrs)
     |> Repo.insert()
   end

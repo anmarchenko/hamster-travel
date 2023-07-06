@@ -30,7 +30,7 @@ defmodule HamsterTravelWeb.Packing.AddItem do
         {:noreply, assign(socket, %{changeset: Packing.new_item(), name: nil})}
 
       {:error, changeset} ->
-        Logger.warn(
+        Logger.warning(
           "Error creating item; params were #{inspect(item_params)}, result is #{inspect(changeset)}"
         )
 

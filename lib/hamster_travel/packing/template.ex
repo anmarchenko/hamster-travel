@@ -43,7 +43,7 @@ defmodule HamsterTravel.Packing.Template do
         |> Ecto.Changeset.put_assoc(:lists, lists)
 
       {:error, messages} ->
-        Logger.warn(
+        Logger.warning(
           "[HamsterTravel.Packing] Template #{template} could not be parsed. Errors were: #{inspect(messages)} "
         )
 

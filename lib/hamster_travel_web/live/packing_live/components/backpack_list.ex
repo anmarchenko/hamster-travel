@@ -64,7 +64,7 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
         {:noreply, socket}
 
       {:error, error} ->
-        Logger.warn(
+        Logger.warning(
           "Could not update an list #{list_to_update.id} because of #{Kernel.inspect(error)}"
         )
 

@@ -41,7 +41,7 @@ defmodule HamsterTravelWeb.Packing.AddList do
         {:noreply, assign(socket, %{edit: false})}
 
       {:error, changeset} ->
-        Logger.warn(
+        Logger.warning(
           "Error creating list; params were #{inspect(list_params)}, result is #{inspect(changeset)}"
         )
 
