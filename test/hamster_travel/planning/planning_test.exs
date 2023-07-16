@@ -199,12 +199,6 @@ defmodule HamsterTravel.PlanningTest do
     test "update_trip/2 validates that dates are required when status is finished" do
       trip = trip_fixture()
 
-      update_attrs = %{
-        status: "2_finished",
-        dates_unknown: true,
-        start_date: nil
-      }
-
       assert {:error, %Ecto.Changeset{}} = Planning.update_trip(trip, %{name: nil})
       refute Planning.get_trip!(trip.id).dates_unknown
     end
