@@ -170,18 +170,16 @@ defmodule HamsterTravelWeb.UserAuth do
   end
 
   defp mount_current_user(session, socket) do
-    Phoenix.Component.assign_new(socket, :current_user, fn ->
-      user_token = session["user_token"]
-      user = user_token && Accounts.get_user_by_session_token(user_token)
+    user_token = session["user_token"]
+    user = user_token && Accounts.get_user_by_session_token(user_token)
 
-      if user do
-        set_locale(user.locale)
-      else
-        set_locale("en")
-      end
+    if user do
+      set_locale(user.locale)
+    else
+      set_locale("en")
+    end
 
-      user
-    end)
+    Phoenix.Component.assign(socket, :current_user, user)
   end
 
   @doc """
