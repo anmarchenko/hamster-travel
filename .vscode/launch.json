@@ -8,7 +8,8 @@
       "type": "mix_task",
       "name": "mix phx.server",
       "request": "launch",
-      "projectDir": "${workspaceRoot}"
+      "projectDir": "${workspaceRoot}",
+      "excludeModules": ["Bcrypt.Base"]
     },
     {
       "type": "mix_task",
@@ -18,7 +19,8 @@
       "taskArgs": ["--trace"],
       "startApps": true,
       "projectDir": "${workspaceRoot}",
-      "requireFiles": ["test/**/test_helper.exs", "test/**/*_test.exs"]
+      "requireFiles": ["test/**/test_helper.exs", "test/**/*_test.exs"],
+      "excludeModules": ["Bcrypt.Base"]
     }
   ]
 }
