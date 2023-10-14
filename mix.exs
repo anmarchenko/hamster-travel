@@ -51,7 +51,7 @@ defmodule HamsterTravel.MixProject do
 
       # frontend
       {:phoenix_html, "~> 3.0"},
-      {:phoenix_live_view, "~> 0.19.0"},
+      {:phoenix_live_view, "~> 0.20.0"},
       {:petal_components, "~> 1.0"},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
