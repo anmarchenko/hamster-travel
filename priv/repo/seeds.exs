@@ -10,30 +10,51 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
-admin1 =
+bunny =
   HamsterTravel.Repo.insert!(%HamsterTravel.Accounts.User{
-    name: "Test Admin",
-    email: "admin@mail.test",
+    name: "Bunny Hamsters",
+    email: "bunny@hamsters.test",
     confirmed_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
     hashed_password: Bcrypt.hash_pwd_salt("test1234"),
     locale: "ru"
   })
 
-admin2 =
+hamster =
   HamsterTravel.Repo.insert!(%HamsterTravel.Accounts.User{
-    name: "Test Admin 2",
-    email: "admin2@mail.test",
+    name: "Hamster Hamsters",
+    email: "hamster@hamsters.test",
     confirmed_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
     hashed_password: Bcrypt.hash_pwd_salt("test1234"),
     locale: "en"
   })
 
-HamsterTravel.Repo.insert!(%HamsterTravel.Accounts.User{
-  name: "Test Admin 3",
-  email: "admin3@mail.test",
-  confirmed_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-  hashed_password: Bcrypt.hash_pwd_salt("test1234"),
-  locale: "en"
-})
+john =
+  HamsterTravel.Repo.insert!(%HamsterTravel.Accounts.User{
+    name: "John Doe",
+    email: "john.doe@mail.test",
+    confirmed_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
+    hashed_password: Bcrypt.hash_pwd_salt("test1234"),
+    locale: "en"
+  })
 
-HamsterTravel.Social.add_friends(admin1.id, admin2.id)
+HamsterTravel.Social.add_friends(bunny.id, hamster.id)
+
+HamsterTravel.Packing.create_backpack(
+  %{template: "hamsters", name: "Италия", days: 14, nights: 13},
+  bunny
+)
+
+HamsterTravel.Packing.create_backpack(
+  %{template: "hamsters", name: "USA", days: 20, nights: 19},
+  hamster
+)
+
+HamsterTravel.Packing.create_backpack(
+  %{template: "hamsters", name: "Выходные в горах", days: 2, nights: 1},
+  bunny
+)
+
+HamsterTravel.Packing.create_backpack(
+  %{name: "My trip", days: 5, nights: 4},
+  john
+)

@@ -13,6 +13,7 @@ config :hamster_travel, HamsterTravel.Repo,
   password: "postgres",
   database: "hamster_travel_test#{System.get_env("MIX_TEST_PARTITION")}",
   hostname: "localhost",
+  port: 6000,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 10
 
