@@ -116,11 +116,11 @@ defmodule HamsterTravel.PackingTest do
 
       assert {:ok, %Backpack{} = new_backpack} = Packing.create_backpack(valid_attrs, user)
       assert new_backpack.name == "name"
-      assert new_backpack.slug == "name-1"
+      assert new_backpack.slug != backpack.slug
 
       assert {:ok, %Backpack{} = newer_backpack} = Packing.create_backpack(valid_attrs, user)
       assert newer_backpack.name == "name"
-      assert newer_backpack.slug == "name-2"
+      assert newer_backpack.slug != new_backpack.slug
     end
 
     test "create_backpack/2 with invalid data returns error changeset", %{
@@ -231,7 +231,7 @@ defmodule HamsterTravel.PackingTest do
 
       assert {:ok, %Backpack{} = backpack} = Packing.update_backpack(backpack, update_attrs)
       assert backpack.name == "some name"
-      assert backpack.slug == "some-name-1"
+      assert backpack.slug != "some-name"
     end
 
     test "update_backpack/2 with invalid data returns error changeset" do

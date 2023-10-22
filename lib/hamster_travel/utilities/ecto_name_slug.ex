@@ -24,7 +24,7 @@ defmodule HamsterTravel.EctoNameSlug do
       end
 
       defp next_slug(slug, 0), do: slug
-      defp next_slug(slug, attempts), do: "#{slug}-#{attempts}"
+      defp next_slug(slug, attempts), do: "#{slug}-#{SecureRandom.hex(4)}"
     end
   end
 end

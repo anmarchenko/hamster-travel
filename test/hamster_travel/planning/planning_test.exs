@@ -43,7 +43,7 @@ defmodule HamsterTravel.PlanningTest do
       assert Planning.get_trip!(trip.id).name == trip.name
     end
 
-    test "create_trip/1 with valid data creates a trip", %{user: user} do
+    test "create_trip/2 with valid data creates a trip", %{user: user} do
       valid_attrs = %{
         name: "Venice on weekend",
         dates_unknown: false,
@@ -70,7 +70,30 @@ defmodule HamsterTravel.PlanningTest do
       assert trip.author_id == user.id
     end
 
-    test "create_trip/1 with unknown dates", %{user: user} do
+    test "create_trip/2 changes slug in case it is occupied", %{user: user} do
+      trip = trip_fixture(%{name: "name"})
+
+      valid_attrs = %{
+        name: "name",
+        dates_unknown: false,
+        start_date: ~D[2023-06-12],
+        end_date: ~D[2023-06-14],
+        currency: "EUR",
+        status: "1_planned",
+        private: false,
+        people_count: 2
+      }
+
+      assert {:ok, %Trip{} = new_trip} = Planning.create_trip(valid_attrs, user)
+      assert new_trip.name == "name"
+      assert new_trip.slug != trip.slug
+
+      assert {:ok, %Trip{} = newer_trip} = Planning.create_trip(valid_attrs, user)
+      assert newer_trip.name == "name"
+      assert newer_trip.slug != new_trip.slug
+    end
+
+    test "create_trip/2 with unknown dates", %{user: user} do
       valid_attrs = %{
         name: "Venice on weekend",
         dates_unknown: true,
@@ -97,7 +120,7 @@ defmodule HamsterTravel.PlanningTest do
       assert trip.author_id == user.id
     end
 
-    test "create_trip/1 with empty name returns error changeset", %{user: user} do
+    test "create_trip/2 with empty name returns error changeset", %{user: user} do
       invalid_attrs = %{
         name: nil,
         dates_unknown: false,
@@ -112,7 +135,7 @@ defmodule HamsterTravel.PlanningTest do
       assert {:error, %Ecto.Changeset{}} = Planning.create_trip(invalid_attrs, user)
     end
 
-    test "create_trip/1 with unknown dates when duration is invalid", %{user: user} do
+    test "create_trip/2 with unknown dates when duration is invalid", %{user: user} do
       invalid_attrs = %{
         name: "Venice on weekend",
         dates_unknown: true,

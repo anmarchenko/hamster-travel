@@ -43,6 +43,9 @@ defmodule HamsterTravel.MixProject do
       # password hashing
       {:bcrypt_elixir, "~> 3.0"},
 
+      # utilities
+      {:secure_random, "~> 0.5"},
+
       # database
       {:ecto_sql, "~> 3.6"},
       {:phoenix_ecto, "~> 4.4"},

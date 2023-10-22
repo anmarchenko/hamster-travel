@@ -65,6 +65,17 @@ defmodule HamsterTravel.Planning.Trip do
     |> NameSlug.unique_constraint()
   end
 
+  defp validate_finished_trip_has_known_dates(changeset) do
+    if @finished == get_field(changeset, :status) do
+      changeset
+      |> validate_change(:dates_unknown, fn :dates_unknown, dates_unknown ->
+        validate_dates_unkown(dates_unknown)
+      end)
+    else
+      changeset
+    end
+  end
+
   defp validate_dates_and_duration(changeset) do
     dates_unknown = get_field(changeset, :dates_unknown)
 
@@ -85,17 +96,6 @@ defmodule HamsterTravel.Planning.Trip do
         final_changeset
         |> put_change(:duration, compute_duration(final_changeset))
       end)
-    end
-  end
-
-  defp validate_finished_trip_has_known_dates(changeset) do
-    if @finished == get_field(changeset, :status) do
-      changeset
-      |> validate_change(:dates_unknown, fn :dates_unknown, dates_unknown ->
-        validate_dates_unkown(dates_unknown)
-      end)
-    else
-      changeset
     end
   end
 

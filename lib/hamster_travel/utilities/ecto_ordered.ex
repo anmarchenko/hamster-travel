@@ -6,6 +6,7 @@ defmodule HamsterTravel.EctoOrdered do
 
   EctoOrdered provides changeset methods for updating ordering an ordering column
   It should be added to your schema like so:
+
   ```
   defmodule OrderedListItem do
     use Ecto.Schema
