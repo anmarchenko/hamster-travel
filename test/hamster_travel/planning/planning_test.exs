@@ -47,6 +47,7 @@ defmodule HamsterTravel.PlanningTest do
       valid_attrs = %{
         name: "Venice on weekend",
         dates_unknown: false,
+        duration: 0,
         start_date: ~D[2023-06-12],
         end_date: ~D[2023-06-14],
         currency: "EUR",
@@ -74,6 +75,8 @@ defmodule HamsterTravel.PlanningTest do
         name: "Venice on weekend",
         dates_unknown: true,
         duration: 1,
+        start_date: ~D[2023-06-12],
+        end_date: ~D[2023-06-14],
         currency: "EUR",
         status: "1_planned",
         private: false,
@@ -94,7 +97,7 @@ defmodule HamsterTravel.PlanningTest do
       assert trip.author_id == user.id
     end
 
-    test "create_trip/1 with invalid data returns error changeset", %{user: user} do
+    test "create_trip/1 with empty name returns error changeset", %{user: user} do
       invalid_attrs = %{
         name: nil,
         dates_unknown: false,
@@ -109,7 +112,7 @@ defmodule HamsterTravel.PlanningTest do
       assert {:error, %Ecto.Changeset{}} = Planning.create_trip(invalid_attrs, user)
     end
 
-    test "create_trip/1 with unknown when duration is invalid", %{user: user} do
+    test "create_trip/1 with unknown dates when duration is invalid", %{user: user} do
       invalid_attrs = %{
         name: "Venice on weekend",
         dates_unknown: true,
@@ -155,7 +158,7 @@ defmodule HamsterTravel.PlanningTest do
       assert trip.end_date == ~D[2023-06-14]
     end
 
-    test "update_trip/2 with valid data updates the trip start_date adn end_date" do
+    test "update_trip/2 with valid data updates the trip start_date and end_date" do
       trip = trip_fixture()
 
       update_attrs = %{
@@ -197,9 +200,9 @@ defmodule HamsterTravel.PlanningTest do
     end
 
     test "update_trip/2 validates that dates are required when status is finished" do
-      trip = trip_fixture()
+      trip = trip_fixture(%{status: "2_finished"})
 
-      assert {:error, %Ecto.Changeset{}} = Planning.update_trip(trip, %{name: nil})
+      assert {:error, %Ecto.Changeset{}} = Planning.update_trip(trip, %{dates_unknown: true})
       refute Planning.get_trip!(trip.id).dates_unknown
     end
 
