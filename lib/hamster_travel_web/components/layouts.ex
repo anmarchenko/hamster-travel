@@ -16,14 +16,14 @@ defmodule HamsterTravelWeb.Layouts do
       <nav class="space-x-6 flex items-center">
         <div class="hidden sm:block">
           <div class="space-x-6 flex items-center">
-            <.nav_link to={~p"/plans"} active={@active_nav == :plans}>
+            <.nav_link to={plans_url()} active={@active_nav == plans_nav_item()}>
               <%= gettext("Plans") %>
             </.nav_link>
             <%= if @current_user do %>
-              <.nav_link to={~p"/drafts"} active={@active_nav == :drafts}>
+              <.nav_link to={~p"/drafts"} active={@active_nav == drafts_nav_item()}>
                 <%= gettext("Drafts") %>
               </.nav_link>
-              <.nav_link to={backpacks_url()} active={@active_nav == :backpacks}>
+              <.nav_link to={backpacks_url()} active={@active_nav == backpacks_nav_item()}>
                 <%= gettext("Backpacks") %>
               </.nav_link>
             <% end %>
@@ -93,17 +93,21 @@ defmodule HamsterTravelWeb.Layouts do
 
   def mobile_nav_global(assigns) do
     ~H"""
-    <.mobile_nav_link label={gettext("Homepage")} to={~p"/"} active={@active_nav == :home}>
+    <.mobile_nav_link label={gettext("Homepage")} to={~p"/"} active={@active_nav == home_nav_item()}>
       <.icon name={:home} outline={true} class="w-6 h-6" />
     </.mobile_nav_link>
-    <.mobile_nav_link label={gettext("Plans")} to={~p"/plans"} active={@active_nav == :plans}>
+    <.mobile_nav_link
+      label={gettext("Plans")}
+      to={plans_url()}
+      active={@active_nav == plans_nav_item()}
+    >
       <.icon name={:book_open} outline={true} class="w-6 h-6" />
     </.mobile_nav_link>
     <.mobile_nav_link
       :if={@current_user}
       label={gettext("Drafts")}
       to={~p"/drafts"}
-      active={@active_nav == :drafts}
+      active={@active_nav == drafts_nav_item()}
     >
       <.icon name={:light_bulb} outline={true} class="w-6 h-6" />
     </.mobile_nav_link>
@@ -111,7 +115,7 @@ defmodule HamsterTravelWeb.Layouts do
       :if={@current_user}
       label={gettext("Backpacks")}
       to={backpacks_url()}
-      active={@active_nav == :backpacks}
+      active={@active_nav == backpacks_nav_item()}
     >
       <.icon name={:briefcase} outline={true} class="w-6 h-6" />
     </.mobile_nav_link>
@@ -161,10 +165,10 @@ defmodule HamsterTravelWeb.Layouts do
     do: "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
 
   def back_url(assigns) do
-    if assigns.active_nav == :plans do
-      "/plans"
+    if assigns.active_nav == plans_nav_item() do
+      ~p"/plans"
     else
-      "/drafts"
+      ~p"/drafts"
     end
   end
 end

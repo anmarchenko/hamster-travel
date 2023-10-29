@@ -12,8 +12,12 @@ defmodule HamsterTravel.Planning.Trip do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  @statuses ["0_draft", "1_planned", "2_finished"]
+  @draft "0_draft"
+  @planned "1_planned"
   @finished "2_finished"
+
+  @statuses [@draft, @planned, @finished]
+
   @duration_range 1..30
 
   schema "trips" do
@@ -65,6 +69,18 @@ defmodule HamsterTravel.Planning.Trip do
     |> NameSlug.unique_constraint()
   end
 
+  def finished do
+    @finished
+  end
+
+  def planned do
+    @planned
+  end
+
+  def draft do
+    @draft
+  end
+
   defp validate_finished_trip_has_known_dates(changeset) do
     if @finished == get_field(changeset, :status) do
       changeset
@@ -103,7 +119,7 @@ defmodule HamsterTravel.Planning.Trip do
     if compute_duration(changeset) in @duration_range do
       changeset
     else
-      add_error(changeset, :end_date, "trip duration invalid")
+      add_error(changeset, :start_date, "trip duration invalid")
     end
   end
 
@@ -119,6 +135,10 @@ defmodule HamsterTravel.Planning.Trip do
     start_date = get_field(changeset, :start_date)
     end_date = get_field(changeset, :end_date)
 
-    Date.diff(end_date, start_date) + 1
+    if start_date && end_date do
+      Date.diff(end_date, start_date) + 1
+    else
+      0
+    end
   end
 end

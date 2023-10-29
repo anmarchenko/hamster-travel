@@ -20,21 +20,12 @@ defmodule HamsterTravelWeb.Router do
   scope "/", HamsterTravelWeb do
     pipe_through :browser
 
-    live_session :default,
-      on_mount: [
-        {HamsterTravelWeb.UserAuth, :mount_current_user}
-      ] do
-      live "/", Home
-
-      live "/plans", Planning.IndexPlans
-      live "/plans/:plan_slug", Planning.ShowPlan
-    end
-
     live_session :authenticated,
       on_mount: [
         {HamsterTravelWeb.UserAuth, :ensure_authenticated}
       ] do
       live "/drafts", Planning.IndexDrafts
+      live "/trips/new", Planning.CreateTrip
 
       live "/backpacks", Packing.IndexBackpacks
       live "/backpacks/new", Packing.CreateBackpack
@@ -42,6 +33,16 @@ defmodule HamsterTravelWeb.Router do
       live "/backpacks/:backpack_slug/edit", Packing.EditBackpack
 
       live "/profile", Accounts.Profile
+    end
+
+    live_session :default,
+      on_mount: [
+        {HamsterTravelWeb.UserAuth, :mount_current_user}
+      ] do
+      live "/", Home
+
+      live "/plans", Planning.IndexPlans
+      live "/trips/:plan_slug", Planning.ShowPlan
     end
   end
 

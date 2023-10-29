@@ -54,6 +54,10 @@ defmodule HamsterTravel.Planning do
     |> Repo.one()
   end
 
+  def new_trip do
+    Trip.changeset(%Trip{status: Trip.draft(), people_count: 2, private: false}, %{})
+  end
+
   @doc """
   Creates a trip.
 

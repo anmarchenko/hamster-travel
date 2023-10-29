@@ -51,8 +51,8 @@ defmodule HamsterTravelWeb.Planning.ShowPlan do
     """
   end
 
-  defp active_nav(%{status: "draft"}), do: :drafts
-  defp active_nav(_), do: :plans
+  defp active_nav(%{status: "draft"}), do: drafts_nav_item()
+  defp active_nav(_), do: plans_nav_item()
 
   defp fetch_tab(%{"tab" => tab})
        when tab in @tabs,

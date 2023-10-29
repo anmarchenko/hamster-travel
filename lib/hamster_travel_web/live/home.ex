@@ -12,7 +12,7 @@ defmodule HamsterTravelWeb.Home do
   def mount(_params, _session, socket) do
     socket =
       socket
-      |> assign(active_nav: :home)
+      |> assign(active_nav: home_nav_item())
       |> assign(page_title: gettext("Homepage"))
       |> assign(next_plans: HamsterTravel.next_plans())
       |> assign(last_plans: HamsterTravel.last_plans())

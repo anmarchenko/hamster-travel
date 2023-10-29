@@ -17,7 +17,7 @@ defmodule HamsterTravelWeb.Packing.EditBackpack do
          true <- Policy.authorized?(:edit, backpack, user) do
       socket =
         socket
-        |> assign(active_nav: :backpacks)
+        |> assign(active_nav: backpacks_nav_item())
         |> assign(page_title: gettext("Edit backpack"))
         |> assign(backpack: backpack)
         |> assign(changeset: Packing.change_backpack(backpack))

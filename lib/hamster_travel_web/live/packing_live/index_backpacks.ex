@@ -13,7 +13,7 @@ defmodule HamsterTravelWeb.Packing.IndexBackpacks do
   def mount(_params, _session, socket) do
     socket =
       socket
-      |> assign(active_nav: :backpacks)
+      |> assign(active_nav: backpacks_nav_item())
       |> assign(page_title: gettext("Backpacks"))
       |> assign(backpacks: Packing.list_backpacks(socket.assigns.current_user))
 
