@@ -27,7 +27,6 @@ defmodule HamsterTravelWeb.Planning.CreateTrip do
     IO.inspect(trip_params)
 
     trip_params
-    |> Map.merge(%{"dates_unknown" => false})
     |> Planning.create_trip(socket.assigns.current_user)
     |> result(socket)
   end

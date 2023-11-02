@@ -2,9 +2,8 @@ defmodule HamsterTravelWeb.Planning.TripForm do
   @moduledoc """
   Live trip create/edit form
   """
-  use HamsterTravelWeb, :live_component
 
-  alias HamsterTravel.Packing
+  use HamsterTravelWeb, :live_component
 
   @impl true
   def render(assigns) do
@@ -22,6 +21,14 @@ defmodule HamsterTravelWeb.Planning.TripForm do
                 autofocus={true}
               />
             </div>
+            <%!-- TODO: conditionally show duration field --%>
+            <div class="col-span-6">
+              <.field
+                type="checkbox"
+                field={@form[:dates_unknown]}
+                label={gettext("Dates are yet unknown")}
+              />
+            </div>
             <div class="col-span-3">
               <.field
                 type="date"
@@ -30,6 +37,8 @@ defmodule HamsterTravelWeb.Planning.TripForm do
                 required={true}
               />
             </div>
+
+            <%!-- TODO: add min, max constraints --%>
             <div class="col-span-3">
               <.field
                 type="date"
@@ -37,6 +46,9 @@ defmodule HamsterTravelWeb.Planning.TripForm do
                 label={gettext("End date")}
                 required={true}
               />
+            </div>
+            <div class="col-span-6">
+              <.field type="checkbox" field={@form[:private]} label={gettext("Private trip")} />
             </div>
           </div>
 
