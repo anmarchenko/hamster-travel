@@ -8,13 +8,12 @@ defmodule HamsterTravelWeb.Telemetry do
 
   @impl true
   def init(_arg) do
-    children = [
-      # Telemetry poller will execute the given period measurements
-      # every 10_000ms. Learn more here: https://hexdocs.pm/telemetry_metrics
-      {:telemetry_poller, measurements: periodic_measurements(), period: 10_000}
-      # Add reporters as children of your supervision tree.
-      # {Telemetry.Metrics.ConsoleReporter, metrics: metrics()}
-    ]
+    children =
+      [
+        # Telemetry poller will execute the given period measurements
+        # every 10_000ms. Learn more here: https://hexdocs.pm/telemetry_metrics
+        {:telemetry_poller, measurements: periodic_measurements(), period: 10_000}
+      ] ++ reporters()
 
     Supervisor.init(children, strategy: :one_for_one)
   end
@@ -23,41 +22,50 @@ defmodule HamsterTravelWeb.Telemetry do
     [
       # Phoenix Metrics
       summary("phoenix.endpoint.stop.duration",
+        tags: [:env, :service],
         unit: {:native, :millisecond}
       ),
       summary("phoenix.router_dispatch.stop.duration",
-        tags: [:route],
+        tags: [:route, :env, :service],
         unit: {:native, :millisecond}
       ),
 
       # Database Metrics
       summary("hamster_travel.repo.query.total_time",
+        tags: [:env, :service],
         unit: {:native, :millisecond},
         description: "The sum of the other measurements"
       ),
       summary("hamster_travel.repo.query.decode_time",
+        tags: [:env, :service],
         unit: {:native, :millisecond},
         description: "The time spent decoding the data received from the database"
       ),
       summary("hamster_travel.repo.query.query_time",
+        tags: [:env, :service],
         unit: {:native, :millisecond},
         description: "The time spent executing the query"
       ),
       summary("hamster_travel.repo.query.queue_time",
+        tags: [:env, :service],
         unit: {:native, :millisecond},
         description: "The time spent waiting for a database connection"
       ),
       summary("hamster_travel.repo.query.idle_time",
+        tags: [:env, :service],
         unit: {:native, :millisecond},
         description:
           "The time the connection spent waiting before being checked out for the query"
       ),
 
       # VM Metrics
-      summary("vm.memory.total", unit: {:byte, :kilobyte}),
-      summary("vm.total_run_queue_lengths.total"),
-      summary("vm.total_run_queue_lengths.cpu"),
-      summary("vm.total_run_queue_lengths.io")
+      summary("vm.memory.total",
+        tags: [:env, :service],
+        unit: {:byte, :kilobyte}
+      ),
+      summary("vm.total_run_queue_lengths.total", tags: [:env, :service]),
+      summary("vm.total_run_queue_lengths.cpu", tags: [:env, :service]),
+      summary("vm.total_run_queue_lengths.io", tags: [:env, :service])
     ]
   end
 
@@ -67,5 +75,19 @@ defmodule HamsterTravelWeb.Telemetry do
       # This function must call :telemetry.execute/3 and a metric must be added above.
       # {HamsterTravelWeb, :count_users, []}
     ]
+  end
+
+  defp reporters do
+    if Application.fetch_env!(:hamster_travel, __MODULE__)[:report_metrics] do
+      [
+        {TelemetryMetricsStatsd,
+         metrics: metrics(),
+         global_tags: [env: "fly", service: "hamster_travel"],
+         host: "ddagent.fly.dev",
+         formatter: :datadog}
+      ]
+    else
+      []
+    end
   end
 end
