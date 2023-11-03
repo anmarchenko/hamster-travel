@@ -83,7 +83,8 @@ defmodule HamsterTravelWeb.Telemetry do
         {TelemetryMetricsStatsd,
          metrics: metrics(),
          global_tags: [env: "fly", service: "hamster_travel"],
-         host: "ddagent.fly.dev",
+         host: "ddagent.internal",
+         inet_address_family: :inet6,
          formatter: :datadog}
       ]
     else
