@@ -31,27 +31,27 @@ defmodule HamsterTravelWeb.Telemetry do
       ),
 
       # Database Metrics
-      summary("hamster_travel.repo.query.total_time",
+      summary("ecto.repo.query.total_time",
         tags: [:env, :service],
         unit: {:native, :millisecond},
         description: "The sum of the other measurements"
       ),
-      summary("hamster_travel.repo.query.decode_time",
+      summary("ecto.repo.query.decode_time",
         tags: [:env, :service],
         unit: {:native, :millisecond},
         description: "The time spent decoding the data received from the database"
       ),
-      summary("hamster_travel.repo.query.query_time",
+      summary("ecto.repo.query.query_time",
         tags: [:env, :service],
         unit: {:native, :millisecond},
         description: "The time spent executing the query"
       ),
-      summary("hamster_travel.repo.query.queue_time",
+      summary("ecto.repo.query.queue_time",
         tags: [:env, :service],
         unit: {:native, :millisecond},
         description: "The time spent waiting for a database connection"
       ),
-      summary("hamster_travel.repo.query.idle_time",
+      summary("ecto.repo.query.idle_time",
         tags: [:env, :service],
         unit: {:native, :millisecond},
         description:
