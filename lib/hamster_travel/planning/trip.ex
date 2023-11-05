@@ -69,6 +69,10 @@ defmodule HamsterTravel.Planning.Trip do
     |> NameSlug.unique_constraint()
   end
 
+  def statuses do
+    @statuses
+  end
+
   def finished do
     @finished
   end

@@ -10,13 +10,13 @@ defmodule HamsterTravelWeb.Planning.CreateTrip do
 
   @impl true
   def mount(_params, _session, socket) do
-    socket =
-      socket
-      |> assign(form: to_form(Planning.new_trip()))
-      |> assign(back_url: plans_url())
+    changeset = Planning.new_trip()
 
     socket =
       socket
+      |> assign(changeset: changeset)
+      |> assign(form: to_form(changeset))
+      |> assign(back_url: plans_url())
       |> assign(active_nav: plans_nav_item())
       |> assign(page_title: gettext("Create a new trip"))
 
@@ -24,8 +24,6 @@ defmodule HamsterTravelWeb.Planning.CreateTrip do
   end
 
   def create_trip(socket, trip_params) do
-    IO.inspect(trip_params)
-
     trip_params
     |> Planning.create_trip(socket.assigns.current_user)
     |> result(socket)
@@ -40,6 +38,6 @@ defmodule HamsterTravelWeb.Planning.CreateTrip do
   end
 
   def result({:error, changeset}, socket) do
-    {:noreply, assign(socket, %{form: to_form(changeset)})}
+    {:noreply, assign(socket, %{changeset: changeset, form: to_form(changeset)})}
   end
 end
