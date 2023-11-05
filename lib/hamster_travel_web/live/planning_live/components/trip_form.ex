@@ -3,6 +3,7 @@ defmodule HamsterTravelWeb.Planning.TripForm do
   Live trip create/edit form
   """
 
+  alias HamsterTravel.Planning
   use HamsterTravelWeb, :live_component
 
   alias HamsterTravel.Planning.Trip
@@ -120,11 +121,18 @@ defmodule HamsterTravelWeb.Planning.TripForm do
   @impl true
   def handle_event(
         "form_changed",
-        %{"_target" => ["trip", "dates_unknown"], "trip" => %{"dates_unknown" => dates_unknown}},
+        %{
+          "_target" => ["trip", "dates_unknown"],
+          "trip" => %{"dates_unknown" => dates_unknown} = trip_params
+        },
         socket
       ) do
     {:noreply,
-     assign(socket, form: to_form(socket.assigns.changeset), dates_unknown: dates_unknown)}
+     assign(socket,
+       dates_unknown: dates_unknown,
+       changeset: Planning.trip_changeset(trip_params),
+       form: to_form(Planning.trip_changeset(trip_params))
+     )}
   end
 
   @impl true

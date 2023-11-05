@@ -54,6 +54,10 @@ defmodule HamsterTravel.Planning do
     |> Repo.one()
   end
 
+  def trip_changeset(params) do
+    Trip.changeset(%Trip{}, params)
+  end
+
   def new_trip do
     Trip.changeset(
       %Trip{status: Trip.draft(), people_count: 2, private: false, currency: "EUR"},
