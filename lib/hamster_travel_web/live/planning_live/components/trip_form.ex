@@ -11,7 +11,16 @@ defmodule HamsterTravelWeb.Planning.TripForm do
   alias Ecto.Changeset
 
   @impl true
+  def mount(socket) do
+    IO.inspect("MOUNT EVENT")
+
+    {:ok, socket}
+  end
+
+  @impl true
   def update(assigns, socket) do
+    IO.inspect("UPDATE EVENT")
+
     socket =
       socket
       |> assign(assigns)
@@ -23,11 +32,14 @@ defmodule HamsterTravelWeb.Planning.TripForm do
 
   @impl true
   def render(assigns) do
+    IO.inspect("RENDER")
+    form = to_form(assigns.changeset)
+
     ~H"""
     <div>
       <.form_container>
         <.form
-          for={@form}
+          for={form}
           as={:trip}
           phx-submit="form_submit"
           phx-change="form_changed"
@@ -127,6 +139,8 @@ defmodule HamsterTravelWeb.Planning.TripForm do
         },
         socket
       ) do
+    IO.inspect("FORM CHANGED EVENT with dates unknown")
+
     {:noreply,
      assign(socket,
        dates_unknown: dates_unknown,
