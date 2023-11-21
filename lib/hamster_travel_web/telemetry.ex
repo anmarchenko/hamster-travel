@@ -21,37 +21,37 @@ defmodule HamsterTravelWeb.Telemetry do
   def metrics do
     [
       # Phoenix Metrics
-      summary("phoenix.endpoint.stop.duration",
+      distribution("phoenix.endpoint.stop.duration",
         tags: [:env, :service],
         unit: {:native, :millisecond}
       ),
-      summary("phoenix.router_dispatch.stop.duration",
+      distribution("phoenix.router_dispatch.stop.duration",
         tags: [:route, :env, :service],
         unit: {:native, :millisecond}
       ),
 
       # Database Metrics
-      summary("hamster_travel.repo.query.total_time",
+      distribution("hamster_travel.repo.query.total_time",
         tags: [:env, :service],
         unit: {:native, :millisecond},
         description: "The sum of the other measurements"
       ),
-      summary("hamster_travel.repo.query.decode_time",
+      distribution("hamster_travel.repo.query.decode_time",
         tags: [:env, :service],
         unit: {:native, :millisecond},
         description: "The time spent decoding the data received from the database"
       ),
-      summary("hamster_travel.repo.query.query_time",
+      distribution("hamster_travel.repo.query.query_time",
         tags: [:env, :service],
         unit: {:native, :millisecond},
         description: "The time spent executing the query"
       ),
-      summary("hamster_travel.repo.query.queue_time",
+      distribution("hamster_travel.repo.query.queue_time",
         tags: [:env, :service],
         unit: {:native, :millisecond},
         description: "The time spent waiting for a database connection"
       ),
-      summary("hamster_travel.repo.query.idle_time",
+      distribution("hamster_travel.repo.query.idle_time",
         tags: [:env, :service],
         unit: {:native, :millisecond},
         description:
