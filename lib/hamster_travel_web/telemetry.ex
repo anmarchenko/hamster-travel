@@ -30,6 +30,24 @@ defmodule HamsterTravelWeb.Telemetry do
         unit: {:native, :millisecond}
       ),
 
+      # LiveView Metrics
+      distribution("phoenix.live_view.mount.stop.duration",
+        tags: [:env, :service, :uri],
+        unit: {:native, :millisecond}
+      ),
+      distribution("phoenix.live_view.handle_params.stop.duration",
+        tags: [:env, :service, :uri],
+        unit: {:native, :millisecond}
+      ),
+      distribution("phoenix.live_view.handle_event.stop.duration",
+        tags: [:env, :service, :event],
+        unit: {:native, :millisecond}
+      ),
+      distribution("phoenix.live_component.handle_event.stop.duration",
+        tags: [:env, :service, :event, :component],
+        unit: {:native, :millisecond}
+      ),
+
       # Database Metrics
       distribution("hamster_travel.repo.query.total_time",
         tags: [:env, :service],
