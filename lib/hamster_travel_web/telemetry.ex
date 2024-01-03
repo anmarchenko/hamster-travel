@@ -22,28 +22,67 @@ defmodule HamsterTravelWeb.Telemetry do
     [
       # Phoenix Metrics
       distribution("phoenix.endpoint.stop.duration",
-        tags: [:env, :service],
+        tags: [:env, :service, :controller, :action],
+        tag_values: fn metadata ->
+          metadata
+          |> Map.put(:controller, Phoenix.Controller.controller_module(metadata))
+          |> Map.put(:action, Phoenix.Controller.action_name(metadata))
+        end,
         unit: {:native, :millisecond}
       ),
-      distribution("phoenix.router_dispatch.stop.duration",
-        tags: [:env, :service],
+      counter("phoenix.error_rendered.duration",
+        tags: [:env, :service, :status],
         unit: {:native, :millisecond}
       ),
 
       # LiveView Metrics
       distribution("phoenix.live_view.mount.stop.duration",
-        tags: [:env, :service],
+        tags: [:env, :service, :view],
+        tag_values: fn metadata ->
+          Map.put(metadata, :view, "#{inspect(metadata.socket.view)}")
+        end,
+        unit: {:native, :millisecond}
+      ),
+      counter("phoenix.live_view.mount.exception.duration",
+        tags: [:env, :service, :view],
+        tag_values: fn metadata ->
+          Map.put(metadata, :view, "#{inspect(metadata.socket.view)}")
+        end,
         unit: {:native, :millisecond}
       ),
       distribution("phoenix.live_view.handle_params.stop.duration",
-        tags: [:env, :service],
+        tags: [:env, :service, :view],
+        tag_values: fn metadata ->
+          Map.put(metadata, :view, "#{inspect(metadata.socket.view)}")
+        end,
+        unit: {:native, :millisecond}
+      ),
+      counter("phoenix.live_view.handle_params.exception.duration",
+        tags: [:env, :service, :view],
+        tag_values: fn metadata ->
+          Map.put(metadata, :view, "#{inspect(metadata.socket.view)}")
+        end,
         unit: {:native, :millisecond}
       ),
       distribution("phoenix.live_view.handle_event.stop.duration",
-        tags: [:env, :service, :event],
+        tags: [:env, :service, :event, :view],
+        tag_values: fn metadata ->
+          Map.put(metadata, :view, "#{inspect(metadata.socket.view)}")
+        end,
+        unit: {:native, :millisecond}
+      ),
+      counter("phoenix.live_view.handle_event.exception.duration",
+        tags: [:env, :service, :event, :view],
+        tag_values: fn metadata ->
+          Map.put(metadata, :view, "#{inspect(metadata.socket.view)}")
+        end,
         unit: {:native, :millisecond}
       ),
       distribution("phoenix.live_component.handle_event.stop.duration",
+        tags: [:env, :service, :event, :component],
+        unit: {:native, :millisecond}
+      ),
+      counter("phoenix.live_component.handle_event.exception.duration",
         tags: [:env, :service, :event, :component],
         unit: {:native, :millisecond}
       ),
