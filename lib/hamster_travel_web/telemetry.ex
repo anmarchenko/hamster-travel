@@ -22,12 +22,7 @@ defmodule HamsterTravelWeb.Telemetry do
     [
       # Phoenix Metrics
       distribution("phoenix.endpoint.stop.duration",
-        tags: [:env, :service, :controller, :action],
-        tag_values: fn metadata ->
-          metadata
-          |> Map.put(:controller, Phoenix.Controller.controller_module(metadata.conn))
-          |> Map.put(:action, Phoenix.Controller.action_name(metadata.conn))
-        end,
+        tags: [:env, :service],
         unit: {:native, :millisecond}
       ),
       counter("phoenix.error_rendered.duration",
