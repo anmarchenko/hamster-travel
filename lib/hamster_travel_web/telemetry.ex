@@ -25,8 +25,8 @@ defmodule HamsterTravelWeb.Telemetry do
         tags: [:env, :service, :controller, :action],
         tag_values: fn metadata ->
           metadata
-          |> Map.put(:controller, Phoenix.Controller.controller_module(metadata))
-          |> Map.put(:action, Phoenix.Controller.action_name(metadata))
+          |> Map.put(:controller, Phoenix.Controller.controller_module(metadata.conn))
+          |> Map.put(:action, Phoenix.Controller.action_name(metadata.conn))
         end,
         unit: {:native, :millisecond}
       ),
