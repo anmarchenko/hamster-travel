@@ -1,6 +1,7 @@
 defmodule HamsterTravelWeb.Telemetry do
   use Supervisor
   import Telemetry.Metrics
+  require Logger
 
   def start_link(arg) do
     Supervisor.start_link(__MODULE__, arg, name: __MODULE__)
@@ -22,13 +23,19 @@ defmodule HamsterTravelWeb.Telemetry do
     [
       # Phoenix Metrics
       distribution("phoenix.endpoint.stop.duration",
-        tags: [:env, :service, :controller],
+        tags: [:env, :service],
         tag_values: fn metadata ->
-          Map.put(
-            metadata,
-            :controller,
-            "#{inspect(Phoenix.Controller.controller_module(metadata.conn))}"
-          )
+          Logger.info("metadata: #{inspect(metadata)}")
+
+          try do
+            Logger.info(
+              "controller: #{inspect(Phoenix.Controller.controller_module(metadata.conn))}"
+            )
+          rescue
+            e in RuntimeError -> Logger.info("error: #{inspect(e)}")
+          end
+
+          metadata
         end,
         unit: {:native, :millisecond}
       ),
