@@ -34,42 +34,42 @@ defmodule HamsterTravelWeb.Telemetry do
       distribution("phoenix.live_view.mount.stop.duration",
         tags: [:env, :service, :view],
         tag_values: fn metadata ->
-          Map.put(metadata, :view, "#{inspect(metadata.socket.view)}")
+          view_tag_value(metadata)
         end,
         unit: {:native, :millisecond}
       ),
       counter("phoenix.live_view.mount.exception.duration",
         tags: [:env, :service, :view],
         tag_values: fn metadata ->
-          Map.put(metadata, :view, "#{inspect(metadata.socket.view)}")
+          view_tag_value(metadata)
         end,
         unit: {:native, :millisecond}
       ),
       distribution("phoenix.live_view.handle_params.stop.duration",
         tags: [:env, :service, :view],
         tag_values: fn metadata ->
-          Map.put(metadata, :view, "#{inspect(metadata.socket.view)}")
+          view_tag_value(metadata)
         end,
         unit: {:native, :millisecond}
       ),
       counter("phoenix.live_view.handle_params.exception.duration",
         tags: [:env, :service, :view],
         tag_values: fn metadata ->
-          Map.put(metadata, :view, "#{inspect(metadata.socket.view)}")
+          view_tag_value(metadata)
         end,
         unit: {:native, :millisecond}
       ),
       distribution("phoenix.live_view.handle_event.stop.duration",
         tags: [:env, :service, :event, :view],
         tag_values: fn metadata ->
-          Map.put(metadata, :view, "#{inspect(metadata.socket.view)}")
+          view_tag_value(metadata)
         end,
         unit: {:native, :millisecond}
       ),
       counter("phoenix.live_view.handle_event.exception.duration",
         tags: [:env, :service, :event, :view],
         tag_values: fn metadata ->
-          Map.put(metadata, :view, "#{inspect(metadata.socket.view)}")
+          view_tag_value(metadata)
         end,
         unit: {:native, :millisecond}
       ),
@@ -127,6 +127,10 @@ defmodule HamsterTravelWeb.Telemetry do
       # This function must call :telemetry.execute/3 and a metric must be added above.
       # {HamsterTravelWeb, :count_users, []}
     ]
+  end
+
+  defp view_tag_value(metadata) do
+    Map.put(metadata, :view, "#{inspect(metadata.socket.view)}")
   end
 
   defp reporters do
