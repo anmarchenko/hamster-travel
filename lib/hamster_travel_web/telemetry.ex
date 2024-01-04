@@ -21,30 +21,11 @@ defmodule HamsterTravelWeb.Telemetry do
 
   def metrics do
     [
-      # Phoenix Metrics
-      distribution("phoenix.endpoint.stop.duration",
-        tags: [:env, :service],
-        tag_values: fn metadata ->
-          Logger.info("metadata: #{inspect(metadata)}")
-
-          try do
-            Logger.info(
-              "controller: #{inspect(Phoenix.Controller.controller_module(metadata.conn))}"
-            )
-          rescue
-            e in RuntimeError -> Logger.info("error: #{inspect(e)}")
-          end
-
-          metadata
-        end,
-        unit: {:native, :millisecond}
-      ),
+      # LiveView Metrics
       counter("phoenix.error_rendered.duration",
         tags: [:env, :service, :status],
         unit: {:native, :millisecond}
       ),
-
-      # LiveView Metrics
       distribution("phoenix.live_view.mount.stop.duration",
         tags: [:env, :service, :view],
         tag_values: fn metadata ->
