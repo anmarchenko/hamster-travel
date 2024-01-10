@@ -114,7 +114,7 @@ defmodule HamsterTravelWeb.Telemetry do
       summary("vm.total_run_queue_lengths.io", tags: [:env, :service]),
 
       # Custom business metrics
-      counter("hamster_travel.packing.backpack.create", tags: [:env, :service, :source])
+      counter("hamster_travel.packing.backpack.create.count", tags: [:env, :service, :source])
     ]
   end
 

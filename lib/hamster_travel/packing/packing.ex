@@ -196,7 +196,7 @@ defmodule HamsterTravel.Packing do
     |> Repo.preload(lists: lists_preload_query)
   end
 
-  defp send_pubsub_event({:ok, result}, [:item, _] = event) do
+  defp send_pubsub_event({:ok, result} = return_tuple, [:item, _] = event) do
     list_id = result.backpack_list_id
 
     backpack_id = Repo.one(from(l in List, select: l.backpack_id, where: l.id == ^list_id))
@@ -207,10 +207,10 @@ defmodule HamsterTravel.Packing do
       {event, %{value: result}}
     )
 
-    {:ok, result}
+    return_tuple
   end
 
-  defp send_pubsub_event({:ok, result}, [:list, _] = event) do
+  defp send_pubsub_event({:ok, result} = return_tuple, [:list, _] = event) do
     backpack_id = result.backpack_id
 
     Phoenix.PubSub.broadcast(
@@ -219,17 +219,15 @@ defmodule HamsterTravel.Packing do
       {event, %{value: result}}
     )
 
-    {:ok, result}
+    return_tuple
   end
 
-  defp send_pubsub_event({:ok, result}, _) do
-    {:ok, result}
-  end
+  defp send_pubsub_event({:ok, _} = result, _), do: result
 
   defp send_pubsub_event({:error, reason}, _), do: {:error, reason}
 
   defp send_telemetry_event({:ok, _} = result, event, metadata) do
-    :telemetry.execute([:hamster_travel, :packing] ++ event, %{}, metadata)
+    :telemetry.execute([:hamster_travel, :packing] ++ event, %{count: 1}, metadata)
 
     result
   end
