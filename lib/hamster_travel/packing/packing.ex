@@ -70,6 +70,7 @@ defmodule HamsterTravel.Packing do
     |> Backpack.changeset(attrs)
     |> Template.from_changeset()
     |> Repo.insert()
+    |> send_telemetry_event([:backpack, :create, :template])
   end
 
   def create_backpack(attrs, user, backpack) do
@@ -95,6 +96,7 @@ defmodule HamsterTravel.Packing do
       |> EctoOrdered.fill_ranks()
     )
     |> Repo.insert()
+    |> send_telemetry_event([:backpack, :create, :template])
   end
 
   def change_backpack(%Backpack{} = backpack, attrs \\ %{}) do
@@ -225,4 +227,12 @@ defmodule HamsterTravel.Packing do
   end
 
   defp notify_event({:error, reason}, _), do: {:error, reason}
+
+  defp send_telemetry_event({:ok, _} = result, event) do
+    :telemetry.execute([:hamster_travel, :packing] ++ event, %{})
+
+    result
+  end
+
+  defp send_telemetry_event(result, _), do: result
 end
