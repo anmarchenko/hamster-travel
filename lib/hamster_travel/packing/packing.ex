@@ -70,7 +70,7 @@ defmodule HamsterTravel.Packing do
     |> Backpack.changeset(attrs)
     |> Template.from_changeset()
     |> Repo.insert()
-    |> send_telemetry_event([:backpack, :create, :template])
+    |> send_telemetry_event([:backpack, :create], %{source: "template"})
   end
 
   def create_backpack(attrs, user, backpack) do
@@ -96,7 +96,7 @@ defmodule HamsterTravel.Packing do
       |> EctoOrdered.fill_ranks()
     )
     |> Repo.insert()
-    |> send_telemetry_event([:backpack, :create, :template])
+    |> send_telemetry_event([:backpack, :create], %{source: "copy"})
   end
 
   def change_backpack(%Backpack{} = backpack, attrs \\ %{}) do
@@ -123,7 +123,7 @@ defmodule HamsterTravel.Packing do
     %List{backpack_id: backpack.id}
     |> List.changeset(attrs)
     |> Repo.insert()
-    |> notify_event([:list, :created])
+    |> send_pubsub_event([:list, :created])
   end
 
   def change_list(%List{} = list) do
@@ -134,12 +134,12 @@ defmodule HamsterTravel.Packing do
     list
     |> List.update_changeset(attrs)
     |> Repo.update()
-    |> notify_event([:list, :updated])
+    |> send_pubsub_event([:list, :updated])
   end
 
   def delete_list(%List{} = list) do
     Repo.delete(list)
-    |> notify_event([:list, :deleted])
+    |> send_pubsub_event([:list, :deleted])
   end
 
   # ITEMS
@@ -158,14 +158,14 @@ defmodule HamsterTravel.Packing do
     %Item{backpack_list_id: list.id, checked: false}
     |> Item.changeset(processed_attrs)
     |> Repo.insert()
-    |> notify_event([:item, :created])
+    |> send_pubsub_event([:item, :created])
   end
 
   def update_item_checked(%Item{} = item, checked) do
     item
     |> Item.checked_changeset(%{checked: checked})
     |> Repo.update()
-    |> notify_event([:item, :updated])
+    |> send_pubsub_event([:item, :updated])
   end
 
   def update_item(%Item{} = item, attrs) do
@@ -174,7 +174,7 @@ defmodule HamsterTravel.Packing do
     item
     |> Item.update_changeset(processed_attrs)
     |> Repo.update()
-    |> notify_event([:item, :updated])
+    |> send_pubsub_event([:item, :updated])
   end
 
   def all_checked?(items) do
@@ -183,7 +183,7 @@ defmodule HamsterTravel.Packing do
 
   def delete_item(%Item{} = item) do
     Repo.delete(item)
-    |> notify_event([:item, :deleted])
+    |> send_pubsub_event([:item, :deleted])
   end
 
   defp backpack_preloading(query) do
@@ -196,7 +196,7 @@ defmodule HamsterTravel.Packing do
     |> Repo.preload(lists: lists_preload_query)
   end
 
-  defp notify_event({:ok, result}, [:item, _] = event) do
+  defp send_pubsub_event({:ok, result}, [:item, _] = event) do
     list_id = result.backpack_list_id
 
     backpack_id = Repo.one(from(l in List, select: l.backpack_id, where: l.id == ^list_id))
@@ -210,7 +210,7 @@ defmodule HamsterTravel.Packing do
     {:ok, result}
   end
 
-  defp notify_event({:ok, result}, [:list, _] = event) do
+  defp send_pubsub_event({:ok, result}, [:list, _] = event) do
     backpack_id = result.backpack_id
 
     Phoenix.PubSub.broadcast(
@@ -222,17 +222,17 @@ defmodule HamsterTravel.Packing do
     {:ok, result}
   end
 
-  defp notify_event({:ok, result}, _) do
+  defp send_pubsub_event({:ok, result}, _) do
     {:ok, result}
   end
 
-  defp notify_event({:error, reason}, _), do: {:error, reason}
+  defp send_pubsub_event({:error, reason}, _), do: {:error, reason}
 
-  defp send_telemetry_event({:ok, _} = result, event) do
-    :telemetry.execute([:hamster_travel, :packing] ++ event, %{})
+  defp send_telemetry_event({:ok, _} = result, event, metadata) do
+    :telemetry.execute([:hamster_travel, :packing] ++ event, %{}, metadata)
 
     result
   end
 
-  defp send_telemetry_event(result, _), do: result
+  defp send_telemetry_event(result, _, _), do: result
 end
