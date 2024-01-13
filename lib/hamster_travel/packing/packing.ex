@@ -186,6 +186,12 @@ defmodule HamsterTravel.Packing do
     |> send_pubsub_event([:item, :deleted])
   end
 
+  def count_backpacks do
+    backpacks_count = Repo.aggregate(Backpack, :count, :id)
+    :telemetry.execute([:hamster_travel, :packing, :backpacks], %{count: backpacks_count})
+    backpacks_count
+  end
+
   defp backpack_preloading(query) do
     items_preload_query = from i in Item, order_by: [i.rank]
 

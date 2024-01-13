@@ -260,6 +260,14 @@ defmodule HamsterTravel.PackingTest do
       backpack = backpack_fixture()
       assert %Ecto.Changeset{} = Packing.change_backpack(backpack)
     end
+
+    test "count_backpacks/0 returns the number of backpacks" do
+      assert 0 == Packing.count_backpacks()
+      backpack = backpack_fixture()
+      assert 1 == Packing.count_backpacks()
+      Packing.delete_backpack(backpack)
+      assert 0 == Packing.count_backpacks()
+    end
   end
 
   describe "items" do

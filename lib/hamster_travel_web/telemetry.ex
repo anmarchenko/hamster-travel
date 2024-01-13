@@ -12,7 +12,7 @@ defmodule HamsterTravelWeb.Telemetry do
       [
         # Telemetry poller will execute the given period measurements
         # every 10_000ms. Learn more here: https://hexdocs.pm/telemetry_metrics
-        {:telemetry_poller, measurements: periodic_measurements(), period: 10_000}
+        {:telemetry_poller, measurements: periodic_measurements(), period: 30_000}
       ] ++ reporters()
 
     Supervisor.init(children, strategy: :one_for_one)
@@ -114,7 +114,9 @@ defmodule HamsterTravelWeb.Telemetry do
       summary("vm.total_run_queue_lengths.io", tags: [:env, :service]),
 
       # Custom business metrics
-      counter("hamster_travel.packing.backpack.create.count", tags: [:env, :service, :source])
+      counter("hamster_travel.packing.backpack.create.count", tags: [:env, :service, :source]),
+      last_value("hamster_travel.accounts.users.count", tags: [:env, :service]),
+      last_value("hamster_travel.packing.backpacks.count", tags: [:env, :service])
     ]
   end
 
