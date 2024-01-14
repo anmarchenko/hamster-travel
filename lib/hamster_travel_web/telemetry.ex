@@ -2,6 +2,8 @@ defmodule HamsterTravelWeb.Telemetry do
   use Supervisor
   import Telemetry.Metrics
 
+  alias HamsterTravel.{Accounts, Packing}
+
   def start_link(arg) do
     Supervisor.start_link(__MODULE__, arg, name: __MODULE__)
   end
@@ -11,7 +13,7 @@ defmodule HamsterTravelWeb.Telemetry do
     children =
       [
         # Telemetry poller will execute the given period measurements
-        # every 10_000ms. Learn more here: https://hexdocs.pm/telemetry_metrics
+        # every Nms. Learn more here: https://hexdocs.pm/telemetry_metrics
         {:telemetry_poller, measurements: periodic_measurements(), period: 30_000}
       ] ++ reporters()
 
@@ -121,11 +123,16 @@ defmodule HamsterTravelWeb.Telemetry do
   end
 
   defp periodic_measurements do
-    [
-      # A module, function and arguments to be invoked periodically.
-      # This function must call :telemetry.execute/3 and a metric must be added above.
-      # {HamsterTravelWeb, :count_users, []}
-    ]
+    if Application.fetch_env!(:hamster_travel, __MODULE__)[:periodic_measurements_enabled] do
+      [
+        # A module, function and arguments to be invoked periodically.
+        # This function must call :telemetry.execute/3 and a metric must be added above.
+        {Accounts, :count_users, []},
+        {Packing, :count_backpacks, []}
+      ]
+    else
+      []
+    end
   end
 
   defp view_tag_value(metadata) do

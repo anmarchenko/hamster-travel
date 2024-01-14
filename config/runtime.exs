@@ -45,7 +45,9 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
-  config :hamster_travel, HamsterTravelWeb.Telemetry, report_metrics: true
+  config :hamster_travel, HamsterTravelWeb.Telemetry,
+    report_metrics: true,
+    periodic_measurements_enabled: true
 
   # ## Configuring the mailer
   #
