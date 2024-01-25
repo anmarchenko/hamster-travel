@@ -69,6 +69,7 @@ defmodule HamsterTravel.MixProject do
       {:phoenix_live_dashboard, "~> 0.8"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
+      {:telemetry_metrics_statsd, "~> 0.7"},
 
       # i18n
       {:gettext, "~> 0.22"},

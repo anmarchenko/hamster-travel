@@ -354,6 +354,12 @@ defmodule HamsterTravel.Accounts do
     end
   end
 
+  def count_users do
+    users_count = Repo.aggregate(User, :count, :id)
+    :telemetry.execute([:hamster_travel, :accounts, :users], %{count: users_count})
+    users_count
+  end
+
   defp user_preloading(user) do
     Repo.preload(user, :friendships)
   end

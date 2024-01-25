@@ -58,6 +58,10 @@ config :petal_components,
        :error_translator_function,
        {HamsterTravelWeb.CoreComponents, :translate_error}
 
+config :hamster_travel, HamsterTravelWeb.Telemetry,
+  report_metrics: false,
+  periodic_measurements_enabled: true
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

@@ -45,15 +45,9 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
-  # ## Using releases
-  #
-  # If you are doing OTP releases, you need to instruct Phoenix
-  # to start each relevant endpoint:
-  #
-  #     config :hamster_travel, HamsterTravelWeb.Endpoint, server: true
-  #
-  # Then you can assemble a release by calling `mix release`.
-  # See `mix help release` for more information.
+  config :hamster_travel, HamsterTravelWeb.Telemetry,
+    report_metrics: true,
+    periodic_measurements_enabled: true
 
   # ## Configuring the mailer
   #

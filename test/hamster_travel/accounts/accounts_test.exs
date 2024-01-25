@@ -510,4 +510,14 @@ defmodule HamsterTravel.AccountsTest do
       refute inspect(%User{password: "123456"}) =~ "password: \"123456\""
     end
   end
+
+  describe "count_users/0" do
+    test "returns the number of users" do
+      assert Accounts.count_users() == 0
+      user_fixture()
+      assert Accounts.count_users() == 1
+      user_fixture()
+      assert Accounts.count_users() == 2
+    end
+  end
 end
