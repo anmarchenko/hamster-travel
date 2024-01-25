@@ -45,6 +45,8 @@ backpack:
     items:
       - name: Паспорта
         count: 3
+      - name: Водительские права
+        count: 1
       - name: ПМЖ
         count: 2
       - name: Деньги
