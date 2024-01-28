@@ -513,11 +513,11 @@ defmodule HamsterTravel.AccountsTest do
 
   describe "count_users/0" do
     test "returns the number of users" do
-      assert Accounts.count_users() == 0
+      initial_count = Accounts.count_users()
       user_fixture()
-      assert Accounts.count_users() == 1
+      assert Accounts.count_users() == initial_count + 1
       user_fixture()
-      assert Accounts.count_users() == 2
+      assert Accounts.count_users() == initial_count + 2
     end
   end
 end
