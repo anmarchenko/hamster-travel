@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 env:
-  POSTGRES_HOST: postgres
+  POSTGRES_HOST: localhost
   POSTGRES_PORT: 5432
   MIX_ENV: test
 
@@ -25,7 +25,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: glimesh_test
+          POSTGRES_HOST_AUTH_METHOD: 'trust'
         ports: ['5432:5432']
 
     steps:
@@ -63,6 +63,9 @@ jobs:
 
       - name: Run linter
         run: mix credo
+
+      - name: Setup database
+        run: mix ecto.setup
 
       - name: Run tests
         run: mix test
