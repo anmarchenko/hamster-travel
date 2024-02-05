@@ -25,8 +25,9 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
       socket
       |> assign(assigns)
       |> assign(:changeset, changeset)
-      |> assign(dates_unknown: Changeset.get_field(changeset, :dates_unknown))
-      |> assign(start_date: Changeset.get_field(changeset, :start_date))
+      |> assign(:dates_unknown, Changeset.get_field(changeset, :dates_unknown))
+      |> assign(:start_date, Changeset.get_field(changeset, :start_date))
+      |> assign(:end_date, Changeset.get_field(changeset, :end_date))
       |> assign_form(changeset)
 
     {:ok, socket}
@@ -91,6 +92,8 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
                 type="date"
                 field={@form[:end_date]}
                 label={gettext("End date")}
+                min={@start_date}
+                max={max_end_date(@start_date)}
                 required={true}
               />
             </div>
@@ -143,7 +146,7 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
 
     {:noreply,
      socket
-     |> assign(dates_unknown: dates_unknown)}
+     |> assign(:dates_unknown, dates_unknown)}
   end
 
   def handle_event(
@@ -157,6 +160,19 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
     {:noreply,
      socket
      |> assign(start_date: start_date)}
+  end
+
+  def handle_event(
+        "form_changed",
+        %{
+          "_target" => ["trip", "end_date"],
+          "trip" => %{"end_date" => end_date}
+        },
+        socket
+      ) do
+    {:noreply,
+     socket
+     |> assign(end_date: end_date)}
   end
 
   @impl true
@@ -194,6 +210,19 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
       |> assign(:changeset, changeset)
       |> assign_form(changeset)
     }
+  end
+
+  defp max_end_date(nil), do: nil
+
+  defp max_end_date(start_date) do
+    # parse start_date as date
+    case Date.from_iso8601(start_date) do
+      {:ok, start_date} ->
+        Date.add(start_date, 29)
+
+      _ ->
+        nil
+    end
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
