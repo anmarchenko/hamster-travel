@@ -7,6 +7,7 @@ defmodule HamsterTravel.Planning.Trip do
   import Ecto.Changeset
 
   alias HamsterTravel.Accounts.User
+  alias HamsterTravel.Dates
   alias HamsterTravel.Planning.Trip.NameSlug
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -139,10 +140,6 @@ defmodule HamsterTravel.Planning.Trip do
     start_date = get_field(changeset, :start_date)
     end_date = get_field(changeset, :end_date)
 
-    if start_date && end_date do
-      Date.diff(end_date, start_date) + 1
-    else
-      0
-    end
+    Dates.duration(start_date, end_date)
   end
 end

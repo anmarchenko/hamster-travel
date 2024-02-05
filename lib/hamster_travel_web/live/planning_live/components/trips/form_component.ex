@@ -3,6 +3,7 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
   Live trip create/edit form
   """
 
+  alias HamsterTravel.Dates
   alias HamsterTravel.Planning
   use HamsterTravelWeb, :live_component
 
@@ -139,16 +140,27 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
         "form_changed",
         %{
           "_target" => ["trip", "dates_unknown"],
-          "trip" => %{"dates_unknown" => dates_unknown}
+          "trip" => %{"dates_unknown" => dates_unknown} = trip_params
         },
-        socket
+        %{assigns: assigns} = socket
       ) do
     # convert dates_unknown to boolean
     dates_unknown = dates_unknown == "true"
 
+    new_changeset =
+      trip_params
+      |> Map.merge(%{
+        "start_date" => assigns.start_date,
+        "end_date" => assigns.end_date,
+        "duration" => Dates.duration(assigns.start_date, assigns.end_date)
+      })
+      |> Planning.trip_changeset()
+
     {:noreply,
      socket
-     |> assign(:dates_unknown, dates_unknown)}
+     |> assign(:dates_unknown, dates_unknown)
+     |> assign(:changeset, new_changeset)
+     |> assign_form(new_changeset)}
   end
 
   def handle_event(
@@ -238,13 +250,14 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
   defp max_end_date(nil), do: nil
 
   defp max_end_date(start_date) do
+    start_date = Dates.parse_iso_date_or(start_date)
     # parse start_date as date
-    case Date.from_iso8601(start_date) do
-      {:ok, start_date} ->
-        Date.add(start_date, 29)
-
-      _ ->
+    case start_date do
+      nil ->
         nil
+
+      %Date{} ->
+        Date.add(start_date, 29)
     end
   end
 
