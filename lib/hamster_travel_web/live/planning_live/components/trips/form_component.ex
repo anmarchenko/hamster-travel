@@ -28,6 +28,7 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
       |> assign(:dates_unknown, Changeset.get_field(changeset, :dates_unknown))
       |> assign(:start_date, Changeset.get_field(changeset, :start_date))
       |> assign(:end_date, Changeset.get_field(changeset, :end_date))
+      |> assign(:status, Changeset.get_field(changeset, :status))
       |> assign_form(changeset)
 
     {:ok, socket}
@@ -73,6 +74,7 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
             </div>
             <div class="col-span-6">
               <.field
+                :if={@status != Trip.finished()}
                 type="checkbox"
                 field={@form[:dates_unknown]}
                 label={gettext("Dates are yet unknown")}
@@ -87,7 +89,6 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
               />
             </div>
 
-            <%!-- TODO: add min, max constraints --%>
             <div :if={!@dates_unknown} class="col-span-3">
               <.field
                 type="date"
@@ -174,6 +175,27 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
     {:noreply,
      socket
      |> assign(end_date: end_date)}
+  end
+
+  def handle_event(
+        "form_changed",
+        %{
+          "_target" => ["trip", "status"],
+          "trip" => %{"status" => status}
+        },
+        socket
+      ) do
+    socket =
+      if status == Trip.finished() do
+        socket
+        |> assign(:dates_unknown, false)
+      else
+        socket
+      end
+
+    {:noreply,
+     socket
+     |> assign(status: status)}
   end
 
   @impl true

@@ -60,7 +60,7 @@ defmodule HamsterTravel.Planning do
 
   def new_trip do
     Trip.changeset(
-      %Trip{status: Trip.draft(), people_count: 2, private: false, currency: "EUR"},
+      %Trip{status: Trip.planned(), people_count: 2, private: false, currency: "EUR"},
       %{}
     )
   end
