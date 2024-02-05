@@ -54,6 +54,14 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+# Use Jason for currency and localisation
+config :ex_cldr,
+  json_library: Jason
+
+config :ex_money,
+  json_library: Jason,
+  default_cldr_backend: HamsterTravelWeb.Cldr
+
 config :petal_components,
        :error_translator_function,
        {HamsterTravelWeb.CoreComponents, :translate_error}

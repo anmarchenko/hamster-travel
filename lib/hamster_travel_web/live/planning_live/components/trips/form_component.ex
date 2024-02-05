@@ -64,8 +64,9 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
             </div>
             <div class="col-span-6">
               <.field
-                type="hidden"
+                type="select"
                 field={@form[:currency]}
+                options={Money.known_current_currencies()}
                 label={gettext("Trip currency")}
                 required={true}
               />

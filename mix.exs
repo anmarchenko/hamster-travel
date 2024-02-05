@@ -88,6 +88,9 @@ defmodule HamsterTravel.MixProject do
       {:ex_cldr_dates_times, "~> 2.0"},
       {:ex_cldr_numbers, "~> 2.0"},
 
+      # money handling
+      {:ex_money, "~> 5.0"},
+
       # test/lint/dev tools
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:floki, ">= 0.30.0", only: :test},
