@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.Planning.TripForm do
+defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
   @moduledoc """
   Live trip create/edit form
   """
@@ -11,35 +11,34 @@ defmodule HamsterTravelWeb.Planning.TripForm do
   alias Ecto.Changeset
 
   @impl true
-  def mount(socket) do
-    IO.inspect("MOUNT EVENT")
-
-    {:ok, socket}
-  end
-
-  @impl true
   def update(assigns, socket) do
-    IO.inspect("UPDATE EVENT")
+    changeset =
+      case assigns.action do
+        :new ->
+          Planning.new_trip()
+
+        _ ->
+          Planning.change_trip(assigns.trip)
+      end
 
     socket =
       socket
       |> assign(assigns)
-      |> assign(dates_unknown: Changeset.get_field(assigns.changeset, :dates_unknown))
-      |> assign(start_date: Changeset.get_field(assigns.changeset, :start_date))
+      |> assign(:changeset, changeset)
+      |> assign(dates_unknown: Changeset.get_field(changeset, :dates_unknown))
+      |> assign(start_date: Changeset.get_field(changeset, :start_date))
+      |> assign_form(changeset)
 
     {:ok, socket}
   end
 
   @impl true
   def render(assigns) do
-    IO.inspect("RENDER")
-    form = to_form(assigns.changeset)
-
     ~H"""
     <div>
       <.form_container>
         <.form
-          for={form}
+          for={@form}
           as={:trip}
           phx-submit="form_submit"
           phx-change="form_changed"
@@ -135,18 +134,29 @@ defmodule HamsterTravelWeb.Planning.TripForm do
         "form_changed",
         %{
           "_target" => ["trip", "dates_unknown"],
-          "trip" => %{"dates_unknown" => dates_unknown} = trip_params
+          "trip" => %{"dates_unknown" => dates_unknown}
         },
         socket
       ) do
-    IO.inspect("FORM CHANGED EVENT with dates unknown")
+    # convert dates_unknown to boolean
+    dates_unknown = dates_unknown == "true"
 
     {:noreply,
-     assign(socket,
-       dates_unknown: dates_unknown,
-       changeset: Planning.trip_changeset(trip_params),
-       form: to_form(Planning.trip_changeset(trip_params))
-     )}
+     socket
+     |> assign(dates_unknown: dates_unknown)}
+  end
+
+  def handle_event(
+        "form_changed",
+        %{
+          "_target" => ["trip", "start_date"],
+          "trip" => %{"start_date" => start_date}
+        },
+        socket
+      ) do
+    {:noreply,
+     socket
+     |> assign(start_date: start_date)}
   end
 
   @impl true
@@ -160,7 +170,33 @@ defmodule HamsterTravelWeb.Planning.TripForm do
 
   @impl true
   def handle_event("form_submit", %{"trip" => trip_params}, socket) do
-    handler = socket.assigns.on_submit
-    handler.(socket, trip_params)
+    on_submit(socket, socket.assigns.action, trip_params)
+  end
+
+  def on_submit(socket, :new, trip_params) do
+    trip_params
+    |> Planning.create_trip(socket.assigns.current_user)
+    |> result(socket, :new)
+  end
+
+  def result({:ok, trip}, socket, :new) do
+    socket =
+      socket
+      |> push_redirect(to: ~p"/trips/#{trip.slug}")
+
+    {:noreply, socket}
+  end
+
+  def result({:error, changeset}, socket, _) do
+    {
+      :noreply,
+      socket
+      |> assign(:changeset, changeset)
+      |> assign_form(changeset)
+    }
+  end
+
+  defp assign_form(socket, %Ecto.Changeset{} = changeset) do
+    assign(socket, :form, to_form(changeset))
   end
 end
