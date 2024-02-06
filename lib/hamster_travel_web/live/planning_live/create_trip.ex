@@ -4,8 +4,6 @@ defmodule HamsterTravelWeb.Planning.CreateTrip do
   """
   use HamsterTravelWeb, :live_view
 
-  alias HamsterTravel.Planning
-
   alias HamsterTravelWeb.Planning.Trips.FormComponent
 
   @impl true

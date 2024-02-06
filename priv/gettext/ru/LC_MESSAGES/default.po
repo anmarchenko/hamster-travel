@@ -29,9 +29,9 @@ msgid "ppl"
 msgstr "чел"
 
 #: lib/hamster_travel_web/live/packing_live/components/backpack_card.ex:23
-#: lib/hamster_travel_web/live/packing_live/show_backpack.html.heex:6
+#: lib/hamster_travel_web/live/packing_live/show_backpack.html.heex:8
 #: lib/hamster_travel_web/live/planning_live/components/plan_shorts.ex:29
-#, elixir-format, ex-autogen, fuzzy
+#, elixir-format, ex-autogen, elixir-autogen, fuzzy
 msgid "day"
 msgid_plural "days"
 msgstr[0] "день"
@@ -40,13 +40,13 @@ msgstr[2] "дней"
 
 # plan statuses
 msgid "finished"
-msgstr "Состоявшееся"
+msgstr "Finished"
 
 msgid "planned"
-msgstr "Планируемое"
+msgstr "Planned"
 
 msgid "draft"
-msgstr "Черновик"
+msgstr "Draft"
 
 #: lib/hamster_travel_web/components/layouts.ex:24
 #: lib/hamster_travel_web/components/layouts.ex:108
@@ -60,7 +60,7 @@ msgstr "Черновики"
 msgid "Export as PDF"
 msgstr "Экспорт в PDF"
 
-#: lib/hamster_travel_web/live/packing_live/show_backpack.html.heex:27
+#: lib/hamster_travel_web/live/packing_live/show_backpack.html.heex:29
 #: lib/hamster_travel_web/live/planning_live/show_plan.html.heex:13
 #, elixir-autogen, elixir-format
 msgid "Make a copy"
@@ -104,7 +104,7 @@ msgstr "Жильё"
 msgid "Places"
 msgstr "Города"
 
-#: lib/hamster_travel_web/live/packing_live/show_backpack.html.heex:35
+#: lib/hamster_travel_web/live/packing_live/show_backpack.html.heex:37
 #: lib/hamster_travel_web/live/planning_live/show_plan.html.heex:19
 #, elixir-autogen, elixir-format
 msgid "Delete"
@@ -130,7 +130,7 @@ msgstr "На этот день не запланировано впечатле�
 msgid "Address"
 msgstr "Адрес"
 
-#: lib/hamster_travel_web/live/packing_live/show_backpack.html.heex:19
+#: lib/hamster_travel_web/live/packing_live/show_backpack.html.heex:21
 #: lib/hamster_travel_web/live/planning_live/show_plan.html.heex:10
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Edit"
@@ -219,7 +219,7 @@ msgid "Backpack nights"
 msgstr "Ночей"
 
 #: lib/hamster_travel_web/live/packing_live/components/backpack_card.ex:23
-#: lib/hamster_travel_web/live/packing_live/show_backpack.html.heex:6
+#: lib/hamster_travel_web/live/packing_live/show_backpack.html.heex:8
 #, elixir-autogen, elixir-format, fuzzy
 msgid "night"
 msgid_plural "nights"
@@ -227,7 +227,7 @@ msgstr[0] "ночь"
 msgstr[1] "ночи"
 msgstr[2] "ночей"
 
-#: lib/hamster_travel_web/live/packing_live/show_backpack.html.heex:32
+#: lib/hamster_travel_web/live/packing_live/show_backpack.html.heex:34
 #, elixir-autogen, elixir-format
 msgid "Are you sure you want to delete backpack?"
 msgstr "Вы уверены, что хотите удалить рюкзачок?"
@@ -263,11 +263,13 @@ msgid "Copy"
 msgstr "Копия"
 
 #: lib/hamster_travel_web/live/packing_live/components/backpack_form.ex:59
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:133
 #, elixir-autogen, elixir-format
 msgid "Save"
 msgstr "Сохранить"
 
 #: lib/hamster_travel_web/live/packing_live/components/backpack_form.ex:56
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:130
 #, elixir-autogen, elixir-format
 msgid "Cancel"
 msgstr "Отмена"
@@ -277,7 +279,7 @@ msgstr "Отмена"
 msgid "Actions"
 msgstr "Операции"
 
-#: lib/hamster_travel_web/live/planning_live/create_trip.ex:21
+#: lib/hamster_travel_web/live/planning_live/create_trip.ex:14
 #, elixir-autogen, elixir-format
 msgid "Create a new trip"
 msgstr "Новое путешествие"
@@ -287,3 +289,61 @@ msgstr "Новое путешествие"
 #, elixir-autogen, elixir-format
 msgid "close"
 msgstr "Закрыть"
+
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:85
+#, elixir-autogen, elixir-format
+msgid "Dates are yet unknown"
+msgstr "Точные даты еще не известны"
+
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:111
+#, elixir-autogen, elixir-format
+msgid "Duration"
+msgstr "Продолжительность (дней)"
+
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:101
+#, elixir-autogen, elixir-format
+msgid "End date"
+msgstr "Дата окончания"
+
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:119
+#, elixir-autogen, elixir-format
+msgid "People count"
+msgstr "Количество людей"
+
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:124
+#, elixir-autogen, elixir-format
+msgid "Private trip"
+msgstr "Приватный план"
+
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:92
+#, elixir-autogen, elixir-format
+msgid "Start date"
+msgstr "Дата начала"
+
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:76
+#, elixir-autogen, elixir-format
+msgid "Trip currency"
+msgstr "Валюта"
+
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:55
+#, elixir-autogen, elixir-format
+msgid "Trip name"
+msgstr "Название"
+
+#, fuzzy
+msgid "0_draft"
+msgstr "Черновик"
+
+#, fuzzy
+msgid "1_planned"
+msgstr "Планируемое"
+
+# plan statuses
+#, fuzzy
+msgid "2_finished"
+msgstr "Состоявшееся"
+
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:63
+#, elixir-autogen, elixir-format
+msgid "Trip status"
+msgstr "Статус путешествия"

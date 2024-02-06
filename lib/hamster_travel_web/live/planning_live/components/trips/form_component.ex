@@ -3,11 +3,14 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
   Live trip create/edit form
   """
 
-  alias HamsterTravel.Dates
-  alias HamsterTravel.Planning
   use HamsterTravelWeb, :live_component
 
+  alias HamsterTravel.Dates
+  alias HamsterTravel.Planning
+
   alias HamsterTravel.Planning.Trip
+
+  alias HamsterTravelWeb.Cldr
 
   alias Ecto.Changeset
 
@@ -60,15 +63,22 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
             <div class="col-span-6">
               <.field
                 field={@form[:status]}
+                label={gettext("Trip status")}
                 type="select"
-                options={for status <- Trip.statuses(), do: {status, status}}
+                options={
+                  for status <- Trip.statuses(),
+                      do: {Gettext.gettext(HamsterTravelWeb.Gettext, status), status}
+                }
               />
             </div>
             <div class="col-span-6">
               <.field
                 type="select"
                 field={@form[:currency]}
-                options={Money.known_current_currencies()}
+                options={
+                  for currency <- Money.known_current_currencies(),
+                      do: {Cldr.localize_currency(currency), currency}
+                }
                 label={gettext("Trip currency")}
                 required={true}
               />
