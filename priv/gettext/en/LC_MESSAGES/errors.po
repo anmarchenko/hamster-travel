@@ -110,3 +110,6 @@ msgstr ""
 
 msgid "must be equal to %{number}"
 msgstr ""
+
+msgid "trip duration invalid"
+msgstr "trip duration must be between 1 and 30 days"

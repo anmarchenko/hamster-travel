@@ -149,6 +149,20 @@ defmodule HamsterTravel.PlanningTest do
       assert {:error, %Ecto.Changeset{}} = Planning.create_trip(invalid_attrs, user)
     end
 
+    test "create_trip/2 with invali people_count", %{user: user} do
+      invalid_attrs = %{
+        name: "Venice on weekend",
+        dates_unknown: true,
+        duration: 1,
+        currency: "EUR",
+        status: "1_planned",
+        private: false,
+        people_count: 0
+      }
+
+      assert {:error, %Ecto.Changeset{}} = Planning.create_trip(invalid_attrs, user)
+    end
+
     test "update_trip/2 with valid data updates the trip" do
       trip = trip_fixture()
 

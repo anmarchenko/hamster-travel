@@ -92,3 +92,7 @@ msgstr ""
 
 msgid "must be equal to %{number}"
 msgstr ""
+
+msgid "trip duration invalid"
+msgstr ""
+

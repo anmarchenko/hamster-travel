@@ -64,6 +64,7 @@ defmodule HamsterTravel.Planning.Trip do
       :dates_unknown
     ])
     |> validate_inclusion(:status, @statuses)
+    |> validate_number(:people_count, greater_than: 0)
     |> validate_finished_trip_has_known_dates()
     |> validate_dates_and_duration()
     |> NameSlug.maybe_generate_slug()
@@ -103,7 +104,7 @@ defmodule HamsterTravel.Planning.Trip do
     if dates_unknown do
       changeset
       |> validate_required(:duration)
-      |> validate_inclusion(:duration, @duration_range)
+      |> validate_inclusion(:duration, @duration_range, message: "trip duration invalid")
       |> prepare_changes(fn final_changeset ->
         final_changeset
         |> put_change(:start_date, nil)
