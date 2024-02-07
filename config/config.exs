@@ -13,7 +13,10 @@ config :hamster_travel,
 # Configures the endpoint
 config :hamster_travel, HamsterTravelWeb.Endpoint,
   url: [host: "localhost"],
-  render_errors: [html: HamsterTravelWeb.ErrorHTML, json: HamsterTravelWeb.ErrorJSON],
+  render_errors: [
+    formats: [html: HamsterTravelWeb.ErrorHTML, json: HamsterTravelWeb.ErrorJSON],
+    layout: false
+  ],
   pubsub_server: HamsterTravel.PubSub,
   live_view: [signing_salt: "ZN8HpKjW"]
 

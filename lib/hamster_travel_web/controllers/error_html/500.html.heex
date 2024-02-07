@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" style="scrollbar-gutter: stable;">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content={get_csrf_token()} />
+    <title>Hamster Travel</title>
+    <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
+    <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
+    </script>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/manifest.json" />
+  </head>
+  <body class="bg-orange-50 dark:bg-zinc-900">
+    <header class="dark:border-b dark:border-zinc-800">
+      <section class="mx-auto max-w-screen-md lg:max-w-screen-lg xl:max-w-screen-lg px-6 h-20 flex items-center justify-between">
+        <.link href={~p"/"}>
+          <h1 class="font-medium dark:text-white">
+            Hamster Travel
+          </h1>
+        </.link>
+      </section>
+    </header>
+    <main class="pb-16 sm:pb-0 text-zinc-600 dark:text-zinc-300">
+      <section class="mx-auto max-w-screen-md lg:max-w-screen-lg xl:max-w-screen-lg px-6 h-20">
+        <.link href={~p"/"}>Internal error, click here to go back to start</.link>
+      </section>
+    </main>
+  </body>
+</html>

@@ -29,14 +29,14 @@ defmodule HamsterTravel.Packing do
     |> Repo.all()
   end
 
-  def fetch_backpack(slug, user) do
+  def fetch_backpack!(slug, user) do
     query =
       from b in Backpack,
         where: b.slug == ^slug
 
     query
     |> Policy.user_scope(user)
-    |> Repo.one()
+    |> Repo.one!()
     |> backpack_preloading()
   end
 

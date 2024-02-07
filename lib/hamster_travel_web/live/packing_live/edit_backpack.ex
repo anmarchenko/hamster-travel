@@ -12,9 +12,9 @@ defmodule HamsterTravelWeb.Packing.EditBackpack do
   @impl true
   def mount(%{"backpack_slug" => slug}, _session, socket) do
     user = socket.assigns.current_user
+    backpack = Packing.fetch_backpack!(slug, user)
 
-    with backpack when backpack != nil <- Packing.fetch_backpack(slug, user),
-         true <- Policy.authorized?(:edit, backpack, user) do
+    if Policy.authorized?(:edit, backpack, user) do
       socket =
         socket
         |> assign(active_nav: backpacks_nav_item())
@@ -24,11 +24,7 @@ defmodule HamsterTravelWeb.Packing.EditBackpack do
 
       {:ok, socket}
     else
-      nil ->
-        {:ok, socket, layout: {HamsterTravelWeb.LayoutView, "not_found.html"}}
-
-      false ->
-        {:ok, socket, layout: {HamsterTravelWeb.LayoutView, "not_found.html"}}
+      raise HamsterTravelWeb.Errors.NotAuthorized
     end
   end
 

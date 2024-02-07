@@ -18,21 +18,17 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
 
   @impl true
   def mount(%{"backpack_slug" => slug}, _session, socket) do
-    case Packing.fetch_backpack(slug, socket.assigns.current_user) do
-      nil ->
-        {:ok, socket, layout: {HamsterTravelWeb.LayoutView, "not_found.html"}}
+    backpack = Packing.fetch_backpack!(slug, socket.assigns.current_user)
 
-      backpack ->
-        Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "backpacks:#{backpack.id}")
+    Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "backpacks:#{backpack.id}")
 
-        socket =
-          socket
-          |> assign(active_nav: :backpacks)
-          |> assign(page_title: backpack.name)
-          |> assign(backpack: backpack)
+    socket =
+      socket
+      |> assign(active_nav: :backpacks)
+      |> assign(page_title: backpack.name)
+      |> assign(backpack: backpack)
 
-        {:ok, socket}
-    end
+    {:ok, socket}
   end
 
   @impl true

@@ -26,7 +26,8 @@ defmodule HamsterTravelWeb.Planning.ShowPlan do
         {:ok, socket}
 
       {:error, :not_found} ->
-        {:ok, socket, layout: {HamsterTravelWeb.LayoutView, "not_found.html"}}
+        # TODO: remove this next
+        {:ok, socket, layout: {HamsterTravelWeb.Layouts, "not_found.html"}}
     end
   end
 
