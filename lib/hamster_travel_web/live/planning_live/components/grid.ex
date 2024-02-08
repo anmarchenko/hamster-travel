@@ -4,14 +4,14 @@ defmodule HamsterTravelWeb.Planning.Grid do
   """
   use HamsterTravelWeb, :html
 
-  import HamsterTravelWeb.Planning.PlanCard
+  import HamsterTravelWeb.Planning.Trips.Card
 
-  attr(:plans, :list, required: true)
+  attr(:trips, :list, required: true)
 
   def grid(assigns) do
     ~H"""
     <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-8">
-      <.plan_card :for={plan <- @plans} plan={plan} />
+      <.trip_card :for={trip <- @trips} trip={trip} />
     </div>
     """
   end

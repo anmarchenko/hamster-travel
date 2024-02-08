@@ -10,7 +10,7 @@ defmodule HamsterTravelWeb.Planning.IndexPlans do
   def mount(_params, _session, socket) do
     socket =
       socket
-      |> assign(active_nav: :plans)
+      |> assign(active_nav: plans_nav_item())
       |> assign(page_title: gettext("Plans"))
       |> assign(plans: HamsterTravel.plans())
 

@@ -24,7 +24,7 @@ msgstr "неверное значение"
 
 ## From Ecto.Changeset.validate_acceptance/3
 msgid "must be accepted"
-msgstr "нужно согласиться"
+msgstr "согласие обязательно"
 
 ## From Ecto.Changeset.validate_format/3
 msgid "has invalid format"
@@ -119,3 +119,6 @@ msgstr "значение должно быть больше или равно %{
 
 msgid "must be equal to %{number}"
 msgstr "значение должно быть равно %{number}"
+
+msgid "trip duration invalid"
+msgstr "продолжительность путешествия должна быть от 1 до 30 дней"

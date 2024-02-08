@@ -29,7 +29,7 @@ defmodule HamsterTravelWeb.Packing.CreateBackpack do
 
     socket =
       socket
-      |> assign(active_nav: :backpacks)
+      |> assign(active_nav: backpacks_nav_item())
       |> assign(page_title: gettext("Create backpack"))
 
     {:ok, socket}

@@ -15,7 +15,7 @@ defmodule HamsterTravel do
         slug: "rozhdestvenskiy-stokgolm",
         duration: 4,
         start_date: ~D[2021-12-17],
-        status: "planned",
+        status: "1_planned",
         countries: ["se"],
         people_count: 3,
         budget: Decimal.new("1124.59"),
@@ -47,7 +47,7 @@ defmodule HamsterTravel do
         slug: "budapesht-i-tapoltsa",
         duration: 8,
         start_date: ~D[2021-09-07],
-        status: "finished",
+        status: "2_finished",
         countries: ["hu"],
         people_count: 3,
         budget: Decimal.new("1431.28"),
@@ -70,7 +70,7 @@ defmodule HamsterTravel do
         slug: "maljorka",
         duration: 9,
         start_date: ~D[2021-07-13],
-        status: "finished",
+        status: "2_finished",
         countries: ["es"],
         people_count: 3,
         budget: Decimal.new("2939.65"),
@@ -93,7 +93,7 @@ defmodule HamsterTravel do
         slug: "kopengagen-i-nemnogo-shvetsii",
         duration: 4,
         start_date: ~D[2019-05-16],
-        status: "finished",
+        status: "2_finished",
         countries: ["dk", "se"],
         people_count: 3,
         budget: Decimal.new("1171.76"),
@@ -524,7 +524,7 @@ defmodule HamsterTravel do
         slug: "bamberg-pivnoy-gorod",
         duration: 3,
         start_date: nil,
-        status: "draft",
+        status: "0_draft",
         countries: ["de"],
         people_count: 2,
         budget: Decimal.new("614.18"),
@@ -547,7 +547,7 @@ defmodule HamsterTravel do
         slug: "gelgoland-v-gosti-k-tyul",
         duration: 2,
         start_date: nil,
-        status: "draft",
+        status: "0_draft",
         countries: ["de"],
         people_count: 1,
         budget: Decimal.new("90"),
@@ -571,7 +571,7 @@ defmodule HamsterTravel do
     Enum.filter(
       plans(),
       fn plan ->
-        plan[:status] == "planned"
+        plan[:status] == "1_planned"
       end
     )
   end
@@ -579,7 +579,7 @@ defmodule HamsterTravel do
   def last_plans do
     plans()
     |> Enum.filter(fn plan ->
-      plan[:status] == "finished"
+      plan[:status] == "2_finished"
     end)
     |> Enum.take(6)
   end

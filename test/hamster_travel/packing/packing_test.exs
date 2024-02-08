@@ -73,21 +73,21 @@ defmodule HamsterTravel.PackingTest do
              } = new
     end
 
-    test "fetch_backpack/2 returns the backpack with given slug and preloads", %{user: user} do
+    test "fetch_backpack!/2 returns the backpack with given slug and preloads", %{user: user} do
       backpack = backpack_fixture(%{user_id: user.id})
-      db_backpack = Packing.fetch_backpack(backpack.slug, user)
+      db_backpack = Packing.fetch_backpack!(backpack.slug, user)
       assert [] == db_backpack.lists
       assert backpack.name == db_backpack.name
       assert backpack.days == db_backpack.days
       assert backpack.nights == db_backpack.nights
     end
 
-    test "fetch_backpack/2 returns the backpack from friend", %{
+    test "fetch_backpack!/2 returns the backpack from friend", %{
       user: user,
       friend: friend
     } do
       backpack = backpack_fixture(%{user_id: friend.id})
-      db_backpack = Packing.fetch_backpack(backpack.slug, user)
+      db_backpack = Packing.fetch_backpack!(backpack.slug, user)
       assert [] == db_backpack.lists
       assert backpack.name == db_backpack.name
     end

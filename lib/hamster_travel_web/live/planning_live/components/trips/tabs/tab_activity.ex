@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.Planning.TabActivity do
+defmodule HamsterTravelWeb.Planning.Trips.Tabs.TabActivity do
   @moduledoc """
   Activities tab
   """
@@ -10,18 +10,18 @@ defmodule HamsterTravelWeb.Planning.TabActivity do
   alias HamsterTravelWeb.Planning.{Activity, Expense, Note}
 
   def update(assigns, socket) do
-    plan = assigns[:plan]
-    budget = HamsterTravel.fetch_budget(plan, :activities)
+    # budget = HamsterTravel.fetch_budget(plan, :activities)
+    budget = 0
 
     socket =
       socket
       |> assign(assigns)
       |> assign(
         budget: budget,
-        places: plan.places,
-        activities: plan.activities,
-        notes: plan.notes,
-        expenses: plan.expenses
+        places: [],
+        activities: [],
+        notes: [],
+        expenses: []
       )
 
     {:ok, socket}
@@ -76,14 +76,14 @@ defmodule HamsterTravelWeb.Planning.TabActivity do
       <div class="flex flex-row gap-x-4 mt-4 sm:mt-8 text-xl">
         <.inline>
           <.budget />
-          <%= Formatter.format_money(@budget, @plan.currency) %>
+          <%= Formatter.format_money(@budget, @trip.currency) %>
         </.inline>
       </div>
 
       <div class="flex flex-col gap-y-8 mt-8">
-        <div :for={i <- 0..(@plan.duration - 1)} class="flex flex-col gap-y-2">
+        <div :for={i <- 0..(@trip.duration - 1)} class="flex flex-col gap-y-2">
           <div class="text-xl font-semibold">
-            <.day_label day_index={i} start_date={@plan.start_date} />
+            <.day_label day_index={i} start_date={@trip.start_date} />
           </div>
           <div class="flex flex-row gap-x-4">
             <.places_list places={HamsterTravel.filter_places_by_day(@places, i)} day_index={i} />

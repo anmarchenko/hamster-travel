@@ -22,16 +22,24 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   alias Phoenix.LiveView.JS
 
-  def plan_url(slug), do: ~p"/plans/#{slug}"
-  def plan_url(slug, :show), do: plan_url(slug)
-  def plan_url(slug, :itinerary), do: ~p"/plans/#{slug}?tab=itinerary"
-  def plan_url(slug, :activities), do: ~p"/plans/#{slug}?tab=activities"
-  def plan_url(slug, _), do: plan_url(slug)
+  def plans_nav_item, do: :plans
+  def drafts_nav_item, do: :drafts
+  def backpacks_nav_item, do: :backpacks
+  def home_nav_item, do: :home
+
+  def trip_url(slug), do: ~p"/trips/#{slug}"
+  def trip_url(slug, :show), do: trip_url(slug)
+  def trip_url(slug, :itinerary), do: ~p"/trips/#{slug}?tab=itinerary"
+  def trip_url(slug, :activities), do: ~p"/trips/#{slug}?tab=activities"
+  def trip_url(slug, _), do: trip_url(slug)
+
+  def plans_url(), do: ~p"/plans"
 
   def backpack_url(slug), do: ~p"/backpacks/#{slug}"
   def backpack_url(slug, :show), do: backpack_url(slug)
   def backpack_url(slug, :edit), do: ~p"/backpacks/#{slug}/edit"
   def backpack_url(id, :copy), do: ~p"/backpacks/new?copy=#{id}"
+
   def backpacks_url, do: ~p"/backpacks"
 
   def placeholder_image(id) when is_binary(id) do

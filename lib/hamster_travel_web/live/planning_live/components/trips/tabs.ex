@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.Planning.Tabs do
+defmodule HamsterTravelWeb.Planning.Trips.Tabs do
   @moduledoc """
   Renders plan tabs
   """
@@ -8,11 +8,11 @@ defmodule HamsterTravelWeb.Planning.Tabs do
 
   import HamsterTravelWeb.Icons.Airplane
 
-  attr(:plan, :map, required: true)
+  attr(:trip, :map, required: true)
   attr(:active_tab, :string, required: true)
   attr(:class, :string, default: nil)
 
-  def plan_tabs(assigns) do
+  def planning_tabs(assigns) do
     ~H"""
     <.tabs
       underline
@@ -25,7 +25,7 @@ defmodule HamsterTravelWeb.Planning.Tabs do
     >
       <.tab
         underline
-        to={plan_url(@plan.slug, :itinerary)}
+        to={trip_url(@trip.slug, :itinerary)}
         is_active={@active_tab == "itinerary"}
         link_type="live_patch"
       >
@@ -36,7 +36,7 @@ defmodule HamsterTravelWeb.Planning.Tabs do
       </.tab>
       <.tab
         underline
-        to={plan_url(@plan.slug, :activities)}
+        to={trip_url(@trip.slug, :activities)}
         is_active={@active_tab == "activities"}
         link_type="live_patch"
       >

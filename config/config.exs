@@ -13,7 +13,10 @@ config :hamster_travel,
 # Configures the endpoint
 config :hamster_travel, HamsterTravelWeb.Endpoint,
   url: [host: "localhost"],
-  render_errors: [html: HamsterTravelWeb.ErrorHTML, json: HamsterTravelWeb.ErrorJSON],
+  render_errors: [
+    formats: [html: HamsterTravelWeb.ErrorHTML, json: HamsterTravelWeb.ErrorJSON],
+    layout: false
+  ],
   pubsub_server: HamsterTravel.PubSub,
   live_view: [signing_salt: "ZN8HpKjW"]
 
@@ -53,6 +56,14 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+# Use Jason for currency and localisation
+config :ex_cldr,
+  json_library: Jason
+
+config :ex_money,
+  json_library: Jason,
+  default_cldr_backend: HamsterTravelWeb.Cldr
 
 config :petal_components,
        :error_translator_function,
