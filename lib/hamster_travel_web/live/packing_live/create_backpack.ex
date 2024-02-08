@@ -44,7 +44,6 @@ defmodule HamsterTravelWeb.Packing.CreateBackpack do
 
   def create_backpack(socket, backpack_params) do
     backpack_params
-    |> Map.put("template", "hamsters")
     |> Packing.create_backpack(socket.assigns.current_user)
     |> result(socket)
   end

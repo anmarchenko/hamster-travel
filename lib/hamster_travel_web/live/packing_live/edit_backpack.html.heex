@@ -2,6 +2,7 @@
   module={BackpackForm}
   id="create-backpack-form"
   backpack={@backpack}
+  action={:edit}
   changeset={@changeset}
   on_submit={&update_backpack/2}
   back_url={backpack_url(@backpack.slug)}

@@ -1,0 +1,197 @@
+backpack:
+  - name: Гигиена (Горы)
+    items:
+      - name: Гель для рук
+        count: 1
+      - name: Влажные салфетки
+        count: 1
+      - name: Зубная щетка
+        count: 3
+      - name: Зубная паста
+        count: 2
+      - name: Шампунь
+        count: 2
+      - name: Детский шампунь
+        count: 1
+      - name: Крем для рук
+        count: 1
+      - name: Крем для лица
+        count: 1
+      - name: Крем для Дианы
+        count: 1
+      - name: Крем от загара
+        count: 1
+      - name: Гигиеничка
+        count: 1
+      - name: Резинки для волос
+        count: 1
+      - name: Заколка
+        count: 1
+      - name: Резинки для волос Диана
+        count: 3
+      - name: Заколка Диана
+        count: 2
+      - name: Расческа
+        count: 1
+      - name: Ополаскиватель для рта
+        count: 1
+      - name: Щипчики
+        count: 1
+      - name: Бритвы
+        count: 2
+      - name: Носовые платочки
+        count: 1
+  - name: С собой
+    items:
+      - name: Паспорта
+        count: 3
+      - name: Водительские права
+        count: 1
+      - name: ПМЖ
+        count: 2
+      - name: Деньги
+        count: 500
+      - name: Страховки
+        count: 3
+      - name: Кредитка
+        count: 2
+      - name: Наушники Юля
+        count: 1
+      - name: Фотоаппарат
+        count: 1
+      - name: Зарядка для телефона
+        count: 2
+      - name: Путеводитель
+        count: 1
+      - name: Билеты
+        count: 6
+      - name: Солнечные очки
+        count: 2
+      - name: Зарядка для фотоаппарата
+        count: 1
+      - name: Аккумулятор
+        count: 1
+      - name: Наушники для Дианы
+        count: 1
+      - name: Переходник для наушников
+        count: 1
+      - name: Зарядка для часов
+        count: 2
+      - name: Иголочка от айфона
+        count: 1
+      - name: Маски
+        count: 6
+      - name: Видеоняня
+        count: 1
+      - name: Планшет
+        count: 1
+  - name: Одежда
+    items:
+      - name: Носки Андрей
+        count: 'nights'
+      - name: Трусы Андрей
+        count: 'nights'
+      - name: Носки Юля
+        count: 'nights'
+      - name: Трусы Юля
+        count: 'nights'
+      - name: Плавки
+        count: 1
+      - name: Купальник
+        count: 1
+      - name: Джинсы Андрей
+        count: 1
+      - name: Штаны Юля
+        count: 1
+      - name: Футболки Андрей
+        count: 'days / 2'
+      - name: Футболки Юля
+        count: 'days / 2'
+      - name: Кофта Андрей
+        count: 1
+      - name: Кофта Юля
+        count: 1
+      - name: Футболки для сна
+        count: 2
+  - name: Одежда для Дианы
+    items:
+      - name: Штаны и колкотки
+        count: 'nights'
+      - name: Футболки
+        count: 'days / 2'
+      - name: Трусы
+        count: 'nights'
+      - name: Носки
+        count: 'nights'
+      - name: Купальник
+        count: 1
+      - name: Шапка
+        count: 1
+      - name: Перчатки
+        count: 2
+      - name: Кепка
+        count: 1
+      - name: Желтые штаны
+        count: 1
+      - name: Платье
+        count: 2
+      - name: Тонкая кофта
+        count: 1
+      - name: Кофта
+        count: 1
+  - name: В чем едем
+    items:
+      - name: Куртка Юля
+        count: 1
+      - name: Куртка Андрей
+        count: 1
+      - name: Куртка Диана
+        count: 1
+      - name: Ботинки Юля
+        count: 1
+      - name: Ботинки Андрей
+        count: 1
+      - name: Ботинки Диана
+        count: 1
+      - name: Штаны Юля
+        count: 1
+      - name: Штаны Андрей
+        count: 1
+      - name: Штаны Диана
+        count: 1
+      - name: Футболка Юля
+        count: 1
+      - name: Футболка Андрей
+        count: 1
+      - name: Футболка Диана
+        count: 1
+      - name: Кофта Юля
+        count: 1
+      - name: Кофта Андрей
+        count: 1
+      - name: Кофта Диана
+        count: 1
+  - name: Аптечка
+    items:
+      - name: Ибупрофен
+        count: 8
+      - name: Парацетамол
+        count: 2
+      - name: Пластырь
+        count: 4
+      - name: Таблетки от мигрени
+        count: 2
+      - name: Momegalen
+        count: 1
+      - name: Ацикловир
+        count: 1
+      - name: Градусник
+        count: 1
+      - name: Капли в нос
+        count: 1
+      - name: Капли в глаза
+        count: 1
+  - name: Обувь
+    items:
+      - name: Тапочки
+        count: 3

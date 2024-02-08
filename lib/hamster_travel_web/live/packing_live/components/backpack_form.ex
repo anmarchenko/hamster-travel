@@ -49,6 +49,17 @@ defmodule HamsterTravelWeb.Packing.BackpackForm do
                 required={true}
               />
             </div>
+            <div class="col-span-6">
+              <.form_field
+                :if={@action == :new && @copy_from == nil}
+                type="select"
+                form={f}
+                field={:template}
+                label={gettext("Backpack template")}
+                options={[:default, :sea, :mountains]}
+                required={true}
+              />
+            </div>
           </div>
 
           <div class="flex justify-between">

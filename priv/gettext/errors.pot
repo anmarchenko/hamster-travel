@@ -95,4 +95,3 @@ msgstr ""
 
 msgid "trip duration invalid"
 msgstr ""
-
