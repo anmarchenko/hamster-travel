@@ -127,12 +127,48 @@ backpack:
         count: 'days / 2'
       - name: Футболки Юля
         count: 'days / 2'
-      - name: Кофта Андрей
+      - name: Кофта спортивная Андрей
+        count: 2
+      - name: Кофта спортивная Юля
+        count: 3
+      - name: Пижамы
+        count: 2
+      - name: Подштанники Андрей
+        count: 2
+      - name: Подштанники/колготки Юля
+        count: 4
+      - name: Теплые штаны Андрей
+        count: 1
+      - name: Теплые штаны Юля
+        count: 1
+      - name: Куртка Андрей
+        count: 1
+      - name: Куртка Юля
+        count: 1
+      - name: Теплые варежки Андрей
+        count: 1
+      - name: Теплые варежки Юля
+        count: 1
+      - name: Перчатки Андрей
+        count: 1
+      - name: Перчатки Юля
+        count: 1
+      - name: Шапка Андрей
+        count: 1
+      - name: Шапка Юля
+        count: 1
+      - name: Шарф Юля
+        count: 1
+      - name: Теплые носки Андрей
+        count: 2
+      - name: Термобелье Юля
+        count: 2
+      - name: Термокофта Андрей
         count: 1
       - name: Кофта Юля
         count: 1
-      - name: Футболки для сна
-        count: 2
+      - name: Лифчики Юля
+        count: 'nights / 2'
   - name: Одежда для Дианы
     items:
       - name: Штаны и колкотки

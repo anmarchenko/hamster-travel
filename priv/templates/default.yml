@@ -107,20 +107,28 @@ backpack:
         count: 1
       - name: Купальник
         count: 2
-      - name: Джинсы Андрей
-        count: 1
-      - name: Штаны Юля
-        count: 1
       - name: Футболки Андрей
-        count: 'days / 2'
-      - name: Футболки Юля
         count: 'days / 2'
       - name: Кофта Андрей
         count: 1
+      - name: Джинсы Андрей
+        count: 1
+      - name: Футболки Юля
+        count: 'days / 2'
       - name: Кофта Юля
+        count: 1
+      - name: Штаны Юля
+        count: 1
+      - name: Платье Юля
         count: 1
       - name: Футболки для сна
         count: 2
+      - name: Колготки
+        count: 1
+      - name: Тапки Юля
+        count: 1
+      - name: Тапки Андрей
+        count: 1
   - name: Одежда для Дианы
     items:
       - name: Штаны и колкотки
