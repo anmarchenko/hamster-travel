@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.Planning.StatusBadge do
+defmodule HamsterTravelWeb.Planning.Trips.StatusBadge do
   @moduledoc """
   Renders badge with plan state (draft/planned/finished)
   """

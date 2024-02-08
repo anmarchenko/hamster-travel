@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.Planning.PlanStatus do
+defmodule HamsterTravelWeb.Planning.Trips.StatusRow do
   @moduledoc """
   Renders status row for plan (badge, flags, author)
   """
@@ -6,13 +6,13 @@ defmodule HamsterTravelWeb.Planning.PlanStatus do
 
   alias HamsterTravelWeb.CoreComponents
 
-  import HamsterTravelWeb.Planning.StatusBadge
+  import HamsterTravelWeb.Planning.Trips.StatusBadge
 
-  attr(:plan, :map, required: true)
+  attr(:trip, :map, required: true)
   attr(:class, :string, default: nil)
   attr(:flags_limit, :integer, default: 100)
 
-  def plan_status(assigns) do
+  def status_row(assigns) do
     ~H"""
     <.inline class={
       CoreComponents.build_class([
@@ -20,15 +20,15 @@ defmodule HamsterTravelWeb.Planning.PlanStatus do
         @class
       ])
     }>
-      <.status_badge status={@plan.status} />
+      <.status_badge status={@trip.status} />
       <.flag size={24} country="de" />
       <%!-- <%= for country <- Enum.take(@plan.countries, @flags_limit) do %>
         <.flag size={24} country={country} />
       <% end %> --%>
       <.avatar
         size="xs"
-        src={@plan.author.avatar_url}
-        name={@plan.author.name}
+        src={@trip.author.avatar_url}
+        name={@trip.author.name}
         random_color
         class="!w-6 !h-6"
       />

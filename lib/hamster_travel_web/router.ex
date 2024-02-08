@@ -42,7 +42,7 @@ defmodule HamsterTravelWeb.Router do
       live "/", Home
 
       live "/plans", Planning.IndexPlans
-      live "/trips/:plan_slug", Planning.ShowPlan
+      live "/trips/:trip_slug", Planning.ShowTrip
     end
   end
 

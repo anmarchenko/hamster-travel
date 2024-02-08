@@ -27,11 +27,11 @@ defmodule HamsterTravelWeb.CoreComponents do
   def backpacks_nav_item, do: :backpacks
   def home_nav_item, do: :home
 
-  def plan_url(slug), do: ~p"/trips/#{slug}"
-  def plan_url(slug, :show), do: plan_url(slug)
-  def plan_url(slug, :itinerary), do: ~p"/trips/#{slug}?tab=itinerary"
-  def plan_url(slug, :activities), do: ~p"/trips/#{slug}?tab=activities"
-  def plan_url(slug, _), do: plan_url(slug)
+  def trip_url(slug), do: ~p"/trips/#{slug}"
+  def trip_url(slug, :show), do: trip_url(slug)
+  def trip_url(slug, :itinerary), do: ~p"/trips/#{slug}?tab=itinerary"
+  def trip_url(slug, :activities), do: ~p"/trips/#{slug}?tab=activities"
+  def trip_url(slug, _), do: trip_url(slug)
 
   def plans_url(), do: ~p"/plans"
 

@@ -1,20 +1,22 @@
-defmodule HamsterTravelWeb.Planning.ShowPlan do
+defmodule HamsterTravelWeb.Planning.ShowTrip do
   @moduledoc """
-  Plan page
+  Trip page
   """
   use HamsterTravelWeb, :live_view
 
-  import HamsterTravelWeb.Planning.{PlanShorts, PlanStatus, Tabs}
+  import HamsterTravelWeb.Planning.Trips.Tabs
+  import HamsterTravelWeb.Planning.Trips.Shorts
+  import HamsterTravelWeb.Planning.Trips.StatusRow
 
   alias HamsterTravel.Planning
 
-  alias HamsterTravelWeb.Planning.TabActivity
-  alias HamsterTravelWeb.Planning.TabItinerary
+  alias HamsterTravelWeb.Planning.Trips.Tabs.TabActivity
+  alias HamsterTravelWeb.Planning.Trips.Tabs.TabItinerary
 
   @tabs ["activities", "itinerary", "catering", "documents", "report"]
 
   @impl true
-  def mount(%{"plan_slug" => slug} = params, _session, socket) do
+  def mount(%{"trip_slug" => slug} = params, _session, socket) do
     socket =
       socket
       |> assign(mobile_menu: :plan_tabs)
@@ -27,7 +29,7 @@ defmodule HamsterTravelWeb.Planning.ShowPlan do
           socket
           |> assign(active_nav: active_nav(plan))
           |> assign(page_title: plan.name)
-          |> assign(plan: plan)
+          |> assign(trip: plan)
 
         {:ok, socket}
 
@@ -38,7 +40,7 @@ defmodule HamsterTravelWeb.Planning.ShowPlan do
           socket
           |> assign(active_nav: active_nav(trip))
           |> assign(page_title: trip.name)
-          |> assign(plan: trip)
+          |> assign(trip: trip)
 
         {:ok, socket}
     end
@@ -55,13 +57,13 @@ defmodule HamsterTravelWeb.Planning.ShowPlan do
 
   def render_tab(%{active_tab: "itinerary"} = assigns) do
     ~H"""
-    <.live_component module={TabItinerary} id={"plan-#{@plan.id}-itinerary"} plan={@plan} />
+    <.live_component module={TabItinerary} id={"trip-#{@trip.id}-itinerary"} trip={@trip} />
     """
   end
 
   def render_tab(%{active_tab: "activities"} = assigns) do
     ~H"""
-    <.live_component module={TabActivity} id={"plan-#{@plan.id}-activities"} plan={@plan} />
+    <.live_component module={TabActivity} id={"trip-#{@trip.id}-activities"} trip={@trip} />
     """
   end
 
