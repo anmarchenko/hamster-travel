@@ -26,7 +26,11 @@ defmodule HamsterTravel.Planning do
     |> Repo.all()
   end
 
-  def get_trip(id), do: Repo.get(Trip, id)
+  def get_trip(id) do
+    Trip
+    |> Repo.get(id)
+    |> trip_preloading()
+  end
 
   @doc """
   Gets a single trip.
@@ -42,16 +46,33 @@ defmodule HamsterTravel.Planning do
       ** (Ecto.NoResultsError)
 
   """
-  def get_trip!(id), do: Repo.get!(Trip, id)
+  def get_trip!(id) do
+    Trip
+    |> Repo.get!(id)
+    |> trip_preloading()
+  end
 
-  def get_user_trip_by_slug(slug, user) do
+  # when there is no current user then we show only public trips
+  def fetch_trip!(slug, nil) do
+    query =
+      from t in Trip,
+        where: t.slug == ^slug and t.private == false
+
+    query
+    |> Repo.one!()
+    |> trip_preloading()
+  end
+
+  # when current user is present then we show public trips and user's private trips
+  def fetch_trip!(slug, user) do
     query =
       from t in Trip,
         where: t.slug == ^slug
 
     query
     |> Policy.user_scope(user)
-    |> Repo.one()
+    |> Repo.one!()
+    |> trip_preloading()
   end
 
   def trip_changeset(params) do
@@ -128,5 +149,10 @@ defmodule HamsterTravel.Planning do
   """
   def change_trip(%Trip{} = trip, attrs \\ %{}) do
     Trip.changeset(trip, attrs)
+  end
+
+  defp trip_preloading(query) do
+    query
+    |> Repo.preload([:author])
   end
 end

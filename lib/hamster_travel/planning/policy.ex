@@ -20,6 +20,6 @@ defmodule HamsterTravel.Planning.Policy do
   def user_scope(query, %User{} = user) do
     friends_circle = Social.extract_policy_user_ids(user)
 
-    from(t in query, where: t.author_id in ^friends_circle)
+    from(t in query, where: t.author_id in ^friends_circle or t.private == false)
   end
 end

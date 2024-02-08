@@ -6,6 +6,8 @@ defmodule HamsterTravelWeb.Planning.ShowPlan do
 
   import HamsterTravelWeb.Planning.{PlanShorts, PlanStatus, Tabs}
 
+  alias HamsterTravel.Planning
+
   alias HamsterTravelWeb.Planning.TabActivity
   alias HamsterTravelWeb.Planning.TabItinerary
 
@@ -13,21 +15,32 @@ defmodule HamsterTravelWeb.Planning.ShowPlan do
 
   @impl true
   def mount(%{"plan_slug" => slug} = params, _session, socket) do
+    socket =
+      socket
+      |> assign(mobile_menu: :plan_tabs)
+      |> assign(active_tab: fetch_tab(params))
+
     case HamsterTravel.find_plan_by_slug(slug) do
+      # temporary, before we implement /plans view
       {:ok, plan} ->
         socket =
           socket
-          |> assign(mobile_menu: :plan_tabs)
           |> assign(active_nav: active_nav(plan))
-          |> assign(active_tab: fetch_tab(params))
           |> assign(page_title: plan.name)
           |> assign(plan: plan)
 
         {:ok, socket}
 
       {:error, :not_found} ->
-        # TODO: remove this next
-        {:ok, socket, layout: {HamsterTravelWeb.Layouts, "not_found.html"}}
+        trip = Planning.fetch_trip!(slug, socket.assigns.current_user)
+
+        socket =
+          socket
+          |> assign(active_nav: active_nav(trip))
+          |> assign(page_title: trip.name)
+          |> assign(plan: trip)
+
+        {:ok, socket}
     end
   end
 

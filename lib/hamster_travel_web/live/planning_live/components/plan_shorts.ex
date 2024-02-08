@@ -22,7 +22,7 @@ defmodule HamsterTravelWeb.Planning.PlanShorts do
     }>
       <.inline class="gap-1">
         <.budget class={@icon_class} />
-        <%= Formatter.format_money(@plan.budget, @plan.currency) %>
+        <%= Formatter.format_money(0, @plan.currency) %>
       </.inline>
       <.inline class="gap-1">
         <.icon name={:calendar} outline={true} class={"h-4 w-4 #{@icon_class}"} />

@@ -10,18 +10,18 @@ defmodule HamsterTravelWeb.Planning.TabActivity do
   alias HamsterTravelWeb.Planning.{Activity, Expense, Note}
 
   def update(assigns, socket) do
-    plan = assigns[:plan]
-    budget = HamsterTravel.fetch_budget(plan, :activities)
+    # budget = HamsterTravel.fetch_budget(plan, :activities)
+    budget = 0
 
     socket =
       socket
       |> assign(assigns)
       |> assign(
         budget: budget,
-        places: plan.places,
-        activities: plan.activities,
-        notes: plan.notes,
-        expenses: plan.expenses
+        places: [],
+        activities: [],
+        notes: [],
+        expenses: []
       )
 
     {:ok, socket}

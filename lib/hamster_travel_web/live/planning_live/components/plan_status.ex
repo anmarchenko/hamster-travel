@@ -21,9 +21,10 @@ defmodule HamsterTravelWeb.Planning.PlanStatus do
       ])
     }>
       <.status_badge status={@plan.status} />
-      <%= for country <- Enum.take(@plan.countries, @flags_limit) do %>
+      <.flag size={24} country="de" />
+      <%!-- <%= for country <- Enum.take(@plan.countries, @flags_limit) do %>
         <.flag size={24} country={country} />
-      <% end %>
+      <% end %> --%>
       <.avatar
         size="xs"
         src={@plan.author.avatar_url}

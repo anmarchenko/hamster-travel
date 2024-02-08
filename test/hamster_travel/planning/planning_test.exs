@@ -43,6 +43,44 @@ defmodule HamsterTravel.PlanningTest do
       assert Planning.get_trip!(trip.id).name == trip.name
     end
 
+    test "fetch_trip!/2 returns public trip for unauthorized user" do
+      trip = trip_fixture()
+      assert Planning.fetch_trip!(trip.slug, nil).id == trip.id
+    end
+
+    test "fetch_trip!/2 raises when unauthorized user requests private trip" do
+      trip = trip_fixture(%{private: true})
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Planning.fetch_trip!(trip.slug, nil)
+      end
+    end
+
+    test "fetch_trip!/2 returns own private trip", %{user: user} do
+      trip = trip_fixture(%{private: true, author_id: user.id})
+      assert Planning.fetch_trip!(trip.slug, user).id == trip.id
+    end
+
+    test "fetch_trip!/2 returns friends private trip", %{user: user, friend: friend} do
+      trip = trip_fixture(%{private: true, author_id: friend.id})
+      assert Planning.fetch_trip!(trip.slug, user).id == trip.id
+    end
+
+    test "fetch_trip!/2 returns other user's public trip", %{user: user} do
+      trip = trip_fixture()
+      assert Planning.fetch_trip!(trip.slug, user).id == trip.id
+    end
+
+    test "fetch_trip!/2 raises when fetching other user's private trip", %{
+      user: user
+    } do
+      trip = trip_fixture(%{private: true})
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Planning.fetch_trip!(trip.slug, user).id
+      end
+    end
+
     test "create_trip/2 with valid data creates a trip", %{user: user} do
       valid_attrs = %{
         name: "Venice on weekend",

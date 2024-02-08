@@ -4,6 +4,8 @@ defmodule HamsterTravelWeb.Planning.StatusBadge do
   """
   use HamsterTravelWeb, :html
 
+  alias HamsterTravel.Planning.Trip
+
   alias HamsterTravelWeb.CoreComponents
 
   attr(:status, :string, required: true)
@@ -26,12 +28,13 @@ defmodule HamsterTravelWeb.Planning.StatusBadge do
     "flex items-center h-6 px-3 text-xs font-semibold rounded-full #{status_colors(assigns)}"
   end
 
-  defp status_colors(%{status: "finished"}),
-    do: "text-green-500 bg-green-100 dark:bg-green-800 dark:text-green-100"
+  defp status_colors(%{status: status}) do
+    colors = %{
+      Trip.finished() => "text-green-500 bg-green-100 dark:bg-green-800 dark:text-green-100",
+      Trip.draft() => "text-pink-500 bg-pink-100 dark:bg-pink-800 dark:text-pink-100",
+      Trip.planned() => "text-yellow-500 bg-yellow-200 dark:bg-yellow-800 dark:text-yellow-200"
+    }
 
-  defp status_colors(%{status: "planned"}),
-    do: "text-yellow-500 bg-yellow-200 dark:bg-yellow-800 dark:text-yellow-200"
-
-  defp status_colors(%{status: "draft"}),
-    do: "text-pink-500 bg-pink-100 dark:bg-pink-800 dark:text-pink-100"
+    Map.get(colors, status)
+  end
 end
