@@ -4,7 +4,7 @@ defmodule HamsterTravelWeb.Packing.Grid do
   """
   use HamsterTravelWeb, :html
 
-  import HamsterTravelWeb.Packing.BackpackCard
+  import HamsterTravelWeb.Packing.Backpacks.Card
 
   attr(:backpacks, :list, required: true)
 

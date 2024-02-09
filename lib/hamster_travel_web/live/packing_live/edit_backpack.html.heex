@@ -1,9 +1,7 @@
 <.live_component
-  module={BackpackForm}
+  module={FormComponent}
   id="create-backpack-form"
-  backpack={@backpack}
   action={:edit}
-  changeset={@changeset}
-  on_submit={&update_backpack/2}
+  backpack={@backpack}
   back_url={backpack_url(@backpack.slug)}
 />

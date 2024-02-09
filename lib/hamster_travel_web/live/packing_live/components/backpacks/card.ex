@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.Packing.BackpackCard do
+defmodule HamsterTravelWeb.Packing.Backpacks.Card do
   @moduledoc """
   This component renders backpack card
   """

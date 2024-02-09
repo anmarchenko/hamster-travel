@@ -5,14 +5,13 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
 
   use HamsterTravelWeb, :live_component
 
+  alias Ecto.Changeset
+
   alias HamsterTravel.Dates
   alias HamsterTravel.Planning
-
   alias HamsterTravel.Planning.Trip
 
   alias HamsterTravelWeb.Cldr
-
-  alias Ecto.Changeset
 
   @impl true
   def update(assigns, socket) do

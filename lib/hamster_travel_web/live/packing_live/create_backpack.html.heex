@@ -1,10 +1,8 @@
 <.live_component
-  module={BackpackForm}
+  module={FormComponent}
   id="create-backpack-form"
-  current_user={@current_user}
   action={:new}
+  current_user={@current_user}
   copy_from={@copy_from}
-  changeset={@changeset}
-  on_submit={&create_backpack/2}
   back_url={@back_url}
 />
