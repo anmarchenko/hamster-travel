@@ -45,7 +45,7 @@
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
     <.live_component
       :for={items_list <- @backpack.lists}
-      module={BackpackList}
+      module={ListComponent}
       id={"packing-list-#{items_list.id}"}
       list={items_list}
     />

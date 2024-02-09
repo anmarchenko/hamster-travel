@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.Packing.Items.Add do
+defmodule HamsterTravelWeb.Packing.Items.AddComponent do
   @moduledoc """
   Live component responsible for create a new backpack item
   """

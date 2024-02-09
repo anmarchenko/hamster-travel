@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.Packing.BackpackList do
+defmodule HamsterTravelWeb.Packing.Lists.ListComponent do
   @moduledoc """
   Live component responsible for showing and editing packing list
   """
@@ -10,8 +10,8 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
 
   alias HamsterTravel.Packing
 
-  alias HamsterTravelWeb.Packing.Items.Add, as: AddItem
-  alias HamsterTravelWeb.Packing.Items.Item
+  alias HamsterTravelWeb.Packing.Items.AddComponent, as: AddItem
+  alias HamsterTravelWeb.Packing.Items.ItemComponent
 
   @button_color "text-white dark:text-zinc-400 hover:bg-primary-600 dark:hover:bg-primary-800"
 
@@ -24,11 +24,13 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
   end
 
   def update(assigns, socket) do
+    changeset = Packing.change_list(assigns.list)
+
     socket =
       socket
-      |> assign(:done, Packing.all_checked?(assigns.list.items))
-      |> assign(:changeset, Packing.change_list(assigns.list))
       |> assign(assigns)
+      |> assign(:done, Packing.all_checked?(assigns.list.items))
+      |> assign_form(changeset)
 
     {:ok, socket}
   end
@@ -91,12 +93,12 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
           x-data={"{ showItems: $persist(true).as('list-#{@list.id}') }"}
         >
           <div class={"p-4 rounded-t-lg #{decoration_classes(@done)}"}>
-            <.card_header edit={@edit} changeset={@changeset} list={@list} phx-target={@myself} />
+            <.card_header edit={@edit} form={@form} list={@list} phx-target={@myself} />
           </div>
           <div class="p-4" x-show="showItems" x-transition.duration.300ms>
             <.live_component
               :for={item <- @list.items}
-              module={Item}
+              module={ItemComponent}
               id={"item-#{item.id}"}
               item={item}
             />
@@ -158,15 +160,9 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
   def card_header(%{edit: true} = assigns) do
     ~H"""
     <.inline>
-      <.form
-        :let={f}
-        for={@changeset}
-        phx-submit="update"
-        phx-target={assigns[:"phx-target"]}
-        as={:list}
-      >
+      <.form for={@form} phx-submit="update" phx-target={assigns[:"phx-target"]} as={:list}>
         <.inline>
-          <.text_input form={f} id={"update-item-#{@list.id}"} field={:name} x-init="$el.focus()" />
+          <.input id={"update-item-#{@list.id}"} field={@form[:name]} x-init="$el.focus()" />
           <.icon_button class={button_color()}>
             <.icon name={:check} />
           </.icon_button>
@@ -183,4 +179,8 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
   defp decoration_classes(_), do: "bg-violet-700 dark:bg-violet-900"
 
   defp button_color, do: @button_color
+
+  defp assign_form(socket, %Ecto.Changeset{} = changeset) do
+    assign(socket, :form, to_form(changeset))
+  end
 end
