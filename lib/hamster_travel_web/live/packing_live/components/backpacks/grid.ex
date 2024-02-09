@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.Packing.Grid do
+defmodule HamsterTravelWeb.Packing.Backpacks.Grid do
   @moduledoc """
   Parses plan cards as a grid
   """

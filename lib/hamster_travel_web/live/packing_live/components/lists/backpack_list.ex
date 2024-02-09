@@ -5,12 +5,13 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
 
   require Logger
 
+  alias HamsterTravelWeb.Packing.AddItem
   use HamsterTravelWeb, :live_component
 
   alias HamsterTravel.Packing
 
-  alias HamsterTravelWeb.Packing.AddItem
-  alias HamsterTravelWeb.Packing.BackpackItem
+  alias HamsterTravelWeb.Packing.Items.Add, as: AddItem
+  alias HamsterTravelWeb.Packing.Items.Item
 
   @button_color "text-white dark:text-zinc-400 hover:bg-primary-600 dark:hover:bg-primary-800"
 
@@ -95,7 +96,7 @@ defmodule HamsterTravelWeb.Packing.BackpackList do
           <div class="p-4" x-show="showItems" x-transition.duration.300ms>
             <.live_component
               :for={item <- @list.items}
-              module={BackpackItem}
+              module={Item}
               id={"item-#{item.id}"}
               item={item}
             />
