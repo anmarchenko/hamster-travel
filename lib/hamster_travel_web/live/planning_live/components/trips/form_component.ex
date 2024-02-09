@@ -28,7 +28,6 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
     socket =
       socket
       |> assign(assigns)
-      |> assign(:changeset, changeset)
       |> assign(:dates_unknown, Changeset.get_field(changeset, :dates_unknown))
       |> assign(:start_date, Changeset.get_field(changeset, :start_date))
       |> assign(:end_date, Changeset.get_field(changeset, :end_date))
@@ -169,7 +168,6 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
     {:noreply,
      socket
      |> assign(:dates_unknown, dates_unknown)
-     |> assign(:changeset, new_changeset)
      |> assign_form(new_changeset)}
   end
 
@@ -252,7 +250,6 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
     {
       :noreply,
       socket
-      |> assign(:changeset, changeset)
       |> assign_form(changeset)
     }
   end
