@@ -83,8 +83,6 @@ backpack:
         count: 1
       - name: Наушники для Дианы
         count: 1
-      - name: Видеоняня
-        count: 1
       - name: Иголочка от айфона
         count: 1
       - name: Планшет
@@ -133,7 +131,7 @@ backpack:
     items:
       - name: Штаны и колкотки
         count: 'nights'
-      - name: Футболки
+      - name: Футболки и платья
         count: 'days / 2'
       - name: Трусы
         count: 'nights'
@@ -147,13 +145,11 @@ backpack:
         count: 2
       - name: Кепка
         count: 1
-      - name: Желтые штаны
-        count: 1
-      - name: Платье
-        count: 2
-      - name: Тонкая кофта
+      - name: Тапки
         count: 1
       - name: Кофта
+        count: 1
+      - name: Пижама
         count: 1
   - name: В чем едем
     items:
@@ -187,27 +183,67 @@ backpack:
         count: 1
       - name: Кофта Диана
         count: 1
+      - name: Шапка Юля
+        count: 1
+      - name: Шапка Андрей
+        count: 1
+      - name: Шапка Диана
+        count: 1
+      - name: Шарф Диана
+        count: 1
+      - name: Перчатки Диана
+        count: 1
+      - name: Колготки
+        count: 1
   - name: Аптечка
     items:
       - name: Ибупрофен
         count: 8
       - name: Парацетамол
-        count: 2
+        count: 8
+      - name: Детский ибупрофен
+        count: 1
       - name: Пластырь
         count: 4
-      - name: Таблетки от мигрени
-        count: 2
-      - name: Momegalen
-        count: 1
-      - name: Ацикловир
-        count: 1
       - name: Градусник
         count: 1
       - name: Капли в нос
         count: 1
       - name: Капли в глаза
         count: 1
-  - name: Обувь
+      - name: Momegalen
+        count: 1
+      - name: Ацикловир
+        count: 1
+  - name: Вещи для Дианы
     items:
-      - name: Тапочки
+      - name: Видеоняня
+        count: 1
+      - name: Книги
         count: 3
+      - name: Раскраска
+        count: 1
+      - name: Тетрадка
+        count: 3
+      - name: Листочки
+        count: 20
+      - name: Карандаши и фломастеры
+        count: 10
+      - name: Игрушки
+        count: 5
+      - name: Игрушка в самолет
+        count: 1
+      - name: Магнитики
+        count: 1
+      - name: Наклейки
+        count: 2
+      - name: Нарукавники
+        count: 1
+      - name: Очки для плавания
+        count: 2
+      - name: Накладки на туалет
+        count: 20
+      - name: Хрустики
+        count: 1
+      - name: Сладости
+        count: 1

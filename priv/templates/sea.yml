@@ -1,5 +1,5 @@
 backpack:
-  - name: Гигиена (Море)
+  - name: Гигиена
     items:
       - name: Гель для рук
         count: 1
@@ -83,8 +83,6 @@ backpack:
         count: 1
       - name: Наушники для Дианы
         count: 1
-      - name: Видеоняня
-        count: 1
       - name: Иголочка от айфона
         count: 1
       - name: Планшет
@@ -129,38 +127,28 @@ backpack:
         count: 3
   - name: Одежда для Дианы
     items:
-      - name: Штаны и колкотки
+      - name: Шорты/штаны летние
         count: 'nights'
       - name: Футболки
-        count: 'days / 2'
+        count: 'nights'
       - name: Трусы
         count: 'nights'
       - name: Носки
         count: 'nights'
       - name: Купальник
-        count: 1
-      - name: Шапка
-        count: 1
-      - name: Перчатки
-        count: 2
-      - name: Кепка
-        count: 1
-      - name: Желтые штаны
+        count: 3
+      - name: Кепка/шляпа
+        count: 4
+      - name: Кофта
         count: 1
       - name: Платье
+        count: 'days / 2'
+      - name: Пижама
         count: 2
-      - name: Тонкая кофта
-        count: 1
-      - name: Кофта
+      - name: Юбка
         count: 1
   - name: В чем едем
     items:
-      - name: Куртка Юля
-        count: 1
-      - name: Куртка Андрей
-        count: 1
-      - name: Куртка Диана
-        count: 1
       - name: Ботинки Юля
         count: 1
       - name: Ботинки Андрей
@@ -190,22 +178,88 @@ backpack:
       - name: Ибупрофен
         count: 8
       - name: Парацетамол
-        count: 2
+        count: 8
+      - name: Детский ибупрофен
+        count: 1
       - name: Пластырь
         count: 4
-      - name: Таблетки от мигрени
-        count: 2
-      - name: Momegalen
-        count: 1
-      - name: Ацикловир
-        count: 1
       - name: Градусник
         count: 1
       - name: Капли в нос
         count: 1
       - name: Капли в глаза
         count: 1
+      - name: Momegalen
+        count: 1
+      - name: Бепантен
+        count: 1
+      - name: Ацикловир
+        count: 1
+      - name: Kamilosan
+        count: 1
+  - name: Вещи для Дианы
+    items:
+      - name: Видеоняня
+        count: 1
+      - name: Книги
+        count: 3
+      - name: Раскраска
+        count: 1
+      - name: Тетрадка
+        count: 3
+      - name: Листочки
+        count: 20
+      - name: Карандаши и фломастеры
+        count: 10
+      - name: Игрушки
+        count: 5
+      - name: Игрушка в самолет
+        count: 1
+      - name: Магнитики
+        count: 1
+      - name: Наклейки
+        count: 2
+      - name: Нарукавники
+        count: 1
+      - name: Очки для плавания
+        count: 2
+      - name: Накладки на туалет
+        count: 20
+      - name: Хрустики
+        count: 1
+      - name: Сладости
+        count: 1
+      - name: Ступенька
+        count: 1
+      - name: Сиденье на туалет
+        count: 1
+      - name: Плавательная палка
+        count: 1
+      - name: Песочные игрушки
+        count: 10
+      - name: Надувной шар
+        count: 1
+      - name: Уточка
+        count: 1
+      - name: Жилет
+        count: 1
   - name: Обувь
     items:
       - name: Тапочки
         count: 3
+      - name: Сандали Андрей
+        count: 1
+      - name: Сандали Юля
+        count: 3
+  - name: Багаж
+    items:
+      - name: Чемоданы
+        count: 2
+      - name: Рюкзак
+        count: 2
+      - name: Trunki
+        count: 1
+      - name: Пляжные сумки
+        count: 2
+      - name: Сумки на выход
+        count: 2
