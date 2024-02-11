@@ -72,7 +72,9 @@ backpack:
       - name: Зарядка для телефона
         count: 2
       - name: Зарядка для часов
-        count: 2
+        count: 1
+      - name: Зарядка тройная
+        count: 1
       - name: Путеводитель
         count: 1
       - name: Билеты

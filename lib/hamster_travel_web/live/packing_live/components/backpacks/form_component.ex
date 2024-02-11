@@ -11,11 +11,7 @@ defmodule HamsterTravelWeb.Packing.Backpacks.FormComponent do
     changeset =
       case assigns.action do
         :new ->
-          if assigns.copy_from != nil do
-            Packing.new_backpack(assigns.copy_from)
-          else
-            Packing.new_backpack()
-          end
+          Packing.new_backpack(assigns.copy_from)
 
         :edit ->
           Packing.change_backpack(assigns.backpack)

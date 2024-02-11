@@ -56,6 +56,10 @@ defmodule HamsterTravel.Packing do
     Backpack.changeset(%Backpack{days: 2, nights: 1}, %{})
   end
 
+  def new_backpack(nil) do
+    new_backpack()
+  end
+
   def new_backpack(backpack) do
     name = "#{backpack.name} (#{gettext("Copy")})"
     Backpack.changeset(%Backpack{days: backpack.days, nights: backpack.nights, name: name}, %{})

@@ -5,7 +5,6 @@ defmodule HamsterTravelWeb.Packing.Lists.ListComponent do
 
   require Logger
 
-  alias HamsterTravelWeb.Packing.AddItem
   use HamsterTravelWeb, :live_component
 
   alias HamsterTravel.Packing
@@ -36,22 +35,11 @@ defmodule HamsterTravelWeb.Packing.Lists.ListComponent do
   end
 
   def handle_event("edit", _, socket) do
-    list = socket.assigns.list
-
-    socket =
-      socket
-      |> assign(:edit, true)
-      |> assign(:changeset, Packing.change_list(list))
-
-    {:noreply, socket}
+    {:noreply, assign(socket, :edit, true)}
   end
 
   def handle_event("cancel", _, socket) do
-    socket =
-      socket
-      |> assign(:edit, false)
-
-    {:noreply, socket}
+    {:noreply, assign(socket, :edit, false)}
   end
 
   def handle_event("update", %{"list" => params}, socket) do
@@ -71,11 +59,7 @@ defmodule HamsterTravelWeb.Packing.Lists.ListComponent do
           "Could not update an list #{list_to_update.id} because of #{Kernel.inspect(error)}"
         )
 
-        socket =
-          socket
-          |> assign(:edit, false)
-
-        {:noreply, socket}
+        {:noreply, assign(socket, :edit, false)}
     end
   end
 
