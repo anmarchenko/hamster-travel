@@ -1,10 +1,10 @@
-defmodule HamsterTravelWeb.Packing.Grid do
+defmodule HamsterTravelWeb.Packing.Backpacks.Grid do
   @moduledoc """
   Parses plan cards as a grid
   """
   use HamsterTravelWeb, :html
 
-  import HamsterTravelWeb.Packing.BackpackCard
+  import HamsterTravelWeb.Packing.Backpacks.Card
 
   attr(:backpacks, :list, required: true)
 

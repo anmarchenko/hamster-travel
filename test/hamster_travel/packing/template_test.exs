@@ -34,7 +34,7 @@ defmodule HamsterTravel.Packing.TemplateTest do
   end
 
   test "it parses predefined templates" do
-    assert {:ok, _} = Template.execute("hamsters", %{days: 3, nights: 2})
+    assert {:ok, _} = Template.execute("default", %{days: 3, nights: 2})
   end
 
   test "when file does not exists it returns an error" do

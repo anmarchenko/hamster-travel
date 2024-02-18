@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.Packing.AddList do
+defmodule HamsterTravelWeb.Packing.Lists.AddComponent do
   @moduledoc """
   Live component responsible for creating a new backpack list
   """
@@ -19,10 +19,12 @@ defmodule HamsterTravelWeb.Packing.AddList do
   end
 
   def handle_event("edit", _, socket) do
+    changeset = Packing.new_list()
+
     socket =
       socket
       |> assign(:edit, true)
-      |> assign(:changeset, Packing.new_list())
+      |> assign_form(changeset)
 
     {:noreply, socket}
   end
@@ -45,7 +47,7 @@ defmodule HamsterTravelWeb.Packing.AddList do
           "Error creating list; params were #{inspect(list_params)}, result is #{inspect(changeset)}"
         )
 
-        {:noreply, assign(socket, %{changeset: changeset})}
+        {:noreply, assign_form(socket, changeset)}
     end
   end
 
@@ -53,12 +55,11 @@ defmodule HamsterTravelWeb.Packing.AddList do
     ~H"""
     <div class="mb-5">
       <.inline>
-        <.form :let={f} for={@changeset} phx-submit="create" phx-target={@myself} as={:list}>
+        <.form for={@form} phx-submit="create" phx-target={@myself} as={:list}>
           <.inline>
-            <.text_input
-              form={f}
+            <.input
               id={"add-list-#{@backpack.id}"}
-              field={:name}
+              field={@form[:name]}
               placeholder={gettext("List name")}
               x-init="$el.focus()"
             />
@@ -84,5 +85,9 @@ defmodule HamsterTravelWeb.Packing.AddList do
       </.button>
     </div>
     """
+  end
+
+  defp assign_form(socket, %Ecto.Changeset{} = changeset) do
+    assign(socket, :form, to_form(changeset))
   end
 end

@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.Packing.AddItem do
+defmodule HamsterTravelWeb.Packing.Items.AddComponent do
   @moduledoc """
   Live component responsible for create a new backpack item
   """
@@ -10,11 +10,13 @@ defmodule HamsterTravelWeb.Packing.AddItem do
   alias HamsterTravel.Packing
 
   def update(assigns, socket) do
+    changeset = Packing.new_item()
+
     socket =
       socket
       |> assign(assigns)
-      |> assign(changeset: Packing.new_item())
       |> assign(name: nil)
+      |> assign_form(changeset)
 
     {:ok, socket}
   end
@@ -27,14 +29,16 @@ defmodule HamsterTravelWeb.Packing.AddItem do
   def handle_event("create_item", %{"item" => item_params}, socket) do
     case Packing.create_item(item_params, socket.assigns.list) do
       {:ok, _} ->
-        {:noreply, assign(socket, %{changeset: Packing.new_item(), name: nil})}
+        changeset = Packing.new_item()
+
+        {:noreply, socket |> assign(:name, nil) |> assign_form(changeset)}
 
       {:error, changeset} ->
         Logger.warning(
           "Error creating item; params were #{inspect(item_params)}, result is #{inspect(changeset)}"
         )
 
-        {:noreply, assign(socket, %{changeset: changeset})}
+        {:noreply, assign_form(socket, changeset)}
     end
   end
 
@@ -45,19 +49,11 @@ defmodule HamsterTravelWeb.Packing.AddItem do
   def render(assigns) do
     ~H"""
     <div class="mt-3">
-      <.form
-        :let={f}
-        for={@changeset}
-        phx-submit="create_item"
-        phx-change="change"
-        phx-target={@myself}
-        as={:item}
-      >
+      <.form for={@form} as={:item} phx-submit="create_item" phx-change="change" phx-target={@myself}>
         <.inline>
-          <.text_input
-            form={f}
+          <.input
             id={"add-item-#{@list.id}"}
-            field={:name}
+            field={@form[:name]}
             placeholder={gettext("Add backpack item")}
             value={@name}
           />
@@ -68,5 +64,9 @@ defmodule HamsterTravelWeb.Packing.AddItem do
       </.form>
     </div>
     """
+  end
+
+  defp assign_form(socket, %Ecto.Changeset{} = changeset) do
+    assign(socket, :form, to_form(changeset))
   end
 end

@@ -5,7 +5,7 @@ defmodule HamsterTravelWeb.Packing.IndexBackpacks do
   use HamsterTravelWeb, :live_view
 
   import HamsterTravelWeb.Gettext
-  import HamsterTravelWeb.Packing.Grid
+  import HamsterTravelWeb.Packing.Backpacks.Grid
 
   alias HamsterTravel.Packing
 

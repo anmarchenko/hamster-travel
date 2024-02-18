@@ -62,7 +62,7 @@ jobs:
         run: mix compile
 
       - name: Setup database
-        run: mix ecto.setup
+        run: mix do ecto.create, ecto.migrate
 
       - name: Run tests
         run: mix test
