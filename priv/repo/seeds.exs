@@ -40,17 +40,17 @@ john =
 HamsterTravel.Social.add_friends(bunny.id, hamster.id)
 
 HamsterTravel.Packing.create_backpack(
-  %{template: "hamsters", name: "Италия", days: 14, nights: 13},
+  %{template: "default", name: "Италия", days: 14, nights: 13},
   bunny
 )
 
 HamsterTravel.Packing.create_backpack(
-  %{template: "hamsters", name: "USA", days: 20, nights: 19},
+  %{template: "sea", name: "Mallorca", days: 20, nights: 19},
   hamster
 )
 
 HamsterTravel.Packing.create_backpack(
-  %{template: "hamsters", name: "Выходные в горах", days: 2, nights: 1},
+  %{template: "mountains", name: "Выходные в горах", days: 2, nights: 1},
   bunny
 )
 
