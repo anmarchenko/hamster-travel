@@ -1,3 +1,9 @@
 <.container wide>
+  <div class="mb-8">
+    <.button link_type="live_redirect" to="trips/new" color="primary">
+      <.icon name={:plus} solid={true} class="w-5 h-5 mr-2" />
+      <%= gettext("Create trip") %>
+    </.button>
+  </div>
   <.grid trips={@plans} />
 </.container>
