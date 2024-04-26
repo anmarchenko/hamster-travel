@@ -9,7 +9,7 @@
         <.button link_type="live_redirect" to={trip_url(@trip.slug, :edit)} color="secondary">
           <.icon_text icon={:pencil} label={gettext("Edit")} />
         </.button>
-        <.link href={trip_url(@trip.slug, :copy)}>
+        <%!-- <.link href={trip_url(@trip.slug, :copy)}>
           <%= gettext("Make a copy") %>
         </.link>
         <.link href={trip_url(@trip.slug, :pdf)}>
@@ -17,7 +17,7 @@
         </.link>
         <.link href={trip_url(@trip.slug, :delete)}>
           <%= gettext("Delete") %>
-        </.link>
+        </.link> --%>
       </.inline>
       <.status_row trip={@trip} />
     </div>

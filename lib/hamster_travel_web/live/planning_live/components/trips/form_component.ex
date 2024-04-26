@@ -42,6 +42,7 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
     <div>
       <.form_container>
         <.form
+          id="trip-form"
           for={@form}
           as={:trip}
           phx-submit="form_submit"
@@ -155,52 +156,53 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
     # convert dates_unknown to boolean
     dates_unknown = dates_unknown == "true"
 
-    new_changeset =
+    trip_params =
       trip_params
       |> Map.merge(%{
         "start_date" => assigns.start_date,
         "end_date" => assigns.end_date,
         "duration" => Dates.duration(assigns.start_date, assigns.end_date)
       })
-      |> Planning.trip_changeset()
 
     {:noreply,
      socket
      |> assign(:dates_unknown, dates_unknown)
-     |> assign_form(new_changeset)}
+     |> assign_form(trip_params)}
   end
 
   def handle_event(
         "form_changed",
         %{
           "_target" => ["trip", "start_date"],
-          "trip" => %{"start_date" => start_date}
+          "trip" => %{"start_date" => start_date} = trip_params
         },
         socket
       ) do
     {:noreply,
      socket
-     |> assign(start_date: start_date)}
+     |> assign(start_date: start_date)
+     |> assign_form(trip_params)}
   end
 
   def handle_event(
         "form_changed",
         %{
           "_target" => ["trip", "end_date"],
-          "trip" => %{"end_date" => end_date}
+          "trip" => %{"end_date" => end_date} = trip_params
         },
         socket
       ) do
     {:noreply,
      socket
-     |> assign(end_date: end_date)}
+     |> assign(end_date: end_date)
+     |> assign_form(trip_params)}
   end
 
   def handle_event(
         "form_changed",
         %{
           "_target" => ["trip", "status"],
-          "trip" => %{"status" => status}
+          "trip" => %{"status" => status} = trip_params
         },
         socket
       ) do
@@ -212,18 +214,29 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
         socket
       end
 
+    trip_params =
+      if status == Trip.finished() do
+        trip_params
+        |> Map.merge(%{"dates_unknown" => false})
+      else
+        trip_params
+      end
+
     {:noreply,
      socket
-     |> assign(status: status)}
+     |> assign(status: status)
+     |> assign_form(trip_params)}
   end
 
   @impl true
   def handle_event(
         "form_changed",
-        _,
+        %{
+          "trip" => trip_params
+        },
         socket
       ) do
-    {:noreply, socket}
+    {:noreply, socket |> assign_form(trip_params)}
   end
 
   @impl true
@@ -269,5 +282,9 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
     assign(socket, :form, to_form(changeset))
+  end
+
+  defp assign_form(socket, trip_params) when is_map(trip_params) do
+    assign_form(socket, Planning.trip_changeset(trip_params))
   end
 end
