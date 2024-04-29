@@ -20,7 +20,7 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
         :new ->
           Planning.new_trip()
 
-        _ ->
+        :edit ->
           Planning.change_trip(assigns.trip)
       end
 
@@ -247,10 +247,16 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
   def on_submit(socket, :new, trip_params) do
     trip_params
     |> Planning.create_trip(socket.assigns.current_user)
-    |> result(socket, :new)
+    |> result(socket)
   end
 
-  def result({:ok, trip}, socket, :new) do
+  def on_submit(socket, :edit, trip_params) do
+    socket.assigns.trip
+    |> Planning.update_trip(trip_params)
+    |> result(socket)
+  end
+
+  def result({:ok, trip}, socket) do
     socket =
       socket
       |> push_redirect(to: ~p"/trips/#{trip.slug}")
@@ -258,7 +264,7 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
     {:noreply, socket}
   end
 
-  def result({:error, changeset}, socket, _) do
+  def result({:error, changeset}, socket) do
     {
       :noreply,
       socket

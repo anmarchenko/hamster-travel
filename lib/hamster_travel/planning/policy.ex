@@ -6,7 +6,7 @@ defmodule HamsterTravel.Planning.Policy do
   alias HamsterTravel.Social
 
   def authorized?(:edit, %Trip{} = trip, %User{} = user) do
-    trip.author_id == user.id
+    Social.user_in_friends_circle?(user, trip.author_id)
   end
 
   def authorized?(:delete, %Trip{} = trip, %User{} = user) do
