@@ -430,10 +430,13 @@ defmodule HamsterTravelWeb.CoreComponents do
       <div>
         <h1 class="text-lg font-semibold leading-8 text-zinc-800 dark:text-zinc-300">
           <%= render_slot(@inner_block) %>
+          <span
+            :if={@subtitle != []}
+            class="ml-2 font-light leading-6 text-zinc-600 dark:text-zinc-400"
+          >
+            <%= render_slot(@subtitle) %>
+          </span>
         </h1>
-        <p :if={@subtitle != []} class="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
-          <%= render_slot(@subtitle) %>
-        </p>
       </div>
       <div class="flex-none"><%= render_slot(@actions) %></div>
     </header>

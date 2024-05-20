@@ -96,6 +96,7 @@ defmodule HamsterTravelWeb.Packing.Lists.ListComponent do
 
   attr :edit, :boolean, required: true
   attr :list, :any, required: true
+  attr :form, :any, required: true
   attr :"phx-target", :any, required: true
   attr :changeset, :any, default: nil
 

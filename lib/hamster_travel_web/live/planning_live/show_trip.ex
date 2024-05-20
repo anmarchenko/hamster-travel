@@ -10,6 +10,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   alias HamsterTravel.Planning
 
+  alias HamsterTravelWeb.Cldr
   alias HamsterTravelWeb.Planning.Trips.Tabs.TabActivity
   alias HamsterTravelWeb.Planning.Trips.Tabs.TabItinerary
 

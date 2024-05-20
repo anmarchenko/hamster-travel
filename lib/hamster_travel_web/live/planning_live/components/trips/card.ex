@@ -7,6 +7,8 @@ defmodule HamsterTravelWeb.Planning.Trips.Card do
   import HamsterTravelWeb.Planning.Trips.Shorts
   import HamsterTravelWeb.Planning.Trips.StatusRow
 
+  alias HamsterTravelWeb.Cldr
+
   attr(:trip, :map, required: true)
 
   def trip_card(assigns) do
@@ -24,6 +26,9 @@ defmodule HamsterTravelWeb.Planning.Trips.Card do
         <p class="text-base font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
           <.link navigate={trip_url(@trip.slug)}>
             <%= @trip.name %>
+            <span class="font-light text-zinc-600 dark:text-zinc-400">
+              <%= Cldr.year_with_month(@trip.start_date) %>
+            </span>
           </.link>
         </p>
         <.secondary tag="div" italic={false} class="font-light">

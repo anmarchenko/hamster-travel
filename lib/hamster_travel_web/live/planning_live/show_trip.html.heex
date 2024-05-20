@@ -3,6 +3,9 @@
     <div class="flex-1 flex flex-col gap-y-4">
       <.header>
         <%= @trip.name %>
+        <:subtitle>
+          <%= Cldr.year_with_month(@trip.start_date) %>
+        </:subtitle>
       </.header>
       <.shorts trip={@trip} />
       <.inline class="gap-3 text-xs sm:text-base">
