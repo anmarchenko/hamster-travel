@@ -81,6 +81,34 @@ defmodule HamsterTravel.PlanningTest do
       end
     end
 
+    test "new_trip/1 returns a new trip changeset" do
+      planned = Trip.planned()
+
+      assert %Ecto.Changeset{
+               data: %{
+                 status: ^planned,
+                 people_count: 2,
+                 private: false,
+                 currency: "EUR"
+               }
+             } =
+               Planning.new_trip()
+    end
+
+    test "new_trip/1 with parameters returns a new trip changeset overriding fields from params" do
+      draft = Trip.draft()
+
+      assert %Ecto.Changeset{
+               data: %{
+                 status: ^draft,
+                 people_count: 2,
+                 private: false,
+                 currency: "EUR"
+               }
+             } =
+               Planning.new_trip(%{status: draft})
+    end
+
     test "create_trip/2 with valid data creates a trip", %{user: user} do
       valid_attrs = %{
         name: "Venice on weekend",

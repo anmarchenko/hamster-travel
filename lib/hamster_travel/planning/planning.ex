@@ -79,9 +79,15 @@ defmodule HamsterTravel.Planning do
     Trip.changeset(%Trip{}, params)
   end
 
-  def new_trip do
+  def new_trip(params \\ %{}) do
+    params =
+      Map.merge(
+        %{status: Trip.planned(), people_count: 2, private: false, currency: "EUR"},
+        params
+      )
+
     Trip.changeset(
-      %Trip{status: Trip.planned(), people_count: 2, private: false, currency: "EUR"},
+      struct(Trip, params),
       %{}
     )
   end
