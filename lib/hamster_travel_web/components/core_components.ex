@@ -187,17 +187,18 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   def flash_group(assigns) do
     ~H"""
-    <.flash kind={:info} title="Success!" flash={@flash} />
-    <.flash kind={:error} title="Error!" flash={@flash} />
+    <.flash kind={:info} title={gettext("Success!")} flash={@flash} />
+    <.flash kind={:error} title={gettext("Error!")} flash={@flash} />
     <.flash
       id="disconnected"
       kind={:error}
-      title="We can't find the internet"
+      title={gettext("We can't find the internet")}
       phx-disconnected={show("#disconnected")}
       phx-connected={hide("#disconnected")}
       hidden
     >
-      Attempting to reconnect <.icon name={:arrow_path} class="ml-1 h-3 w-3 animate-spin" />
+      <%= gettext("Attempting to reconnect") %>
+      <.icon name={:arrow_path} class="ml-1 h-3 w-3 animate-spin" />
     </.flash>
     """
   end
@@ -377,16 +378,30 @@ defmodule HamsterTravelWeb.CoreComponents do
     """
   end
 
+  attr(:href, :string, required: true)
+  attr(:method, :string, default: "get")
+
+  slot(:inner_block, required: true)
+
+  def ht_link(assigns) do
+    ~H"""
+    <.link
+      href={@href}
+      method={@method}
+      class="underline text-indigo-500 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-100"
+    >
+      <%= render_slot(@inner_block) %>
+    </.link>
+    """
+  end
+
   attr(:link, :string, required: true)
 
   def external_link(assigns) do
     ~H"""
-    <.link
-      href={@link}
-      class="underline text-indigo-500 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-100"
-    >
+    <.ht_link href={@link}>
       <%= URI.parse(@link).host %>
-    </.link>
+    </.ht_link>
     """
   end
 

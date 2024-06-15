@@ -266,23 +266,23 @@ msgid "Copy"
 msgstr ""
 
 #: lib/hamster_travel_web/live/packing_live/components/backpacks/form_component.ex:84
-#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:138
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:145
 #, elixir-autogen, elixir-format
 msgid "Save"
 msgstr ""
 
 #: lib/hamster_travel_web/live/packing_live/components/backpacks/form_component.ex:81
-#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:135
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:142
 #, elixir-autogen, elixir-format
 msgid "Cancel"
 msgstr ""
 
-#: lib/hamster_travel_web/components/core_components.ex:243
+#: lib/hamster_travel_web/components/core_components.ex:244
 #, elixir-autogen, elixir-format
 msgid "Actions"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/create_trip.ex:14
+#: lib/hamster_travel_web/live/planning_live/create_trip.ex:16
 #, elixir-autogen, elixir-format
 msgid "Create a new trip"
 msgstr ""
@@ -293,42 +293,42 @@ msgstr ""
 msgid "close"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:90
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:97
 #, elixir-autogen, elixir-format
 msgid "Dates are yet unknown"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:116
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:123
 #, elixir-autogen, elixir-format
 msgid "Duration"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:106
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:113
 #, elixir-autogen, elixir-format
 msgid "End date"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:124
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:131
 #, elixir-autogen, elixir-format
 msgid "People count"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:129
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:136
 #, elixir-autogen, elixir-format
 msgid "Private trip"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:97
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:104
 #, elixir-autogen, elixir-format
 msgid "Start date"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:81
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:88
 #, elixir-autogen, elixir-format
 msgid "Trip currency"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:57
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:64
 #, elixir-autogen, elixir-format
 msgid "Trip name"
 msgstr ""
@@ -342,7 +342,7 @@ msgstr ""
 msgid "2_finished"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:65
+#: lib/hamster_travel_web/live/planning_live/components/trips/form_component.ex:72
 #, elixir-autogen, elixir-format
 msgid "Trip status"
 msgstr ""
@@ -365,4 +365,49 @@ msgstr ""
 #: lib/hamster_travel_web/live/planning_live/edit_trip.ex:21
 #, elixir-autogen, elixir-format
 msgid "Edit trip"
+msgstr ""
+
+#: lib/hamster_travel_web/controllers/user_session_controller.ex:10
+#, elixir-autogen, elixir-format
+msgid "Account created successfully!"
+msgstr ""
+
+#: lib/hamster_travel_web/components/core_components.ex:200
+#, elixir-autogen, elixir-format
+msgid "Attempting to reconnect"
+msgstr ""
+
+#: lib/hamster_travel_web/components/core_components.ex:191
+#, elixir-autogen, elixir-format
+msgid "Error!"
+msgstr ""
+
+#: lib/hamster_travel_web/controllers/user_session_controller.ex:33
+#, elixir-autogen, elixir-format
+msgid "Invalid email or password"
+msgstr ""
+
+#: lib/hamster_travel_web/controllers/user_session_controller.ex:41
+#, elixir-autogen, elixir-format
+msgid "Logged out successfully."
+msgstr ""
+
+#: lib/hamster_travel_web/controllers/user_session_controller.ex:16
+#, elixir-autogen, elixir-format
+msgid "Password updated successfully!"
+msgstr ""
+
+#: lib/hamster_travel_web/components/core_components.ex:190
+#, elixir-autogen, elixir-format
+msgid "Success!"
+msgstr ""
+
+#: lib/hamster_travel_web/components/core_components.ex:195
+#, elixir-autogen, elixir-format
+msgid "We can't find the internet"
+msgstr ""
+
+#: lib/hamster_travel_web/controllers/user_session_controller.ex:20
+#, elixir-autogen, elixir-format
+msgid "Welcome back!"
 msgstr ""
