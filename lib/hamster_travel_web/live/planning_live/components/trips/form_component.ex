@@ -18,14 +18,14 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
     changeset =
       case assigns.action do
         :new ->
-          status =
+          new_trip_attrs =
             if assigns[:is_draft] do
-              Trip.draft()
+              %{status: Trip.draft(), dates_unknown: true, duration: 1}
             else
-              Trip.planned()
+              %{status: Trip.planned()}
             end
 
-          Planning.new_trip(%{status: status})
+          Planning.new_trip(new_trip_attrs)
 
         :edit ->
           Planning.change_trip(assigns.trip)
