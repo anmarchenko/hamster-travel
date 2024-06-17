@@ -17,15 +17,63 @@ defmodule HamsterTravel.PlanningTest do
       {:ok, user: Repo.preload(user, :friendships), friend: Repo.preload(friend, :friendships)}
     end
 
-    test "list_trips/1 returns all trips including ones from friends", %{
+    test "list_plans/1 returns all planned and finished trips including ones from friends", %{
       user: user,
       friend: friend
     } do
-      %{name: name} = trip_fixture(%{author_id: user.id})
-      %{name: friend_name} = trip_fixture(%{author_id: friend.id})
+      %{id: first_id} =
+        trip_fixture(%{
+          author_id: user.id,
+          status: Trip.planned(),
+          start_date: ~D[2023-06-12],
+          end_date: ~D[2023-06-13]
+        })
 
-      assert [%Trip{name: ^friend_name}, %Trip{name: ^name}] =
-               Planning.list_trips(user)
+      %{id: second_id} =
+        trip_fixture(%{
+          author_id: user.id,
+          status: Trip.planned(),
+          start_date: ~D[2023-03-01],
+          end_date: ~D[2023-03-02]
+        })
+
+      %{id: friend_id} = trip_fixture(%{author_id: friend.id, status: Trip.finished()})
+      %{id: _draft_id} = trip_fixture(%{author_id: user.id, status: Trip.draft()})
+
+      assert [
+               %Trip{id: ^first_id},
+               %Trip{id: ^second_id},
+               %Trip{id: ^friend_id}
+             ] =
+               Planning.list_plans(user)
+    end
+
+    test "list_drafts/1 returns all drafts for user", %{
+      user: user,
+      friend: friend
+    } do
+      %{id: first_id} =
+        trip_fixture(%{
+          author_id: user.id,
+          status: Trip.draft(),
+          name: "a"
+        })
+
+      %{id: second_id} =
+        trip_fixture(%{
+          author_id: user.id,
+          status: Trip.draft(),
+          name: "b"
+        })
+
+      %{id: _friend_id} = trip_fixture(%{author_id: friend.id, status: Trip.draft()})
+      %{id: _plan_id} = trip_fixture(%{author_id: user.id, status: Trip.planned()})
+
+      assert [
+               %Trip{id: ^first_id},
+               %Trip{id: ^second_id}
+             ] =
+               Planning.list_drafts(user)
     end
 
     test "get_trip/1 returns the trip with given id" do

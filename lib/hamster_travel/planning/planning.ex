@@ -9,20 +9,30 @@ defmodule HamsterTravel.Planning do
   alias HamsterTravel.Planning.Policy
   alias HamsterTravel.Planning.Trip
 
-  @doc """
-  Returns the list of trips.
-
-  ## Examples
-
-      iex> list_trips()
-      [%Trip{}, ...]
-
-  """
-  def list_trips(user) do
-    query = from t in Trip, order_by: [desc: t.inserted_at]
+  def list_plans(user) do
+    query =
+      from t in Trip,
+        where: t.status in [^Trip.planned(), ^Trip.finished()],
+        order_by: [
+          asc: t.status,
+          desc: t.start_date
+        ]
 
     query
-    |> Policy.user_scope(user)
+    |> Policy.user_plans_scope(user)
+    |> Repo.all()
+  end
+
+  def list_drafts(user) do
+    query =
+      from t in Trip,
+        where: t.status == ^Trip.draft(),
+        order_by: [
+          asc: t.name
+        ]
+
+    query
+    |> Policy.user_drafts_scope(user)
     |> Repo.all()
   end
 
@@ -70,7 +80,7 @@ defmodule HamsterTravel.Planning do
         where: t.slug == ^slug
 
     query
-    |> Policy.user_scope(user)
+    |> Policy.user_trip_visibility_scope(user)
     |> Repo.one!()
     |> trip_preloading()
   end
