@@ -379,7 +379,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   end
 
   attr(:href, :string, required: true)
-  attr(:method, :string, default: "get")
+  attr(:rest, :global)
 
   slot(:inner_block, required: true)
 
@@ -387,8 +387,8 @@ defmodule HamsterTravelWeb.CoreComponents do
     ~H"""
     <.link
       href={@href}
-      method={@method}
       class="underline text-indigo-500 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-100"
+      {@rest}
     >
       <%= render_slot(@inner_block) %>
     </.link>
