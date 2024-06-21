@@ -6,13 +6,15 @@ defmodule HamsterTravelWeb.Planning.IndexPlans do
 
   import HamsterTravelWeb.Planning.Grid
 
+  alias HamsterTravel.Planning
+
   @impl true
   def mount(_params, _session, socket) do
     socket =
       socket
       |> assign(active_nav: plans_nav_item())
       |> assign(page_title: gettext("Plans"))
-      |> assign(plans: HamsterTravel.plans())
+      |> stream(:plans, Planning.list_plans(socket.assigns.current_user))
 
     {:ok, socket}
   end

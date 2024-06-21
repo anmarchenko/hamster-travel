@@ -11,7 +11,7 @@ defmodule HamsterTravelWeb.Planning.Grid do
   def grid(assigns) do
     ~H"""
     <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-8">
-      <.trip_card :for={trip <- @trips} trip={trip} />
+      <.trip_card :for={{id, trip} <- @trips} trip={trip} id={id} />
     </div>
     """
   end

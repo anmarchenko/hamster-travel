@@ -33,7 +33,7 @@ jobs:
       - name: Set up Elixir
         uses: erlef/setup-beam@v1
         with:
-          elixir-version: '1.17.0'
+          elixir-version: '1.17'
           otp-version: '27.0'
 
       - name: Restore dependencies cache

@@ -9,7 +9,7 @@ defmodule HamsterTravel.Planning do
   alias HamsterTravel.Planning.Policy
   alias HamsterTravel.Planning.Trip
 
-  def list_plans(user) do
+  def list_plans(user \\ nil) do
     query =
       from t in Trip,
         where: t.status in [^Trip.planned(), ^Trip.finished()],
@@ -21,6 +21,7 @@ defmodule HamsterTravel.Planning do
     query
     |> Policy.user_plans_scope(user)
     |> Repo.all()
+    |> trip_preloading()
   end
 
   def list_drafts(user) do
@@ -34,6 +35,35 @@ defmodule HamsterTravel.Planning do
     query
     |> Policy.user_drafts_scope(user)
     |> Repo.all()
+    |> trip_preloading()
+  end
+
+  def next_plans(user \\ nil) do
+    query =
+      from t in Trip,
+        where: t.status == ^Trip.planned() and t.author_id == ^user.id,
+        order_by: [
+          asc: t.start_date
+        ],
+        limit: 4
+
+    query
+    |> Repo.all()
+    |> trip_preloading()
+  end
+
+  def last_trips(user \\ nil) do
+    query =
+      from t in Trip,
+        where: t.status == ^Trip.finished() and t.author_id == ^user.id,
+        order_by: [
+          desc: t.start_date
+        ],
+        limit: 6
+
+    query
+    |> Repo.all()
+    |> trip_preloading()
   end
 
   def get_trip(id) do

@@ -3,11 +3,11 @@
     <.subheader>
       <%= gettext("Next travels") %>
     </.subheader>
-    <.grid trips={@next_plans} />
+    <.grid trips={@streams.next_plans} />
     <.subheader>
       <%= gettext("Last travels") %>
     </.subheader>
-    <.grid trips={@last_plans} />
+    <.grid trips={@streams.last_trips} />
   </.container>
 <% else %>
   <.container>
