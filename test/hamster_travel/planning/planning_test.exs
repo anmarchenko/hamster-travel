@@ -127,6 +127,14 @@ defmodule HamsterTravel.PlanningTest do
           end_date: ~D[2023-03-02]
         })
 
+      %{id: _third_id} =
+        trip_fixture(%{
+          author_id: user.id,
+          status: Trip.finished(),
+          start_date: ~D[2023-03-01],
+          end_date: ~D[2023-03-02]
+        })
+
       %{id: _friend_id} = trip_fixture(%{author_id: friend.id, status: Trip.planned()})
       %{id: _draft_id} = trip_fixture(%{author_id: user.id, status: Trip.draft()})
 
@@ -135,6 +143,44 @@ defmodule HamsterTravel.PlanningTest do
                %Trip{id: ^first_id}
              ] =
                Planning.next_plans(user)
+    end
+
+    test "last_trips/1 returns most recent trips belonging to the user", %{
+      user: user,
+      friend: friend
+    } do
+      %{id: _first_id} =
+        trip_fixture(%{
+          author_id: user.id,
+          status: Trip.planned(),
+          start_date: ~D[2023-06-12],
+          end_date: ~D[2023-06-13]
+        })
+
+      %{id: second_id} =
+        trip_fixture(%{
+          author_id: user.id,
+          status: Trip.finished(),
+          start_date: ~D[2023-03-01],
+          end_date: ~D[2023-03-02]
+        })
+
+      %{id: third_id} =
+        trip_fixture(%{
+          author_id: user.id,
+          status: Trip.finished(),
+          start_date: ~D[2023-07-01],
+          end_date: ~D[2023-07-02]
+        })
+
+      %{id: _friend_id} = trip_fixture(%{author_id: friend.id, status: Trip.finished()})
+      %{id: _draft_id} = trip_fixture(%{author_id: user.id, status: Trip.draft()})
+
+      assert [
+               %Trip{id: ^third_id},
+               %Trip{id: ^second_id}
+             ] =
+               Planning.last_trips(user)
     end
 
     test "get_trip/1 returns the trip with given id" do
