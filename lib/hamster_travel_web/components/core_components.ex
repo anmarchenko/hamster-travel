@@ -346,18 +346,22 @@ defmodule HamsterTravelWeb.CoreComponents do
     """
   end
 
+  attr(:id, :string, default: nil)
   attr(:class, :string, default: nil)
 
   slot(:inner_block, required: true)
 
   def card(assigns) do
     ~H"""
-    <div class={
-      build_class([
-        "flex flex-row bg-zinc-50 dark:bg-zinc-900 dark:border dark:border-zinc-600 shadow-md rounded-lg hover:shadow-lg hover:bg-white hover:dark:bg-zinc-800",
-        @class
-      ])
-    }>
+    <div
+      id={@id}
+      class={
+        build_class([
+          "flex flex-row bg-zinc-50 dark:bg-zinc-900 dark:border dark:border-zinc-600 shadow-md rounded-lg hover:shadow-lg hover:bg-white hover:dark:bg-zinc-800",
+          @class
+        ])
+      }
+    >
       <%= render_slot(@inner_block) %>
     </div>
     """

@@ -8,14 +8,25 @@ defmodule HamsterTravelWeb.Home do
   import HamsterTravelWeb.Gettext
   import HamsterTravelWeb.Planning.Grid
 
+  alias HamsterTravel.Planning
+
   @impl true
   def mount(_params, _session, socket) do
     socket =
       socket
       |> assign(active_nav: home_nav_item())
       |> assign(page_title: gettext("Homepage"))
-      |> assign(next_plans: HamsterTravel.next_plans())
-      |> assign(last_plans: HamsterTravel.last_plans())
+
+    current_user = socket.assigns.current_user
+
+    socket =
+      if current_user do
+        socket
+        |> stream(:next_plans, Planning.next_plans(current_user))
+        |> stream(:last_trips, Planning.last_trips(current_user))
+      else
+        socket
+      end
 
     {:ok, socket}
   end

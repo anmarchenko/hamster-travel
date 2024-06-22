@@ -17,11 +17,19 @@ defmodule HamsterTravel.Planning.Policy do
     true
   end
 
+  def user_trip_visibility_scope(query, nil) do
+    from(t in query, where: t.private == false)
+  end
+
   def user_trip_visibility_scope(query, %User{} = user) do
     friends_circle = Social.extract_policy_user_ids(user)
 
     # TODO: or if I am participant in the trip
     from(t in query, where: t.author_id in ^friends_circle or t.private == false)
+  end
+
+  def user_plans_scope(query, nil) do
+    from(t in query, where: t.private == false)
   end
 
   def user_plans_scope(query, %User{} = user) do

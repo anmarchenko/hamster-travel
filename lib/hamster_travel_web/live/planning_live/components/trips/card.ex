@@ -9,15 +9,17 @@ defmodule HamsterTravelWeb.Planning.Trips.Card do
 
   alias HamsterTravelWeb.Cldr
 
+  attr(:id, :string, required: true)
   attr(:trip, :map, required: true)
 
   def trip_card(assigns) do
     ~H"""
-    <.card>
+    <.card id={@id}>
       <div class="shrink-0">
         <.link navigate={trip_url(@trip.slug)}>
+          <%!-- # @trip.cover ||  --%>
           <img
-            src={@trip[:cover] || placeholder_image(@trip.id)}
+            src={placeholder_image(@trip.id)}
             class="w-32 h-32 object-cover object-center rounded-l-lg"
           />
         </.link>

@@ -8,7 +8,7 @@
         </:subtitle>
       </.header>
       <.shorts trip={@trip} />
-      <.inline class="gap-3 text-xs sm:text-base">
+      <.inline :if={@current_user} class="gap-3 text-xs sm:text-base">
         <.button link_type="live_redirect" to={trip_url(@trip.slug, :edit)} color="secondary">
           <.icon_text icon={:pencil} label={gettext("Edit")} />
         </.button>
