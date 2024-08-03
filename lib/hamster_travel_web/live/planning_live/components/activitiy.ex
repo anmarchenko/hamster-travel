@@ -62,7 +62,6 @@ defmodule HamsterTravelWeb.Planning.Activity do
 
   defp activity_feature(%{value: nil} = assigns) do
     ~H"""
-
     """
   end
 
