@@ -8,12 +8,6 @@ defmodule HamsterTravelWeb.UserLoginLive do
         <h2 class="mt-6 text-center text-3xl font-bold tracking-tight">
           <%= gettext("Sign in to your account") %>
         </h2>
-        <p class="mt-2 text-center text-sm hidden">
-          Or
-          <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">
-            start your 14-day free trial
-          </a>
-        </p>
       </div>
 
       <.form
@@ -86,7 +80,7 @@ defmodule HamsterTravelWeb.UserLoginLive do
   end
 
   def mount(_params, _session, socket) do
-    email = live_flash(socket.assigns.flash, :email)
+    email = Phoenix.Flash.get(socket.assigns.flash, :email)
     form = to_form(%{"email" => email}, as: "user")
     {:ok, assign(socket, form: form), temporary_assigns: [form: form]}
   end
