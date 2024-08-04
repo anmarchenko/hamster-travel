@@ -12,7 +12,6 @@ defmodule HamsterTravel.Geo.Country do
     field :currency_name, :string
     field :iso3, :string
     field :ison, :string
-    field :population, :integer, virtual: true
 
     timestamps()
   end

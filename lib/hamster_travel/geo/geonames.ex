@@ -3,19 +3,29 @@ defmodule Geo.Geonames do
   Handles downloading, parsing, and importing geonames data.
   """
   alias HamsterTravel.Geo.Country
+  alias HamsterTravel.Repo
 
   require Logger
 
   def import_countries do
     {:ok, countries} = download_countries()
 
-    countries
-    |> String.split("\r\n")
-    |> Enum.reject(&String.starts_with?(&1, "#"))
-    |> Enum.map(&String.split(&1, "\t"))
-    |> Enum.map(&parse_country/1)
-    |> Enum.reject(&is_nil/1)
-    |> Enum.reject(fn country -> country.population <= 0 end)
+    countries =
+      countries
+      |> String.split("\r\n")
+      |> Enum.reject(&String.starts_with?(&1, "#"))
+      |> Enum.map(&String.split(&1, "\t"))
+      |> Enum.map(&parse_country/1)
+      |> Enum.reject(fn country_data ->
+        country_data == nil || country_data[:iso] == "CS" || country_data[:iso] == "AN"
+      end)
+
+    Repo.insert_all(
+      Country,
+      countries,
+      on_conflict: {:replace_all_except, [:id, :inserted_at, :name_ru]},
+      conflict_target: :geonames_id
+    )
   end
 
   defp download_countries do
@@ -69,17 +79,24 @@ defmodule Geo.Geonames do
          _,
          geonames_id | _
        ]) do
-    %Country{
-      geonames_id: geonames_id,
-      iso: iso,
-      iso3: iso3,
-      ison: ison,
-      name: name,
-      continent: continent,
-      currency_code: currency_code,
-      currency_name: currency_name,
-      population: String.to_integer(population)
-    }
+    population = String.to_integer(population)
+
+    if population <= 0 do
+      nil
+    else
+      %{
+        geonames_id: geonames_id,
+        iso: iso,
+        iso3: iso3,
+        ison: ison,
+        name: name,
+        continent: continent,
+        currency_code: currency_code,
+        currency_name: currency_name,
+        inserted_at: NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second),
+        updated_at: NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+      }
+    end
   end
 
   defp parse_country(_) do
