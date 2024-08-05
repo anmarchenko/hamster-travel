@@ -1,4 +1,4 @@
-defmodule Geo.Geonames do
+defmodule HamsterTravel.Geo.Geonames do
   @moduledoc """
   Handles downloading, parsing, and importing geonames data.
   """
@@ -12,9 +12,9 @@ defmodule Geo.Geonames do
 
     countries =
       countries
-      |> String.split("\r\n")
+      |> String.split("\n")
       |> Enum.reject(&String.starts_with?(&1, "#"))
-      |> Enum.map(&String.split(&1, "\t"))
+      |> Enum.map(&String.split(String.trim(&1), "\t"))
       |> Enum.map(&parse_country/1)
       |> Enum.reject(fn country_data ->
         country_data == nil || country_data[:iso] == "CS" || country_data[:iso] == "AN"
@@ -29,7 +29,7 @@ defmodule Geo.Geonames do
   end
 
   defp download_countries do
-    case Req.get("https://download.geonames.org/export/dump/countryInfo.txt") do
+    case Req.get("https://download.geonames.org/export/dump/countryInfo.txt", options()) do
       {:ok, %Req.Response{body: body} = resp} ->
         if resp.status < 400 do
           {:ok, body}
@@ -101,5 +101,9 @@ defmodule Geo.Geonames do
 
   defp parse_country(_) do
     nil
+  end
+
+  defp options do
+    Application.get_env(:hamster_travel, :geonames_req_options, [])
   end
 end

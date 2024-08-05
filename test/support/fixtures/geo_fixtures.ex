@@ -4,25 +4,13 @@ defmodule HamsterTravel.GeoFixtures do
   entities via the `HamsterTravel.Geo` context.
   """
 
-  @doc """
-  Generate a country.
-  """
-  def country_fixture(attrs \\ %{}) do
-    {:ok, country} =
-      attrs
-      |> Enum.into(%{
-        continent: "some continent",
-        currency_code: "some currency_code",
-        currency_name: "some currency_name",
-        geonames_id: "some geonames_id",
-        iso: "some iso",
-        iso3: "some iso3",
-        ison: "some ison",
-        name: "some name",
-        name_ru: "some name_ru"
-      })
-      |> HamsterTravel.Geo.create_country()
+  alias HamsterTravel.Geo.Geonames
 
-    country
+  def geonames_countries_fixture do
+    Req.Test.stub(Geonames, fn conn ->
+      Req.Test.text(conn, File.read!("test/support/test_data/geonames/countryInfo.txt"))
+    end)
+
+    Geonames.import_countries()
   end
 end
