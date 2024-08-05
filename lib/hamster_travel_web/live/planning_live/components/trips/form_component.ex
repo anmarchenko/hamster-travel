@@ -266,7 +266,7 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
   def result({:ok, trip}, socket) do
     socket =
       socket
-      |> push_redirect(to: ~p"/trips/#{trip.slug}")
+      |> push_navigate(to: ~p"/trips/#{trip.slug}")
 
     {:noreply, socket}
   end

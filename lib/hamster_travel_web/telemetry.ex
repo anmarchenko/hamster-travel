@@ -118,7 +118,8 @@ defmodule HamsterTravelWeb.Telemetry do
       # Custom business metrics
       counter("hamster_travel.packing.backpack.create.count", tags: [:env, :service, :source]),
       last_value("hamster_travel.accounts.users.count", tags: [:env, :service]),
-      last_value("hamster_travel.packing.backpacks.count", tags: [:env, :service])
+      last_value("hamster_travel.packing.backpacks.count", tags: [:env, :service]),
+      counter("hamster_travel.geonames.download_countries.error", tags: [:env, :service])
     ]
   end
 

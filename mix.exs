@@ -91,6 +91,9 @@ defmodule HamsterTravel.MixProject do
       # money handling
       {:ex_money, "~> 5.0"},
 
+      # http client
+      {:req, "~> 0.5"},
+
       # test/lint/dev tools
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:floki, ">= 0.30.0", only: :test},

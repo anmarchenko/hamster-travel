@@ -101,7 +101,6 @@ defmodule HamsterTravelWeb.Planning.Transfer do
       """
     else
       ~H"""
-
       """
     end
   end

@@ -60,7 +60,6 @@ defmodule HamsterTravelWeb.Planning.Trips.Tabs.TabActivity do
 
   def note(%{note: nil} = assigns) do
     ~H"""
-
     """
   end
 
