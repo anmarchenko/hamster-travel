@@ -11,8 +11,7 @@ defmodule HamsterTravel.Repo.Migrations.CreateCities do
             column: :region_code,
             type: :string,
             with: [country_code: :country_code]
-          ),
-          null: false
+          )
 
       add :geonames_id, :string, null: false
       add :country_code, references("countries", column: :iso, type: :string), null: false

@@ -6,6 +6,8 @@ defmodule HamsterTravel.Geo.Geonames do
   alias HamsterTravel.Geo.Country
   alias HamsterTravel.Repo
 
+  import Ecto.Query
+
   require Logger
 
   def import do
@@ -19,27 +21,62 @@ defmodule HamsterTravel.Geo.Geonames do
   end
 
   def import_features(iso_code) do
+    Logger.info("Downloading features for #{iso_code}...")
     {:ok, features} = download_features(iso_code)
 
     features =
       features
       |> String.split("\n")
-      |> Enum.reject(&String.starts_with?(&1, "#"))
       |> Enum.map(&String.split(String.trim(&1), "\t"))
-      # |> Enum.map(&parse_feature/1)
-      |> Enum.reject(fn feature_data ->
-        feature_data == nil
+
+    valid_region_codes =
+      features
+      |> Enum.reduce(%{}, fn arr, acc ->
+        region_code = Enum.at(arr, 10)
+
+        feature_class = Enum.at(arr, 6)
+        feature_code = Enum.at(arr, 7)
+
+        if feature_class == "A" && feature_code == "ADM1" do
+          Map.put(acc, region_code, true)
+        else
+          acc
+        end
       end)
 
-    {entries_count, _} =
+    features =
+      features
+      |> Enum.reduce(
+        %{regions: [], cities: [], valid_region_codes: valid_region_codes},
+        &parse_feature/2
+      )
+
+    {regions_count, _} =
       Repo.insert_all(
         Geo.Region,
-        features,
+        features.regions,
         on_conflict: {:replace_all_except, [:id, :inserted_at, :name_ru]},
         conflict_target: :geonames_id
       )
 
-    Logger.info("Imported #{entries_count} features for #{iso_code}")
+    Logger.info("Imported #{regions_count} regions for #{iso_code}")
+
+    cities_count =
+      features.cities
+      |> Enum.chunk_every(3000)
+      |> Enum.reduce(0, fn chunk, acc ->
+        {cities_count, _} =
+          Repo.insert_all(
+            Geo.City,
+            chunk,
+            on_conflict: {:replace_all_except, [:id, :inserted_at, :name_ru]},
+            conflict_target: :geonames_id
+          )
+
+        cities_count + acc
+      end)
+
+    Logger.info("Imported #{cities_count} cities for #{iso_code}")
   end
 
   def import_countries do
@@ -171,6 +208,74 @@ defmodule HamsterTravel.Geo.Geonames do
 
   defp parse_country(_) do
     nil
+  end
+
+  defp parse_feature(
+         [
+           geoname_id,
+           name,
+           _,
+           _,
+           lat,
+           lon,
+           feature_class,
+           feature_code,
+           country_code,
+           _,
+           admin1_code,
+           _,
+           _,
+           _,
+           population,
+           _,
+           _,
+           _,
+           _
+         ],
+         acc
+       ) do
+    {lat, _} = Float.parse(lat)
+    {lon, _} = Float.parse(lon)
+
+    admin1_code =
+      if Map.get(acc.valid_region_codes, admin1_code) do
+        admin1_code
+      else
+        nil
+      end
+
+    geo_map = %{
+      name: name,
+      country_code: country_code,
+      region_code: admin1_code,
+      geonames_id: geoname_id,
+      lat: lat,
+      lon: lon,
+      inserted_at: NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second),
+      updated_at: NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    }
+
+    case {feature_class, feature_code} do
+      {"A", "ADM1"} ->
+        Map.replace(acc, :regions, [geo_map | acc.regions])
+
+      {"P", _} ->
+        population = String.to_integer(population)
+
+        if population >= 200 do
+          geo_map = Map.put(geo_map, :population, population)
+          Map.replace(acc, :cities, [geo_map | acc.cities])
+        else
+          acc
+        end
+
+      {_, _} ->
+        acc
+    end
+  end
+
+  defp parse_feature(_, acc) do
+    acc
   end
 
   defp options do
