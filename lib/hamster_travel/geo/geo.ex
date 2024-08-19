@@ -80,6 +80,21 @@ defmodule HamsterTravel.Geo do
     Repo.get_by(City, geonames_id: geonames_id)
   end
 
+  def search_cities(search_term) do
+    search_term = "#{search_term}%"
+
+    query =
+      from(
+        c in City,
+        where: ilike(c.name, ^search_term),
+        order_by: [desc: fragment("? % ?", ^search_term, c.name), desc: c.population],
+        limit: 50,
+        preload: [:country]
+      )
+
+    Repo.all(query)
+  end
+
   @doc """
   Creates a region.
 
