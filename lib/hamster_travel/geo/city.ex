@@ -15,11 +15,14 @@ defmodule HamsterTravel.Geo.City do
       references: :iso,
       type: :string
 
-    # TODO: will this work????
-    belongs_to :region, HamsterTravel.Geo.Region,
-      foreign_key: :region_code,
-      references: :region_code,
-      type: :string
+    # Ecto does not support composite foreign keys as of Ecto 3.12.1
+    # Wait till this is finally merged: https://github.com/elixir-ecto/ecto/pull/3638
+    #
+    # belongs_to :region, HamsterTravel.Geo.Region,
+    #   foreign_key: :region_code,
+    #   references: :region_code,
+    #   type: :string
+    field :region_code, :string
 
     timestamps()
   end

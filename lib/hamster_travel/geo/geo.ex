@@ -68,6 +68,18 @@ defmodule HamsterTravel.Geo do
   """
   def get_region!(id), do: Repo.get!(Region, id)
 
+  def find_region_by_geonames_id(geonames_id) do
+    Repo.get_by(Region, geonames_id: geonames_id)
+  end
+
+  def find_region_by_code_and_country(region_code, country_code) do
+    Repo.get_by(Region, country_code: country_code, region_code: region_code)
+  end
+
+  def find_city_by_geonames_id(geonames_id) do
+    Repo.get_by(City, geonames_id: geonames_id)
+  end
+
   @doc """
   Creates a region.
 

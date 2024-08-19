@@ -3,10 +3,8 @@ defmodule HamsterTravel.Geo.Geonames do
   Handles downloading, parsing, and importing geonames data.
   """
   alias HamsterTravel.Geo
-  alias HamsterTravel.Geo.Country
+  alias HamsterTravel.Geo.{City, Country, Region}
   alias HamsterTravel.Repo
-
-  import Ecto.Query
 
   require Logger
 
@@ -53,7 +51,7 @@ defmodule HamsterTravel.Geo.Geonames do
 
     {regions_count, _} =
       Repo.insert_all(
-        Geo.Region,
+        Region,
         features.regions,
         on_conflict: {:replace_all_except, [:id, :inserted_at, :name_ru]},
         conflict_target: :geonames_id
@@ -67,7 +65,7 @@ defmodule HamsterTravel.Geo.Geonames do
       |> Enum.reduce(0, fn chunk, acc ->
         {cities_count, _} =
           Repo.insert_all(
-            Geo.City,
+            City,
             chunk,
             on_conflict: {:replace_all_except, [:id, :inserted_at, :name_ru]},
             conflict_target: :geonames_id
