@@ -260,7 +260,7 @@ defmodule HamsterTravel.Geo.Geonames do
       {"P", _} ->
         population = String.to_integer(population)
 
-        if population >= 200 do
+        if population >= 5 do
           geo_map = Map.put(geo_map, :population, population)
           Map.replace(acc, :cities, [geo_map | acc.cities])
         else

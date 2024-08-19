@@ -92,6 +92,7 @@ defmodule HamsterTravel.Geo do
         preload: [:country]
       )
 
+    # TODO: we need to preload the region for each city in a single query
     Repo.all(query)
   end
 
