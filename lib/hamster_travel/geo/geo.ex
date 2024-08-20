@@ -89,10 +89,12 @@ defmodule HamsterTravel.Geo do
         where: ilike(c.name, ^search_term),
         order_by: [desc: fragment("? % ?", ^search_term, c.name), desc: c.population],
         limit: 50,
-        preload: [:country]
+        preload: [:country],
+        join: r in Region,
+        on: c.region_code == r.region_code and c.country_code == r.country_code,
+        select: %{c | region_name: r.name, region_name_ru: r.name_ru}
       )
 
-    # TODO: we need to preload the region for each city in a single query
     Repo.all(query)
   end
 

@@ -24,6 +24,10 @@ defmodule HamsterTravel.Geo.City do
     #   type: :string
     field :region_code, :string
 
+    # define virtual fields for region_name and region_name_ru
+    field :region_name, :string, virtual: true
+    field :region_name_ru, :string, virtual: true
+
     timestamps()
   end
 
