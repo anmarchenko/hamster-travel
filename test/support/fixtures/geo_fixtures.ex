@@ -5,6 +5,7 @@ defmodule HamsterTravel.GeoFixtures do
   """
 
   alias HamsterTravel.Geo.Geonames
+  alias HamsterTravel.Geo.Geonames.{Countries, Features}
 
   def geonames_fixture do
     Req.Test.stub(Geonames, fn conn ->
@@ -17,7 +18,7 @@ defmodule HamsterTravel.GeoFixtures do
       end
     end)
 
-    Geonames.import_countries()
-    Geonames.import_features("DE")
+    Countries.import()
+    Features.import("DE")
   end
 end
