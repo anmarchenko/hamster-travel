@@ -48,5 +48,20 @@ defmodule HamsterTravel.GeoTest do
       assert %Region{name: "Baden-Württemberg"} = Geo.find_region_by_code_and_country("01", "DE")
       assert Geo.find_region_by_code_and_country("xx", "DE") == nil
     end
+
+    test "search_cities/1" do
+      assert [
+               %City{name: "Berlin", region_name: "Land Berlin"},
+               %City{name: "Bergedorf", region_name: "Free and Hanseatic City of Hamburg"},
+               %City{name: "Bergisch Gladbach", region_name: "Nordrhein-Westfalen"}
+             ] = Geo.search_cities("ber")
+
+      assert [
+               %City{name: "Bergedorf", region_name: "Free and Hanseatic City of Hamburg"},
+               %City{name: "Bergisch Gladbach", region_name: "Nordrhein-Westfalen"}
+             ] = Geo.search_cities("berg")
+
+      assert [] = Geo.search_cities("berr")
+    end
   end
 end
