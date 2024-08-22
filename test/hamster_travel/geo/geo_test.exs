@@ -5,10 +5,10 @@ defmodule HamsterTravel.GeoTest do
   alias HamsterTravel.Geo
 
   describe "countries" do
-    alias HamsterTravel.Geo.Country
+    alias HamsterTravel.Geo.{City, Country, Region}
 
     setup do
-      geonames_countries_fixture()
+      geonames_fixture()
 
       :ok
     end
@@ -42,6 +42,11 @@ defmodule HamsterTravel.GeoTest do
     test "list_country_iso_codes/0 returns all country ISO codes ordered alphabetically" do
       assert Enum.count(Geo.list_country_iso_codes()) == 246
       assert ["AD", "AE", "AF"] == Enum.take(Geo.list_country_iso_codes(), 3)
+    end
+
+    test "find_region_by_code_and_country/2" do
+      assert %Region{name: "Baden-Württemberg"} = Geo.find_region_by_code_and_country("01", "DE")
+      assert Geo.find_region_by_code_and_country("xx", "DE") == nil
     end
   end
 end

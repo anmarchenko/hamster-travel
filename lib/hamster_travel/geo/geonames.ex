@@ -135,9 +135,9 @@ defmodule HamsterTravel.Geo.Geonames do
 
   defp download_features(iso_code) do
     case Req.get("https://download.geonames.org/export/dump/#{iso_code}.zip", options()) do
-      {:ok, %Req.Response{body: [{_, _}, {_, csv}]} = resp} ->
+      {:ok, resp} ->
         if resp.status < 400 do
-          {:ok, csv}
+          parse_features_response(resp)
         else
           :telemetry.execute(
             [:hamster_travel, :geonames, :download_features],
@@ -164,6 +164,13 @@ defmodule HamsterTravel.Geo.Geonames do
         error_tuple
     end
   end
+
+  defp parse_features_response(%Req.Response{body: [{~c"readme.txt", _}, {_, csv}]}) do
+    {:ok, csv}
+  end
+
+  # suboptimal - test-only case in production code!!
+  defp parse_features_response(%Req.Response{body: csv}), do: {:ok, csv}
 
   defp parse_country([
          iso,

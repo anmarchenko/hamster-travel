@@ -76,6 +76,22 @@ defmodule HamsterTravel.Geo do
     Repo.get_by(Region, country_code: country_code, region_code: region_code)
   end
 
+  @doc """
+  Gets a single city.
+
+  Raises `Ecto.NoResultsError` if the City does not exist.
+
+  ## Examples
+
+      iex> get_city!(123)
+      %City{}
+
+      iex> get_city!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_city!(id), do: Repo.get!(City, id)
+
   def find_city_by_geonames_id(geonames_id) do
     Repo.get_by(City, geonames_id: geonames_id)
   end
@@ -96,57 +112,5 @@ defmodule HamsterTravel.Geo do
       )
 
     Repo.all(query)
-  end
-
-  @doc """
-  Creates a region.
-
-  ## Examples
-
-      iex> create_region(%{field: value})
-      {:ok, %Region{}}
-
-      iex> create_region(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_region(attrs \\ %{}) do
-    %Region{}
-    |> Region.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Gets a single city.
-
-  Raises `Ecto.NoResultsError` if the City does not exist.
-
-  ## Examples
-
-      iex> get_city!(123)
-      %City{}
-
-      iex> get_city!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_city!(id), do: Repo.get!(City, id)
-
-  @doc """
-  Creates a city.
-
-  ## Examples
-
-      iex> create_city(%{field: value})
-      {:ok, %City{}}
-
-      iex> create_city(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_city(attrs \\ %{}) do
-    %City{}
-    |> City.changeset(attrs)
-    |> Repo.insert()
   end
 end
