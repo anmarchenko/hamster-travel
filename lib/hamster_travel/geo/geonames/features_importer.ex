@@ -8,7 +8,7 @@ defmodule HamsterTravel.Geo.Geonames.FeaturesImporter do
 
   require Logger
 
-  def process(features, country_code) do
+  def process(features, country_code, translations) do
     Logger.info("Importing features for #{country_code}...")
 
     features =
@@ -26,14 +26,16 @@ defmodule HamsterTravel.Geo.Geonames.FeaturesImporter do
       features
       |> Enum.reduce(
         %FeaturesImportData{regions: [], cities: [], valid_region_codes: valid_region_codes},
-        &parse_feature/2
+        fn feature, import_data ->
+          parse_feature(feature, import_data, translations)
+        end
       )
 
     {regions_count, _} =
       Repo.insert_all(
         Region,
         features.regions,
-        on_conflict: {:replace_all_except, [:id, :inserted_at, :name_ru]},
+        on_conflict: {:replace_all_except, [:id, :inserted_at]},
         conflict_target: :geonames_id
       )
 
@@ -48,7 +50,7 @@ defmodule HamsterTravel.Geo.Geonames.FeaturesImporter do
           Repo.insert_all(
             City,
             chunk,
-            on_conflict: {:replace_all_except, [:id, :inserted_at, :name_ru]},
+            on_conflict: {:replace_all_except, [:id, :inserted_at]},
             conflict_target: :geonames_id
           )
 
@@ -80,7 +82,8 @@ defmodule HamsterTravel.Geo.Geonames.FeaturesImporter do
            _,
            _
          ],
-         %FeaturesImportData{} = import_data
+         %FeaturesImportData{} = import_data,
+         translations
        ) do
     admin1_code = nilify_invalid_region_code(admin1_code, import_data.valid_region_codes)
 
@@ -89,6 +92,7 @@ defmodule HamsterTravel.Geo.Geonames.FeaturesImporter do
 
     geo_map = %{
       name: name,
+      name_ru: Map.get(translations, geoname_id),
       country_code: country_code,
       region_code: admin1_code,
       geonames_id: geoname_id,
@@ -117,7 +121,7 @@ defmodule HamsterTravel.Geo.Geonames.FeaturesImporter do
     end
   end
 
-  defp parse_feature(_, import_data) do
+  defp parse_feature(_, import_data, _) do
     import_data
   end
 
