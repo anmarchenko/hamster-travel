@@ -6,7 +6,7 @@ defmodule HamsterTravel.Geo.Geonames.Features do
     download_translations = Task.async(fn -> Translations.fetch(country_code) end)
 
     with {:ok, features} <- Client.fetch_features_for_country(country_code),
-         {:ok, translations} <- Task.await(download_translations) do
+         {:ok, translations} <- Task.await(download_translations, 60_000) do
       FeaturesImporter.process(features, country_code, translations)
     else
       _ ->
