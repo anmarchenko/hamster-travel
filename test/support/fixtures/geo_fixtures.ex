@@ -15,6 +15,12 @@ defmodule HamsterTravel.GeoFixtures do
 
         "/export/dump/DE.zip" ->
           Req.Test.text(conn, File.read!("test/support/test_data/geonames/features_de.txt"))
+
+        "/export/dump/alternatenames/DE.zip" ->
+          Req.Test.text(
+            conn,
+            File.read!("test/support/test_data/geonames/alternate_names_de.txt")
+          )
       end
     end)
 

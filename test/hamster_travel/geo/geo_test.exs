@@ -32,7 +32,7 @@ defmodule HamsterTravel.GeoTest do
     end
 
     test "find_country_by_iso returns the country with given iso" do
-      assert %Country{name: "Germany"} = Geo.find_country_by_iso("DE")
+      assert %Country{name: "Germany", name_ru: "Германия"} = Geo.find_country_by_iso("DE")
     end
 
     test "find_country_by_iso returns nil if the country with given iso does not exist" do
@@ -45,13 +45,20 @@ defmodule HamsterTravel.GeoTest do
     end
 
     test "find_region_by_code_and_country/2" do
-      assert %Region{name: "Baden-Württemberg"} = Geo.find_region_by_code_and_country("01", "DE")
+      assert %Region{name: "Saxony", name_ru: "Саксония"} =
+               Geo.find_region_by_code_and_country("13", "DE")
+
       assert Geo.find_region_by_code_and_country("xx", "DE") == nil
     end
 
     test "search_cities/1" do
       assert [
-               %City{name: "Berlin", region_name: "Land Berlin"},
+               %City{
+                 name: "Berlin",
+                 region_name: "Land Berlin",
+                 name_ru: "Берлин",
+                 region_name_ru: "Берлин"
+               },
                %City{name: "Bergedorf", region_name: "Free and Hanseatic City of Hamburg"},
                %City{name: "Bergisch Gladbach", region_name: "Nordrhein-Westfalen"}
              ] = Geo.search_cities("ber")

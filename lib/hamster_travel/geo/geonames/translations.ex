@@ -44,7 +44,7 @@ defmodule HamsterTravel.Geo.Geonames.Translations do
 
   defp parse_translation(_), do: nil
 
-  def store_translation(translation, acc) do
+  defp store_translation(translation, acc) do
     Map.update(acc, translation.geonames_id, translation.name_ru, fn existing ->
       if translation.preferred do
         translation.name_ru
