@@ -99,11 +99,17 @@ defmodule HamsterTravel.Geo do
   def search_cities(search_term) do
     search_term = "#{search_term}%"
 
+    # determine if search term starts with cyrillic letter
+    is_cyrillic = String.match?(search_term, ~r/^[а-яА-Я]/)
+
+    # set the correct column to search (name or name_ru)
+    column = if is_cyrillic, do: :name_ru, else: :name
+
     query =
       from(
         c in City,
-        where: ilike(c.name, ^search_term),
-        order_by: [desc: fragment("? % ?", ^search_term, c.name), desc: c.population],
+        where: ilike(field(c, ^column), ^search_term),
+        order_by: [desc: fragment("? % ?", ^search_term, field(c, ^column)), desc: c.population],
         limit: 50,
         preload: [:country],
         join: r in Region,

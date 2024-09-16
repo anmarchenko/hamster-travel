@@ -70,5 +70,18 @@ defmodule HamsterTravel.GeoTest do
 
       assert [] = Geo.search_cities("berr")
     end
+
+    test "search_cities/1 in russian" do
+      assert [
+               %City{
+                 name: "Berlin",
+                 region_name: "Land Berlin",
+                 name_ru: "Берлин",
+                 region_name_ru: "Берлин"
+               }
+             ] = Geo.search_cities("бер")
+
+      assert [] = Geo.search_cities("берр")
+    end
   end
 end
