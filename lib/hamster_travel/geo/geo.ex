@@ -110,7 +110,7 @@ defmodule HamsterTravel.Geo do
         c in City,
         where: ilike(field(c, ^column), ^search_term),
         order_by: [desc: fragment("? % ?", ^search_term, field(c, ^column)), desc: c.population],
-        limit: 50,
+        limit: 25,
         preload: [:country],
         join: r in Region,
         on: c.region_code == r.region_code and c.country_code == r.country_code,
