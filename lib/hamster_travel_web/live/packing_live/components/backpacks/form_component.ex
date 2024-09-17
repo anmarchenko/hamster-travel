@@ -165,7 +165,7 @@ defmodule HamsterTravelWeb.Packing.Backpacks.FormComponent do
   def result({:ok, backpack}, socket) do
     socket =
       socket
-      |> push_redirect(to: ~p"/backpacks/#{backpack.slug}")
+      |> push_navigate(to: ~p"/backpacks/#{backpack.slug}")
 
     {:noreply, socket}
   end

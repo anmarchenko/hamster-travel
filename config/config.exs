@@ -73,6 +73,8 @@ config :hamster_travel, HamsterTravelWeb.Telemetry,
   report_metrics: false,
   periodic_measurements_enabled: true
 
+config :hamster_travel, :geonames_req_options, []
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

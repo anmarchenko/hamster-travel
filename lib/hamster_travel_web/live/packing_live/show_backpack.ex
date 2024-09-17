@@ -161,7 +161,7 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
 
       socket =
         socket
-        |> push_redirect(to: ~p"/backpacks")
+        |> push_navigate(to: ~p"/backpacks")
 
       {:noreply, socket}
     else
