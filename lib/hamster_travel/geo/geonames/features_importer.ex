@@ -44,7 +44,7 @@ defmodule HamsterTravel.Geo.Geonames.FeaturesImporter do
     cities_count =
       features.cities
       # insert data in chunks as cities count might exceed postgres parameter limit
-      |> Enum.chunk_every(1000)
+      |> Enum.chunk_every(500)
       |> Enum.reduce(0, fn chunk, overall_count ->
         {cities_count, _} =
           Repo.insert_all(
