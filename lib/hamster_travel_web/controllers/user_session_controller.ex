@@ -4,7 +4,7 @@ defmodule HamsterTravelWeb.UserSessionController do
   alias HamsterTravel.Accounts
   alias HamsterTravelWeb.UserAuth
 
-  import HamsterTravelWeb.Gettext
+  use Gettext, backend: HamsterTravelWeb.Gettext
 
   def create(conn, %{"_action" => "registered"} = params) do
     create(conn, params, gettext("Account created successfully!"))

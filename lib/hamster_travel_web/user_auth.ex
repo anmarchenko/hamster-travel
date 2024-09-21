@@ -1,7 +1,7 @@
 defmodule HamsterTravelWeb.UserAuth do
   use HamsterTravelWeb, :verified_routes
 
-  import HamsterTravelWeb.Gettext
+  use Gettext, backend: HamsterTravelWeb.Gettext
   import Phoenix.Controller
   import Plug.Conn
 

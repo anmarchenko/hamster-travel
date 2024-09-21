@@ -44,7 +44,7 @@ defmodule HamsterTravelWeb do
         layouts: [html: HamsterTravelWeb.Layouts]
 
       import Plug.Conn
-      import HamsterTravelWeb.Gettext
+      use Gettext, backend: HamsterTravelWeb.Gettext
 
       unquote(verified_routes())
     end
@@ -86,7 +86,7 @@ defmodule HamsterTravelWeb do
       import Phoenix.HTML
       # Core UI components and translation
       import HamsterTravelWeb.CoreComponents
-      import HamsterTravelWeb.Gettext
+      use Gettext, backend: HamsterTravelWeb.Gettext
 
       # use PETAL components
       import PetalComponents.Alert

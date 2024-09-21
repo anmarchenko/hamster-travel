@@ -4,7 +4,7 @@ defmodule HamsterTravelWeb.Packing.IndexBackpacks do
   """
   use HamsterTravelWeb, :live_view
 
-  import HamsterTravelWeb.Gettext
+  use Gettext, backend: HamsterTravelWeb.Gettext
   import HamsterTravelWeb.Packing.Backpacks.Grid
 
   alias HamsterTravel.Packing

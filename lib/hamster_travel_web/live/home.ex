@@ -5,7 +5,7 @@ defmodule HamsterTravelWeb.Home do
   """
   use HamsterTravelWeb, :live_view
 
-  import HamsterTravelWeb.Gettext
+  use Gettext, backend: HamsterTravelWeb.Gettext
   import HamsterTravelWeb.Planning.Grid
 
   alias HamsterTravel.Planning

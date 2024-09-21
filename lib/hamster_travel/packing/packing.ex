@@ -6,7 +6,7 @@ defmodule HamsterTravel.Packing do
   require Logger
 
   import Ecto.Query, warn: false
-  import HamsterTravelWeb.Gettext
+  use Gettext, backend: HamsterTravelWeb.Gettext
 
   alias HamsterTravel.EctoOrdered
   alias HamsterTravel.Packing.Policy

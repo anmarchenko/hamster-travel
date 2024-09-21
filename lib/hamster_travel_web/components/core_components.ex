@@ -18,7 +18,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   use HamsterTravelWeb, :verified_routes
 
   import PetalComponents.Icon
-  import HamsterTravelWeb.Gettext
+  use Gettext, backend: HamsterTravelWeb.Gettext
 
   alias Phoenix.LiveView.JS
 
