@@ -68,7 +68,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     """
   end
 
-  defp active_nav(%{status: "draft"}), do: drafts_nav_item()
+  defp active_nav(%{status: "0_draft"}), do: drafts_nav_item()
   defp active_nav(_), do: plans_nav_item()
 
   defp fetch_tab(%{"tab" => tab})
