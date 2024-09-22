@@ -19,7 +19,7 @@ defmodule HamsterTravelWeb.Packing.Backpacks.Card do
         <.secondary tag="div" italic={false}>
           <div class="text-xs sm:text-base font-light flex flex-row gap-x-2">
             <.inline>
-              <.icon name={:calendar} outline={true} class="h-4 w-4" />
+              <.icon name="hero-calendar" class="h-4 w-4" />
               <%= @backpack.days %> <%= ngettext("day", "days", @backpack.days) %> / <%= @backpack.nights %> <%= ngettext(
                 "night",
                 "nights",

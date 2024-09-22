@@ -64,12 +64,12 @@ defmodule HamsterTravelWeb.Packing.Lists.AddComponent do
               x-init="$el.focus()"
             />
             <.icon_button>
-              <.icon name={:check} />
+              <.icon name="hero-check" />
             </.icon_button>
           </.inline>
         </.form>
         <.icon_button phx-click="cancel" phx-target={@myself}>
-          <.icon name={:x_mark} />
+          <.icon name="hero-x-mark" />
         </.icon_button>
       </.inline>
     </div>
@@ -80,7 +80,7 @@ defmodule HamsterTravelWeb.Packing.Lists.AddComponent do
     ~H"""
     <div class="mb-5">
       <.button color="primary" phx-click="edit" phx-target={@myself}>
-        <.icon name={:plus} solid={true} class="w-5 h-5 mr-2" />
+        <.icon name="hero-plus-solid" class="w-5 h-5 mr-2" />
         <%= gettext("Add list") %>
       </.button>
     </div>

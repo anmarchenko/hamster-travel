@@ -58,7 +58,7 @@ defmodule HamsterTravelWeb.Packing.Items.AddComponent do
             value={@name}
           />
           <.icon_button size="md">
-            <.icon name={:plus} outline={true} />
+            <.icon name="hero-plus" />
           </.icon_button>
         </.inline>
       </.form>

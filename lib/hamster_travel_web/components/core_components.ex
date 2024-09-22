@@ -119,7 +119,7 @@ defmodule HamsterTravelWeb.CoreComponents do
                   class="-m-3 flex-none p-3 opacity-20 hover:opacity-40"
                   aria-label={gettext("close")}
                 >
-                  <.icon name={:x_mark} solid={true} class="h-5 w-5" />
+                  <.icon name="hero-x-mark-solid" class="h-5 w-5" />
                 </button>
               </div>
               <div id={"#{@id}-content"}>
@@ -164,13 +164,13 @@ defmodule HamsterTravelWeb.CoreComponents do
       {@rest}
     >
       <p :if={@title} class="flex items-center gap-1.5 text-sm font-semibold leading-6">
-        <.icon :if={@kind == :info} name={:information_circle} class="h-4 w-4" />
-        <.icon :if={@kind == :error} name={:exclamation_circle} class="h-4 w-4" />
+        <.icon :if={@kind == :info} name="hero-information-circle" class="h-4 w-4" />
+        <.icon :if={@kind == :error} name="hero-exclamation-circle" class="h-4 w-4" />
         <%= @title %>
       </p>
       <p class="mt-2 text-sm leading-5"><%= msg %></p>
       <button type="button" class="group absolute top-1 right-1 p-2" aria-label={gettext("close")}>
-        <.icon name={:x_mark} solid={true} class="h-5 w-5 opacity-40 group-hover:opacity-70" />
+        <.icon name="hero-x-mark-solid" class="h-5 w-5 opacity-40 group-hover:opacity-70" />
       </button>
     </div>
     """
@@ -198,7 +198,7 @@ defmodule HamsterTravelWeb.CoreComponents do
       hidden
     >
       <%= gettext("Attempting to reconnect") %>
-      <.icon name={:arrow_path} class="ml-1 h-3 w-3 animate-spin" />
+      <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
     </.flash>
     """
   end
@@ -368,14 +368,13 @@ defmodule HamsterTravelWeb.CoreComponents do
   end
 
   attr(:label, :string, required: true)
-  attr(:icon, :atom, required: true)
-  attr(:style, :atom, default: :solid)
+  attr(:icon, :string, required: true)
   attr(:class, :string, default: "w-5 h-5")
   attr(:rest, :global)
 
   def icon_text(assigns) do
     ~H"""
-    <.icon name={@icon} outline={@style == :outline} solid={@style == :solid} class={@class} {@rest} />
+    <.icon name={@icon} class={@class} {@rest} />
     <span class="hidden sm:inline ml-2">
       <%= @label %>
     </span>

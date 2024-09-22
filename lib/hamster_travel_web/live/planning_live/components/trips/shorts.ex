@@ -25,11 +25,11 @@ defmodule HamsterTravelWeb.Planning.Trips.Shorts do
         <%= Formatter.format_money(0, @trip.currency) %>
       </.inline>
       <.inline class="gap-1">
-        <.icon name={:calendar} outline={true} class={"h-4 w-4 #{@icon_class}"} />
+        <.icon name="hero-calendar" class={"h-4 w-4 #{@icon_class}"} />
         <%= @trip.duration %> <%= ngettext("day", "days", @trip.duration) %>
       </.inline>
       <.inline class="gap-1">
-        <.icon name={:user} outline={true} class={"h-4 w-4 #{@icon_class}"} />
+        <.icon name="hero-user" class={"h-4 w-4 #{@icon_class}"} />
         <%= @trip.people_count %> <%= gettext("ppl") %>
       </.inline>
     </.inline>

@@ -110,7 +110,7 @@ defmodule HamsterTravelWeb.Packing.Lists.ListComponent do
         phx-click="edit"
         phx-target={assigns[:"phx-target"]}
       >
-        <.icon name={:pencil} />
+        <.icon name="hero-pencil" />
       </.icon_button>
       <.icon_button
         size="xs"
@@ -119,7 +119,7 @@ defmodule HamsterTravelWeb.Packing.Lists.ListComponent do
         phx-target={assigns[:"phx-target"]}
         data-confirm={gettext("Are you sure you want to delete this list? All items will be lost")}
       >
-        <.icon name={:trash} />
+        <.icon name="hero-trash" />
       </.icon_button>
       <.icon_button
         size="xs"
@@ -127,7 +127,7 @@ defmodule HamsterTravelWeb.Packing.Lists.ListComponent do
         x-show="showItems"
         @click="showItems = !showItems"
       >
-        <.icon name={:chevron_down} />
+        <.icon name="hero-chevron-down" />
       </.icon_button>
 
       <.icon_button
@@ -136,7 +136,7 @@ defmodule HamsterTravelWeb.Packing.Lists.ListComponent do
         x-show="!showItems"
         @click="showItems = !showItems"
       >
-        <.icon name={:chevron_right} />
+        <.icon name="hero-chevron-right" />
       </.icon_button>
     </.inline>
     """
@@ -149,12 +149,12 @@ defmodule HamsterTravelWeb.Packing.Lists.ListComponent do
         <.inline>
           <.input id={"update-item-#{@list.id}"} field={@form[:name]} x-init="$el.focus()" />
           <.icon_button class={button_color()}>
-            <.icon name={:check} />
+            <.icon name="hero-check" />
           </.icon_button>
         </.inline>
       </.form>
       <.icon_button class={button_color()} phx-click="cancel" phx-target={assigns[:"phx-target"]}>
-        <.icon name={:x_mark} />
+        <.icon name="hero-x-mark" />
       </.icon_button>
     </.inline>
     """

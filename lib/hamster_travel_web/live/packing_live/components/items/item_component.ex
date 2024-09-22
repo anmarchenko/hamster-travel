@@ -101,12 +101,12 @@ defmodule HamsterTravelWeb.Packing.Items.ItemComponent do
               x-init="$el.focus()"
             />
             <.icon_button>
-              <.icon name={:check} />
+              <.icon name="hero-check" />
             </.icon_button>
           </.inline>
         </.form>
         <.icon_button phx-click="cancel" phx-target={@myself}>
-          <.icon name={:x_mark} />
+          <.icon name="hero-x-mark" />
         </.icon_button>
       </.inline>
     </div>
@@ -133,10 +133,10 @@ defmodule HamsterTravelWeb.Packing.Items.ItemComponent do
           </label>
         </.form>
         <.icon_button size="xs" class="justify-self-end" phx-click="edit" phx-target={@myself}>
-          <.icon name={:pencil} class="w-5 h-5" />
+          <.icon name="hero-pencil" class="w-5 h-5" />
         </.icon_button>
         <.icon_button size="xs" class="justify-self-end" phx-click="delete" phx-target={@myself}>
-          <.icon name={:trash} class="w-5 h-5" />
+          <.icon name="hero-trash" class="w-5 h-5" />
         </.icon_button>
       </.inline>
     </div>

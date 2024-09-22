@@ -72,7 +72,7 @@ defmodule HamsterTravelWeb.Layouts do
   def mobile_nav_plan_tabs(assigns) do
     ~H"""
     <.mobile_nav_link label={gettext("Back")} to={back_url(assigns)} active={false}>
-      <.icon name={:arrow_left} outline={true} class="h-6 w-6" />
+      <.icon name="hero-arrow-left" class="h-6 w-6" />
     </.mobile_nav_link>
     <.mobile_nav_link_tab
       label={gettext("Transfers")}
@@ -86,7 +86,7 @@ defmodule HamsterTravelWeb.Layouts do
       to="?tab=activities"
       active={@active_tab == "activities"}
     >
-      <.icon name={:clipboard_document_list} outline={true} class="h-6 w-6" />
+      <.icon name="hero-clipboard-document-list" class="h-6 w-6" />
     </.mobile_nav_link_tab>
     """
   end
@@ -94,14 +94,14 @@ defmodule HamsterTravelWeb.Layouts do
   def mobile_nav_global(assigns) do
     ~H"""
     <.mobile_nav_link label={gettext("Homepage")} to={~p"/"} active={@active_nav == home_nav_item()}>
-      <.icon name={:home} outline={true} class="w-6 h-6" />
+      <.icon name="hero-home" class="w-6 h-6" />
     </.mobile_nav_link>
     <.mobile_nav_link
       label={gettext("Plans")}
       to={plans_url()}
       active={@active_nav == plans_nav_item()}
     >
-      <.icon name={:book_open} outline={true} class="w-6 h-6" />
+      <.icon name="hero-book-open" class="w-6 h-6" />
     </.mobile_nav_link>
     <.mobile_nav_link
       :if={@current_user}
@@ -109,7 +109,7 @@ defmodule HamsterTravelWeb.Layouts do
       to={~p"/drafts"}
       active={@active_nav == drafts_nav_item()}
     >
-      <.icon name={:light_bulb} outline={true} class="w-6 h-6" />
+      <.icon name="hero-light-bulb" class="w-6 h-6" />
     </.mobile_nav_link>
     <.mobile_nav_link
       :if={@current_user}
@@ -117,7 +117,7 @@ defmodule HamsterTravelWeb.Layouts do
       to={backpacks_url()}
       active={@active_nav == backpacks_nav_item()}
     >
-      <.icon name={:briefcase} outline={true} class="w-6 h-6" />
+      <.icon name="hero-briefcase" class="w-6 h-6" />
     </.mobile_nav_link>
     """
   end

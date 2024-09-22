@@ -4,7 +4,7 @@
       <%= @backpack.name %>
     </.header>
     <.inline class="gap-4">
-      <.icon outline={true} name={:calendar} class="h-4 w-4" />
+      <.icon name="hero-calendar" class="h-4 w-4" />
       <%= @backpack.days %> <%= ngettext("day", "days", @backpack.days) %> / <%= @backpack.nights %> <%= ngettext(
         "night",
         "nights",
@@ -18,7 +18,7 @@
         to={backpack_url(@backpack.slug, :edit)}
         color="secondary"
       >
-        <.icon_text icon={:pencil} label={gettext("Edit")} />
+        <.icon_text icon="hero-pencil" label={gettext("Edit")} />
       </.button>
       <.button
         :if={Policy.authorized?(:copy, @backpack, @current_user)}
@@ -26,7 +26,7 @@
         to={backpack_url(@backpack.id, :copy)}
         color="secondary"
       >
-        <.icon_text icon={:document_duplicate} label={gettext("Make a copy")} />
+        <.icon_text icon="hero-document-duplicate" label={gettext("Make a copy")} />
       </.button>
       <.button
         :if={Policy.authorized?(:delete, @backpack, @current_user)}
@@ -34,7 +34,7 @@
         data-confirm={gettext("Are you sure you want to delete backpack?")}
         color="danger"
       >
-        <.icon_text icon={:trash} label={gettext("Delete")} />
+        <.icon_text icon="hero-trash" label={gettext("Delete")} />
       </.button>
     </.inline>
   </div>

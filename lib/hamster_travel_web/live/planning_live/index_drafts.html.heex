@@ -1,7 +1,7 @@
 <.container wide>
   <div class="mb-8">
     <.button :if={@current_user} link_type="live_redirect" to="trips/new?draft=1" color="primary">
-      <.icon name={:plus} solid={true} class="w-5 h-5 mr-2" />
+      <.icon name="hero-plus-solid" class="w-5 h-5 mr-2" />
       <%= gettext("Create draft") %>
     </.button>
   </div>
