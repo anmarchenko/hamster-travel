@@ -41,7 +41,10 @@ defmodule HamsterTravelWeb.Layouts do
       </nav>
     </.container>
     <div class="sm:hidden">
-      <nav class="w-full border-t bg-orange-50 dark:bg-zinc-900 dark:border-zinc-800 fixed bottom-0">
+      <nav
+        class="w-full border-t bg-orange-50 dark:bg-zinc-900 dark:border-zinc-800 fixed bottom-0"
+        style="z-index: 100"
+      >
         <div class="mx-auto px-6 max-w-md h-16 flex items-center justify-around">
           <.mobile_nav
             current_user={@current_user}
