@@ -4,6 +4,9 @@ defmodule HamsterTravelWeb.Planning.CityInput do
   @impl true
   def render(assigns) do
     ~H"""
+    <p>
+      BOOO!
+    </p>
     """
   end
 
