@@ -52,10 +52,13 @@ defmodule HamsterTravel.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:ecto_autoslug_field, "~> 3.0"},
 
-      # frontend
+      # frontend - HTML
       {:phoenix_html, "~> 4.0"},
       {:phoenix_live_view, "~> 0.20.0"},
       {:petal_components, "~> 2.0"},
+      {:live_select, "~> 1.0"},
+
+      # frontend - assets
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
       {
