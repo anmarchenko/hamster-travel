@@ -17,7 +17,7 @@ defmodule HamsterTravelWeb.Planning.CityInput do
         field={@field}
         phx-target={@myself}
         text_input_class="pc-text-input"
-        dropdown_extra_class="max-h-32 overflow-y-scroll bg-white"
+        dropdown_class="absolute rounded-md shadow z-50 bg-white inset-x-0 top-full max-h-32 overflow-y-scroll"
         active_option_class="font-bold bg-gray-200"
         update_min_len={2}
       />
