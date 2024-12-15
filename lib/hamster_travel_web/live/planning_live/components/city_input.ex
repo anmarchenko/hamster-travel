@@ -13,7 +13,14 @@ defmodule HamsterTravelWeb.Planning.CityInput do
     ~H"""
     <div>
       <.label for={@field.id}><%= @label %></.label>
-      <.live_select field={@field} phx-target={@myself} />
+      <.live_select
+        field={@field}
+        phx-target={@myself}
+        text_input_class="pc-text-input"
+        dropdown_extra_class="max-h-32 overflow-y-scroll bg-white"
+        active_option_class="font-bold bg-gray-200"
+        update_min_len={2}
+      />
     </div>
     """
   end
@@ -25,7 +32,7 @@ defmodule HamsterTravelWeb.Planning.CityInput do
       |> Geo.search_cities()
       |> Enum.map(fn city ->
         [
-          label: city.name,
+          label: Geo.city_text(city),
           value: %{
             id: city.id,
             country: city.country.iso

@@ -119,4 +119,11 @@ defmodule HamsterTravel.Geo do
 
     Repo.all(query)
   end
+
+  def city_text(city) do
+    case Gettext.get_locale() do
+      "ru" -> "#{city.name_ru}, #{city.region_name_ru}, #{city.country.name_ru}"
+      _ -> "#{city.name}, #{city.region_name}, #{city.country.name}"
+    end
+  end
 end
