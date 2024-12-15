@@ -36,29 +36,23 @@ defmodule HamsterTravel.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      # phoenix base
+      # phoenix framework
       {:phoenix, "~> 1.7.0"},
       {:plug_cowboy, "~> 2.5"},
 
-      # password hashing
-      {:bcrypt_elixir, "~> 3.0"},
-
-      # utilities
-      {:secure_random, "~> 0.5"},
-
       # database
-      {:ecto_sql, "~> 3.6"},
       {:phoenix_ecto, "~> 4.4"},
+      {:ecto_sql, "~> 3.6"},
       {:postgrex, ">= 0.0.0"},
       {:ecto_autoslug_field, "~> 3.0"},
 
-      # frontend - HTML
-      {:phoenix_html, "~> 4.0"},
+      # UI
       {:phoenix_live_view, "~> 0.20.0"},
+      {:phoenix_html, "~> 4.0"},
       {:petal_components, "~> 2.0"},
       {:live_select, "~> 1.0"},
 
-      # frontend - assets
+      # assets
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
       {
@@ -70,40 +64,38 @@ defmodule HamsterTravel.MixProject do
         sparse: "optimized"
       },
 
+      # hashing, random
+      {:bcrypt_elixir, "~> 3.0"},
+      {:secure_random, "~> 0.5"},
+
       # mails
       {:swoosh, "~> 1.3"},
 
       # http client
+      {:req, "~> 0.5"},
       {:finch, "~> 0.13"},
+
+      # i18n, l10n
+      {:gettext, "~> 0.22"},
+      {:ex_cldr, "~> 2.23"},
+      {:ex_cldr_dates_times, "~> 2.0"},
+      {:ex_cldr_numbers, "~> 2.0"},
+
+      # (de)serialization
+      {:jason, "~> 1.2"},
+      {:yaml_elixir, "~> 2.9"},
+
+      # math formulas
+      {:abacus, "~> 2.0"},
+
+      # money
+      {:ex_money, "~> 5.0"},
 
       # observability
       {:phoenix_live_dashboard, "~> 0.8"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
       {:telemetry_metrics_statsd, "~> 0.7"},
-
-      # i18n
-      {:gettext, "~> 0.22"},
-
-      # json
-      {:jason, "~> 1.2"},
-
-      # yaml parsing
-      {:yaml_elixir, "~> 2.9"},
-
-      # math
-      {:abacus, "~> 2.0"},
-
-      # locale info, dates and money formatting
-      {:ex_cldr, "~> 2.23"},
-      {:ex_cldr_dates_times, "~> 2.0"},
-      {:ex_cldr_numbers, "~> 2.0"},
-
-      # money handling
-      {:ex_money, "~> 5.0"},
-
-      # http client
-      {:req, "~> 0.5"},
 
       # test/lint/dev tools
       {:phoenix_live_reload, "~> 1.2", only: :dev},

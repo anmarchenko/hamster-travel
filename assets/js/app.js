@@ -5,8 +5,12 @@ import { Socket } from 'phoenix';
 import { LiveSocket } from 'phoenix_live_view';
 import topbar from '../vendor/topbar';
 
+// alpinejs for interactivity and persist plugin for local storage
 import Alpine from 'alpinejs';
 import persist from '@alpinejs/persist';
+
+// live_select UI component
+import live_select from 'live_select';
 
 Alpine.plugin(persist);
 
@@ -17,7 +21,10 @@ let csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute('content');
 
-let hooks = {};
+let hooks = {
+  ...live_select,
+};
+
 let liveSocket = new LiveSocket('/live', Socket, {
   params: { _csrf_token: csrfToken },
   hooks: hooks,

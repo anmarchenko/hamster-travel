@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@alpinejs/persist": "^3.10.5",
-    "alpinejs": "^3.9.0"
+    "alpinejs": "^3.9.0",
+    "live_select": "file:../deps/live_select"
   }
 }

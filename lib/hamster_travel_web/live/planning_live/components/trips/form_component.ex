@@ -1,6 +1,6 @@
 defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
   @moduledoc """
-  Live trip create/edit form
+  Trip create/edit form
   """
 
   use HamsterTravelWeb, :live_component

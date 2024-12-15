@@ -1,7 +1,42 @@
 defmodule HamsterTravelWeb.Planning.CityInput do
   use HamsterTravelWeb, :live_component
 
+  import LiveSelect
+
   alias HamsterTravel.Geo
+
+  attr :field, Phoenix.HTML.FormField, required: true
+  attr :label, :string, required: true
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <div>
+      <.label for={@field.id}><%= @label %></.label>
+      <.live_select field={@field} phx-target={@myself} />
+    </div>
+    """
+  end
+
+  @impl true
+  def handle_event("live_select_change", %{"text" => text, "id" => live_select_id}, socket) do
+    cities =
+      text
+      |> Geo.search_cities()
+      |> Enum.map(fn city ->
+        [
+          label: city.name,
+          value: %{
+            id: city.id,
+            country: city.country.iso
+          }
+        ]
+      end)
+
+    send_update(LiveSelect.Component, id: live_select_id, options: cities)
+
+    {:noreply, socket}
+  end
 
   # TMP: https://fly.io/phoenix-files/phoenix-liveview-and-sqlite-autocomplete/
 

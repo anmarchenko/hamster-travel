@@ -4,8 +4,6 @@ defmodule HamsterTravelWeb.Planning.PlacesList do
   """
   use HamsterTravelWeb, :html
 
-  alias HamsterTravelWeb.Planning.Place
-
   attr(:places, :list, required: true)
   attr(:day_index, :integer, required: true)
 
@@ -22,9 +20,7 @@ defmodule HamsterTravelWeb.Planning.PlacesList do
     <%!-- TODO: REMOVE THIS, IT'S JUST FOR TESTING --%>
     <.live_component
       id={"search-city-new-place-#{@day_index}"}
-      module={HamsterTravelWeb.Planning.CityInput}
-      show={true}
-      on_cancel={%JS{}}
+      module={HamsterTravelWeb.Planning.DestinationForm}
     />
     """
   end
