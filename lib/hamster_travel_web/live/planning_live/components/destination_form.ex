@@ -11,7 +11,7 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
   def render(assigns) do
     ~H"""
     <div>
-      <.form id="destination-form" for={@form} phx-target={@myself}>
+      <.form id="destination-form" for={@form} as={:destination} phx-target={@myself}>
         <.live_component
           id="destination-form-city-input"
           module={CityInput}
@@ -32,7 +32,7 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
     socket =
       socket
       |> assign(assigns)
-      |> assign(:form, to_form(changeset))
+      |> assign(:form, to_form(changeset, as: :destination))
 
     {:ok, socket}
   end
