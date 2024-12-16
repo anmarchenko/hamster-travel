@@ -17,10 +17,17 @@ defmodule HamsterTravelWeb.Planning.CityInput do
         field={@field}
         phx-target={@myself}
         text_input_class="pc-text-input"
-        dropdown_class="absolute rounded-md shadow z-50 bg-white inset-x-0 top-full max-h-32 overflow-y-scroll"
+        dropdown_class="absolute rounded-md shadow z-50 bg-white inset-x-0 top-full max-h-32 overflow-y-scroll w-max"
         active_option_class="font-bold bg-gray-200"
         update_min_len={2}
-      />
+      >
+        <:option :let={option}>
+          <.inline>
+            <.flag size={16} country={option.value.country} />
+            <%= option.label %>
+          </.inline>
+        </:option>
+      </.live_select>
     </div>
     """
   end
