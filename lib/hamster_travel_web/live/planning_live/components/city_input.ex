@@ -9,12 +9,19 @@ defmodule HamsterTravelWeb.Planning.CityInput do
   attr :label, :string, required: true
 
   @impl true
-  def render(assigns) do
+  def render(%{field: field} = assigns) do
+    # errors = if used_input?(field), do: field.errors, else: []
+
+    # assigns =
+    #   assigns
+    #   |> assign(:errors, Enum.map([], &translate_error(&1)))
+
     ~H"""
     <div>
       <.label for={@field.id}><%= @label %></.label>
       <.live_select
         field={@field}
+        value_mapper={&value_mapper/1}
         phx-target={@myself}
         text_input_class="pc-text-input"
         dropdown_class="absolute rounded-md shadow z-50 bg-white dark:bg-zinc-900 dark:text-zinc-300 inset-x-0 top-full max-h-32 overflow-y-scroll w-max max-w-[330px] sm:max-w-md"
@@ -29,6 +36,8 @@ defmodule HamsterTravelWeb.Planning.CityInput do
           </.inline>
         </:option>
       </.live_select>
+
+      <%!-- <.field_error :for={msg <- @errors}>{msg}</.field_error> --%>
     </div>
     """
   end
@@ -38,18 +47,20 @@ defmodule HamsterTravelWeb.Planning.CityInput do
     cities =
       text
       |> Geo.search_cities()
-      |> Enum.map(fn city ->
-        [
-          label: Geo.city_text(city),
-          value: %{
-            id: city.id,
-            country: city.country.iso
-          }
-        ]
-      end)
+      |> Enum.map(&value_mapper/1)
 
     send_update(LiveSelect.Component, id: live_select_id, options: cities)
 
     {:noreply, socket}
+  end
+
+  defp value_mapper(city) do
+    %{
+      label: Geo.city_text(city),
+      value: %{
+        id: city.id,
+        country: city.country.iso
+      }
+    }
   end
 end
