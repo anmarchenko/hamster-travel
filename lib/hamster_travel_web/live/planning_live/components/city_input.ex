@@ -31,8 +31,7 @@ defmodule HamsterTravelWeb.Planning.CityInput do
       >
         <:option :let={option}>
           <.inline>
-            <.flag size={16} country={option.value.country} />
-            {option.label}
+            <.flag size={16} country={option.value.country} /> {option.label}
           </.inline>
         </:option>
       </.live_select>

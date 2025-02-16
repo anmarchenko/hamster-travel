@@ -20,7 +20,7 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
         phx-submit="form_submit"
       >
         <.live_component
-          id="destination-form-city-input"
+          id="destination-put-destination-id-here-form-city-input"
           module={CityInput}
           field={@form[:city]}
           label={gettext("City")}
