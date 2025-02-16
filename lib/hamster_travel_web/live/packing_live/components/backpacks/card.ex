@@ -12,7 +12,7 @@ defmodule HamsterTravelWeb.Packing.Backpacks.Card do
       <div class="p-4 flex flex-col gap-y-4">
         <p class="text-base font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
           <.link navigate={backpack_url(@backpack.slug)}>
-            <%= @backpack.name %>
+            {@backpack.name}
           </.link>
         </p>
 
@@ -20,11 +20,11 @@ defmodule HamsterTravelWeb.Packing.Backpacks.Card do
           <div class="text-xs sm:text-base font-light flex flex-row gap-x-2">
             <.inline>
               <.icon name="hero-calendar" class="h-4 w-4" />
-              <%= @backpack.days %> <%= ngettext("day", "days", @backpack.days) %> / <%= @backpack.nights %> <%= ngettext(
+              {@backpack.days} {ngettext("day", "days", @backpack.days)} / {@backpack.nights} {ngettext(
                 "night",
                 "nights",
                 @backpack.nights
-              ) %>
+              )}
             </.inline>
           </div>
         </.secondary>

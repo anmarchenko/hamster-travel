@@ -27,9 +27,9 @@ defmodule HamsterTravelWeb.Planning.Trips.Card do
       <div class="p-4 max-w-[calc(100%_-_theme(width.32))] flex flex-col justify-between">
         <p class="text-base font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
           <.link navigate={trip_url(@trip.slug)}>
-            <%= @trip.name %>
+            {@trip.name}
             <span class="font-light text-zinc-600 dark:text-zinc-400">
-              <%= Cldr.year_with_month(@trip.start_date) %>
+              {Cldr.year_with_month(@trip.start_date)}
             </span>
           </.link>
         </p>

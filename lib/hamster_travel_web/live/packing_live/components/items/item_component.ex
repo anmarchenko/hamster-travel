@@ -127,8 +127,8 @@ defmodule HamsterTravelWeb.Packing.Items.ItemComponent do
                 label={@item.name}
                 value={@item.checked}
               />
-              <div class="text-sm grow"><%= @item.name %></div>
-              <div class="text-sm justify-self-end"><%= @item.count %></div>
+              <div class="text-sm grow">{@item.name}</div>
+              <div class="text-sm justify-self-end">{@item.count}</div>
             </.inline>
           </label>
         </.form>

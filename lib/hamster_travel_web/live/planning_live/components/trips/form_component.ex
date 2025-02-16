@@ -1,6 +1,6 @@
 defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
   @moduledoc """
-  Live trip create/edit form
+  Trip create/edit form
   """
 
   use HamsterTravelWeb, :live_component
@@ -139,10 +139,10 @@ defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
 
           <div class="flex justify-between">
             <.button link_type="live_redirect" to={@back_url} color="white">
-              <%= gettext("Cancel") %>
+              {gettext("Cancel")}
             </.button>
             <.button color="primary">
-              <%= gettext("Save") %>
+              {gettext("Save")}
             </.button>
           </div>
         </.form>

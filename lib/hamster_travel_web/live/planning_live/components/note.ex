@@ -22,7 +22,7 @@ defmodule HamsterTravelWeb.Planning.Note do
     ~H"""
     <div class="text-sm">
       <.secondary>
-        <%= @note.text %>
+        {@note.text}
       </.secondary>
     </div>
     """

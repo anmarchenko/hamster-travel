@@ -17,14 +17,14 @@ defmodule HamsterTravelWeb.Layouts do
         <div class="hidden sm:block">
           <div class="space-x-6 flex items-center">
             <.nav_link to={plans_url()} active={@active_nav == plans_nav_item()}>
-              <%= gettext("Plans") %>
+              {gettext("Plans")}
             </.nav_link>
             <%= if @current_user do %>
               <.nav_link to={~p"/drafts"} active={@active_nav == drafts_nav_item()}>
-                <%= gettext("Drafts") %>
+                {gettext("Drafts")}
               </.nav_link>
               <.nav_link to={backpacks_url()} active={@active_nav == backpacks_nav_item()}>
-                <%= gettext("Backpacks") %>
+                {gettext("Backpacks")}
               </.nav_link>
             <% end %>
           </div>
@@ -35,7 +35,7 @@ defmodule HamsterTravelWeb.Layouts do
           </.nav_link>
         <% else %>
           <.nav_link to={~p"/users/log_in"}>
-            <%= gettext("Log in") %>
+            {gettext("Log in")}
           </.nav_link>
         <% end %>
       </nav>
@@ -128,7 +128,7 @@ defmodule HamsterTravelWeb.Layouts do
   def nav_link(assigns) do
     ~H"""
     <.link navigate={@to} class={"text-sm #{color_classes(assigns)}"}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </.link>
     """
   end
@@ -136,7 +136,7 @@ defmodule HamsterTravelWeb.Layouts do
   def mobile_nav_link(assigns) do
     ~H"""
     <.link navigate={@to} class={"#{mobile_nav_classes()} #{color_classes(assigns)}"}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
       <.mobile_nav_label label={@label} />
     </.link>
     """
@@ -145,7 +145,7 @@ defmodule HamsterTravelWeb.Layouts do
   def mobile_nav_link_tab(assigns) do
     ~H"""
     <.link patch={@to} class={"#{mobile_nav_classes()} #{color_classes(assigns)}"}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
       <.mobile_nav_label label={@label} />
     </.link>
     """
@@ -153,7 +153,7 @@ defmodule HamsterTravelWeb.Layouts do
 
   def mobile_nav_label(assigns) do
     ~H"""
-    <span class="text-xs text-zinc-600 dark:text-zinc-400"><%= @label %></span>
+    <span class="text-xs text-zinc-600 dark:text-zinc-400">{@label}</span>
     """
   end
 

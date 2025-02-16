@@ -21,8 +21,8 @@ defmodule HamsterTravelWeb.Planning.Expense do
   def render(%{edit: false} = assigns) do
     ~H"""
     <div class="flex flex-row gap-x-1 text-sm font-light">
-      <%= @expense.name %>
-      <%= Formatter.format_money(@expense.price, @expense.price_currency) %>
+      {@expense.name}
+      {Formatter.format_money(@expense.price, @expense.price_currency)}
     </div>
     """
   end

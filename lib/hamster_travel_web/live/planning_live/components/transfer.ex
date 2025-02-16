@@ -26,31 +26,31 @@ defmodule HamsterTravelWeb.Planning.Transfer do
       <.secondary italic={false} tag="div">
         <.inline>
           <.transfer_icon type={@transfer.type} />
-          <%= @transfer.vehicle_id %>
-          <%= @transfer.company %>
+          {@transfer.vehicle_id}
+          {@transfer.company}
           <.budget />
-          <%= Formatter.format_money(@transfer.price, @transfer.price_currency) %>
+          {Formatter.format_money(@transfer.price, @transfer.price_currency)}
         </.inline>
       </.secondary>
       <div class="flex flex-row text-lg mt-2">
         <div class="flex flex-col gap-y-2 pr-6 border-r-2 font-medium">
-          <div><%= @transfer.time_from %></div>
-          <div><%= @transfer.time_to %></div>
+          <div>{@transfer.time_from}</div>
+          <div>{@transfer.time_to}</div>
         </div>
         <div class="flex flex-col pl-6 gap-y-2">
           <div>
-            <%= @transfer.city_from.name %>
+            {@transfer.city_from.name}
             <.station station={@transfer.station_from} />
           </div>
           <div>
-            <%= @transfer.city_to.name %>
+            {@transfer.city_to.name}
             <.station station={@transfer.station_to} />
           </div>
         </div>
       </div>
 
       <.secondary>
-        <%= @transfer.comment %>
+        {@transfer.comment}
       </.secondary>
 
       <.external_links links={@transfer.links} />
@@ -97,7 +97,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
   defp station(assigns) do
     if assigns.station do
       ~H"""
-      (<%= @station %>)
+      ({@station})
       """
     else
       ~H"""

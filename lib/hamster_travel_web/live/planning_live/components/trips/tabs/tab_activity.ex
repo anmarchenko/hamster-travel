@@ -30,7 +30,7 @@ defmodule HamsterTravelWeb.Planning.Trips.Tabs.TabActivity do
   def activities(%{activities: []} = assigns) do
     ~H"""
     <.secondary class="sm:hidden">
-      <%= gettext("No activities planned for this day") %>
+      {gettext("No activities planned for this day")}
     </.secondary>
     """
   end
@@ -75,7 +75,7 @@ defmodule HamsterTravelWeb.Planning.Trips.Tabs.TabActivity do
       <div class="flex flex-row gap-x-4 mt-4 sm:mt-8 text-xl">
         <.inline>
           <.budget />
-          <%= Formatter.format_money(@budget, @trip.currency) %>
+          {Formatter.format_money(@budget, @trip.currency)}
         </.inline>
       </div>
 

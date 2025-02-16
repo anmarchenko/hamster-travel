@@ -110,7 +110,7 @@ defmodule HamsterTravel.Geo do
         c in City,
         where: ilike(field(c, ^column), ^search_term),
         order_by: [desc: fragment("? % ?", ^search_term, field(c, ^column)), desc: c.population],
-        limit: 25,
+        limit: 10,
         preload: [:country],
         join: r in Region,
         on: c.region_code == r.region_code and c.country_code == r.country_code,
@@ -118,5 +118,15 @@ defmodule HamsterTravel.Geo do
       )
 
     Repo.all(query)
+  end
+
+  def city_text(city) do
+    case Gettext.get_locale(HamsterTravelWeb.Gettext) do
+      "ru" ->
+        "#{city.name_ru || city.name}, #{city.region_name_ru || city.region_name}, #{city.country.name_ru}"
+
+      _ ->
+        "#{city.name}, #{city.region_name}, #{city.country.name}"
+    end
   end
 end

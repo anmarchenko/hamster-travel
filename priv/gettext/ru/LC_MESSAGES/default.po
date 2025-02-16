@@ -1,19 +1,19 @@
 #: lib/hamster_travel_web/components/layouts.ex:20
-#: lib/hamster_travel_web/components/layouts.ex:100
-#: lib/hamster_travel_web/live/planning_live/index_plans.ex:14
+#: lib/hamster_travel_web/components/layouts.ex:103
+#: lib/hamster_travel_web/live/planning_live/index_plans.ex:16
 #, elixir-autogen, elixir-format
 msgid "Plans"
 msgstr "Путешествия"
 
 #: lib/hamster_travel_web/components/layouts.ex:27
-#: lib/hamster_travel_web/components/layouts.ex:116
+#: lib/hamster_travel_web/components/layouts.ex:119
 #: lib/hamster_travel_web/live/packing_live/index_backpacks.ex:17
 #, elixir-autogen, elixir-format
 msgid "Backpacks"
 msgstr "Рюкзачки"
 
-#: lib/hamster_travel_web/components/layouts.ex:96
-#: lib/hamster_travel_web/live/home.ex:16
+#: lib/hamster_travel_web/components/layouts.ex:99
+#: lib/hamster_travel_web/live/home.ex:18
 #, elixir-autogen, elixir-format
 msgid "Homepage"
 msgstr "Главная"
@@ -49,8 +49,8 @@ msgid "draft"
 msgstr "Draft"
 
 #: lib/hamster_travel_web/components/layouts.ex:24
-#: lib/hamster_travel_web/components/layouts.ex:108
-#: lib/hamster_travel_web/live/planning_live/index_drafts.ex:14
+#: lib/hamster_travel_web/components/layouts.ex:111
+#: lib/hamster_travel_web/live/planning_live/index_drafts.ex:16
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Drafts"
 msgstr "Черновики"
@@ -60,7 +60,7 @@ msgstr "Черновики"
 msgid "Make a copy"
 msgstr "Сделать копию"
 
-#: lib/hamster_travel_web/components/layouts.ex:85
+#: lib/hamster_travel_web/components/layouts.ex:88
 #: lib/hamster_travel_web/live/planning_live/components/trips/tabs.ex:45
 #, elixir-autogen, elixir-format
 msgid "Activities"
@@ -71,12 +71,12 @@ msgstr "Впечатления"
 msgid "Transfers and hotels"
 msgstr "Трансферы и жильё"
 
-#: lib/hamster_travel_web/components/layouts.ex:74
+#: lib/hamster_travel_web/components/layouts.ex:77
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Back"
 msgstr "Назад"
 
-#: lib/hamster_travel_web/components/layouts.ex:78
+#: lib/hamster_travel_web/components/layouts.ex:81
 #: lib/hamster_travel_web/live/planning_live/components/trips/tabs/tab_itinerary.ex:85
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Transfers"
@@ -140,17 +140,17 @@ msgid "Last travels"
 msgstr "Последние путешествия"
 
 #: lib/hamster_travel_web/components/layouts.ex:38
-#: lib/hamster_travel_web/live/user_login_live.ex:80
+#: lib/hamster_travel_web/live/user_login_live.ex:74
 #, elixir-autogen, elixir-format
 msgid "Log in"
 msgstr "Войти"
 
-#: lib/hamster_travel_web/live/user_login_live.ex:34
+#: lib/hamster_travel_web/live/user_login_live.ex:28
 #, elixir-autogen, elixir-format
 msgid "Email"
 msgstr "Email"
 
-#: lib/hamster_travel_web/live/user_login_live.ex:45
+#: lib/hamster_travel_web/live/user_login_live.ex:39
 #, elixir-autogen, elixir-format
 msgid "Password"
 msgstr "Пароль"
@@ -405,3 +405,8 @@ msgstr "Потерялся интернет"
 #, elixir-autogen, elixir-format
 msgid "Welcome back!"
 msgstr "Добро пожаловать!"
+
+#: lib/hamster_travel_web/live/planning_live/components/destination_form.ex:19
+#, elixir-autogen, elixir-format
+msgid "City"
+msgstr "Город"
