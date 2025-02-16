@@ -53,8 +53,6 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
 
   @impl true
   def handle_event("form_submit", %{"destination" => destination_params}, socket) do
-    IO.inspect(destination_params)
-
     {:noreply, socket}
   end
 end
