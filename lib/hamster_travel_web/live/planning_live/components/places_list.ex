@@ -16,12 +16,6 @@ defmodule HamsterTravelWeb.Planning.PlacesList do
       place={place}
       day_index={@day_index}
     /> --%>
-
-    <%!-- TODO: REMOVE THIS, IT'S JUST FOR TESTING --%>
-    <.live_component
-      id={"search-city-new-place-#{@day_index}"}
-      module={HamsterTravelWeb.Planning.DestinationForm}
-    />
     """
   end
 end
