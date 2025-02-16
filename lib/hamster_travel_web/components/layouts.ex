@@ -41,10 +41,7 @@ defmodule HamsterTravelWeb.Layouts do
       </nav>
     </.container>
     <div class="sm:hidden">
-      <nav
-        class="w-full border-t bg-orange-50 dark:bg-zinc-900 dark:border-zinc-800 fixed bottom-0"
-        style="z-index: 100"
-      >
+      <nav class="w-full border-t bg-orange-50 dark:bg-zinc-900 dark:border-zinc-800 fixed bottom-0 z-40">
         <div class="mx-auto px-6 max-w-md h-16 flex items-center justify-around">
           <.mobile_nav
             current_user={@current_user}
@@ -136,8 +133,7 @@ defmodule HamsterTravelWeb.Layouts do
   def mobile_nav_link(assigns) do
     ~H"""
     <.link navigate={@to} class={"#{mobile_nav_classes()} #{color_classes(assigns)}"}>
-      {render_slot(@inner_block)}
-      <.mobile_nav_label label={@label} />
+      {render_slot(@inner_block)} <.mobile_nav_label label={@label} />
     </.link>
     """
   end
@@ -145,8 +141,7 @@ defmodule HamsterTravelWeb.Layouts do
   def mobile_nav_link_tab(assigns) do
     ~H"""
     <.link patch={@to} class={"#{mobile_nav_classes()} #{color_classes(assigns)}"}>
-      {render_slot(@inner_block)}
-      <.mobile_nav_label label={@label} />
+      {render_slot(@inner_block)} <.mobile_nav_label label={@label} />
     </.link>
     """
   end
