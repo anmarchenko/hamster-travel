@@ -482,7 +482,7 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   def error(assigns) do
     ~H"""
-    <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600 phx-no-feedback:hidden">
+    <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600">
       <%= render_slot(@inner_block) %>
     </p>
     """
