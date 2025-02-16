@@ -123,7 +123,7 @@ defmodule HamsterTravelWeb.CoreComponents do
                 </button>
               </div>
               <div id={"#{@id}-content"}>
-                <%= render_slot(@inner_block) %>
+                {render_slot(@inner_block)}
               </div>
             </.focus_wrap>
           </div>
@@ -166,9 +166,9 @@ defmodule HamsterTravelWeb.CoreComponents do
       <p :if={@title} class="flex items-center gap-1.5 text-sm font-semibold leading-6">
         <.icon :if={@kind == :info} name="hero-information-circle" class="h-4 w-4" />
         <.icon :if={@kind == :error} name="hero-exclamation-circle" class="h-4 w-4" />
-        <%= @title %>
+        {@title}
       </p>
-      <p class="mt-2 text-sm leading-5"><%= msg %></p>
+      <p class="mt-2 text-sm leading-5">{msg}</p>
       <button type="button" class="group absolute top-1 right-1 p-2" aria-label={gettext("close")}>
         <.icon name="hero-x-mark-solid" class="h-5 w-5 opacity-40 group-hover:opacity-70" />
       </button>
@@ -197,7 +197,7 @@ defmodule HamsterTravelWeb.CoreComponents do
       phx-connected={hide("#disconnected")}
       hidden
     >
-      <%= gettext("Attempting to reconnect") %>
+      {gettext("Attempting to reconnect")}
       <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
     </.flash>
     """
@@ -240,8 +240,8 @@ defmodule HamsterTravelWeb.CoreComponents do
       <table class="w-[40rem] mt-11 sm:w-full">
         <thead class="text-sm text-left leading-6 text-zinc-500">
           <tr>
-            <th :for={col <- @col} class="p-0 pr-6 pb-4 font-normal"><%= col[:label] %></th>
-            <th class="relative p-0 pb-4"><span class="sr-only"><%= gettext("Actions") %></span></th>
+            <th :for={col <- @col} class="p-0 pr-6 pb-4 font-normal">{col[:label]}</th>
+            <th class="relative p-0 pb-4"><span class="sr-only">{gettext("Actions")}</span></th>
           </tr>
         </thead>
         <tbody
@@ -258,7 +258,7 @@ defmodule HamsterTravelWeb.CoreComponents do
               <div class="block py-4 pr-6">
                 <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 sm:rounded-l-xl" />
                 <span class={["relative", i == 0 && "font-semibold text-zinc-900"]}>
-                  <%= render_slot(col, @row_item.(row)) %>
+                  {render_slot(col, @row_item.(row))}
                 </span>
               </div>
             </td>
@@ -269,7 +269,7 @@ defmodule HamsterTravelWeb.CoreComponents do
                   :for={action <- @action}
                   class="relative ml-4 font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
                 >
-                  <%= render_slot(action, @row_item.(row)) %>
+                  {render_slot(action, @row_item.(row))}
                 </span>
               </div>
             </td>
@@ -299,8 +299,8 @@ defmodule HamsterTravelWeb.CoreComponents do
     <div class="mt-14">
       <dl class="-my-4 divide-y divide-zinc-100">
         <div :for={item <- @item} class="flex gap-4 py-4 text-sm leading-6 sm:gap-8">
-          <dt class="w-1/4 flex-none text-zinc-500"><%= item.title %></dt>
-          <dd class="text-zinc-700"><%= render_slot(item) %></dd>
+          <dt class="w-1/4 flex-none text-zinc-500">{item.title}</dt>
+          <dd class="text-zinc-700">{render_slot(item)}</dd>
         </div>
       </dl>
     </div>
@@ -323,7 +323,7 @@ defmodule HamsterTravelWeb.CoreComponents do
         @class
       ])
     }>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </section>
     """
   end
@@ -340,7 +340,7 @@ defmodule HamsterTravelWeb.CoreComponents do
     ~H"""
     <div class="flex min-h-full items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div class="w-full max-w-md space-y-8">
-        <%= render_slot(@inner_block) %>
+        {render_slot(@inner_block)}
       </div>
     </div>
     """
@@ -362,7 +362,7 @@ defmodule HamsterTravelWeb.CoreComponents do
         ])
       }
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -376,7 +376,7 @@ defmodule HamsterTravelWeb.CoreComponents do
     ~H"""
     <.icon name={@icon} class={@class} {@rest} />
     <span class="hidden sm:inline ml-2">
-      <%= @label %>
+      {@label}
     </span>
     """
   end
@@ -393,7 +393,7 @@ defmodule HamsterTravelWeb.CoreComponents do
       class="underline text-indigo-500 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-100"
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </.link>
     """
   end
@@ -403,7 +403,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   def external_link(assigns) do
     ~H"""
     <.ht_link href={@link}>
-      <%= URI.parse(@link).host %>
+      {URI.parse(@link).host}
     </.ht_link>
     """
   end
@@ -447,16 +447,16 @@ defmodule HamsterTravelWeb.CoreComponents do
     <header class={[@actions != [] && "flex items-center justify-between gap-6", @class]}>
       <div>
         <h1 class="text-lg font-semibold leading-8 text-zinc-800 dark:text-zinc-300">
-          <%= render_slot(@inner_block) %>
+          {render_slot(@inner_block)}
           <span
             :if={@subtitle != []}
             class="ml-2 font-light leading-6 text-zinc-600 dark:text-zinc-400"
           >
-            <%= render_slot(@subtitle) %>
+            {render_slot(@subtitle)}
           </span>
         </h1>
       </div>
-      <div class="flex-none"><%= render_slot(@actions) %></div>
+      <div class="flex-none">{render_slot(@actions)}</div>
     </header>
     """
   end
@@ -470,7 +470,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   def label(assigns) do
     ~H"""
     <label for={@for} class="pc-label">
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </label>
     """
   end
@@ -483,7 +483,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   def error(assigns) do
     ~H"""
     <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600">
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </p>
     """
   end
@@ -496,7 +496,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   def secondary(%{tag: "div"} = assigns) do
     ~H"""
     <div class={build_class([secondary_component_class(assigns), @class])}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -504,7 +504,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   def secondary(%{tag: "p"} = assigns) do
     ~H"""
     <p class={build_class([secondary_component_class(assigns), @class])}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </p>
     """
   end
@@ -570,7 +570,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   def inline(assigns) do
     ~H"""
     <div class={build_class([inline_component_class(assigns), @class])}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end

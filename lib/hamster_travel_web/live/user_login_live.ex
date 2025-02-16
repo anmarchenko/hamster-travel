@@ -6,7 +6,7 @@ defmodule HamsterTravelWeb.UserLoginLive do
     <.form_container>
       <div>
         <h2 class="mt-6 text-center text-3xl font-bold tracking-tight">
-          <%= gettext("Sign in to your account") %>
+          {gettext("Sign in to your account")}
         </h2>
       </div>
 
@@ -71,7 +71,7 @@ defmodule HamsterTravelWeb.UserLoginLive do
                 />
               </svg>
             </span>
-            <%= gettext("Log in") %>
+            {gettext("Log in")}
           </.button>
         </div>
       </.form>

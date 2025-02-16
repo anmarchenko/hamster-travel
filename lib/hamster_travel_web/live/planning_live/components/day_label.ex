@@ -13,13 +13,13 @@ defmodule HamsterTravelWeb.Planning.DayLabel do
 
   defp render(%{start_date: nil} = assigns) do
     ~H"""
-    <%= gettext("Day") %> <%= @day_index + 1 %>
+    {gettext("Day")} {@day_index + 1}
     """
   end
 
   defp render(assigns) do
     ~H"""
-    <%= Formatter.date_with_weekday(Date.add(@start_date, @day_index)) %>
+    {Formatter.date_with_weekday(Date.add(@start_date, @day_index))}
     """
   end
 end

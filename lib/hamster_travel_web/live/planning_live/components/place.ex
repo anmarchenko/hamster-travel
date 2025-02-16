@@ -23,7 +23,7 @@ defmodule HamsterTravelWeb.Planning.Place do
     <span>
       <.inline>
         <.flag size={16} country={@place.city.country} />
-        <%= @place.city.name %>
+        {@place.city.name}
       </.inline>
     </span>
     """

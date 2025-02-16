@@ -81,7 +81,7 @@ defmodule HamsterTravelWeb.Packing.Lists.AddComponent do
     <div class="mb-5">
       <.button color="primary" phx-click="edit" phx-target={@myself}>
         <.icon name="hero-plus-solid" class="w-5 h-5 mr-2" />
-        <%= gettext("Add list") %>
+        {gettext("Add list")}
       </.button>
     </div>
     """

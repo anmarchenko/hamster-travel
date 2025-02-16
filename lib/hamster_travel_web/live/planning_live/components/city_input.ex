@@ -10,15 +10,15 @@ defmodule HamsterTravelWeb.Planning.CityInput do
 
   @impl true
   def render(%{field: field} = assigns) do
-    # errors = if used_input?(field), do: field.errors, else: []
+    errors = if used_input?(field), do: field.errors, else: []
 
-    # assigns =
-    #   assigns
-    #   |> assign(:errors, Enum.map([], &translate_error(&1)))
+    assigns =
+      assigns
+      |> assign(:errors, Enum.map([], &translate_error(&1)))
 
     ~H"""
     <div>
-      <.label for={@field.id}><%= @label %></.label>
+      <.label for={@field.id}>{@label}</.label>
       <.live_select
         field={@field}
         value_mapper={&value_mapper/1}
@@ -32,12 +32,12 @@ defmodule HamsterTravelWeb.Planning.CityInput do
         <:option :let={option}>
           <.inline>
             <.flag size={16} country={option.value.country} />
-            <%= option.label %>
+            {option.label}
           </.inline>
         </:option>
       </.live_select>
 
-      <%!-- <.field_error :for={msg <- @errors}>{msg}</.field_error> --%>
+      <.field_error :for={msg <- @errors}>{msg}</.field_error>
     </div>
     """
   end

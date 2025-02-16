@@ -103,7 +103,7 @@ defmodule HamsterTravelWeb.Packing.Lists.ListComponent do
   def card_header(%{edit: false} = assigns) do
     ~H"""
     <.inline>
-      <div class="grow text-white dark:text-zinc-300"><%= @list.name %></div>
+      <div class="grow text-white dark:text-zinc-300">{@list.name}</div>
       <.icon_button
         size="xs"
         class={button_color()}

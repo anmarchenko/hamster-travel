@@ -78,10 +78,10 @@ defmodule HamsterTravelWeb.Packing.Backpacks.FormComponent do
 
           <div class="flex justify-between">
             <.button link_type="live_redirect" to={@back_url} color="white">
-              <%= gettext("Cancel") %>
+              {gettext("Cancel")}
             </.button>
             <.button color="primary">
-              <%= gettext("Save") %>
+              {gettext("Save")}
             </.button>
           </div>
         </.form>

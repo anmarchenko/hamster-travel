@@ -19,7 +19,7 @@ defmodule HamsterTravelWeb.Planning.Trips.StatusBadge do
         @class
       ])
     }>
-      <%= Gettext.gettext(HamsterTravelWeb.Gettext, @status) %>
+      {Gettext.gettext(HamsterTravelWeb.Gettext, @status)}
     </span>
     """
   end

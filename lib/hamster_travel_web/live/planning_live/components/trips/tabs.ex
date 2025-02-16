@@ -31,7 +31,7 @@ defmodule HamsterTravelWeb.Planning.Trips.Tabs do
       >
         <.inline>
           <.airplane />
-          <%= gettext("Transfers and hotels") %>
+          {gettext("Transfers and hotels")}
         </.inline>
       </.tab>
       <.tab
@@ -42,7 +42,7 @@ defmodule HamsterTravelWeb.Planning.Trips.Tabs do
       >
         <.inline>
           <.icon name="hero-clipboard-document-list" class="h-5 w-5" />
-          <%= gettext("Activities") %>
+          {gettext("Activities")}
         </.inline>
       </.tab>
     </.tabs>

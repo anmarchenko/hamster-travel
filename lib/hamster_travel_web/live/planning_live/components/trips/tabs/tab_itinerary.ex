@@ -29,7 +29,7 @@ defmodule HamsterTravelWeb.Planning.Trips.Tabs.TabItinerary do
   def transfers(%{transfers: []} = assigns) do
     ~H"""
     <.secondary class="sm:hidden">
-      <%= gettext("No transfers planned for this day") %>
+      {gettext("No transfers planned for this day")}
     </.secondary>
     """
   end
@@ -48,7 +48,7 @@ defmodule HamsterTravelWeb.Planning.Trips.Tabs.TabItinerary do
   def hotels(%{hotels: []} = assigns) do
     ~H"""
     <.secondary class="sm:hidden">
-      <%= gettext("No hotels for this day") %>
+      {gettext("No hotels for this day")}
     </.secondary>
     """
   end
@@ -70,21 +70,21 @@ defmodule HamsterTravelWeb.Planning.Trips.Tabs.TabItinerary do
       <div class="flex flex-row gap-x-4 mt-4 sm:mt-8 text-xl">
         <.inline>
           <.budget />
-          <%= Formatter.format_money(@budget, @trip.currency) %>
+          {Formatter.format_money(@budget, @trip.currency)}
         </.inline>
       </div>
 
       <table class="sm:mt-8 sm:table-auto sm:border-collapse sm:border sm:border-slate-500 sm:w-full">
         <thead>
           <tr class="hidden sm:table-row">
-            <th class="border border-slate-600 px-2 py-4 text-left w-1/12"><%= gettext("Day") %></th>
+            <th class="border border-slate-600 px-2 py-4 text-left w-1/12">{gettext("Day")}</th>
             <th class="border border-slate-600 px-2 py-4 text-left w-1/6">
-              <%= gettext("Places") %>
+              {gettext("Places")}
             </th>
             <th class="border border-slate-600 px-2 py-4 text-left w-1/3">
-              <%= gettext("Transfers") %>
+              {gettext("Transfers")}
             </th>
-            <th class="border border-slate-600 px-2 py-4 text-left w-1/3"><%= gettext("Hotel") %></th>
+            <th class="border border-slate-600 px-2 py-4 text-left w-1/3">{gettext("Hotel")}</th>
           </tr>
         </thead>
         <tbody>

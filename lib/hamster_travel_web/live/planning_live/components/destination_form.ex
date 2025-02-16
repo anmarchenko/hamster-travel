@@ -27,7 +27,7 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
         />
         <div class="flex justify-between mt-2">
           <.button color="primary" size="xs">
-            <%= gettext("Save") %>
+            {gettext("Save")}
           </.button>
         </div>
       </.form>

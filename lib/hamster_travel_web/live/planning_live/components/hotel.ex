@@ -25,14 +25,14 @@ defmodule HamsterTravelWeb.Planning.Hotel do
     <div class="flex flex-col gap-y-1">
       <.inline>
         <.home_simple />
-        <%= @hotel.name %>
+        {@hotel.name}
       </.inline>
       <.inline>
         <.budget />
-        <%= Formatter.format_money(@hotel.price, @hotel.price_currency) %>
+        {Formatter.format_money(@hotel.price, @hotel.price_currency)}
       </.inline>
       <.secondary>
-        <%= @hotel.comment %>
+        {@hotel.comment}
       </.secondary>
       <.external_links links={@hotel.links} />
     </div>
