@@ -21,7 +21,7 @@ defmodule HamsterTravelWeb.Planning.Trips.StatusRow do
       ])
     }>
       <.status_badge status={@trip.status} />
-      <.flag size={24} country="de" />
+      <.flag size={20} country="de" />
       <%!-- <%= for country <- Enum.take(@plan.countries, @flags_limit) do %>
         <.flag size={24} country={country} />
       <% end %> --%>

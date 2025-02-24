@@ -22,7 +22,7 @@ defmodule HamsterTravelWeb.Planning.Place do
     ~H"""
     <span>
       <.inline>
-        <.flag size={16} country={@place.city.country} />
+        <.flag size={20} country={@place.city.country} />
         {@place.city.name}
       </.inline>
     </span>

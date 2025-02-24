@@ -14,7 +14,7 @@ defmodule HamsterTravelWeb.Planning.CityInput do
 
     assigns =
       assigns
-      |> assign(:errors, Enum.map([], &translate_error(&1)))
+      |> assign(:errors, Enum.map(errors, &translate_error(&1)))
 
     ~H"""
     <div>
@@ -31,7 +31,7 @@ defmodule HamsterTravelWeb.Planning.CityInput do
       >
         <:option :let={option}>
           <.inline>
-            <.flag size={16} country={option.value.country} /> {option.label}
+            <.flag size={20} country={option.value.country} /> {option.label}
           </.inline>
         </:option>
       </.live_select>

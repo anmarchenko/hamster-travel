@@ -419,17 +419,25 @@ defmodule HamsterTravelWeb.CoreComponents do
   end
 
   attr(:country, :string, required: true)
-  attr(:size, :integer, required: true, values: [16, 24, 32, 48])
+  attr(:size, :integer, required: true, values: [20, 40, 60])
   attr(:class, :string, default: "")
 
   def flag(assigns) do
+    assigns =
+      assigns
+      |> assign(:country, String.downcase(assigns.country))
+
     ~H"""
-    <img
-      class={@class}
-      src={~p"/images/flags/#{@size}/#{@country <> ".png"}"}
-      alt={"Country #{@country}"}
-      style={"width: #{@size}px;  height: #{@size}px"}
-    />
+    <picture>
+      <source type="image/webp" srcset={"https://flagcdn.com/w#{@size}/#{@country}.webp"} />
+      <source type="image/png" srcset={"https://flagcdn.com/w#{@size}/#{@country}.png"} />
+      <img
+        src={"https://flagcdn.com/w#{@size}/#{@country}.png"}
+        width={@size}
+        alt={"Country flag #{@country}"}
+        class={"rounded-sm shadow-md hover:shadow-lg transition-shadow duration-300 #{@class}"}
+      />
+    </picture>
     """
   end
 
