@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.Packing.Backpacks.FormComponent do
+defmodule HamsterTravelWeb.Packing.BackpackForm do
   @moduledoc """
   Live backpack create/edit form
   """

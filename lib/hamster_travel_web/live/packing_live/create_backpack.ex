@@ -7,7 +7,7 @@ defmodule HamsterTravelWeb.Packing.CreateBackpack do
   alias HamsterTravel.Packing
   alias HamsterTravel.Packing.Policy
 
-  alias HamsterTravelWeb.Packing.Backpacks.FormComponent
+  alias HamsterTravelWeb.Packing.BackpackForm
 
   @impl true
   def mount(params, _session, socket) do

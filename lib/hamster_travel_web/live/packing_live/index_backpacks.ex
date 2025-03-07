@@ -3,9 +3,9 @@ defmodule HamsterTravelWeb.Packing.IndexBackpacks do
   Page showing all the backpacks
   """
   use HamsterTravelWeb, :live_view
-
   use Gettext, backend: HamsterTravelWeb.Gettext
-  import HamsterTravelWeb.Packing.Backpacks.Grid
+
+  import HamsterTravelWeb.Packing.PackingComponents
 
   alias HamsterTravel.Packing
 

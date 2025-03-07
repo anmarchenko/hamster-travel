@@ -1,6 +1,6 @@
-defmodule HamsterTravelWeb.Packing.Backpacks.Card do
+defmodule HamsterTravelWeb.Packing.PackingComponents do
   @moduledoc """
-  This component renders backpack card
+  HTML components for packing
   """
   use HamsterTravelWeb, :html
 

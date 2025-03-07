@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.Packing.Lists.ListComponent do
+defmodule HamsterTravelWeb.Packing.List do
   @moduledoc """
   Live component responsible for showing and editing packing list
   """
@@ -9,8 +9,8 @@ defmodule HamsterTravelWeb.Packing.Lists.ListComponent do
 
   alias HamsterTravel.Packing
 
-  alias HamsterTravelWeb.Packing.Items.AddComponent, as: AddItem
-  alias HamsterTravelWeb.Packing.Items.ItemComponent
+  alias HamsterTravelWeb.Packing.ItemNew
+  alias HamsterTravelWeb.Packing.Item
 
   @button_color "text-white dark:text-zinc-400 hover:bg-primary-600 dark:hover:bg-primary-800"
 
@@ -82,11 +82,11 @@ defmodule HamsterTravelWeb.Packing.Lists.ListComponent do
           <div class="p-4" x-show="showItems" x-transition.duration.300ms>
             <.live_component
               :for={item <- @list.items}
-              module={ItemComponent}
+              module={Item}
               id={"item-#{item.id}"}
               item={item}
             />
-            <.live_component module={AddItem} id={"item-add-#{@list.id}"} list={@list} />
+            <.live_component module={ItemNew} id={"item-add-#{@list.id}"} list={@list} />
           </div>
         </div>
       </.card>

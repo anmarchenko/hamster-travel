@@ -4,7 +4,7 @@ defmodule HamsterTravelWeb.Planning.CreateTrip do
   """
   use HamsterTravelWeb, :live_view
 
-  alias HamsterTravelWeb.Planning.Trips.FormComponent
+  alias HamsterTravelWeb.Planning.TripForm
 
   @impl true
   def mount(params, _session, socket) do

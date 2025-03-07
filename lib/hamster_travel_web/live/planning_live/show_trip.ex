@@ -4,9 +4,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   """
   use HamsterTravelWeb, :live_view
 
-  import HamsterTravelWeb.Planning.Trips.Tabs
-  import HamsterTravelWeb.Planning.Trips.Shorts
-  import HamsterTravelWeb.Planning.Trips.StatusRow
+  import HamsterTravelWeb.Planning.PlanningComponents
 
   alias HamsterTravel.Planning
 

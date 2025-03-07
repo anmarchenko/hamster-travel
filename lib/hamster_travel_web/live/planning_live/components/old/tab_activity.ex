@@ -4,8 +4,8 @@ defmodule HamsterTravelWeb.Planning.Trips.Tabs.TabActivity do
   """
   use HamsterTravelWeb, :live_component
 
+  import HamsterTravelWeb.Planning.PlanningComponents
   import HamsterTravelWeb.Icons.Budget
-  import HamsterTravelWeb.Planning.{DayLabel, PlacesList}
 
   alias HamsterTravelWeb.Planning.{Activity, Expense, Note}
 

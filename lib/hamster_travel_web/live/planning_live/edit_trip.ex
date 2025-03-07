@@ -7,7 +7,7 @@ defmodule HamsterTravelWeb.Planning.EditTrip do
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.Policy
 
-  alias HamsterTravelWeb.Planning.Trips.FormComponent
+  alias HamsterTravelWeb.Planning.TripForm
 
   @impl true
   def mount(%{"trip_slug" => slug}, _session, socket) do

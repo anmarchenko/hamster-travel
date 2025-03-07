@@ -11,7 +11,7 @@ defmodule HamsterTravel.Packing.Template do
   def execute(template, vars \\ %{})
   def execute(nil, _), do: []
 
-  @spec execute(String.t(), Map.t()) :: {:ok, list(List.t())} | {:error, list(String.t())}
+  @spec execute(String.t(), map()) :: {:ok, list(List)} | {:error, list(String.t())}
   def execute(template, vars) do
     filepath = Application.app_dir(:hamster_travel, "priv/templates/#{template}.yml")
 

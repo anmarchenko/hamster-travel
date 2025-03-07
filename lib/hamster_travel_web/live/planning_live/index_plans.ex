@@ -4,7 +4,7 @@ defmodule HamsterTravelWeb.Planning.IndexPlans do
   """
   use HamsterTravelWeb, :live_view
 
-  import HamsterTravelWeb.Planning.Grid
+  import HamsterTravelWeb.Planning.PlanningComponents
 
   alias HamsterTravel.Planning
 

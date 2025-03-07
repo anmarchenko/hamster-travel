@@ -6,6 +6,7 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
   use HamsterTravelWeb, :live_component
 
   alias HamsterTravel.Geo
+
   alias HamsterTravelWeb.Planning.CityInput
 
   @impl true
@@ -52,7 +53,7 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
   end
 
   @impl true
-  def handle_event("form_submit", %{"destination" => destination_params}, socket) do
+  def handle_event("form_submit", %{"destination" => _destination_params}, socket) do
     {:noreply, socket}
   end
 end

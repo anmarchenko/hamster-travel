@@ -5,7 +5,7 @@ defmodule HamsterTravelWeb.Planning.Trips.Tabs.TabItinerary do
   use HamsterTravelWeb, :live_component
 
   import HamsterTravelWeb.Icons.Budget
-  import HamsterTravelWeb.Planning.{DayLabel, PlacesList}
+  import HamsterTravelWeb.Planning.PlanningComponents
 
   alias HamsterTravelWeb.Planning.{Hotel, Transfer}
 

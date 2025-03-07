@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.Planning.Trips.FormComponent do
+defmodule HamsterTravelWeb.Planning.TripForm do
   @moduledoc """
   Trip create/edit form
   """

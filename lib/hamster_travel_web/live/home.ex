@@ -4,9 +4,9 @@ defmodule HamsterTravelWeb.Home do
   personalized home page for authenticated)
   """
   use HamsterTravelWeb, :live_view
-
   use Gettext, backend: HamsterTravelWeb.Gettext
-  import HamsterTravelWeb.Planning.Grid
+
+  import HamsterTravelWeb.Planning.PlanningComponents
 
   alias HamsterTravel.Planning
 
