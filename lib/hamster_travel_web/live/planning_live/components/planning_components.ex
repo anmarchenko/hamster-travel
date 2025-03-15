@@ -2,9 +2,9 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   use HamsterTravelWeb, :html
 
   import HamsterTravelWeb.Icons.{Airplane, Budget}
-  alias HamsterTravelWeb.Cldr
 
   alias HamsterTravel.Planning.Trip
+  alias HamsterTravelWeb.Cldr
   alias HamsterTravelWeb.CoreComponents
 
   attr(:trip, :map, required: true)
