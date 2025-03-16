@@ -1,5 +1,5 @@
 defmodule HamsterTravel.SocialTest do
-  use HamsterTravel.DataCase
+  use HamsterTravel.DataCase, async: true
 
   alias HamsterTravel.Social
 

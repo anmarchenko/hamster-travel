@@ -49,7 +49,7 @@ defmodule HamsterTravel.MixProject do
       # UI
       {:phoenix_live_view, "~> 1.0"},
       {:phoenix_html, "~> 4.0"},
-      {:petal_components, "~> 2.0"},
+      {:petal_components, "~> 2.8.0"},
       {:live_select, "~> 1.0"},
 
       # assets

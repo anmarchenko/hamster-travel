@@ -56,20 +56,6 @@ defmodule HamsterTravel.Social do
     [user.id] ++ Enum.map(user.friendships, fn fr -> fr.friend_id end)
   end
 
-  @spec get_friendship!(String) :: Friendship.t()
-  @doc """
-  Gets a single friendship.
-
-  Raises `Ecto.NoResultsError` if the Friendship does not exist.
-
-  ## Examples
-
-      iex> get_friendship!(123)
-      %Friendship{}
-
-      iex> get_friendship!(456)
-      ** (Ecto.NoResultsError)
-
-  """
+  @spec get_friendship!(String) :: Friendship
   def get_friendship!(id), do: Repo.get!(Friendship, id)
 end

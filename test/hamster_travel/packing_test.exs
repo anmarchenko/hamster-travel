@@ -1,5 +1,5 @@
 defmodule HamsterTravel.PackingTest do
-  use HamsterTravel.DataCase
+  use HamsterTravel.DataCase, async: true
 
   alias HamsterTravel.Packing
   alias HamsterTravel.Packing.{Backpack, Item, List}

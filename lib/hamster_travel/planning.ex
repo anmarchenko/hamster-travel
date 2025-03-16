@@ -4,10 +4,9 @@ defmodule HamsterTravel.Planning do
   """
 
   import Ecto.Query, warn: false
-  alias HamsterTravel.Repo
 
-  alias HamsterTravel.Planning.Policy
-  alias HamsterTravel.Planning.Trip
+  alias HamsterTravel.Repo
+  alias HamsterTravel.Planning.{Destination, Policy, Trip}
 
   def list_plans(user \\ nil) do
     query =
@@ -72,20 +71,6 @@ defmodule HamsterTravel.Planning do
     |> trip_preloading()
   end
 
-  @doc """
-  Gets a single trip.
-
-  Raises `Ecto.NoResultsError` if the Trip does not exist.
-
-  ## Examples
-
-      iex> get_trip!(123)
-      %Trip{}
-
-      iex> get_trip!(456)
-      ** (Ecto.NoResultsError)
-
-  """
   def get_trip!(id) do
     Trip
     |> Repo.get!(id)
@@ -132,73 +117,67 @@ defmodule HamsterTravel.Planning do
     )
   end
 
-  @doc """
-  Creates a trip.
-
-  ## Examples
-
-      iex> create_trip(%{field: value})
-      {:ok, %Trip{}}
-
-      iex> create_trip(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
   def create_trip(attrs \\ %{}, user) do
     %Trip{author_id: user.id}
     |> Trip.changeset(attrs)
     |> Repo.insert()
   end
 
-  @doc """
-  Updates a trip.
-
-  ## Examples
-
-      iex> update_trip(trip, %{field: new_value})
-      {:ok, %Trip{}}
-
-      iex> update_trip(trip, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
   def update_trip(%Trip{} = trip, attrs) do
     trip
     |> Trip.changeset(attrs)
     |> Repo.update()
   end
 
-  @doc """
-  Deletes a trip.
-
-  ## Examples
-
-      iex> delete_trip(trip)
-      {:ok, %Trip{}}
-
-      iex> delete_trip(trip)
-      {:error, %Ecto.Changeset{}}
-
-  """
   def delete_trip(%Trip{} = trip) do
     Repo.delete(trip)
   end
 
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking trip changes.
-
-  ## Examples
-
-      iex> change_trip(trip)
-      %Ecto.Changeset{data: %Trip{}}
-
-  """
   def change_trip(%Trip{} = trip, attrs \\ %{}) do
     Trip.changeset(trip, attrs)
   end
 
+  def get_destination!(id) do
+    Repo.get!(Destination, id)
+    |> destinations_preloading()
+  end
+
+  def list_destinations(%Trip{id: trip_id}) do
+    list_destinations(trip_id)
+  end
+
+  def list_destinations(trip_id) do
+    Repo.all(from d in Destination, where: d.trip_id == ^trip_id)
+    |> destinations_preloading()
+  end
+
+  def create_destination(trip, attrs \\ %{}) do
+    %Destination{trip_id: trip.id}
+    |> Destination.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def update_destination(%Destination{} = destination, attrs) do
+    destination
+    |> Destination.changeset(attrs)
+    |> Repo.update()
+  end
+
+  def change_destination(%Destination{} = destination, attrs \\ %{}) do
+    Destination.changeset(destination, attrs)
+  end
+
+  def delete_destination(%Destination{} = destination) do
+    Repo.delete(destination)
+  end
+
   defp trip_preloading(query) do
     query
-    |> Repo.preload([:author])
+    |> Repo.preload([:author, destinations: [:city]])
+  end
+
+  defp destinations_preloading(query) do
+    query
+    |> Repo.preload([:city])
   end
 end

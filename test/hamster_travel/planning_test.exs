@@ -1,5 +1,5 @@
 defmodule HamsterTravel.PlanningTest do
-  use HamsterTravel.DataCase
+  use HamsterTravel.DataCase, async: true
 
   alias HamsterTravel.Planning
   alias HamsterTravel.Social
@@ -473,6 +473,111 @@ defmodule HamsterTravel.PlanningTest do
     test "change_trip/1 returns a trip changeset" do
       trip = trip_fixture()
       assert %Ecto.Changeset{} = Planning.change_trip(trip)
+    end
+  end
+
+  describe "destinations" do
+    alias HamsterTravel.Planning.Destination
+
+    import HamsterTravel.PlanningFixtures
+    import HamsterTravel.GeoFixtures
+
+    @invalid_attrs %{start_day: nil, end_day: nil}
+
+    setup do
+      geonames_fixture()
+      berlin = HamsterTravel.Geo.find_city_by_geonames_id("2950159")
+
+      {:ok, city: berlin}
+    end
+
+    test "list_destinations/1 returns all destinations for a trip" do
+      destination = destination_fixture()
+      [result] = Planning.list_destinations(destination.trip_id)
+      assert result.id == destination.id
+      assert result.city_id == destination.city_id
+      assert result.trip_id == destination.trip_id
+      assert result.start_day == destination.start_day
+      assert result.end_day == destination.end_day
+    end
+
+    test "get_destination!/1 returns the destination with given id" do
+      destination = destination_fixture()
+      result = Planning.get_destination!(destination.id)
+      assert result.id == destination.id
+      assert result.city_id == destination.city_id
+      assert result.trip_id == destination.trip_id
+      assert result.start_day == destination.start_day
+      assert result.end_day == destination.end_day
+    end
+
+    test "create_destination/1 with valid data creates a destination", %{city: city} do
+      trip = trip_fixture()
+
+      valid_attrs = %{
+        start_day: 42,
+        end_day: 42,
+        city_id: city.id
+      }
+
+      assert {:ok, %Destination{} = destination} =
+               Planning.create_destination(trip, valid_attrs)
+
+      assert destination.start_day == 42
+      assert destination.end_day == 42
+    end
+
+    test "create_destination/1 with invalid data returns error changeset" do
+      trip = trip_fixture()
+      assert {:error, %Ecto.Changeset{}} = Planning.create_destination(trip, @invalid_attrs)
+    end
+
+    test "create_destination/1 fails if end_day is less than start_day", %{city: city} do
+      trip = trip_fixture()
+
+      invalid_attrs = %{
+        start_day: 10,
+        end_day: 5,
+        city_id: city.id
+      }
+
+      assert {:error, %Ecto.Changeset{}} = Planning.create_destination(trip, invalid_attrs)
+    end
+
+    test "update_destination/2 with valid data updates the destination" do
+      destination = destination_fixture()
+      update_attrs = %{start_day: 43, end_day: 43}
+
+      assert {:ok, %Destination{} = destination} =
+               Planning.update_destination(destination, update_attrs)
+
+      assert destination.start_day == 43
+      assert destination.end_day == 43
+    end
+
+    test "update_destination/2 with invalid data returns error changeset" do
+      destination = destination_fixture()
+
+      assert {:error, %Ecto.Changeset{}} =
+               Planning.update_destination(destination, @invalid_attrs)
+
+      result = Planning.get_destination!(destination.id)
+      assert result.id == destination.id
+      assert result.city_id == destination.city_id
+      assert result.trip_id == destination.trip_id
+      assert result.start_day == destination.start_day
+      assert result.end_day == destination.end_day
+    end
+
+    test "delete_destination/1 deletes the destination" do
+      destination = destination_fixture()
+      assert {:ok, %Destination{}} = Planning.delete_destination(destination)
+      assert_raise Ecto.NoResultsError, fn -> Planning.get_destination!(destination.id) end
+    end
+
+    test "change_destination/1 returns a destination changeset" do
+      destination = destination_fixture()
+      assert %Ecto.Changeset{} = Planning.change_destination(destination)
     end
   end
 end

@@ -13,8 +13,8 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
   alias HamsterTravel.Packing.List
   alias HamsterTravel.Packing.Policy
 
-  alias HamsterTravelWeb.Packing.ListNew
   alias HamsterTravelWeb.Packing.List, as: ListComponent
+  alias HamsterTravelWeb.Packing.ListNew
 
   @impl true
   def mount(%{"backpack_slug" => slug}, _session, socket) do

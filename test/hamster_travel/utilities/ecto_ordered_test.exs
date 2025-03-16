@@ -1,5 +1,5 @@
 defmodule HamsterTravel.EctoOrderedTest do
-  use HamsterTravel.DataCase
+  use HamsterTravel.DataCase, async: true
 
   alias HamsterTravel.Packing.List
   alias HamsterTravel.Repo
