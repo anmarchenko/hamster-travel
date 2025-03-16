@@ -1,5 +1,5 @@
 defmodule HamsterTravel.PolicyTest do
-  use HamsterTravel.DataCase
+  use HamsterTravel.DataCase, async: true
 
   import Ecto.Query, warn: false
   import HamsterTravel.AccountsFixtures

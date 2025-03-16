@@ -1,5 +1,5 @@
 defmodule HamsterTravel.PlanningTest do
-  use HamsterTravel.DataCase
+  use HamsterTravel.DataCase, async: true
 
   alias HamsterTravel.Planning
   alias HamsterTravel.Social
@@ -532,6 +532,18 @@ defmodule HamsterTravel.PlanningTest do
       assert {:error, %Ecto.Changeset{}} = Planning.create_destination(trip, @invalid_attrs)
     end
 
+    test "create_destination/1 fails if end_day is less than start_day", %{city: city} do
+      trip = trip_fixture()
+
+      invalid_attrs = %{
+        start_day: 10,
+        end_day: 5,
+        city_id: city.id
+      }
+
+      assert {:error, %Ecto.Changeset{}} = Planning.create_destination(trip, invalid_attrs)
+    end
+
     test "update_destination/2 with valid data updates the destination" do
       destination = destination_fixture()
       update_attrs = %{start_day: 43, end_day: 43}
@@ -561,18 +573,6 @@ defmodule HamsterTravel.PlanningTest do
       destination = destination_fixture()
       assert {:ok, %Destination{}} = Planning.delete_destination(destination)
       assert_raise Ecto.NoResultsError, fn -> Planning.get_destination!(destination.id) end
-    end
-
-    test "create_destination/1 fails if end_day is less than start_day", %{city: city} do
-      trip = trip_fixture()
-
-      invalid_attrs = %{
-        start_day: 10,
-        end_day: 5,
-        city_id: city.id
-      }
-
-      assert {:error, %Ecto.Changeset{}} = Planning.create_destination(trip, invalid_attrs)
     end
 
     test "change_destination/1 returns a destination changeset" do

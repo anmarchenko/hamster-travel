@@ -1,5 +1,5 @@
 defmodule HamsterTravel.GeoTest do
-  use HamsterTravel.DataCase
+  use HamsterTravel.DataCase, async: true
   import HamsterTravel.GeoFixtures
 
   alias HamsterTravel.Geo

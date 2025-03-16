@@ -1,5 +1,5 @@
 defmodule HamsterTravelWeb.UserResetPasswordLiveTest do
-  use HamsterTravelWeb.ConnCase
+  use HamsterTravelWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
   import HamsterTravel.AccountsFixtures

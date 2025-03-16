@@ -1,5 +1,5 @@
 defmodule HamsterTravelWeb.UserSettingsLiveTest do
-  use HamsterTravelWeb.ConnCase
+  use HamsterTravelWeb.ConnCase, async: true
 
   alias HamsterTravel.Accounts
   import Phoenix.LiveViewTest

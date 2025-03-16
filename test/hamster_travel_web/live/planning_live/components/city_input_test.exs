@@ -1,5 +1,5 @@
 defmodule HamsterTravelWeb.Planning.CityInputTest do
-  use HamsterTravelWeb.ConnCase
+  use HamsterTravelWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
   import HamsterTravel.GeoFixtures
