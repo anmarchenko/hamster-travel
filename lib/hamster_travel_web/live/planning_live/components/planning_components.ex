@@ -4,7 +4,6 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   import HamsterTravelWeb.Icons.{Airplane, Budget}
 
   alias HamsterTravel.Planning.Trip
-  alias HamsterTravelWeb.Cldr
   alias HamsterTravelWeb.CoreComponents
 
   attr(:trip, :map, required: true)
@@ -125,7 +124,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
           <.link navigate={trip_url(@trip.slug)}>
             {@trip.name}
             <span class="font-light text-zinc-600 dark:text-zinc-400">
-              {Cldr.year_with_month(@trip.start_date)}
+              {Formatter.year_with_month(@trip.start_date)}
             </span>
           </.link>
         </p>
@@ -153,7 +152,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
       <.status_badge status={@trip.status} />
       <.flag size={20} country="de" />
       <%!-- <%= for country <- Enum.take(@plan.countries, @flags_limit) do %>
-        <.flag size={24} country={country} />
+        <.flag size={20} country={country} />
       <% end %> --%>
       <.avatar
         size="xs"
