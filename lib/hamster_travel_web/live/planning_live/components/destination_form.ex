@@ -8,6 +8,7 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
   alias HamsterTravel.Geo
 
   alias HamsterTravelWeb.Planning.CityInput
+  alias HamsterTravelWeb.Planning.DayRangeSelect
 
   @impl true
   def render(assigns) do
@@ -19,12 +20,21 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
         as={:destination}
         phx-target={@myself}
         phx-submit="form_submit"
+        class="space-y-4"
       >
         <.live_component
-          id="destination-put-destination-id-here-form-city-input"
+          id={"destination-form-city-input-#{:rand.uniform(1000)}"}
           module={CityInput}
           field={@form[:city]}
           label={gettext("City")}
+        />
+        <.live_component
+          id={"destination-put-destination-id-here-#{:rand.uniform(1000)}-form-day-range-select"}
+          module={DayRangeSelect}
+          start_day_field={@form[:start_day]}
+          end_day_field={@form[:end_day]}
+          label={gettext("Days")}
+          duration={12}
         />
         <div class="flex justify-between mt-2">
           <.button color="primary" size="xs">

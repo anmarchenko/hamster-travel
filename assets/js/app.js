@@ -21,8 +21,48 @@ let csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute('content');
 
+let DayRangeSelect = {
+  mounted() {
+    const dropdown = this.el.querySelector('#day-range-dropdown');
+    console.log(this.el);
+    console.log(dropdown);
+
+    const trigger = this.el.querySelector('#day-range-trigger');
+    console.log(trigger);
+
+    trigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      dropdown.classList.toggle('hidden');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!this.el.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    });
+
+    // Close dropdown when day is selected (for end selection) - ????????
+    dropdown.addEventListener('click', (e) => {
+      const dayItem = e.target.closest('.day-item');
+      if (
+        dayItem &&
+        this.el
+          .querySelector('#selection-step-badge')
+          .textContent.includes('Select end day')
+      ) {
+        // Add a small delay to allow the server to process the selection
+        setTimeout(() => {
+          dropdown.classList.add('hidden');
+        }, 100);
+      }
+    });
+  },
+};
+
 let hooks = {
   ...live_select,
+  DayRangeSelect,
 };
 
 let liveSocket = new LiveSocket('/live', Socket, {
