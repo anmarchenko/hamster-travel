@@ -59,10 +59,10 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
       place={place}
       day_index={@day_index}
     /> --%>
-    <%!-- <.live_component
+    <.live_component
       id={"search-city-new-place-#{@day_index}"}
       module={HamsterTravelWeb.Planning.DestinationForm}
-    /> --%>
+    />
     """
   end
 

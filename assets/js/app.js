@@ -24,11 +24,7 @@ let csrfToken = document
 let DayRangeSelect = {
   mounted() {
     const dropdown = this.el.querySelector('#day-range-dropdown');
-    console.log(this.el);
-    console.log(dropdown);
-
     const trigger = this.el.querySelector('#day-range-trigger');
-    console.log(trigger);
 
     trigger.addEventListener('click', (e) => {
       e.preventDefault();
