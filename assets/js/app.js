@@ -15,6 +15,96 @@ import live_select from 'live_select';
 Alpine.plugin(persist);
 
 window.Alpine = Alpine;
+
+// Define the dayRangeState component once
+Alpine.data('dayRangeState', () => ({
+  selection_step: 'start',
+  start_selection: null,
+  end_selection: null,
+  isOpen: false,
+
+  init() {
+    // Initialize from LiveView's state
+    const startInput = this.$el.querySelector(
+      'input[type="hidden"][name*="start"]',
+    );
+    const endInput = this.$el.querySelector(
+      'input[type="hidden"][name*="end"]',
+    );
+
+    this.start_selection = startInput?.value || null;
+    this.end_selection = endInput?.value || null;
+    this.selection_step = this.start_selection ? 'end' : 'start';
+
+    // Set up click outside listener using Alpine's magic $watch
+    this.$watch('isOpen', () => {
+      if (this.isOpen) {
+        // Add click outside listener when dropdown opens
+        setTimeout(() => {
+          document.addEventListener('click', this.handleClickOutside);
+        });
+      } else {
+        // Remove click outside listener when dropdown closes
+        document.removeEventListener('click', this.handleClickOutside);
+      }
+    });
+  },
+
+  handleClickOutside(e) {
+    if (!this.$el.contains(e.target)) {
+      this.isOpen = false;
+    }
+  },
+
+  toggleDropdown() {
+    this.isOpen = !this.isOpen;
+  },
+
+  handleDaySelection(day) {
+    if (this.selection_step === 'start') {
+      this.start_selection = day;
+      this.selection_step = 'end';
+    } else {
+      this.end_selection = day;
+      this.selection_step = 'start';
+      // Close dropdown after end day selection
+      this.isOpen = false;
+
+      // Push event to LiveView only when end day is selected
+      this.pushEventToLiveView({
+        start_day: this.start_selection,
+        end_day: this.end_selection,
+      });
+    }
+
+    // Update badge text
+    this.updateSelectionStepBadge();
+  },
+
+  updateSelectionStepBadge() {
+    const startBadge = this.$el.querySelector(
+      '#selection-step-badge-text-start',
+    );
+    const endBadge = this.$el.querySelector('#selection-step-badge-text-end');
+
+    if (this.selection_step === 'start') {
+      startBadge.classList.remove('hidden');
+      endBadge.classList.add('hidden');
+    } else {
+      startBadge.classList.add('hidden');
+      endBadge.classList.remove('hidden');
+    }
+  },
+
+  pushEventToLiveView(data) {
+    // Get LiveView push event function from the hook
+    const pushEvent = this.$el.closest('[phx-hook]').__view.pushEventTo;
+
+    // Push the event to LiveView
+    pushEvent(this.$el, 'day_range_selected', data);
+  },
+}));
+
 Alpine.start();
 
 let csrfToken = document
@@ -23,36 +113,13 @@ let csrfToken = document
 
 let DayRangeSelect = {
   mounted() {
-    const dropdown = this.el.querySelector('#day-range-dropdown');
-    const trigger = this.el.querySelector('#day-range-trigger');
+    // Initialize Alpine component on the element
+    Alpine.initTree(this.el);
+  },
 
-    trigger.addEventListener('click', (e) => {
-      e.preventDefault();
-      dropdown.classList.toggle('hidden');
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!this.el.contains(e.target)) {
-        dropdown.classList.add('hidden');
-      }
-    });
-
-    // Close dropdown when day is selected (for end selection) - ????????
-    dropdown.addEventListener('click', (e) => {
-      const dayItem = e.target.closest('.day-item');
-      if (
-        dayItem &&
-        this.el
-          .querySelector('#selection-step-badge')
-          .textContent.includes('Select end day')
-      ) {
-        // Add a small delay to allow the server to process the selection
-        setTimeout(() => {
-          dropdown.classList.add('hidden');
-        }, 100);
-      }
-    });
+  destroyed() {
+    // Clean up click outside listener if dropdown was open
+    document.removeEventListener('click', this.$data?.handleClickOutside);
   },
 };
 
