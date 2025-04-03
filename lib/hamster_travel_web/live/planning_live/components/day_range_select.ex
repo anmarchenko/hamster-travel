@@ -15,7 +15,7 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
   @impl true
   def render(assigns) do
     ~H"""
-    <div>
+    <div class="day-range-select-live-component">
       <.label for={@start_day_field.id}>{@label}</.label>
       
     <!-- Day Range Select Component -->

@@ -67,6 +67,7 @@ Alpine.data('dayRangeState', () => ({
     } else {
       this.end_selection = day;
       this.selection_step = 'start';
+
       // Close dropdown after end day selection
       this.isOpen = false;
 
@@ -76,32 +77,17 @@ Alpine.data('dayRangeState', () => ({
         end_day: this.end_selection,
       });
     }
-
-    // Update badge text
-    this.updateSelectionStepBadge();
-  },
-
-  updateSelectionStepBadge() {
-    const startBadge = this.$el.querySelector(
-      '#selection-step-badge-text-start',
-    );
-    const endBadge = this.$el.querySelector('#selection-step-badge-text-end');
-
-    if (this.selection_step === 'start') {
-      startBadge.classList.remove('hidden');
-      endBadge.classList.add('hidden');
-    } else {
-      startBadge.classList.add('hidden');
-      endBadge.classList.remove('hidden');
-    }
   },
 
   pushEventToLiveView(data) {
-    // Get LiveView push event function from the hook
-    const pushEvent = this.$el.closest('[phx-hook]').__view.pushEventTo;
-
-    // Push the event to LiveView
-    pushEvent(this.$el, 'day_range_selected', data);
+    // Use the stored reference to the hook's pushEvent method
+    this.$el
+      .closest('.day-range-select')
+      .__liveview_hook__.pushEventTo(
+        this.$el.closest('.day-range-select-live-component'),
+        'day_range_selected',
+        data,
+      );
   },
 }));
 
@@ -113,13 +99,12 @@ let csrfToken = document
 
 let DayRangeSelect = {
   mounted() {
+    // Store reference to the hook so we can use it to push events from the
+    // Alpine component
+    this.el.__liveview_hook__ = this;
+
     // Initialize Alpine component on the element
     Alpine.initTree(this.el);
-  },
-
-  destroyed() {
-    // Clean up click outside listener if dropdown was open
-    document.removeEventListener('click', this.$data?.handleClickOutside);
   },
 };
 
