@@ -51,7 +51,8 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
     [city | _] = Geo.search_cities("lis")
 
     changeset =
-      {%{city: city}, %{city: :map}}
+      {%{city: city, start_day: 1, end_day: 5},
+       %{city: :map, start_day: :integer, end_day: :integer}}
       |> Ecto.Changeset.cast(%{}, [:city])
 
     socket =
