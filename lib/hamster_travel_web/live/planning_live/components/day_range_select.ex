@@ -5,6 +5,7 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
 
   # preview: https://v0.dev/chat/date-range-select-js-fP6afJvlffR
 
+  attr :id, :string, required: true
   attr :start_day_field, Phoenix.HTML.FormField, required: true
   attr :end_day_field, Phoenix.HTML.FormField, required: true
 
@@ -19,16 +20,10 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
       <.label for={@start_day_field.id}>{@label}</.label>
       
     <!-- Day Range Select Component -->
-      <div
-        id={"day-range-select-#{@id}"}
-        class="day-range-select relative"
-        phx-hook="DayRangeSelect"
-        x-data="dayRangeState"
-        class="space-y-4"
-      >
+      <div id={"day-range-select-#{@id}"} class="day-range-select relative" class="space-y-4">
         <button
           id="day-range-trigger"
-          @click.prevent="toggleDropdown"
+          phx-click={toggle_dropdown(@id)}
           class="w-full flex items-center justify-between px-3 py-2 text-left bg-white border border-gray-300 rounded-md shadow-sm text-sm"
         >
           <span id="selected-range-display">
@@ -42,50 +37,33 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
                 <.day_label day_index={@end_day_selection} start_date={@start_date} />
             <% end %>
           </span>
-          <.icon name="hero-chevron-down" class="h-5 w-5 text-gray-400" />
+          <.icon name="hero-calendar-date-range" class="h-5 w-5 text-gray-400" />
         </button>
         
     <!-- Dropdown -->
         <div
-          id="day-range-dropdown"
-          x-show="isOpen"
-          @click.outside="isOpen = false"
-          class="day-range-select-dropdown absolute z-50 w-max max-w-[330px] sm:max-w-md mt-1 border border-gray-200 rounded-md shadow-lg overflow-visible bg-white dark:bg-zinc-900"
+          id={"day-range-dropdown-#{@id}"}
+          class="day-range-select-dropdown absolute z-50 w-max max-w-[330px] sm:max-w-md mt-1 border border-gray-200 rounded-md shadow-lg overflow-visible bg-white dark:bg-zinc-900 hidden"
+          phx-hook="DayRangeSelect"
+          phx-update="ignore"
+          data-selection-start={@start_day_selection}
+          data-selection-end={@end_day_selection}
+          data-selection-step="start"
+          data-close-dropdown={close_dropdown(@id)}
         >
-          <!-- Selection Step Indicator -->
-          <div class="px-3 py-2 border-b border-gray-300">
-            <span
-              id="selection-step-badge"
-              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100"
-            >
-              <span id="selection-step-badge-text-start" x-show="selection_step === 'start'">
-                {gettext("Select start day")}
-              </span>
-              <span id="selection-step-badge-text-end" x-show="selection_step === 'end'">
-                {gettext("Select end day")}
-              </span>
-            </span>
-          </div>
-          
-    <!-- Days List -->
+          <!-- Days List -->
           <div class="max-h-60 overflow-y-auto p-1">
             <div id="days-container" class="space-y-1">
-              <%= for day <- @days do %>
-                <div
-                  @click={"handleDaySelection(#{day})"}
-                  class="day-item flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer hover:bg-gray-100"
-                >
-                  <input
-                    type="checkbox"
-                    class="pc-checkbox"
-                    x-bind:checked={"start_selection <= #{day} && #{day} <= end_selection"}
-                    readonly
-                  />
-                  <span>
-                    <.day_label day_index={day} start_date={@start_date} />
-                  </span>
-                </div>
-              <% end %>
+              <div
+                :for={day <- @days}
+                class="day-item flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer hover:bg-gray-100"
+                data-day={day}
+              >
+                <input type="checkbox" class="pc-checkbox" readonly />
+                <span>
+                  <.day_label day_index={day} start_date={@start_date} />
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -117,7 +95,7 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
         start_day_selection: assigns.start_day_field.value,
         end_day_selection: assigns.end_day_field.value,
         # the days list, comes from the server when the component is mounted
-        days: Enum.map(1..assigns.duration, fn index -> index end)
+        days: Enum.map(0..(assigns.duration - 1), fn index -> index end)
       )
       |> assign(assigns)
 
@@ -141,6 +119,22 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
         end_day_selection: end_day
       )
 
-    {:noreply, socket}
+    {:noreply, push_event(socket, "closeDropdown", %{})}
+  end
+
+  def toggle_dropdown(id) do
+    JS.toggle(
+      to: "#day-range-dropdown-#{id}",
+      in: {"transition ease-out duration-100", "opacity-0 scale-95", "opacity-100 scale-100"},
+      out: {"transition ease-in duration-75", "opacity-100 scale-100", "opacity-0 scale-95"}
+    )
+  end
+
+  def close_dropdown(id) do
+    JS.hide(
+      to: "#day-range-dropdown-#{id}",
+      transition:
+        {"transition ease-in duration-75", "opacity-100 scale-100", "opacity-0 scale-95"}
+    )
   end
 end

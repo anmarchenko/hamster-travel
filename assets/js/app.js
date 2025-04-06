@@ -16,81 +16,6 @@ Alpine.plugin(persist);
 
 window.Alpine = Alpine;
 
-// Define the dayRangeState component once
-Alpine.data('dayRangeState', () => ({
-  selection_step: 'start',
-  start_selection: null,
-  end_selection: null,
-  isOpen: false,
-
-  init() {
-    // Initialize from LiveView's state
-    const startInput = this.$el.querySelector(
-      'input[type="hidden"][name*="start"]',
-    );
-    const endInput = this.$el.querySelector(
-      'input[type="hidden"][name*="end"]',
-    );
-
-    this.start_selection = startInput?.value || null;
-    this.end_selection = endInput?.value || null;
-    this.selection_step = this.start_selection ? 'end' : 'start';
-
-    // Set up click outside listener using Alpine's magic $watch
-    this.$watch('isOpen', () => {
-      if (this.isOpen) {
-        // Add click outside listener when dropdown opens
-        setTimeout(() => {
-          document.addEventListener('click', this.handleClickOutside);
-        });
-      } else {
-        // Remove click outside listener when dropdown closes
-        document.removeEventListener('click', this.handleClickOutside);
-      }
-    });
-  },
-
-  handleClickOutside(e) {
-    if (!this.$el.contains(e.target)) {
-      this.isOpen = false;
-    }
-  },
-
-  toggleDropdown() {
-    this.isOpen = !this.isOpen;
-  },
-
-  handleDaySelection(day) {
-    if (this.selection_step === 'start') {
-      this.start_selection = day;
-      this.selection_step = 'end';
-    } else {
-      this.end_selection = day;
-      this.selection_step = 'start';
-
-      // Close dropdown after end day selection
-      this.isOpen = false;
-
-      // Push event to LiveView only when end day is selected
-      this.pushEventToLiveView({
-        start_day: this.start_selection,
-        end_day: this.end_selection,
-      });
-    }
-  },
-
-  pushEventToLiveView(data) {
-    // Use the stored reference to the hook's pushEvent method
-    this.$el
-      .closest('.day-range-select')
-      .__liveview_hook__.pushEventTo(
-        this.$el.closest('.day-range-select-live-component'),
-        'day_range_selected',
-        data,
-      );
-  },
-}));
-
 Alpine.start();
 
 let csrfToken = document
@@ -99,12 +24,84 @@ let csrfToken = document
 
 let DayRangeSelect = {
   mounted() {
-    // Store reference to the hook so we can use it to push events from the
-    // Alpine component
-    this.el.__liveview_hook__ = this;
+    this.el.querySelectorAll('.day-item').forEach((item) => {
+      item.addEventListener('click', (e) => {
+        this.handleDaySelection(item.dataset.day);
+      });
+    });
 
-    // Initialize Alpine component on the element
-    Alpine.initTree(this.el);
+    this.updateSelection(
+      this.el.dataset.selectionStart,
+      this.el.dataset.selectionEnd,
+    );
+
+    this.handleEvent('closeDropdown', () => {
+      liveSocket.execJS(this.el, this.el.getAttribute('data-close-dropdown'));
+    });
+
+    this.handleOutsideClick = (e) => {
+      if (!this.el.contains(e.target)) {
+        // Push an event to the LiveView
+        liveSocket.execJS(this.el, this.el.getAttribute('data-close-dropdown'));
+      }
+    };
+
+    document.addEventListener('click', this.handleOutsideClick);
+  },
+
+  destroyed() {
+    document.removeEventListener('click', this.handleOutsideClick);
+  },
+
+  handleDaySelection(day) {
+    // find here the dropdown element
+    const dropdown = this.el.closest('.day-range-select-dropdown');
+    const dayNumber = parseInt(day);
+
+    console.log(
+      'dropdown.dataset.selectionStep',
+      dropdown.dataset.selectionStep,
+    );
+
+    if (dropdown.dataset.selectionStep === 'start') {
+      dropdown.dataset.selectionStart = dayNumber;
+      dropdown.dataset.selectionEnd = null;
+      dropdown.dataset.selectionStep = 'end';
+    } else {
+      dropdown.dataset.selectionEnd = dayNumber;
+      dropdown.dataset.selectionStep = 'start';
+
+      this.pushEventTo(
+        this.el.closest('.day-range-select-live-component'),
+        'day_range_selected',
+        {
+          start_day: dropdown.dataset.selectionStart,
+          end_day: dropdown.dataset.selectionEnd,
+        },
+      );
+    }
+
+    this.updateSelection(
+      dropdown.dataset.selectionStart,
+      dropdown.dataset.selectionEnd,
+    );
+  },
+
+  updateSelection(selectionStart, selectionEnd) {
+    this.el.querySelectorAll('.day-item').forEach((item) => {
+      let dayNumber = parseInt(item.dataset.day);
+      if (
+        (selectionStart &&
+          selectionEnd &&
+          dayNumber >= selectionStart &&
+          dayNumber <= selectionEnd) ||
+        (selectionStart && dayNumber == selectionStart)
+      ) {
+        item.querySelector('input').checked = true;
+      } else {
+        item.querySelector('input').checked = false;
+      }
+    });
   },
 };
 
