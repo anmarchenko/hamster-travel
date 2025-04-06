@@ -46,8 +46,8 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
           class="day-range-select-dropdown absolute z-50 w-max max-w-[330px] sm:max-w-md mt-1 border border-gray-200 rounded-md shadow-lg overflow-visible bg-white dark:bg-zinc-900 hidden"
           phx-hook="DayRangeSelect"
           phx-update="ignore"
-          data-selection-start={@start_day_selection}
-          data-selection-end={@end_day_selection}
+          data-selection-start-init={@start_day_selection}
+          data-selection-end-init={@end_day_selection}
           data-selection-step="start"
           data-close-dropdown={close_dropdown(@id)}
         >

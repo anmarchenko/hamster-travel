@@ -30,19 +30,15 @@ let DayRangeSelect = {
       });
     });
 
-    this.updateSelection(
-      this.el.dataset.selectionStart,
-      this.el.dataset.selectionEnd,
-    );
+    this.initialState();
 
     this.handleEvent('closeDropdown', () => {
-      liveSocket.execJS(this.el, this.el.getAttribute('data-close-dropdown'));
+      this.closeDropdown();
     });
 
     this.handleOutsideClick = (e) => {
       if (!this.el.contains(e.target)) {
-        // Push an event to the LiveView
-        liveSocket.execJS(this.el, this.el.getAttribute('data-close-dropdown'));
+        this.closeDropdown();
       }
     };
 
@@ -102,6 +98,23 @@ let DayRangeSelect = {
         item.querySelector('input').checked = false;
       }
     });
+  },
+
+  closeDropdown() {
+    liveSocket.execJS(this.el, this.el.getAttribute('data-close-dropdown'));
+
+    this.initialState();
+  },
+
+  initialState() {
+    this.el.dataset.selectionStart = this.el.dataset.selectionStartInit;
+    this.el.dataset.selectionEnd = this.el.dataset.selectionEndInit;
+    this.el.dataset.selectionStep = 'start';
+
+    this.updateSelection(
+      this.el.dataset.selectionStart,
+      this.el.dataset.selectionEnd,
+    );
   },
 };
 
