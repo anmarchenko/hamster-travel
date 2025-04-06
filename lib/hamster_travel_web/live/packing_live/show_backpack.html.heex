@@ -1,4 +1,4 @@
-<.container class="!mt-* mt-4">
+<.container full class="!mt-* mt-4">
   <div class="flex flex-col gap-y-4">
     <.header>
       {@backpack.name}
@@ -40,7 +40,7 @@
   </div>
 </.container>
 
-<.container class="!mt-* mt-0">
+<.container full class="!mt-* mt-0">
   <.live_component module={ListNew} id={"add_item-#{@backpack.id}"} backpack={@backpack} />
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
     <.live_component
