@@ -1,8 +1,6 @@
 defmodule HamsterTravelWeb.Planning.DayRangeSelect do
   use HamsterTravelWeb, :live_component
 
-  import HamsterTravelWeb.Planning.PlanningComponents, only: [day_label: 1]
-
   # preview: https://v0.dev/chat/date-range-select-js-fP6afJvlffR
 
   attr :id, :string, required: true
@@ -31,10 +29,12 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
               <% @start_day_selection == nil -> %>
                 {gettext("Select day")}
               <% @start_day_selection == @end_day_selection -> %>
-                <.day_label day_index={@start_day_selection} start_date={@start_date} />
+                {gettext("Day")}
+                <.short_day_label day_index={@start_day_selection} start_date={@start_date} />
               <% true -> %>
-                <.day_label day_index={@start_day_selection} start_date={@start_date} /> -
-                <.day_label day_index={@end_day_selection} start_date={@start_date} />
+                {gettext("Days")}
+                <.short_day_label day_index={@start_day_selection} start_date={@start_date} /> -
+                <.short_day_label day_index={@end_day_selection} start_date={@start_date} />
             <% end %>
           </span>
           <.icon name="hero-calendar-date-range" class="h-5 w-5 text-gray-400" />
@@ -52,8 +52,17 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
           data-close-dropdown={close_dropdown(@id)}
         >
           <!-- Days List -->
-          <div class="max-h-60 overflow-y-auto p-1">
-            <div id="days-container" class="space-y-1">
+          <div class="max-h-60 overflow-y-auto p-2">
+            <div id="day-selector-grid" class="grid grid-cols-7 gap-1">
+              <div
+                :for={day <- @days}
+                data-day={day}
+                class="day-item flex justify-center items-center h-8 w-8 text-sm rounded-md cursor-pointer transition duration-150 ease-in-out border border-gray-300 hover:bg-gray-200"
+              >
+                <.short_day_label day_index={day} start_date={@start_date} />
+              </div>
+            </div>
+            <%!-- <div id="days-container" class="space-y-1">
               <div
                 :for={day <- @days}
                 class="day-item flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer hover:bg-gray-100"
@@ -64,7 +73,7 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
                   <.day_label day_index={day} start_date={@start_date} />
                 </span>
               </div>
-            </div>
+            </div> --%>
           </div>
         </div>
       </div>
@@ -136,5 +145,17 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
       transition:
         {"transition ease-in duration-75", "opacity-100 scale-100", "opacity-0 scale-95"}
     )
+  end
+
+  def short_day_label(%{start_date: nil} = assigns) do
+    ~H"""
+    {@day_index + 1}
+    """
+  end
+
+  def short_day_label(assigns) do
+    ~H"""
+    {Formatter.date_without_year(Date.add(@start_date, @day_index))}
+    """
   end
 end

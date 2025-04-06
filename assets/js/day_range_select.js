@@ -69,9 +69,11 @@ let DayRangeSelect = {
           dayNumber <= selectionEnd) ||
         (selectionStart && dayNumber == selectionStart)
       ) {
-        item.querySelector('input').checked = true;
+        item.classList.add('bg-blue-500');
+        item.classList.add('text-white');
       } else {
-        item.querySelector('input').checked = false;
+        item.classList.remove('bg-blue-500');
+        item.classList.remove('text-white');
       }
     });
   },
