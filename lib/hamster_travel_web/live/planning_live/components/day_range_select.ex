@@ -1,8 +1,6 @@
 defmodule HamsterTravelWeb.Planning.DayRangeSelect do
   use HamsterTravelWeb, :live_component
 
-  # preview: https://v0.dev/chat/date-range-select-js-fP6afJvlffR
-
   attr :id, :string, required: true
   attr :start_day_field, Phoenix.HTML.FormField, required: true
   attr :end_day_field, Phoenix.HTML.FormField, required: true
@@ -16,8 +14,7 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
     ~H"""
     <div class="day-range-select-live-component">
       <.label for={@start_day_field.id}>{@label}</.label>
-      
-    <!-- Day Range Select Component -->
+
       <div id={"day-range-select-#{@id}"} class="day-range-select relative" class="space-y-4">
         <button
           id="day-range-trigger"
@@ -62,18 +59,6 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
                 <.short_day_label day_index={day} start_date={@start_date} />
               </div>
             </div>
-            <%!-- <div id="days-container" class="space-y-1">
-              <div
-                :for={day <- @days}
-                class="day-item flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer hover:bg-gray-100"
-                data-day={day}
-              >
-                <input type="checkbox" class="pc-checkbox" readonly />
-                <span>
-                  <.day_label day_index={day} start_date={@start_date} />
-                </span>
-              </div>
-            </div> --%>
           </div>
         </div>
       </div>

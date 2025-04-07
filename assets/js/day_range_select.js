@@ -2,6 +2,13 @@ let DayRangeSelect = {
   mounted() {
     this.el.querySelectorAll('.day-item').forEach((item) => {
       item.addEventListener('click', (e) => {
+        let dropdown = item.closest('.day-range-select-dropdown');
+        if (
+          item.hasAttribute('disabled') &&
+          dropdown.dataset.selectionStep == 'end'
+        ) {
+          return;
+        }
         this.handleDaySelection(item.dataset.day);
       });
     });
@@ -26,14 +33,8 @@ let DayRangeSelect = {
   },
 
   handleDaySelection(day) {
-    // find here the dropdown element
-    const dropdown = this.el.closest('.day-range-select-dropdown');
-    const dayNumber = parseInt(day);
-
-    console.log(
-      'dropdown.dataset.selectionStep',
-      dropdown.dataset.selectionStep,
-    );
+    let dropdown = this.el.closest('.day-range-select-dropdown');
+    let dayNumber = parseInt(day);
 
     if (dropdown.dataset.selectionStep === 'start') {
       dropdown.dataset.selectionStart = dayNumber;
@@ -59,21 +60,44 @@ let DayRangeSelect = {
     );
   },
 
+  disableDay(item) {
+    item.classList.add('opacity-70');
+    item.setAttribute('disabled', 'true');
+  },
+
+  enableDay(item) {
+    item.classList.remove('opacity-70');
+    item.removeAttribute('disabled');
+  },
+
+  unselectDay(item) {
+    item.classList.remove('bg-blue-500');
+    item.classList.remove('text-white');
+  },
+
+  selectDay(item) {
+    item.classList.add('bg-blue-500');
+    item.classList.add('text-white');
+  },
+
   updateSelection(selectionStart, selectionEnd) {
     this.el.querySelectorAll('.day-item').forEach((item) => {
       let dayNumber = parseInt(item.dataset.day);
-      if (
+      if (selectionStart && dayNumber < selectionStart) {
+        this.disableDay(item);
+        this.unselectDay(item);
+      } else if (
         (selectionStart &&
           selectionEnd &&
           dayNumber >= selectionStart &&
           dayNumber <= selectionEnd) ||
         (selectionStart && dayNumber == selectionStart)
       ) {
-        item.classList.add('bg-blue-500');
-        item.classList.add('text-white');
+        this.selectDay(item);
+        this.enableDay(item);
       } else {
-        item.classList.remove('bg-blue-500');
-        item.classList.remove('text-white');
+        this.unselectDay(item);
+        this.enableDay(item);
       }
     });
   },
