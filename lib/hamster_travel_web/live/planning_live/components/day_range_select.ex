@@ -26,10 +26,10 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
               <% @start_day_selection == nil -> %>
                 {gettext("Select day")}
               <% @start_day_selection == @end_day_selection -> %>
-                {gettext("Day")}
+                <span :if={@start_date == nil}>{gettext("Day")}</span>
                 <.short_day_label day_index={@start_day_selection} start_date={@start_date} />
               <% true -> %>
-                {gettext("Days")}
+                <span :if={@start_date == nil}>{gettext("Days")}</span>
                 <.short_day_label day_index={@start_day_selection} start_date={@start_date} /> -
                 <.short_day_label day_index={@end_day_selection} start_date={@start_date} />
             <% end %>

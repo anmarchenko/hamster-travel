@@ -34,7 +34,8 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
           start_day_field={@form[:start_day]}
           end_day_field={@form[:end_day]}
           label={gettext("Days")}
-          duration={12}
+          duration={15}
+          start_date={Date.utc_today()}
         />
         <div class="flex justify-between mt-2">
           <.button color="primary" size="xs">
