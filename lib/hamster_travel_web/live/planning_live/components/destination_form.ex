@@ -28,13 +28,14 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
           field={@form[:city]}
           label={gettext("City")}
         />
+        <!-- take duration and start date from trip -->
         <.live_component
           id={"destination-put-destination-id-here-#{:rand.uniform(1000)}-form-day-range-select"}
           module={DayRangeSelect}
           start_day_field={@form[:start_day]}
           end_day_field={@form[:end_day]}
-          label={gettext("Days")}
-          duration={15}
+          label={gettext("Date range")}
+          duration={5}
           start_date={Date.utc_today()}
         />
         <div class="flex justify-between mt-2">
@@ -52,7 +53,7 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
     [city | _] = Geo.search_cities("lis")
 
     changeset =
-      {%{city: city, start_day: 1, end_day: 5},
+      {%{city: city, start_day: 0, end_day: 1},
        %{city: :map, start_day: :integer, end_day: :integer}}
       |> Ecto.Changeset.cast(%{}, [:city])
 
