@@ -12,7 +12,7 @@ let DayRangeSelect = {
 
     // known trip dates, show flatpickr
     if (this.el.dataset.startDate) {
-      let flatpickr_element = this.el.querySelector('.day-range-flatpickr');
+      let flatpickrElement = this.el.querySelector('.day-range-flatpickr');
 
       let tripStartDate = new Date(this.el.dataset.startDate);
       let defaultStartDate = new Date(tripStartDate);
@@ -35,9 +35,7 @@ let DayRangeSelect = {
         ];
       }
 
-      console.log(this.el.dataset.userLocale);
-
-      this.flatpickr = flatpickr(flatpickr_element, {
+      this.flatpickr = flatpickr(flatpickrElement, {
         mode: 'range',
         dateFormat: 'Y-m-d',
         inline: true,
