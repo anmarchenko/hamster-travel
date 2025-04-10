@@ -20,6 +20,10 @@ defmodule HamsterTravelWeb.Cldr do
     HamsterTravelWeb.Cldr.Date.to_string!(date, format: "dd.MM.yyyy EEEE")
   end
 
+  def date_without_year(date) do
+    HamsterTravelWeb.Cldr.Date.to_string!(date, format: "dd.MM")
+  end
+
   def year_with_month(nil), do: ""
 
   def year_with_month(date) do

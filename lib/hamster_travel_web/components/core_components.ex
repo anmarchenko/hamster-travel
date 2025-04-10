@@ -308,6 +308,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   end
 
   attr(:wide, :boolean, default: false)
+  attr(:full, :boolean, default: false)
   attr(:nomargin, :boolean, default: false)
   attr(:class, :string, default: nil)
 
@@ -332,6 +333,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   defp container_margins(_), do: "p-6 mt-6"
 
   defp container_width(%{wide: true}), do: "2xl:max-w-screen-2xl"
+  defp container_width(%{full: true}), do: "xl:max-w-screen-xl"
   defp container_width(_), do: "2xl:max-w-screen-xl"
 
   slot(:inner_block, required: true)

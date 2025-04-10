@@ -20,6 +20,7 @@ defmodule HamsterTravelWeb.Planning.CityInput do
     <div>
       <.label for={@field.id}>{@label}</.label>
       <.live_select
+        id={"#{@id}-live-select"}
         field={@field}
         value_mapper={&value_mapper/1}
         phx-target={@myself}

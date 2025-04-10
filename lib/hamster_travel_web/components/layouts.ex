@@ -7,7 +7,7 @@ defmodule HamsterTravelWeb.Layouts do
 
   def navbar(assigns) do
     ~H"""
-    <.container nomargin class="px-6 h-20 flex items-center justify-between">
+    <.container nomargin full class="px-6 h-20 flex items-center justify-between">
       <.link href={~p"/"}>
         <h1 class="font-medium dark:text-white">
           Hamster Travel

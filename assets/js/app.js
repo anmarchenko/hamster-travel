@@ -12,9 +12,13 @@ import persist from '@alpinejs/persist';
 // live_select UI component
 import live_select from 'live_select';
 
+// hamster travel components
+import DayRangeSelect from './day_range_select';
+
 Alpine.plugin(persist);
 
 window.Alpine = Alpine;
+
 Alpine.start();
 
 let csrfToken = document
@@ -23,6 +27,7 @@ let csrfToken = document
 
 let hooks = {
   ...live_select,
+  ...DayRangeSelect,
 };
 
 let liveSocket = new LiveSocket('/live', Socket, {
@@ -61,3 +66,37 @@ liveSocket.connect();
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket;
+
+// Load the appropriate Flatpickr theme based on OS color scheme
+function loadFlatpickrTheme() {
+  const head = document.head;
+  const existingLink = document.querySelector(
+    'link[rel="stylesheet"][href*="flatpickr"]',
+  );
+  if (existingLink) {
+    head.removeChild(existingLink);
+  }
+
+  const themeLink = document.createElement('link');
+  themeLink.rel = 'stylesheet';
+  themeLink.type = 'text/css';
+
+  if (
+    window.matchMedia &&
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+  ) {
+    themeLink.href = 'https://npmcdn.com/flatpickr/dist/themes/dark.css';
+  } else {
+    themeLink.href = 'https://npmcdn.com/flatpickr/dist/themes/light.css';
+  }
+
+  head.appendChild(themeLink);
+}
+
+// Initial theme load
+loadFlatpickrTheme();
+
+// Listen for changes in the OS color scheme
+window
+  .matchMedia('(prefers-color-scheme: dark)')
+  .addEventListener('change', loadFlatpickrTheme);
