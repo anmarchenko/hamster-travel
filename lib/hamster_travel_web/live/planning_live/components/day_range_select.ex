@@ -85,7 +85,7 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
           </div>
           
     <!-- Flatpickr calendar - when trip dates are known -->
-          <div :if={@start_date != nil} class="max-h-60 overflow-y-auto p-2">
+          <div :if={@start_date != nil} class="max-h-80 overflow-y-auto p-2">
             <span class="day-range-flatpickr" />
           </div>
         </div>
