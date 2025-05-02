@@ -6,44 +6,36 @@ defmodule HamsterTravelWeb.Planning.CityInputTest do
 
   alias HamsterTravelWeb.Planning.CityInput
 
-  # Create a simple LiveView to host our component for testing
-  defmodule TestFormLive do
-    use Phoenix.LiveView
-
-    def render(assigns) do
-      ~H"""
-      <.form :let={f} for={%{}} as={:test_form} phx-change="validate">
-        <.live_component module={CityInput} id="city-input" field={f[:city_id]} label="City" />
-      </.form>
-      """
-    end
-
-    def mount(_params, _session, socket) do
-      {:ok, socket}
-    end
-
-    def handle_event("validate", _params, socket) do
-      {:noreply, socket}
-    end
-  end
-
   describe "CityInput component" do
-    setup do
-      # Import geo data for testing
-      geonames_fixture()
-      :ok
-    end
+    test "renders city input field correctly" do
+      # Construct a mock form and form field
+      form = %Phoenix.HTML.Form{
+        source: %{},
+        impl: Phoenix.HTML.FormData.Atom,
+        id: "test_form",
+        name: "test_form",
+        data: %{},
+        action: nil,
+        hidden: [],
+        params: %{},
+        errors: [],
+        options: [],
+        index: nil
+      }
 
-    test "renders city input field correctly", %{conn: conn} do
-      # Render the LiveView that contains our component
-      {:ok, view, html} = live_isolated(conn, TestFormLive)
+      field = %Phoenix.HTML.FormField{
+        id: "test_form_city_id",
+        name: "test_form[city_id]",
+        errors: [],
+        field: :city_id,
+        form: form,
+        value: nil
+      }
 
-      # Verify the component renders correctly
+      html = render_component(CityInput, id: "city-input", field: field, label: "City")
+
       assert html =~ "City"
-      assert has_element?(view, ".pc-text-input")
-
-      # The test passes if the component renders without errors
-      assert html =~ "City"
+      assert html =~ "pc-text-input"
     end
   end
 end
