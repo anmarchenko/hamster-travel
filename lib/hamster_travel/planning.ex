@@ -8,6 +8,8 @@ defmodule HamsterTravel.Planning do
   alias HamsterTravel.Repo
   alias HamsterTravel.Planning.{Destination, Policy, Trip}
 
+  @topic "trip_destinations"
+
   def list_plans(user \\ nil) do
     query =
       from t in Trip,
@@ -155,6 +157,7 @@ defmodule HamsterTravel.Planning do
     %Destination{trip_id: trip.id}
     |> Destination.changeset(attrs)
     |> Repo.insert()
+    |> send_pubsub_event([:destination, :created], trip)
   end
 
   def update_destination(%Destination{} = destination, attrs) do
@@ -185,4 +188,16 @@ defmodule HamsterTravel.Planning do
     query
     |> Repo.preload([:city])
   end
+
+  defp send_pubsub_event({:ok, result} = return_tuple, event, trip) do
+    Phoenix.PubSub.broadcast(
+      HamsterTravel.PubSub,
+      @topic <> ":#{trip.id}",
+      {event, %{value: result}}
+    )
+
+    return_tuple
+  end
+
+  defp send_pubsub_event({:error, _reason} = result, _, _), do: result
 end

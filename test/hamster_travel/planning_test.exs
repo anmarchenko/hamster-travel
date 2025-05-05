@@ -1,5 +1,5 @@
 defmodule HamsterTravel.PlanningTest do
-  use HamsterTravel.DataCase, async: true
+  use HamsterTravel.DataCase
 
   alias HamsterTravel.Planning
   alias HamsterTravel.Social
@@ -487,8 +487,9 @@ defmodule HamsterTravel.PlanningTest do
     setup do
       geonames_fixture()
       berlin = HamsterTravel.Geo.find_city_by_geonames_id("2950159")
+      trip = trip_fixture()
 
-      {:ok, city: berlin}
+      {:ok, city: berlin, trip: trip}
     end
 
     test "list_destinations/1 returns all destinations for a trip" do
@@ -511,20 +512,35 @@ defmodule HamsterTravel.PlanningTest do
       assert result.end_day == destination.end_day
     end
 
-    test "create_destination/1 with valid data creates a destination", %{city: city} do
-      trip = trip_fixture()
-
+    test "create_destination/1 with valid data creates a destination", %{city: city, trip: trip} do
       valid_attrs = %{
-        start_day: 42,
-        end_day: 42,
-        city_id: city.id
+        city_id: city.id,
+        start_day: 0,
+        end_day: 1
       }
 
-      assert {:ok, %Destination{} = destination} =
-               Planning.create_destination(trip, valid_attrs)
+      assert {:ok, %Destination{} = destination} = Planning.create_destination(trip, valid_attrs)
+      assert destination.city_id == city.id
+      assert destination.start_day == 0
+      assert destination.end_day == 1
+      assert destination.trip_id == trip.id
+    end
 
-      assert destination.start_day == 42
-      assert destination.end_day == 42
+    test "create_destination/1 broadcasts destination creation", %{city: city, trip: trip} do
+      # Subscribe to the topic
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "trip_destinations:#{trip.id}")
+
+      valid_attrs = %{
+        city_id: city.id,
+        start_day: 0,
+        end_day: 1
+      }
+
+      # Act
+      {:ok, destination} = Planning.create_destination(trip, valid_attrs)
+
+      # Assert
+      assert_receive {[:destination, :created], %{value: ^destination}}
     end
 
     test "create_destination/1 with invalid data returns error changeset" do

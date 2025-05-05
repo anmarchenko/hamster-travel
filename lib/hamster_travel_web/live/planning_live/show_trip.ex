@@ -18,6 +18,14 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     trip = Planning.fetch_trip!(slug, socket.assigns.current_user)
 
     socket =
+      if connected?(socket) do
+        Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "trip_destinations:#{trip.id}")
+        socket
+      else
+        socket
+      end
+
+    socket =
       socket
       |> assign(mobile_menu: :plan_tabs)
       |> assign(active_tab: fetch_tab(params))
@@ -33,6 +41,22 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     socket =
       socket
       |> assign(active_tab: fetch_tab(params))
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({[:destination, :created], %{value: created_destination}}, socket) do
+    # Preload city before sending to component
+    created_destination = HamsterTravel.Repo.preload(created_destination, [:city])
+
+    trip =
+      socket.assigns.trip
+      |> Map.put(:destinations, socket.assigns.trip.destinations ++ [created_destination])
+
+    socket =
+      socket
+      |> assign(trip: trip)
 
     {:noreply, socket}
   end

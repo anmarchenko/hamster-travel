@@ -71,7 +71,7 @@ defmodule HamsterTravelWeb.Planning.Trips.Tabs.TabActivity do
 
   def render(assigns) do
     ~H"""
-    <div>
+    <div id={"activities-#{@trip.id}"}>
       <div class="flex flex-row gap-x-4 mt-4 sm:mt-8 text-xl">
         <.inline>
           <.budget />
