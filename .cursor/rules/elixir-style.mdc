@@ -23,7 +23,9 @@ alwaysApply: false
 - **Test Public APIs**: Focus on testing public context APIs
 - **Mox for Dependencies**: Use Mox for mocking external dependencies
 - **Arrange-Act-Assert**: Structure tests with clear setup, action, and verification phases
-- Use fixtures for test data
+- Use fixtures for test data, look into `test/support/fixtures` folder for existing fixtures. Create new fixtures if necessary.
+- After any change to a test file run it with `mix test <file_path>`
+- After several changes run all tests with `mix test`
 
 ## HTTP and API Integration
 - **Req for HTTP Clients**: Use Req instead of HTTPoison or Tesla
