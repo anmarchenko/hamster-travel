@@ -35,14 +35,14 @@ msgstr ""
 msgid "Next travels"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:101
+#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:97
 #, elixir-autogen, elixir-format
 msgid "ppl"
 msgstr ""
 
 #: lib/hamster_travel_web/live/packing_live/components/packing_components.ex:23
 #: lib/hamster_travel_web/live/packing_live/show_backpack.html.heex:8
-#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:97
+#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:93
 #, elixir-format, ex-autogen, elixir-autogen
 msgid "day"
 msgid_plural "days"
@@ -88,24 +88,24 @@ msgid "Back"
 msgstr ""
 
 #: lib/hamster_travel_web/components/layouts.ex:78
-#: lib/hamster_travel_web/live/planning_live/components/old/tab_itinerary.ex:85
+#: lib/hamster_travel_web/live/planning_live/components/tab_itinerary.ex:87
 #, elixir-autogen, elixir-format
 msgid "Transfers"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/day_range_select.ex:49
-#: lib/hamster_travel_web/live/planning_live/components/old/tab_itinerary.ex:80
-#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:199
+#: lib/hamster_travel_web/live/planning_live/components/day_range_select.ex:50
+#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:195
+#: lib/hamster_travel_web/live/planning_live/components/tab_itinerary.ex:82
 #, elixir-autogen, elixir-format
 msgid "Day"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/old/tab_itinerary.ex:87
+#: lib/hamster_travel_web/live/planning_live/components/tab_itinerary.ex:89
 #, elixir-autogen, elixir-format
 msgid "Hotel"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/old/tab_itinerary.ex:82
+#: lib/hamster_travel_web/live/planning_live/components/tab_itinerary.ex:84
 #, elixir-autogen, elixir-format
 msgid "Places"
 msgstr ""
@@ -115,12 +115,12 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/old/tab_itinerary.ex:51
+#: lib/hamster_travel_web/live/planning_live/components/tab_itinerary.ex:53
 #, elixir-autogen, elixir-format
 msgid "No hotels for this day"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/old/tab_itinerary.ex:32
+#: lib/hamster_travel_web/live/planning_live/components/tab_itinerary.ex:34
 #, elixir-autogen, elixir-format
 msgid "No transfers planned for this day"
 msgstr ""
@@ -267,13 +267,14 @@ msgid "Copy"
 msgstr ""
 
 #: lib/hamster_travel_web/live/packing_live/components/backpack_form.ex:84
-#: lib/hamster_travel_web/live/planning_live/components/destination_form.ex:42
+#: lib/hamster_travel_web/live/planning_live/components/destination_form.ex:51
 #: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:145
 #, elixir-autogen, elixir-format
 msgid "Save"
 msgstr ""
 
 #: lib/hamster_travel_web/live/packing_live/components/backpack_form.ex:81
+#: lib/hamster_travel_web/live/planning_live/components/destination_form.ex:48
 #: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:142
 #, elixir-autogen, elixir-format
 msgid "Cancel"
@@ -414,22 +415,27 @@ msgstr ""
 msgid "Welcome back!"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/destination_form.ex:29
+#: lib/hamster_travel_web/live/planning_live/components/destination_form.ex:35
 #, elixir-autogen, elixir-format
 msgid "City"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/day_range_select.ex:52
+#: lib/hamster_travel_web/live/planning_live/components/day_range_select.ex:53
 #, elixir-autogen, elixir-format
 msgid "Days"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/day_range_select.ex:47
+#: lib/hamster_travel_web/live/planning_live/components/day_range_select.ex:48
 #, elixir-autogen, elixir-format
 msgid "Select day"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/destination_form.ex:36
+#: lib/hamster_travel_web/live/planning_live/components/destination_form.ex:42
 #, elixir-autogen, elixir-format
 msgid "Date range"
+msgstr ""
+
+#: lib/hamster_travel_web/live/planning_live/components/destination_new.ex:57
+#, elixir-autogen, elixir-format
+msgid "Add destination"
 msgstr ""

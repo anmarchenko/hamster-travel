@@ -18,7 +18,7 @@ defmodule HamsterTravelWeb.Planning.Trips.Tabs.TabActivity do
       |> assign(assigns)
       |> assign(
         budget: budget,
-        places: [],
+        destinations: [],
         activities: [],
         notes: [],
         expenses: []
@@ -85,7 +85,10 @@ defmodule HamsterTravelWeb.Planning.Trips.Tabs.TabActivity do
             <.day_label day_index={i} start_date={@trip.start_date} />
           </div>
           <div class="flex flex-row gap-x-4">
-            <.places_list places={HamsterTravel.filter_places_by_day(@places, i)} day_index={i} />
+            <.destinations_list
+              destinations={HamsterTravel.filter_places_by_day(@destinations, i)}
+              day_index={i}
+            />
           </div>
           <.note note={HamsterTravel.find_note_by_day(@notes, i)} day_index={i} />
           <.expenses expenses={HamsterTravel.filter_expenses_by_day(@expenses, i)} day_index={i} />

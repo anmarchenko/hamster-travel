@@ -39,6 +39,7 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
         <button
           id="day-range-trigger"
           phx-click={toggle_dropdown(@id)}
+          type="button"
           class="w-full flex items-center justify-between px-3 py-2 text-left bg-white border border-gray-300 rounded-md shadow-xs text-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:focus:border-primary-500 dark:bg-gray-800 dark:text-gray-300 focus:outline-hidden"
         >
           <span id="selected-range-display">
@@ -56,6 +57,7 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
           </span>
           <.icon name="hero-calendar-date-range" class="h-5 w-5 text-gray-400 dark:text-gray-300" />
         </button>
+        <.field_error :for={msg <- @errors}>{msg}</.field_error>
         
     <!-- Dropdown -->
         <div
@@ -64,8 +66,8 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
           phx-hook="DayRangeSelect"
           phx-update="ignore"
           data-user-locale={@locale}
-          data-selection-start-init={@start_day_selection}
-          data-selection-end-init={@end_day_selection}
+          data-selection-start-init={@start_day_selection || ""}
+          data-selection-end-init={@end_day_selection || ""}
           data-selection-step="start"
           data-close-dropdown={close_dropdown(@id)}
           data-start-date={if @start_date, do: Date.to_iso8601(@start_date)}
@@ -109,13 +111,18 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
   def update(assigns, socket) do
     start_date = assigns[:start_date] || nil
 
+    errors = if used_input?(assigns.end_day_field), do: assigns.end_day_field.errors, else: []
+
     socket =
       socket
       |> assign(
+        errors: Enum.map(errors, &translate_error(&1)),
         start_date: start_date,
         # the results of this field
-        start_day_selection: assigns.start_day_field.value,
-        end_day_selection: assigns.end_day_field.value,
+        start_day_selection:
+          if(assigns.start_day_field.value == "", do: nil, else: assigns.start_day_field.value),
+        end_day_selection:
+          if(assigns.end_day_field.value == "", do: nil, else: assigns.end_day_field.value),
         # the days list, comes from the server when the component is mounted
         days: Enum.map(0..(assigns.duration - 1), fn index -> index end),
         locale: Gettext.get_locale(HamsterTravelWeb.Gettext)

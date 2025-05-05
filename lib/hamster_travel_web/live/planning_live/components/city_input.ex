@@ -6,11 +6,13 @@ defmodule HamsterTravelWeb.Planning.CityInput do
   alias HamsterTravel.Geo
 
   attr :field, Phoenix.HTML.FormField, required: true
+  attr :validated_field, Phoenix.HTML.FormField, required: false
   attr :label, :string, required: true
 
   @impl true
   def render(%{field: field} = assigns) do
-    errors = if used_input?(field), do: field.errors, else: []
+    field_with_errors = if assigns[:validated_field], do: assigns.validated_field, else: field
+    errors = if used_input?(field), do: field_with_errors.errors, else: []
 
     assigns =
       assigns
@@ -43,6 +45,11 @@ defmodule HamsterTravelWeb.Planning.CityInput do
   end
 
   @impl true
+  def update(assigns, socket) do
+    {:ok, assign(socket, assigns)}
+  end
+
+  @impl true
   def handle_event("live_select_change", %{"text" => text, "id" => live_select_id}, socket) do
     cities =
       text
@@ -53,6 +60,9 @@ defmodule HamsterTravelWeb.Planning.CityInput do
 
     {:noreply, socket}
   end
+
+  defp value_mapper(nil), do: nil
+  defp value_mapper(""), do: nil
 
   defp value_mapper(city) do
     %{

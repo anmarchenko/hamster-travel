@@ -83,5 +83,21 @@ defmodule HamsterTravel.GeoTest do
 
       assert [] = Geo.search_cities("берр")
     end
+
+    test "get_city/1 returns the city with preloaded country and region fields" do
+      # Get a city from the imported geonames_fixture
+      berlin = Geo.find_city_by_geonames_id("2950159")
+
+      result = Geo.get_city(berlin.id)
+      assert result.id == berlin.id
+      assert "Germany" == result.country.name
+      assert "Германия" == result.country.name_ru
+      assert "Land Berlin" == result.region_name
+      assert "Берлин" == result.region_name_ru
+    end
+
+    test "get_city/1 returns nil if the city does not exist" do
+      assert Geo.get_city(-1) == nil
+    end
   end
 end

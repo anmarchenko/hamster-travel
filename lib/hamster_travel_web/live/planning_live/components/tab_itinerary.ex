@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.Planning.Trips.Tabs.TabItinerary do
+defmodule HamsterTravelWeb.Planning.TabItinerary do
   @moduledoc """
   Transfers/hotels tab (itinerary)
   """
@@ -7,10 +7,12 @@ defmodule HamsterTravelWeb.Planning.Trips.Tabs.TabItinerary do
   import HamsterTravelWeb.Icons.Budget
   import HamsterTravelWeb.Planning.PlanningComponents
 
+  alias HamsterTravelWeb.Planning.DestinationNew
   alias HamsterTravelWeb.Planning.{Hotel, Transfer}
 
   def update(assigns, socket) do
     # budget = HamsterTravel.fetch_budget(plan, :transfers)
+    trip = assigns.trip
     budget = 0
 
     socket =
@@ -18,7 +20,7 @@ defmodule HamsterTravelWeb.Planning.Trips.Tabs.TabItinerary do
       |> assign(assigns)
       |> assign(
         budget: budget,
-        places: [],
+        destinations: trip.destinations,
         transfers: [],
         hotels: []
       )
@@ -97,7 +99,11 @@ defmodule HamsterTravelWeb.Planning.Trips.Tabs.TabItinerary do
             </td>
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
               <div class="flex flex-col gap-y-2">
-                <.places_list places={HamsterTravel.filter_places_by_day(@places, i)} day_index={i} />
+                <.destinations_list
+                  destinations={destinations_for_day(i, @destinations)}
+                  day_index={i}
+                />
+                <.live_component module={DestinationNew} id={"destination-new-#{i}"} trip={@trip} />
               </div>
             </td>
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
@@ -118,5 +124,11 @@ defmodule HamsterTravelWeb.Planning.Trips.Tabs.TabItinerary do
       </table>
     </div>
     """
+  end
+
+  defp destinations_for_day(day_index, destinations) do
+    Enum.filter(destinations, fn destination ->
+      destination.start_day <= day_index && destination.end_day >= day_index
+    end)
   end
 end

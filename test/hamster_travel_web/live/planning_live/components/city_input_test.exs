@@ -2,7 +2,6 @@ defmodule HamsterTravelWeb.Planning.CityInputTest do
   use HamsterTravelWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import HamsterTravel.GeoFixtures
 
   alias HamsterTravelWeb.Planning.CityInput
 

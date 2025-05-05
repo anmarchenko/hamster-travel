@@ -163,6 +163,11 @@ defmodule HamsterTravel.Planning do
     |> Repo.update()
   end
 
+  def new_destination(trip, attrs \\ %{}) do
+    %Destination{trip_id: trip.id, city: nil}
+    |> Destination.changeset(attrs)
+  end
+
   def change_destination(%Destination{} = destination, attrs \\ %{}) do
     Destination.changeset(destination, attrs)
   end

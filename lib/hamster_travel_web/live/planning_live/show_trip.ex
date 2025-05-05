@@ -7,42 +7,25 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   import HamsterTravelWeb.Planning.PlanningComponents
 
   alias HamsterTravel.Planning
-
   alias HamsterTravelWeb.Cldr
+  alias HamsterTravelWeb.Planning.TabItinerary
   alias HamsterTravelWeb.Planning.Trips.Tabs.TabActivity
-  alias HamsterTravelWeb.Planning.Trips.Tabs.TabItinerary
 
   @tabs ["activities", "itinerary", "catering", "documents", "report"]
 
   @impl true
   def mount(%{"trip_slug" => slug} = params, _session, socket) do
+    trip = Planning.fetch_trip!(slug, socket.assigns.current_user)
+
     socket =
       socket
       |> assign(mobile_menu: :plan_tabs)
       |> assign(active_tab: fetch_tab(params))
+      |> assign(active_nav: active_nav(trip))
+      |> assign(page_title: trip.name)
+      |> assign(trip: trip)
 
-    case HamsterTravel.find_plan_by_slug(slug) do
-      # temporary, before we implement /plans view
-      {:ok, plan} ->
-        socket =
-          socket
-          |> assign(active_nav: active_nav(plan))
-          |> assign(page_title: plan.name)
-          |> assign(trip: plan)
-
-        {:ok, socket}
-
-      {:error, :not_found} ->
-        trip = Planning.fetch_trip!(slug, socket.assigns.current_user)
-
-        socket =
-          socket
-          |> assign(active_nav: active_nav(trip))
-          |> assign(page_title: trip.name)
-          |> assign(trip: trip)
-
-        {:ok, socket}
-    end
+    {:ok, socket}
   end
 
   @impl true

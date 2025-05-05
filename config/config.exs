@@ -71,7 +71,7 @@ config :petal_components,
 
 config :hamster_travel, HamsterTravelWeb.Telemetry,
   report_metrics: false,
-  periodic_measurements_enabled: true
+  periodic_measurements_enabled: false
 
 config :hamster_travel, :geonames_req_options, []
 

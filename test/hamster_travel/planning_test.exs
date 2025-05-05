@@ -579,5 +579,38 @@ defmodule HamsterTravel.PlanningTest do
       destination = destination_fixture()
       assert %Ecto.Changeset{} = Planning.change_destination(destination)
     end
+
+    test "new_destination/2 returns a new destination changeset with trip_id and nil city" do
+      trip = trip_fixture()
+      changeset = Planning.new_destination(trip)
+
+      assert %Ecto.Changeset{
+               data: %{
+                 trip_id: trip_id,
+                 city: nil
+               }
+             } = changeset
+
+      assert trip_id == trip.id
+    end
+
+    test "new_destination/2 with attributes overrides default values" do
+      trip = trip_fixture()
+      attrs = %{start_day: 1, end_day: 2}
+      changeset = Planning.new_destination(trip, attrs)
+
+      assert %Ecto.Changeset{
+               data: %{
+                 trip_id: trip_id,
+                 city: nil
+               },
+               changes: %{
+                 start_day: 1,
+                 end_day: 2
+               }
+             } = changeset
+
+      assert trip_id == trip.id
+    end
   end
 end

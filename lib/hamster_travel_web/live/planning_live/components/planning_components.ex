@@ -5,6 +5,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
 
   alias HamsterTravel.Planning.Trip
   alias HamsterTravelWeb.CoreComponents
+  alias HamsterTravelWeb.Planning.Destination
 
   attr(:trip, :map, required: true)
   attr(:active_tab, :string, required: true)
@@ -47,21 +48,17 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
     """
   end
 
-  attr(:places, :list, required: true)
+  attr(:destinations, :list, required: true)
   attr(:day_index, :integer, required: true)
 
-  def places_list(assigns) do
+  def destinations_list(assigns) do
     ~H"""
-    <%!-- <.live_component
-      :for={place <- @places}
-      module={Place}
-      id={"places-#{place.id}-day-#{@day_index}"}
-      place={place}
-      day_index={@day_index}
-    /> --%>
     <.live_component
-      id={"search-city-new-place-#{@day_index}"}
-      module={HamsterTravelWeb.Planning.DestinationForm}
+      :for={destination <- @destinations}
+      module={Destination}
+      id={"destination-#{destination.id}-day-#{@day_index}"}
+      destination={destination}
+      day_index={@day_index}
     />
     """
   end

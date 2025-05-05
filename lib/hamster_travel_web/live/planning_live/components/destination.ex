@@ -1,8 +1,10 @@
-defmodule HamsterTravelWeb.Planning.Place do
+defmodule HamsterTravelWeb.Planning.Destination do
   @moduledoc """
-  Live component responsible for showing and editing places (aka cities to visit)
+  Live component responsible for showing and editing destinations (aka cities to visit)
   """
   use HamsterTravelWeb, :live_component
+
+  alias HamsterTravel.Geo
 
   def mount(socket) do
     socket =
@@ -22,8 +24,8 @@ defmodule HamsterTravelWeb.Planning.Place do
     ~H"""
     <span>
       <.inline>
-        <.flag size={20} country={@place.city.country} />
-        {@place.city.name}
+        <.flag size={20} country={@destination.city.country_code} />
+        {Geo.city_name(@destination.city)}
       </.inline>
     </span>
     """
