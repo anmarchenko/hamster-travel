@@ -32,7 +32,7 @@ defmodule HamsterTravelWeb.Planning.DestinationNew do
 
   def render(%{edit: true} = assigns) do
     ~H"""
-    <div class="mb-5">
+    <div>
       <.live_component
         module={HamsterTravelWeb.Planning.DestinationForm}
         id={"destination-form-#{@id}"}
@@ -46,7 +46,7 @@ defmodule HamsterTravelWeb.Planning.DestinationNew do
 
   def render(assigns) do
     ~H"""
-    <div class="mb-5">
+    <div>
       <a
         href="#"
         phx-click="edit"

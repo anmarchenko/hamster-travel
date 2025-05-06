@@ -7,18 +7,20 @@ defmodule HamsterTravelWeb.Planning.Trips.Tabs.TabActivity do
   import HamsterTravelWeb.Planning.PlanningComponents
   import HamsterTravelWeb.Icons.Budget
 
-  alias HamsterTravelWeb.Planning.{Activity, Expense, Note}
+  alias HamsterTravel.Planning
+  alias HamsterTravelWeb.Planning.{Activity, DestinationNew, Expense, Note}
 
   def update(assigns, socket) do
     # budget = HamsterTravel.fetch_budget(plan, :activities)
     budget = 0
+    trip = assigns.trip
 
     socket =
       socket
       |> assign(assigns)
       |> assign(
         budget: budget,
-        destinations: [],
+        destinations: trip.destinations,
         activities: [],
         notes: [],
         expenses: []
@@ -85,8 +87,16 @@ defmodule HamsterTravelWeb.Planning.Trips.Tabs.TabActivity do
             <.day_label day_index={i} start_date={@trip.start_date} />
           </div>
           <div class="flex flex-row gap-x-4">
-            <.destinations_list trip={@trip} destinations={@destinations} day_index={i} />
+            <.destinations_list
+              trip={@trip}
+              destinations={Planning.destinations_for_day(i, @destinations)}
+              day_index={i}
+            />
           </div>
+          <div class="max-w-xs">
+            <.live_component module={DestinationNew} id={"destination-new-#{i}"} trip={@trip} />
+          </div>
+
           <.note note={HamsterTravel.find_note_by_day(@notes, i)} day_index={i} />
           <.expenses expenses={HamsterTravel.filter_expenses_by_day(@expenses, i)} day_index={i} />
           <div class="flex flex-col mt-4">
