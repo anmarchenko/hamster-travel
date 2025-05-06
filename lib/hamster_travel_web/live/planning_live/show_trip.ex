@@ -61,6 +61,27 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     {:noreply, socket}
   end
 
+  @impl true
+  def handle_info({[:destination, :updated], %{value: updated_destination}}, socket) do
+    # Preload city before sending to component
+    updated_destination = HamsterTravel.Repo.preload(updated_destination, [:city])
+
+    trip =
+      socket.assigns.trip
+      |> Map.put(
+        :destinations,
+        Enum.map(socket.assigns.trip.destinations, fn destination ->
+          if destination.id == updated_destination.id, do: updated_destination, else: destination
+        end)
+      )
+
+    socket =
+      socket
+      |> assign(trip: trip)
+
+    {:noreply, socket}
+  end
+
   def render_tab(%{active_tab: "itinerary"} = assigns) do
     ~H"""
     <.live_component module={TabItinerary} id={"trip-#{@trip.id}-itinerary"} trip={@trip} />

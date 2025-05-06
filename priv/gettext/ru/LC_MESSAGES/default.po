@@ -23,14 +23,14 @@ msgstr "Главная"
 msgid "Next travels"
 msgstr "Ближайшие путешествия"
 
-#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:97
+#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:98
 #, elixir-autogen, elixir-format
 msgid "ppl"
 msgstr "чел"
 
 #: lib/hamster_travel_web/live/packing_live/components/packing_components.ex:23
 #: lib/hamster_travel_web/live/packing_live/show_backpack.html.heex:8
-#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:93
+#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:94
 #, elixir-format, ex-autogen, elixir-autogen, fuzzy
 msgid "day"
 msgid_plural "days"
@@ -61,12 +61,12 @@ msgid "Make a copy"
 msgstr "Сделать копию"
 
 #: lib/hamster_travel_web/components/layouts.ex:85
-#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:43
+#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:44
 #, elixir-autogen, elixir-format
 msgid "Activities"
 msgstr "Впечатления"
 
-#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:32
+#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:33
 #, elixir-autogen, elixir-format
 msgid "Transfers and hotels"
 msgstr "Трансферы и жильё"
@@ -83,7 +83,7 @@ msgid "Transfers"
 msgstr "Трансферы"
 
 #: lib/hamster_travel_web/live/planning_live/components/day_range_select.ex:50
-#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:195
+#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:196
 #: lib/hamster_travel_web/live/planning_live/components/tab_itinerary.ex:82
 #, elixir-autogen, elixir-format
 msgid "Day"
@@ -429,7 +429,12 @@ msgstr "Выберите день"
 msgid "Date range"
 msgstr "Даты"
 
-#: lib/hamster_travel_web/live/planning_live/components/destination_new.ex:57
+#: lib/hamster_travel_web/live/planning_live/components/destination_new.ex:58
 #, elixir-autogen, elixir-format
 msgid "Add destination"
 msgstr "Новый город"
+
+#: lib/hamster_travel_web/live/planning_live/components/destination.ex:37
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Are you sure you want to delete this city from your trip?"
+msgstr "Вы уверены, что хотите удалить этот город из путешествия?"

@@ -5,8 +5,9 @@ defmodule HamsterTravel.Planning do
 
   import Ecto.Query, warn: false
 
-  alias HamsterTravel.Repo
+  alias HamsterTravel.Geo
   alias HamsterTravel.Planning.{Destination, Policy, Trip}
+  alias HamsterTravel.Repo
 
   @topic "trip_destinations"
 
@@ -157,13 +158,14 @@ defmodule HamsterTravel.Planning do
     %Destination{trip_id: trip.id}
     |> Destination.changeset(attrs)
     |> Repo.insert()
-    |> send_pubsub_event([:destination, :created], trip)
+    |> send_pubsub_event([:destination, :created], trip.id)
   end
 
   def update_destination(%Destination{} = destination, attrs) do
     destination
     |> Destination.changeset(attrs)
     |> Repo.update()
+    |> send_pubsub_event([:destination, :updated], destination.trip_id)
   end
 
   def new_destination(trip, attrs \\ %{}) do
@@ -179,20 +181,31 @@ defmodule HamsterTravel.Planning do
     Repo.delete(destination)
   end
 
+  @doc """
+  Returns a list of destinations that are active on a given day index.
+  A destination is considered active if its start_day is less than or equal to
+  the day index and its end_day is greater than or equal to the day index.
+  """
+  def destinations_for_day(day_index, destinations) do
+    Enum.filter(destinations, fn destination ->
+      destination.start_day <= day_index && destination.end_day >= day_index
+    end)
+  end
+
   defp trip_preloading(query) do
     query
-    |> Repo.preload([:author, destinations: [:city]])
+    |> Repo.preload([:author, destinations: [city: Geo.city_preloading_query()]])
   end
 
   defp destinations_preloading(query) do
     query
-    |> Repo.preload([:city])
+    |> Repo.preload(city: Geo.city_preloading_query())
   end
 
-  defp send_pubsub_event({:ok, result} = return_tuple, event, trip) do
+  defp send_pubsub_event({:ok, result} = return_tuple, event, trip_id) do
     Phoenix.PubSub.broadcast(
       HamsterTravel.PubSub,
-      @topic <> ":#{trip.id}",
+      @topic <> ":#{trip_id}",
       {event, %{value: result}}
     )
 

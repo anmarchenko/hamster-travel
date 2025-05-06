@@ -7,8 +7,8 @@ defmodule HamsterTravelWeb.Planning.TabItinerary do
   import HamsterTravelWeb.Icons.Budget
   import HamsterTravelWeb.Planning.PlanningComponents
 
-  alias HamsterTravelWeb.Planning.DestinationNew
-  alias HamsterTravelWeb.Planning.{Hotel, Transfer}
+  alias HamsterTravel.Planning
+  alias HamsterTravelWeb.Planning.{DestinationNew, Hotel, Transfer}
 
   def update(assigns, socket) do
     # budget = HamsterTravel.fetch_budget(plan, :transfers)
@@ -98,9 +98,10 @@ defmodule HamsterTravelWeb.Planning.TabItinerary do
               <.day_label day_index={i} start_date={@trip.start_date} />
             </td>
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
-              <div class="flex flex-col gap-y-2">
+              <div class="flex flex-col">
                 <.destinations_list
-                  destinations={destinations_for_day(i, @destinations)}
+                  trip={@trip}
+                  destinations={Planning.destinations_for_day(i, @destinations)}
                   day_index={i}
                 />
                 <.live_component module={DestinationNew} id={"destination-new-#{i}"} trip={@trip} />
@@ -124,11 +125,5 @@ defmodule HamsterTravelWeb.Planning.TabItinerary do
       </table>
     </div>
     """
-  end
-
-  defp destinations_for_day(day_index, destinations) do
-    Enum.filter(destinations, fn destination ->
-      destination.start_day <= day_index && destination.end_day >= day_index
-    end)
   end
 end

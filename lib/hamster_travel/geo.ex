@@ -4,9 +4,9 @@ defmodule HamsterTravel.Geo do
   """
 
   import Ecto.Query, warn: false
-  alias HamsterTravel.Repo
 
   alias HamsterTravel.Geo.{City, Country, Region}
+  alias HamsterTravel.Repo
 
   @doc """
   Returns the list of countries.
@@ -121,14 +121,10 @@ defmodule HamsterTravel.Geo do
 
     query =
       from(
-        c in City,
+        c in city_preloading_query(),
         where: ilike(field(c, ^column), ^search_term),
         order_by: [desc: fragment("? % ?", ^search_term, field(c, ^column)), desc: c.population],
-        limit: 10,
-        preload: [:country],
-        join: r in Region,
-        on: c.region_code == r.region_code and c.country_code == r.country_code,
-        select: %{c | region_name: r.name, region_name_ru: r.name_ru}
+        limit: 10
       )
 
     Repo.all(query)
@@ -152,5 +148,13 @@ defmodule HamsterTravel.Geo do
       _ ->
         city.name
     end
+  end
+
+  def city_preloading_query do
+    from c in City,
+      preload: [:country],
+      join: r in Region,
+      on: c.region_code == r.region_code and c.country_code == r.country_code,
+      select: %{c | region_name: r.name, region_name_ru: r.name_ru}
   end
 end

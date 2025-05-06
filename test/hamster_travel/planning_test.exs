@@ -483,6 +483,7 @@ defmodule HamsterTravel.PlanningTest do
     import HamsterTravel.GeoFixtures
 
     @invalid_attrs %{start_day: nil, end_day: nil}
+    @update_attrs %{start_day: 43, end_day: 43}
 
     setup do
       geonames_fixture()
@@ -562,13 +563,22 @@ defmodule HamsterTravel.PlanningTest do
 
     test "update_destination/2 with valid data updates the destination" do
       destination = destination_fixture()
-      update_attrs = %{start_day: 43, end_day: 43}
 
-      assert {:ok, %Destination{} = destination} =
-               Planning.update_destination(destination, update_attrs)
+      assert {:ok, %Destination{} = updated_destination} =
+               Planning.update_destination(destination, @update_attrs)
 
-      assert destination.start_day == 43
-      assert destination.end_day == 43
+      assert updated_destination.start_day == 43
+      assert updated_destination.end_day == 43
+    end
+
+    test "update_destination/2 sends pubsub event", %{trip: trip} do
+      destination = destination_fixture(%{trip_id: trip.id})
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "trip_destinations:#{trip.id}")
+
+      assert {:ok, %Destination{} = updated_destination} =
+               Planning.update_destination(destination, @update_attrs)
+
+      assert_receive {[:destination, :updated], %{value: ^updated_destination}}
     end
 
     test "update_destination/2 with invalid data returns error changeset" do
@@ -627,6 +637,39 @@ defmodule HamsterTravel.PlanningTest do
              } = changeset
 
       assert trip_id == trip.id
+    end
+
+    test "destinations_for_day/2 returns destinations active on the given day" do
+      # Create destinations with different day ranges
+      destination1 = destination_fixture(%{start_day: 1, end_day: 3})
+      destination2 = destination_fixture(%{start_day: 2, end_day: 4})
+      destination3 = destination_fixture(%{start_day: 4, end_day: 6})
+
+      destinations = [destination1, destination2, destination3]
+
+      # Test day 2 (should include destination1 and destination2)
+      assert [^destination1, ^destination2] = Planning.destinations_for_day(2, destinations)
+
+      # Test day 4 (should include destination2 and destination3)
+      assert [^destination2, ^destination3] = Planning.destinations_for_day(4, destinations)
+
+      # Test day 5 (should only include destination3)
+      assert [^destination3] = Planning.destinations_for_day(5, destinations)
+
+      # Test day 0 (should return empty list as no destinations start on day 0)
+      assert [] = Planning.destinations_for_day(0, destinations)
+    end
+
+    test "destinations_for_day/2 handles single-day destinations" do
+      destination = destination_fixture(%{start_day: 2, end_day: 2})
+
+      assert [^destination] = Planning.destinations_for_day(2, [destination])
+      assert [] = Planning.destinations_for_day(1, [destination])
+      assert [] = Planning.destinations_for_day(3, [destination])
+    end
+
+    test "destinations_for_day/2 handles empty list of destinations" do
+      assert [] = Planning.destinations_for_day(1, [])
     end
   end
 end

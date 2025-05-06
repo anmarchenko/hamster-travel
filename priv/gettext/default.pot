@@ -35,14 +35,14 @@ msgstr ""
 msgid "Next travels"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:97
+#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:98
 #, elixir-autogen, elixir-format
 msgid "ppl"
 msgstr ""
 
 #: lib/hamster_travel_web/live/packing_live/components/packing_components.ex:23
 #: lib/hamster_travel_web/live/packing_live/show_backpack.html.heex:8
-#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:93
+#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:94
 #, elixir-format, ex-autogen, elixir-autogen
 msgid "day"
 msgid_plural "days"
@@ -72,12 +72,12 @@ msgid "Make a copy"
 msgstr ""
 
 #: lib/hamster_travel_web/components/layouts.ex:85
-#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:43
+#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:44
 #, elixir-autogen, elixir-format
 msgid "Activities"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:32
+#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:33
 #, elixir-autogen, elixir-format
 msgid "Transfers and hotels"
 msgstr ""
@@ -94,7 +94,7 @@ msgid "Transfers"
 msgstr ""
 
 #: lib/hamster_travel_web/live/planning_live/components/day_range_select.ex:50
-#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:195
+#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:196
 #: lib/hamster_travel_web/live/planning_live/components/tab_itinerary.ex:82
 #, elixir-autogen, elixir-format
 msgid "Day"
@@ -435,7 +435,12 @@ msgstr ""
 msgid "Date range"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/destination_new.ex:57
+#: lib/hamster_travel_web/live/planning_live/components/destination_new.ex:58
 #, elixir-autogen, elixir-format
 msgid "Add destination"
+msgstr ""
+
+#: lib/hamster_travel_web/live/planning_live/components/destination.ex:37
+#, elixir-autogen, elixir-format
+msgid "Are you sure you want to delete this city from your trip?"
 msgstr ""

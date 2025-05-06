@@ -92,14 +92,7 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
       |> Map.put("city_id", city_id)
       |> Map.put("city", city)
 
-    case Planning.create_destination(socket.assigns.trip, destination_params) do
-      {:ok, _destination} ->
-        socket.assigns.on_finish.()
-        {:noreply, socket}
-
-      {:error, changeset} ->
-        {:noreply, assign_form(socket, changeset)}
-    end
+    on_submit(socket, socket.assigns.action, destination_params)
   end
 
   def handle_event("cancel", _, socket) do
@@ -110,5 +103,27 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
     assign(socket, :form, to_form(changeset))
+  end
+
+  defp on_submit(socket, :new, destination_params) do
+    socket.assigns.trip
+    |> Planning.create_destination(destination_params)
+    |> result(socket)
+  end
+
+  defp on_submit(socket, :edit, destination_params) do
+    socket.assigns.destination
+    |> Planning.update_destination(destination_params)
+    |> result(socket)
+  end
+
+  defp result({:ok, _destination}, socket) do
+    socket.assigns.on_finish.()
+
+    {:noreply, socket}
+  end
+
+  defp result({:error, changeset}, socket) do
+    {:noreply, assign_form(socket, changeset)}
   end
 end

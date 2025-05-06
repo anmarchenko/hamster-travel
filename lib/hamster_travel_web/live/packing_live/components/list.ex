@@ -9,8 +9,8 @@ defmodule HamsterTravelWeb.Packing.List do
 
   alias HamsterTravel.Packing
 
-  alias HamsterTravelWeb.Packing.ItemNew
   alias HamsterTravelWeb.Packing.Item
+  alias HamsterTravelWeb.Packing.ItemNew
 
   @button_color "text-white dark:text-zinc-400 hover:bg-primary-600 dark:hover:bg-primary-800"
 

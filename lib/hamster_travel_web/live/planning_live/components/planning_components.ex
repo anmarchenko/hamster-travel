@@ -48,6 +48,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
     """
   end
 
+  attr(:trip, Trip, required: true)
   attr(:destinations, :list, required: true)
   attr(:day_index, :integer, required: true)
 
@@ -57,6 +58,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
       :for={destination <- @destinations}
       module={Destination}
       id={"destination-#{destination.id}-day-#{@day_index}"}
+      trip={@trip}
       destination={destination}
       day_index={@day_index}
     />
@@ -73,7 +75,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
     """
   end
 
-  attr(:trip, :map, required: true)
+  attr(:trip, Trip, required: true)
   attr(:icon_class, :string, default: nil)
   attr(:class, :string, default: nil)
 

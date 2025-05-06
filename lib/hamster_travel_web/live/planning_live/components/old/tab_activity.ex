@@ -85,10 +85,7 @@ defmodule HamsterTravelWeb.Planning.Trips.Tabs.TabActivity do
             <.day_label day_index={i} start_date={@trip.start_date} />
           </div>
           <div class="flex flex-row gap-x-4">
-            <.destinations_list
-              destinations={HamsterTravel.filter_places_by_day(@destinations, i)}
-              day_index={i}
-            />
+            <.destinations_list trip={@trip} destinations={@destinations} day_index={i} />
           </div>
           <.note note={HamsterTravel.find_note_by_day(@notes, i)} day_index={i} />
           <.expenses expenses={HamsterTravel.filter_expenses_by_day(@expenses, i)} day_index={i} />
