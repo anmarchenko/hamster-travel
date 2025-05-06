@@ -82,6 +82,24 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     {:noreply, socket}
   end
 
+  @impl true
+  def handle_info({[:destination, :deleted], %{value: deleted_destination}}, socket) do
+    trip =
+      socket.assigns.trip
+      |> Map.put(
+        :destinations,
+        Enum.reject(socket.assigns.trip.destinations, fn destination ->
+          destination.id == deleted_destination.id
+        end)
+      )
+
+    socket =
+      socket
+      |> assign(trip: trip)
+
+    {:noreply, socket}
+  end
+
   def render_tab(%{active_tab: "itinerary"} = assigns) do
     ~H"""
     <.live_component module={TabItinerary} id={"trip-#{@trip.id}-itinerary"} trip={@trip} />

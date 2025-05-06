@@ -5,6 +5,7 @@ defmodule HamsterTravelWeb.Planning.Destination do
   use HamsterTravelWeb, :live_component
 
   alias HamsterTravel.Geo
+  alias HamsterTravel.Planning
 
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :destination, HamsterTravel.Planning.Destination, required: true
@@ -61,5 +62,17 @@ defmodule HamsterTravelWeb.Planning.Destination do
       |> assign(:edit, true)
 
     {:noreply, socket}
+  end
+
+  def handle_event("delete", _, socket) do
+    case Planning.delete_destination(socket.assigns.destination) do
+      {:ok, _destination} ->
+        {:noreply, socket}
+
+      {:error, _changeset} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, gettext("Failed to delete destination"))}
+    end
   end
 end

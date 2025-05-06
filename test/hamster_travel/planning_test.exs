@@ -601,6 +601,16 @@ defmodule HamsterTravel.PlanningTest do
       assert_raise Ecto.NoResultsError, fn -> Planning.get_destination!(destination.id) end
     end
 
+    test "delete_destination/1 sends pubsub event", %{trip: trip} do
+      destination = destination_fixture(%{trip_id: trip.id})
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "trip_destinations:#{trip.id}")
+
+      assert {:ok, %Destination{} = deleted_destination} =
+               Planning.delete_destination(destination)
+
+      assert_receive {[:destination, :deleted], %{value: ^deleted_destination}}
+    end
+
     test "change_destination/1 returns a destination changeset" do
       destination = destination_fixture()
       assert %Ecto.Changeset{} = Planning.change_destination(destination)

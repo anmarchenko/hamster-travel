@@ -179,6 +179,7 @@ defmodule HamsterTravel.Planning do
 
   def delete_destination(%Destination{} = destination) do
     Repo.delete(destination)
+    |> send_pubsub_event([:destination, :deleted], destination.trip_id)
   end
 
   @doc """
