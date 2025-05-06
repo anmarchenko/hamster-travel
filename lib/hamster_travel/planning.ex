@@ -168,8 +168,15 @@ defmodule HamsterTravel.Planning do
     |> send_pubsub_event([:destination, :updated], destination.trip_id)
   end
 
-  def new_destination(trip, attrs \\ %{}) do
-    %Destination{trip_id: trip.id, city: nil}
+  def new_destination(trip, day_index, attrs \\ %{}) do
+    destination =
+      if Ecto.assoc_loaded?(trip.destinations) && Enum.empty?(trip.destinations) do
+        %Destination{trip_id: trip.id, city: nil, start_day: 0, end_day: trip.duration - 1}
+      else
+        %Destination{trip_id: trip.id, city: nil, start_day: day_index, end_day: day_index}
+      end
+
+    destination
     |> Destination.changeset(attrs)
   end
 

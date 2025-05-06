@@ -616,14 +616,34 @@ defmodule HamsterTravel.PlanningTest do
       assert %Ecto.Changeset{} = Planning.change_destination(destination)
     end
 
-    test "new_destination/2 returns a new destination changeset with trip_id and nil city" do
-      trip = trip_fixture()
-      changeset = Planning.new_destination(trip)
+    test "new_destination/2 returns a new destination changeset with trip_id, nil city, start_day and end_day are for the whole trip" do
+      trip = trip_fixture() |> Repo.preload(:destinations)
+      changeset = Planning.new_destination(trip, 0)
 
       assert %Ecto.Changeset{
                data: %{
                  trip_id: trip_id,
-                 city: nil
+                 city: nil,
+                 start_day: 0,
+                 end_day: 2
+               }
+             } = changeset
+
+      assert trip_id == trip.id
+    end
+
+    test "new_destination/2 when trip already has some destinations returns a new destination changeset start_day and end_day for the current day index" do
+      trip = trip_fixture()
+      destination_fixture(%{trip_id: trip.id, start_day: 0, end_day: 1})
+      trip = trip |> Repo.preload(:destinations)
+      changeset = Planning.new_destination(trip, 1)
+
+      assert %Ecto.Changeset{
+               data: %{
+                 trip_id: trip_id,
+                 city: nil,
+                 start_day: 1,
+                 end_day: 1
                }
              } = changeset
 
@@ -633,7 +653,7 @@ defmodule HamsterTravel.PlanningTest do
     test "new_destination/2 with attributes overrides default values" do
       trip = trip_fixture()
       attrs = %{start_day: 1, end_day: 2}
-      changeset = Planning.new_destination(trip, attrs)
+      changeset = Planning.new_destination(trip, 0, attrs)
 
       assert %Ecto.Changeset{
                data: %{

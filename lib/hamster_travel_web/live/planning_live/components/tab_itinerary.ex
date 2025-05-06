@@ -104,7 +104,12 @@ defmodule HamsterTravelWeb.Planning.TabItinerary do
                   destinations={Planning.destinations_for_day(i, @destinations)}
                   day_index={i}
                 />
-                <.live_component module={DestinationNew} id={"destination-new-#{i}"} trip={@trip} />
+                <.live_component
+                  module={DestinationNew}
+                  id={"destination-new-#{i}"}
+                  trip={@trip}
+                  day_index={i}
+                />
               </div>
             </td>
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">

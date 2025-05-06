@@ -94,7 +94,12 @@ defmodule HamsterTravelWeb.Planning.Trips.Tabs.TabActivity do
             />
           </div>
           <div class="max-w-xs">
-            <.live_component module={DestinationNew} id={"destination-new-#{i}"} trip={@trip} />
+            <.live_component
+              module={DestinationNew}
+              id={"destination-new-#{i}"}
+              trip={@trip}
+              day_index={i}
+            />
           </div>
 
           <.note note={HamsterTravel.find_note_by_day(@notes, i)} day_index={i} />

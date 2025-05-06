@@ -13,6 +13,7 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
 
   attr :action, :atom, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true
+  attr :day_index, :integer, required: true
   attr :on_finish, :fun, required: true
 
   @impl true
@@ -61,7 +62,7 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
     changeset =
       case assigns.action do
         :new ->
-          Planning.new_destination(assigns.trip)
+          Planning.new_destination(assigns.trip, assigns.day_index)
 
         :edit ->
           Planning.change_destination(assigns.destination)

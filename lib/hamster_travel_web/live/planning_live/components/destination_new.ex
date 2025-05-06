@@ -5,30 +5,7 @@ defmodule HamsterTravelWeb.Planning.DestinationNew do
 
   use HamsterTravelWeb, :live_component
 
-  def update(assigns, socket) do
-    socket =
-      socket
-      |> assign(assigns)
-      |> assign(edit: false)
-
-    {:ok, socket}
-  end
-
-  def handle_event("edit", _, socket) do
-    socket =
-      socket
-      |> assign(:edit, true)
-
-    {:noreply, socket}
-  end
-
-  def handle_event("finish", _, socket) do
-    socket =
-      socket
-      |> assign(:edit, false)
-
-    {:noreply, socket}
-  end
+  attr :day_index, :integer, required: true
 
   def render(%{edit: true} = assigns) do
     ~H"""
@@ -37,6 +14,7 @@ defmodule HamsterTravelWeb.Planning.DestinationNew do
         module={HamsterTravelWeb.Planning.DestinationForm}
         id={"destination-form-#{@id}"}
         trip={@trip}
+        day_index={@day_index}
         action={:new}
         on_finish={fn -> send_update(@myself, edit: false) end}
       />
@@ -60,5 +38,30 @@ defmodule HamsterTravelWeb.Planning.DestinationNew do
       </a>
     </div>
     """
+  end
+
+  def update(assigns, socket) do
+    socket =
+      socket
+      |> assign(assigns)
+      |> assign(edit: false)
+
+    {:ok, socket}
+  end
+
+  def handle_event("edit", _, socket) do
+    socket =
+      socket
+      |> assign(:edit, true)
+
+    {:noreply, socket}
+  end
+
+  def handle_event("finish", _, socket) do
+    socket =
+      socket
+      |> assign(:edit, false)
+
+    {:noreply, socket}
   end
 end
