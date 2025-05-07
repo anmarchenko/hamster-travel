@@ -169,14 +169,19 @@ defmodule HamsterTravel.Planning do
   end
 
   def new_destination(trip, day_index, attrs \\ %{}) do
-    destination =
+    default_days =
       if Ecto.assoc_loaded?(trip.destinations) && Enum.empty?(trip.destinations) do
-        %Destination{trip_id: trip.id, city: nil, start_day: 0, end_day: trip.duration - 1}
+        %{start_day: 0, end_day: trip.duration - 1}
       else
-        %Destination{trip_id: trip.id, city: nil, start_day: day_index, end_day: day_index}
+        %{start_day: day_index, end_day: day_index}
       end
 
-    destination
+    %Destination{
+      start_day: default_days.start_day,
+      end_day: default_days.end_day,
+      trip_id: trip.id,
+      city: nil
+    }
     |> Destination.changeset(attrs)
   end
 
