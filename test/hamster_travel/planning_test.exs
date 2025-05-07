@@ -4,18 +4,19 @@ defmodule HamsterTravel.PlanningTest do
   alias HamsterTravel.Planning
   alias HamsterTravel.Social
 
+  import HamsterTravel.AccountsFixtures
+  import HamsterTravel.PlanningFixtures
+  import HamsterTravel.GeoFixtures
+
+  setup do
+    user = user_fixture()
+    friend = user_fixture()
+    Social.add_friends(user.id, friend.id)
+    {:ok, user: Repo.preload(user, :friendships), friend: Repo.preload(friend, :friendships)}
+  end
+
   describe "trips" do
     alias HamsterTravel.Planning.Trip
-
-    import HamsterTravel.AccountsFixtures
-    import HamsterTravel.PlanningFixtures
-
-    setup do
-      user = user_fixture()
-      friend = user_fixture()
-      Social.add_friends(user.id, friend.id)
-      {:ok, user: Repo.preload(user, :friendships), friend: Repo.preload(friend, :friendships)}
-    end
 
     test "list_plans/1 returns all planned and finished trips including ones from friends", %{
       user: user,
@@ -479,9 +480,6 @@ defmodule HamsterTravel.PlanningTest do
   describe "destinations" do
     alias HamsterTravel.Planning.Destination
 
-    import HamsterTravel.PlanningFixtures
-    import HamsterTravel.GeoFixtures
-
     @invalid_attrs %{start_day: nil, end_day: nil}
     @update_attrs %{start_day: 43, end_day: 43}
 
@@ -700,6 +698,107 @@ defmodule HamsterTravel.PlanningTest do
 
     test "destinations_for_day/2 handles empty list of destinations" do
       assert [] = Planning.destinations_for_day(1, [])
+    end
+  end
+
+  describe "trip associations" do
+    alias HamsterTravel.Planning.Trip
+
+    test "preloads countries through destinations and cities", %{user: user} do
+      # Setup test data
+      geonames_fixture()
+      berlin = HamsterTravel.Geo.find_city_by_geonames_id("2950159")
+      hamburg = HamsterTravel.Geo.find_city_by_geonames_id("2911298")
+
+      # Create a trip with multiple destinations
+      {:ok, trip} =
+        Planning.create_trip(
+          %{
+            name: "German Tour",
+            dates_unknown: false,
+            start_date: ~D[2023-06-12],
+            end_date: ~D[2023-06-14],
+            currency: "EUR",
+            status: Trip.planned(),
+            private: false,
+            people_count: 2
+          },
+          user
+        )
+
+      # Add destinations
+      {:ok, _} =
+        Planning.create_destination(trip, %{
+          city_id: berlin.id,
+          start_day: 0,
+          end_day: 1
+        })
+
+      {:ok, _} =
+        Planning.create_destination(trip, %{
+          city_id: hamburg.id,
+          start_day: 2,
+          end_day: 2
+        })
+
+      # Fetch trip with preloaded associations
+      trip =
+        Planning.get_trip!(trip.id)
+        |> Repo.preload([:cities])
+
+      # Verify the associations
+      assert length(trip.destinations) == 2
+      assert length(trip.cities) == 2
+      # Both cities are in Germany
+      assert length(trip.countries) == 1
+
+      # Verify we can access country data
+      [country] = trip.countries
+      assert country.iso == "DE"
+    end
+
+    test "preloads countries in list_plans", %{user: user} do
+      # Setup test data
+      geonames_fixture()
+      berlin = HamsterTravel.Geo.find_city_by_geonames_id("2950159")
+
+      # Create a trip
+      {:ok, trip} =
+        Planning.create_trip(
+          %{
+            name: "Berlin Trip",
+            dates_unknown: false,
+            start_date: ~D[2023-06-12],
+            end_date: ~D[2023-06-13],
+            currency: "EUR",
+            status: Trip.planned(),
+            private: false,
+            people_count: 2
+          },
+          user
+        )
+
+      # Add destination
+      {:ok, _} =
+        Planning.create_destination(trip, %{
+          city_id: berlin.id,
+          start_day: 0,
+          end_day: 1
+        })
+
+      # Fetch trips with preloaded associations
+      [loaded_trip] =
+        Planning.list_plans(user)
+        |> Repo.preload([:cities])
+
+      # Verify the associations
+      assert length(loaded_trip.destinations) == 1
+      assert length(loaded_trip.cities) == 1
+      assert length(loaded_trip.countries) == 1
+
+      # Verify country data
+      [country] = loaded_trip.countries
+      assert country.iso == "DE"
     end
   end
 end
