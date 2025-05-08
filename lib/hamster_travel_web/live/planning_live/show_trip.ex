@@ -2,6 +2,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   @moduledoc """
   Trip page
   """
+  alias HamsterTravel.Repo
   use HamsterTravelWeb, :live_view
 
   import HamsterTravelWeb.Planning.PlanningComponents
@@ -48,11 +49,13 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   @impl true
   def handle_info({[:destination, :created], %{value: created_destination}}, socket) do
     # Preload city before sending to component
-    created_destination = HamsterTravel.Repo.preload(created_destination, [:city])
+    created_destination = Repo.preload(created_destination, [:city])
 
     trip =
       socket.assigns.trip
       |> Map.put(:destinations, socket.assigns.trip.destinations ++ [created_destination])
+
+    trip = Repo.preload(trip, :countries)
 
     socket =
       socket
@@ -64,7 +67,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   @impl true
   def handle_info({[:destination, :updated], %{value: updated_destination}}, socket) do
     # Preload city before sending to component
-    updated_destination = HamsterTravel.Repo.preload(updated_destination, [:city])
+    updated_destination = Repo.preload(updated_destination, [:city])
 
     trip =
       socket.assigns.trip
@@ -74,6 +77,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           if destination.id == updated_destination.id, do: updated_destination, else: destination
         end)
       )
+
+    trip = Repo.preload(trip, :countries)
 
     socket =
       socket
@@ -92,6 +97,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           destination.id == deleted_destination.id
         end)
       )
+
+    trip = Repo.preload(trip, :countries)
 
     socket =
       socket

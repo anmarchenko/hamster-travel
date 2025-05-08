@@ -149,10 +149,11 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
       ])
     }>
       <.status_badge status={@trip.status} />
-      <.flag size={20} country="de" />
-      <%!-- <%= for country <- Enum.take(@plan.countries, @flags_limit) do %>
-        <.flag size={20} country={country} />
-      <% end %> --%>
+      <.flag
+        :for={country <- @trip.countries |> Enum.take(@flags_limit)}
+        size={20}
+        country={country.iso}
+      />
       <.avatar
         size="xs"
         src={@trip.author.avatar_url}
