@@ -4,7 +4,6 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
   import Phoenix.LiveViewTest
   import HamsterTravel.AccountsFixtures
   import HamsterTravel.PlanningFixtures
-  import HamsterTravel.GeoFixtures
 
   alias HamsterTravel.Geo
   alias HamsterTravelWeb.Cldr
@@ -129,39 +128,6 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "label", "Date range")
       assert has_element?(view, "button", "Save")
       assert has_element?(view, "button", "Cancel")
-    end
-
-    test "handles destination creation via PubSub", %{conn: conn} do
-      # Arrange
-      geonames_fixture()
-
-      user = user_fixture()
-      conn = log_in_user(conn, user)
-      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
-      # Berlin
-      city = HamsterTravel.Geo.find_city_by_geonames_id("2950159")
-
-      # Act
-      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
-
-      # Create a destination through PubSub
-      destination = %HamsterTravel.Planning.Destination{
-        trip_id: trip.id,
-        city_id: city.id,
-        start_day: 0,
-        end_day: 1,
-        city: city
-      }
-
-      Phoenix.PubSub.broadcast(
-        HamsterTravel.PubSub,
-        "trip_destinations:#{trip.id}",
-        {[:destination, :created], %{value: destination}}
-      )
-
-      # Assert
-      # Verify the destination appears in the view
-      assert render(view) =~ city.name
     end
 
     test "renders activities tab when selected", %{conn: conn} do

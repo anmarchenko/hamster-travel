@@ -107,7 +107,13 @@ defmodule HamsterTravel.Geo do
   end
 
   def find_city_by_geonames_id(geonames_id) do
-    Repo.get_by(City, geonames_id: geonames_id)
+    query =
+      from(
+        c in city_preloading_query(),
+        where: c.geonames_id == ^geonames_id
+      )
+
+    Repo.one(query)
   end
 
   def search_cities(search_term) do

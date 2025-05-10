@@ -15,7 +15,7 @@ config :hamster_travel, HamsterTravel.Repo,
   hostname: System.get_env("POSTGRES_HOST", "localhost"),
   port: System.get_env("POSTGRES_PORT", "6000"),
   pool: Ecto.Adapters.SQL.Sandbox,
-  pool_size: 10
+  pool_size: 30
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.

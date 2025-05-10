@@ -3,9 +3,10 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
 
   import HamsterTravelWeb.Icons.{Airplane, Budget}
 
+  alias HamsterTravel.Planning
   alias HamsterTravel.Planning.Trip
   alias HamsterTravelWeb.CoreComponents
-  alias HamsterTravelWeb.Planning.Destination
+  alias HamsterTravelWeb.Planning.{Destination, DestinationNew, Hotel, Transfer}
 
   attr(:trip, :map, required: true)
   attr(:active_tab, :string, required: true)
@@ -69,7 +70,11 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
 
   def trips_grid(assigns) do
     ~H"""
-    <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-8">
+    <div
+      id="trips-grid"
+      class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-8"
+      phx-update="stream"
+    >
       <.trip_card :for={{id, trip} <- @trips} trip={trip} id={id} />
     </div>
     """
@@ -203,6 +208,226 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   def day_label(assigns) do
     ~H"""
     {Formatter.date_with_weekday(Date.add(@start_date, @day_index))}
+    """
+  end
+
+  attr(:trip, Trip, required: true)
+  attr(:budget, :integer, required: true)
+  attr(:destinations, :list, required: true)
+  attr(:transfers, :list, required: true)
+  attr(:hotels, :list, required: true)
+
+  def tab_itinerary(assigns) do
+    ~H"""
+    <div>
+      <div class="flex flex-row gap-x-4 mt-4 sm:mt-8 text-xl">
+        <.inline>
+          <.budget />
+          {Formatter.format_money(@budget, @trip.currency)}
+        </.inline>
+      </div>
+
+      <table class="sm:mt-8 sm:table-auto sm:border-collapse sm:border sm:border-slate-500 sm:w-full">
+        <thead>
+          <tr class="hidden sm:table-row">
+            <th class="border border-slate-600 px-2 py-4 text-left w-1/12">{gettext("Day")}</th>
+            <th class="border border-slate-600 px-2 py-4 text-left w-1/6">
+              {gettext("Places")}
+            </th>
+            <th class="border border-slate-600 px-2 py-4 text-left w-1/3">
+              {gettext("Transfers")}
+            </th>
+            <th class="border border-slate-600 px-2 py-4 text-left w-1/3">{gettext("Hotel")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            :for={i <- 0..(@trip.duration - 1)}
+            class="flex flex-col gap-y-6 mt-10 sm:table-row sm:gap-y-0 sm:mt-0"
+          >
+            <td class="text-xl font-bold sm:font-normal sm:text-base sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
+              <.day_label day_index={i} start_date={@trip.start_date} />
+            </td>
+            <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
+              <div class="flex flex-col">
+                <.destinations_list
+                  trip={@trip}
+                  destinations={Planning.destinations_for_day(i, @destinations)}
+                  day_index={i}
+                />
+                <.live_component
+                  module={DestinationNew}
+                  id={"destination-new-#{i}"}
+                  trip={@trip}
+                  day_index={i}
+                />
+              </div>
+            </td>
+            <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
+              <div class="flex flex-col gap-y-8">
+                <.transfers
+                  transfers={HamsterTravel.filter_transfers_by_day(@transfers, i)}
+                  day_index={i}
+                />
+              </div>
+            </td>
+            <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
+              <div class="flex flex-col gap-y-8">
+                <.hotels hotels={HamsterTravel.filter_hotels_by_day(@hotels, i)} day_index={i} />
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    """
+  end
+
+  attr(:transfers, :list, required: true)
+  attr(:day_index, :integer, required: true)
+
+  def transfers(%{transfers: []} = assigns) do
+    ~H"""
+    <.secondary class="sm:hidden">
+      {gettext("No transfers planned for this day")}
+    </.secondary>
+    """
+  end
+
+  def transfers(assigns) do
+    ~H"""
+    <.live_component
+      :for={transfer <- @transfers}
+      module={Transfer}
+      id={"transfers-#{transfer.id}-day-#{@day_index}"}
+      transfer={transfer}
+    />
+    """
+  end
+
+  attr(:hotels, :list, required: true)
+  attr(:day_index, :integer, required: true)
+
+  def hotels(%{hotels: []} = assigns) do
+    ~H"""
+    <.secondary class="sm:hidden">
+      {gettext("No hotels for this day")}
+    </.secondary>
+    """
+  end
+
+  def hotels(assigns) do
+    ~H"""
+    <.live_component
+      :for={hotel <- @hotels}
+      module={Hotel}
+      id={"hotels-#{hotel.id}-day-#{@day_index}"}
+      hotel={hotel}
+    />
+    """
+  end
+
+  attr(:trip, Trip, required: true)
+  attr(:budget, :integer, required: true)
+  attr(:destinations, :list, required: true)
+  attr(:activities, :list, required: true)
+  attr(:expenses, :list, required: true)
+  attr(:notes, :list, required: true)
+
+  def tab_activity(assigns) do
+    ~H"""
+    <div id={"activities-#{@trip.id}"}>
+      <div class="flex flex-row gap-x-4 mt-4 sm:mt-8 text-xl">
+        <.inline>
+          <.budget />
+          {Formatter.format_money(@budget, @trip.currency)}
+        </.inline>
+      </div>
+
+      <div class="flex flex-col gap-y-8 mt-8">
+        <div :for={i <- 0..(@trip.duration - 1)} class="flex flex-col gap-y-2">
+          <div class="text-xl font-semibold">
+            <.day_label day_index={i} start_date={@trip.start_date} />
+          </div>
+          <div class="flex flex-row gap-x-4">
+            <.destinations_list
+              trip={@trip}
+              destinations={Planning.destinations_for_day(i, @destinations)}
+              day_index={i}
+            />
+          </div>
+          <div class="max-w-xs">
+            <.live_component
+              module={DestinationNew}
+              id={"destination-new-#{i}"}
+              trip={@trip}
+              day_index={i}
+            />
+          </div>
+
+          <.note note={HamsterTravel.find_note_by_day(@notes, i)} day_index={i} />
+          <.expenses expenses={HamsterTravel.filter_expenses_by_day(@expenses, i)} day_index={i} />
+          <div class="flex flex-col mt-4">
+            <.activities
+              activities={HamsterTravel.filter_activities_by_day(@activities, i)}
+              day_index={i}
+            />
+          </div>
+          <hr />
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  attr(:activities, :list, required: true)
+  attr(:day_index, :integer, required: true)
+
+  def activities(%{activities: []} = assigns) do
+    ~H"""
+    <.secondary class="sm:hidden">
+      {gettext("No activities planned for this day")}
+    </.secondary>
+    """
+  end
+
+  def activities(assigns) do
+    ~H"""
+    <.live_component
+      :for={{activity, index} <- Enum.with_index(@activities)}
+      module={Activity}
+      id={"activities-#{activity.id}-day-#{@day_index}"}
+      activity={activity}
+      index={index}
+    />
+    """
+  end
+
+  attr(:expenses, :list, required: true)
+  attr(:day_index, :integer, required: true)
+
+  def expenses(assigns) do
+    ~H"""
+    <.live_component
+      :for={expense <- @expenses}
+      module={Expense}
+      id={"expenses-#{expense.id}-day-#{@day_index}"}
+      expense={expense}
+    />
+    """
+  end
+
+  attr(:note, :map, required: true)
+  attr(:day_index, :integer, required: true)
+
+  def note(%{note: nil} = assigns) do
+    ~H"""
+    """
+  end
+
+  def note(assigns) do
+    ~H"""
+    <.live_component module={Note} id={"notes-#{@note.id}-day-#{@day_index}"} note={@note} />
     """
   end
 end

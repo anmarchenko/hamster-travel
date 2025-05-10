@@ -7,6 +7,20 @@ defmodule HamsterTravelWeb.Planning.CreateTrip do
   alias HamsterTravelWeb.Planning.TripForm
 
   @impl true
+  def render(assigns) do
+    ~H"""
+    <.live_component
+      id="create-trip-form"
+      module={TripForm}
+      action={:new}
+      current_user={@current_user}
+      back_url={@back_url}
+      is_draft={@is_draft}
+    />
+    """
+  end
+
+  @impl true
   def mount(params, _session, socket) do
     is_draft = Map.get(params, "draft", false)
 

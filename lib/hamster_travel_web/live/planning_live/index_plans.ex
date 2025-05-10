@@ -9,6 +9,21 @@ defmodule HamsterTravelWeb.Planning.IndexPlans do
   alias HamsterTravel.Planning
 
   @impl true
+  def render(assigns) do
+    ~H"""
+    <.container wide>
+      <div class="mb-8">
+        <.button :if={@current_user} link_type="live_redirect" to="trips/new" color="primary">
+          <.icon name="hero-plus-solid" class="w-5 h-5 mr-2" />
+          {gettext("Create trip")}
+        </.button>
+      </div>
+      <.trips_grid trips={@streams.plans} />
+    </.container>
+    """
+  end
+
+  @impl true
   def mount(_params, _session, socket) do
     socket =
       socket
