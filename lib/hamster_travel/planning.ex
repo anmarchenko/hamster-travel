@@ -158,6 +158,7 @@ defmodule HamsterTravel.Planning do
     %Destination{trip_id: trip.id}
     |> Destination.changeset(attrs)
     |> Repo.insert()
+    |> destinations_preloading_after_create()
     |> send_pubsub_event([:destination, :created], trip.id)
   end
 
@@ -213,6 +214,14 @@ defmodule HamsterTravel.Planning do
   defp destinations_preloading(query) do
     query
     |> Repo.preload(city: Geo.city_preloading_query())
+  end
+
+  defp destinations_preloading_after_create({:error, _} = res), do: res
+
+  defp destinations_preloading_after_create({:ok, destination}) do
+    destination = Repo.preload(destination, city: Geo.city_preloading_query())
+
+    {:ok, destination}
   end
 
   defp send_pubsub_event({:ok, result} = return_tuple, event, trip_id) do
