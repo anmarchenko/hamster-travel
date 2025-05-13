@@ -61,6 +61,22 @@ defmodule HamsterTravelWeb.Planning.CityInput do
     {:noreply, socket}
   end
 
+  def process_selected_value_on_submit(params) do
+    city_input_value = Map.get(params, "city")
+
+    city_json =
+      if city_input_value != nil && city_input_value != "",
+        do: Jason.decode!(city_input_value),
+        else: %{}
+
+    city_id = Map.get(city_json, "id")
+    city = if city_id != nil, do: Geo.get_city(city_id), else: nil
+
+    params
+    |> Map.put("city_id", city_id)
+    |> Map.put("city", city)
+  end
+
   defp value_mapper(nil), do: nil
   defp value_mapper(""), do: nil
 

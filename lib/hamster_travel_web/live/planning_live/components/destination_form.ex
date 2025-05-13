@@ -5,7 +5,6 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
 
   use HamsterTravelWeb, :live_component
 
-  alias HamsterTravel.Geo
   alias HamsterTravel.Planning
 
   alias HamsterTravelWeb.Planning.CityInput
@@ -78,20 +77,7 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
 
   @impl true
   def handle_event("form_submit", %{"destination" => destination_params}, socket) do
-    city_input_value = Map.get(destination_params, "city")
-
-    city_json =
-      if city_input_value != nil && city_input_value != "",
-        do: Jason.decode!(city_input_value),
-        else: %{}
-
-    city_id = Map.get(city_json, "id")
-    city = if city_id != nil, do: Geo.get_city(city_id), else: nil
-
-    destination_params =
-      destination_params
-      |> Map.put("city_id", city_id)
-      |> Map.put("city", city)
+    destination_params = CityInput.process_selected_value_on_submit(destination_params)
 
     on_submit(socket, socket.assigns.action, destination_params)
   end
