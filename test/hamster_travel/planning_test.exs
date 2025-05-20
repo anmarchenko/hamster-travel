@@ -12,7 +12,13 @@ defmodule HamsterTravel.PlanningTest do
     user = user_fixture()
     friend = user_fixture()
     Social.add_friends(user.id, friend.id)
-    {:ok, user: Repo.preload(user, :friendships), friend: Repo.preload(friend, :friendships)}
+    geonames_fixture()
+    berlin = HamsterTravel.Geo.find_city_by_geonames_id("2950159")
+
+    {:ok,
+     user: Repo.preload(user, :friendships),
+     friend: Repo.preload(friend, :friendships),
+     city: berlin}
   end
 
   describe "trips" do
@@ -456,6 +462,136 @@ defmodule HamsterTravel.PlanningTest do
       trip = trip_fixture()
       assert {:error, %Ecto.Changeset{}} = Planning.update_trip(trip, %{name: nil})
       assert trip.name == Planning.get_trip!(trip.id).name
+    end
+
+    test "update_trip/2 adjusts destinations when trip duration is reduced", %{city: city} do
+      # Create a trip with duration 5 days
+      trip =
+        trip_fixture(%{
+          dates_unknown: true,
+          duration: 5
+        })
+
+      # Create destinations spanning different days
+      {:ok, _} =
+        Planning.create_destination(trip, %{
+          city_id: city.id,
+          start_day: 0,
+          end_day: 2
+        })
+
+      {:ok, _} =
+        Planning.create_destination(trip, %{
+          city_id: city.id,
+          start_day: 3,
+          end_day: 4
+        })
+
+      # Update trip to reduce duration to 3 days
+      assert {:ok, updated_trip} = Planning.update_trip(trip, %{duration: 3})
+
+      # Verify trip was updated
+      assert updated_trip.duration == 3
+
+      # Verify destinations were adjusted
+      [updated_dest1, updated_dest2] =
+        Planning.list_destinations(updated_trip) |> Enum.sort_by(& &1.start_day)
+
+      assert updated_dest1.start_day == 0
+      assert updated_dest1.end_day == 2
+      assert updated_dest2.start_day == 3
+      assert updated_dest2.end_day == 4
+    end
+
+    test "update_trip/2 does not adjust destinations when trip duration is increased", %{
+      city: city
+    } do
+      # Create a trip with duration 3 days
+      trip =
+        trip_fixture(%{
+          dates_unknown: true,
+          duration: 3
+        })
+
+      # Create destinations
+      {:ok, _} =
+        Planning.create_destination(trip, %{
+          city_id: city.id,
+          start_day: 0,
+          end_day: 1
+        })
+
+      {:ok, _} =
+        Planning.create_destination(trip, %{
+          city_id: city.id,
+          start_day: 2,
+          end_day: 2
+        })
+
+      # Update trip to increase duration to 5 days
+      assert {:ok, updated_trip} = Planning.update_trip(trip, %{duration: 5})
+
+      # Verify trip was updated
+      assert updated_trip.duration == 5
+
+      # Verify destinations were not adjusted
+      [updated_dest1, updated_dest2] =
+        Planning.list_destinations(updated_trip) |> Enum.sort_by(& &1.start_day)
+
+      assert updated_dest1.start_day == 0
+      assert updated_dest1.end_day == 1
+      assert updated_dest2.start_day == 2
+      assert updated_dest2.end_day == 2
+    end
+
+    test "update_trip/2 doesn't adjust destination if it falls outside the new duration", %{
+      city: city
+    } do
+      # Create a trip with duration 7 days
+      trip =
+        trip_fixture(%{
+          dates_unknown: true,
+          duration: 7
+        })
+
+      # Create destinations spanning different days
+      {:ok, _dest1} =
+        Planning.create_destination(trip, %{
+          city_id: city.id,
+          start_day: 0,
+          end_day: 2
+        })
+
+      {:ok, _dest2} =
+        Planning.create_destination(trip, %{
+          city_id: city.id,
+          start_day: 3,
+          end_day: 5
+        })
+
+      {:ok, _dest3} =
+        Planning.create_destination(trip, %{
+          city_id: city.id,
+          start_day: 6,
+          end_day: 6
+        })
+
+      # Update trip to reduce duration to 4 days
+      assert {:ok, updated_trip} = Planning.update_trip(trip, %{duration: 4})
+
+      # Verify trip was updated
+      assert updated_trip.duration == 4
+
+      # Verify destinations were adjusted
+      [updated_dest1, updated_dest2, updated_dest3] =
+        Planning.list_destinations(updated_trip) |> Enum.sort_by(& &1.start_day)
+
+      assert updated_dest1.start_day == 0
+      assert updated_dest1.end_day == 2
+      assert updated_dest2.start_day == 3
+      assert updated_dest2.end_day == 3
+      assert updated_dest3.start_day == 6
+      assert updated_dest3.end_day == 6
     end
 
     test "update_trip/2 validates that dates are required when status is finished" do

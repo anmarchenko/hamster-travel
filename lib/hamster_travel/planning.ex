@@ -127,9 +127,30 @@ defmodule HamsterTravel.Planning do
   end
 
   def update_trip(%Trip{} = trip, attrs) do
-    trip
-    |> Trip.changeset(attrs)
-    |> Repo.update()
+    Repo.transaction(fn ->
+      case Repo.update(Trip.changeset(trip, attrs)) do
+        {:ok, updated_trip} ->
+          maybe_adjust_destinations(updated_trip, trip, attrs)
+
+        {:error, changeset} ->
+          Repo.rollback(changeset)
+      end
+    end)
+  end
+
+  defp maybe_adjust_destinations(updated_trip, original_trip, attrs) do
+    if Map.has_key?(attrs, :duration) && attrs.duration != original_trip.duration do
+      adjust_destinations_for_duration(updated_trip)
+    end
+
+    updated_trip
+  end
+
+  defp adjust_destinations_for_duration(%Trip{id: trip_id, duration: new_duration}) do
+    from(d in Destination,
+      where: d.trip_id == ^trip_id and d.start_day < ^new_duration and d.end_day >= ^new_duration
+    )
+    |> Repo.update_all(set: [end_day: new_duration - 1])
   end
 
   def delete_trip(%Trip{} = trip) do
