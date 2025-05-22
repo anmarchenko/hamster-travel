@@ -8,6 +8,7 @@ import topbar from '../vendor/topbar';
 // alpinejs for interactivity and persist plugin for local storage
 import Alpine from 'alpinejs';
 import persist from '@alpinejs/persist';
+import collapse from '@alpinejs/collapse';
 
 // live_select UI component
 import live_select from 'live_select';
@@ -16,7 +17,7 @@ import live_select from 'live_select';
 import DayRangeSelect from './day_range_select';
 
 Alpine.plugin(persist);
-
+Alpine.plugin(collapse);
 window.Alpine = Alpine;
 
 Alpine.start();

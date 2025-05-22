@@ -227,6 +227,10 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
         </.inline>
       </div>
 
+      <.toggle label="Some destinations are outside of the trip duration" class="mt-4">
+        This content will be shown/hidden when clicking the trigger.
+      </.toggle>
+
       <table class="sm:mt-8 sm:table-auto sm:border-collapse sm:border sm:border-slate-500 sm:w-full">
         <thead>
           <tr class="hidden sm:table-row">
