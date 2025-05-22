@@ -111,7 +111,7 @@ defmodule HamsterTravelWeb.UserSettingsLive do
     user = socket.assigns.current_user
 
     case Accounts.apply_user_email(user, password, user_params) do
-      {:ok, applied_user} ->
+      {:ok, _applied_user} ->
         info = "A link to confirm your email change has been sent to the new address."
         {:noreply, socket |> put_flash(:info, info) |> assign(email_form_current_password: nil)}
 

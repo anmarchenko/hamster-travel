@@ -159,6 +159,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     <.tab_itinerary
       trip={@trip}
       destinations={@trip.destinations}
+      destinations_outside={destinations_outside(@trip)}
       transfers={[]}
       hotels={[]}
       budget={0}
@@ -172,6 +173,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       trip={@trip}
       budget={0}
       destinations={@trip.destinations}
+      destinations_outside={destinations_outside(@trip)}
       activities={[]}
       notes={[]}
       expenses={[]}
@@ -187,4 +189,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
        do: tab
 
   defp fetch_tab(_), do: "itinerary"
+
+  defp destinations_outside(trip) do
+    trip.destinations
+    |> Enum.filter(fn destination ->
+      destination.start_day >= trip.duration
+    end)
+  end
 end

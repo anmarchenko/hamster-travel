@@ -214,6 +214,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   attr(:trip, Trip, required: true)
   attr(:budget, :integer, required: true)
   attr(:destinations, :list, required: true)
+  attr(:destinations_outside, :list, required: true)
   attr(:transfers, :list, required: true)
   attr(:hotels, :list, required: true)
 
@@ -227,8 +228,12 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
         </.inline>
       </div>
 
-      <.toggle label="Some destinations are outside of the trip duration" class="mt-4">
-        This content will be shown/hidden when clicking the trigger.
+      <.toggle
+        :if={Enum.any?(@destinations_outside)}
+        label={gettext("Some items are scheduled outside of the trip duration")}
+        class="mt-4"
+      >
+        <.destinations_list trip={@trip} destinations={@destinations_outside} day_index={0} />
       </.toggle>
 
       <table class="sm:mt-8 sm:table-auto sm:border-collapse sm:border sm:border-slate-500 sm:w-full">
@@ -264,6 +269,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
                   id={"destination-new-#{i}"}
                   trip={@trip}
                   day_index={i}
+                  class="mt-2"
                 />
               </div>
             </td>
@@ -334,6 +340,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   attr(:trip, Trip, required: true)
   attr(:budget, :integer, required: true)
   attr(:destinations, :list, required: true)
+  attr(:destinations_outside, :list, required: true)
   attr(:activities, :list, required: true)
   attr(:expenses, :list, required: true)
   attr(:notes, :list, required: true)
@@ -348,6 +355,14 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
         </.inline>
       </div>
 
+      <.toggle
+        :if={Enum.any?(@destinations_outside)}
+        label={gettext("Some items are scheduled outside of the trip duration")}
+        class="mt-4"
+      >
+        <.destinations_list trip={@trip} destinations={@destinations_outside} day_index={0} />
+      </.toggle>
+
       <div class="flex flex-col gap-y-8 mt-8">
         <div :for={i <- 0..(@trip.duration - 1)} class="flex flex-col gap-y-2">
           <div class="text-xl font-semibold">
@@ -360,12 +375,13 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
               day_index={i}
             />
           </div>
-          <div class="max-w-xs">
+          <div class="inline-block">
             <.live_component
               module={DestinationNew}
               id={"destination-new-#{i}"}
               trip={@trip}
               day_index={i}
+              class="inline-block"
             />
           </div>
 

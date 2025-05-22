@@ -6,10 +6,11 @@ defmodule HamsterTravelWeb.Planning.DestinationNew do
   use HamsterTravelWeb, :live_component
 
   attr :day_index, :integer, required: true
+  attr :class, :string, default: nil
 
   def render(%{edit: true} = assigns) do
     ~H"""
-    <div>
+    <div class={@class}>
       <.live_component
         module={HamsterTravelWeb.Planning.DestinationForm}
         id={"destination-form-#{@id}"}
@@ -24,7 +25,7 @@ defmodule HamsterTravelWeb.Planning.DestinationNew do
 
   def render(assigns) do
     ~H"""
-    <div>
+    <div class={@class}>
       <a
         href="#"
         phx-click="edit"

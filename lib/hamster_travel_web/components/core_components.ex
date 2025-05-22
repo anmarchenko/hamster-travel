@@ -651,7 +651,7 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   def toggle(assigns) do
     ~H"""
-    <div class={@class} id={@id} x-data="{ open: false }">
+    <div class={"inline-block #{@class}"} id={@id} x-data="{ open: false }">
       <div
         @click="open = !open"
         class="flex items-center text-left text-sm font-medium cursor-pointer hover:text-zinc-900 dark:hover:text-zinc-100"
@@ -661,7 +661,12 @@ defmodule HamsterTravelWeb.CoreComponents do
           <.icon name="hero-chevron-down" class="h-5 w-5" />
         </span>
       </div>
-      <div x-data x-collapse x-show="open" class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+      <div
+        x-data
+        x-collapse
+        x-show="open"
+        class="inline-block mt-2 text-sm text-zinc-600 dark:text-zinc-400"
+      >
         {render_slot(@inner_block)}
       </div>
     </div>
