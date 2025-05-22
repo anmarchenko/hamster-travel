@@ -130,7 +130,7 @@ defmodule HamsterTravel.Planning do
     Repo.transaction(fn ->
       case Repo.update(Trip.changeset(trip, attrs)) do
         {:ok, updated_trip} ->
-          maybe_adjust_destinations(updated_trip, trip, attrs)
+          maybe_adjust_destinations(updated_trip, trip)
 
         {:error, changeset} ->
           Repo.rollback(changeset)
@@ -138,8 +138,8 @@ defmodule HamsterTravel.Planning do
     end)
   end
 
-  defp maybe_adjust_destinations(updated_trip, original_trip, attrs) do
-    if Map.has_key?(attrs, :duration) && attrs.duration != original_trip.duration do
+  defp maybe_adjust_destinations(updated_trip, original_trip) do
+    if updated_trip.duration != original_trip.duration do
       adjust_destinations_for_duration(updated_trip)
     end
 
