@@ -37,13 +37,12 @@ defmodule HamsterTravelWeb.UserSettingsLiveTest do
 
       {:ok, lv, _html} = live(conn, ~p"/users/settings")
 
-      result =
-        lv
-        |> form("#email_form", %{
-          "current_password" => password,
-          "user" => %{"email" => new_email}
-        })
-        |> render_submit()
+      lv
+      |> form("#email_form", %{
+        "current_password" => password,
+        "user" => %{"email" => new_email}
+      })
+      |> render_submit()
 
       assert Accounts.get_user_by_email(user.email)
     end
