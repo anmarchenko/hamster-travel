@@ -77,7 +77,7 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
 
   @impl true
   def handle_event("form_submit", %{"destination" => destination_params}, socket) do
-    destination_params = CityInput.process_selected_value_on_submit(destination_params)
+    destination_params = CityInput.process_selected_value_on_submit(destination_params, "city")
 
     on_submit(socket, socket.assigns.action, destination_params)
   end
