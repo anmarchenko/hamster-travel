@@ -114,7 +114,7 @@ msgstr ""
 msgid "No transfers planned for this day"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:400
+#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:409
 #, elixir-autogen, elixir-format
 msgid "No activities planned for this day"
 msgstr ""
@@ -424,17 +424,18 @@ msgstr ""
 msgid "Add destination"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/destination.ex:42
-#, elixir-autogen, elixir-format
-msgid "Are you sure you want to delete this city from your trip?"
-msgstr ""
-
-#: lib/hamster_travel_web/live/planning_live/components/destination.ex:75
+#: lib/hamster_travel_web/live/planning_live/components/destination.ex:79
 #, elixir-autogen, elixir-format
 msgid "Failed to delete destination"
 msgstr ""
 
 #: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:233
+#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:360
 #, elixir-autogen, elixir-format
 msgid "Some items are scheduled outside of the trip duration"
+msgstr ""
+
+#: lib/hamster_travel_web/live/planning_live/components/destination.ex:43
+#, elixir-autogen, elixir-format
+msgid "Are you sure you want to delete %{city_name} from your trip?"
 msgstr ""

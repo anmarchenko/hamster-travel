@@ -103,7 +103,7 @@ msgstr "На этот день не запланировано проживан�
 msgid "No transfers planned for this day"
 msgstr "На этот день не запланировано трансферов"
 
-#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:400
+#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:409
 #, elixir-autogen, elixir-format, fuzzy
 msgid "No activities planned for this day"
 msgstr "На этот день не запланировано впечатлений"
@@ -418,17 +418,18 @@ msgstr "Даты"
 msgid "Add destination"
 msgstr "Новый город"
 
-#: lib/hamster_travel_web/live/planning_live/components/destination.ex:42
-#, elixir-autogen, elixir-format, fuzzy
-msgid "Are you sure you want to delete this city from your trip?"
-msgstr "Вы уверены, что хотите удалить этот город из путешествия?"
-
-#: lib/hamster_travel_web/live/planning_live/components/destination.ex:75
+#: lib/hamster_travel_web/live/planning_live/components/destination.ex:79
 #, elixir-autogen, elixir-format
 msgid "Failed to delete destination"
 msgstr ""
 
 #: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:233
+#: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:360
 #, elixir-autogen, elixir-format
 msgid "Some items are scheduled outside of the trip duration"
 msgstr "Некоторые мероприятия запланированы за пределами путешествия"
+
+#: lib/hamster_travel_web/live/planning_live/components/destination.ex:43
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Are you sure you want to delete %{city_name} from your trip?"
+msgstr "Вы уверены, что хотите удалить %{city_name} из путешествия?"
