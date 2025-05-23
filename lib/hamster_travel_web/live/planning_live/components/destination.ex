@@ -30,7 +30,7 @@ defmodule HamsterTravelWeb.Planning.Destination do
     <div>
       <.inline class="gap-[0px]">
         <.flag size={20} country={@destination.city.country_code} class="mr-2" />
-        <span class="grow">{Geo.city_name(@destination.city)}</span>
+        <span class="sm:grow">{Geo.city_name(@destination.city)}</span>
         <.icon_button size="xs" phx-click="edit" phx-target={@myself} class="justify-self-end ml-2">
           <.icon name="hero-pencil" class="w-4 h-4" />
         </.icon_button>

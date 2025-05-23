@@ -44,7 +44,7 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
           start_date={@trip.start_date}
         />
         <div class="flex justify-between mt-2">
-          <.button color="white" type="button" phx-click="cancel" phx-target={@myself}>
+          <.button color="light" type="button" phx-click="cancel" phx-target={@myself}>
             {gettext("Cancel")}
           </.button>
           <.button color="primary" size="xs" type="submit">
