@@ -5,10 +5,15 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
 
   use HamsterTravelWeb, :live_component
 
-  alias HamsterTravel.Geo
+  alias HamsterTravel.Planning
 
   alias HamsterTravelWeb.Planning.CityInput
   alias HamsterTravelWeb.Planning.DayRangeSelect
+
+  attr :action, :atom, required: true
+  attr :trip, HamsterTravel.Planning.Trip, required: true
+  attr :day_index, :integer, required: true
+  attr :on_finish, :fun, required: true
 
   @impl true
   def render(assigns) do
@@ -23,23 +28,26 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
         class="space-y-4"
       >
         <.live_component
-          id={"destination-form-city-input-#{:rand.uniform(1000)}"}
+          id={"city-input-#{@id}"}
           module={CityInput}
           field={@form[:city]}
+          validated_field={@form[:city_id]}
           label={gettext("City")}
         />
-        <!-- take duration and start date from trip -->
         <.live_component
-          id={"destination-put-destination-id-here-#{:rand.uniform(1000)}-form-day-range-select"}
+          id={"day-range-#{@id}"}
           module={DayRangeSelect}
           start_day_field={@form[:start_day]}
           end_day_field={@form[:end_day]}
           label={gettext("Date range")}
-          duration={5}
-          start_date={Date.utc_today()}
+          duration={@trip.duration}
+          start_date={@trip.start_date}
         />
         <div class="flex justify-between mt-2">
-          <.button color="primary" size="xs">
+          <.button color="light" type="button" phx-click="cancel" phx-target={@myself}>
+            {gettext("Cancel")}
+          </.button>
+          <.button color="primary" size="xs" type="submit">
             {gettext("Save")}
           </.button>
         </div>
@@ -50,23 +58,59 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
 
   @impl true
   def update(assigns, socket) do
-    [city | _] = Geo.search_cities("lis")
-
     changeset =
-      {%{city: city, start_day: 0, end_day: 1},
-       %{city: :map, start_day: :integer, end_day: :integer}}
-      |> Ecto.Changeset.cast(%{}, [:city])
+      case assigns.action do
+        :new ->
+          Planning.new_destination(assigns.trip, assigns.day_index)
+
+        :edit ->
+          Planning.change_destination(assigns.destination)
+      end
 
     socket =
       socket
       |> assign(assigns)
-      |> assign(:form, to_form(changeset, as: :destination))
+      |> assign_form(changeset)
 
     {:ok, socket}
   end
 
   @impl true
-  def handle_event("form_submit", %{"destination" => _destination_params}, socket) do
+  def handle_event("form_submit", %{"destination" => destination_params}, socket) do
+    destination_params = CityInput.process_selected_value_on_submit(destination_params, "city")
+
+    on_submit(socket, socket.assigns.action, destination_params)
+  end
+
+  def handle_event("cancel", _, socket) do
+    socket.assigns.on_finish.()
+
     {:noreply, socket}
+  end
+
+  defp assign_form(socket, %Ecto.Changeset{} = changeset) do
+    assign(socket, :form, to_form(changeset))
+  end
+
+  defp on_submit(socket, :new, destination_params) do
+    socket.assigns.trip
+    |> Planning.create_destination(destination_params)
+    |> result(socket)
+  end
+
+  defp on_submit(socket, :edit, destination_params) do
+    socket.assigns.destination
+    |> Planning.update_destination(destination_params)
+    |> result(socket)
+  end
+
+  defp result({:ok, _destination}, socket) do
+    socket.assigns.on_finish.()
+
+    {:noreply, socket}
+  end
+
+  defp result({:error, changeset}, socket) do
+    {:noreply, assign_form(socket, changeset)}
   end
 end

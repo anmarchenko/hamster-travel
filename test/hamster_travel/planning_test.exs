@@ -1,21 +1,28 @@
 defmodule HamsterTravel.PlanningTest do
-  use HamsterTravel.DataCase, async: true
+  use HamsterTravel.DataCase
 
   alias HamsterTravel.Planning
   alias HamsterTravel.Social
 
+  import HamsterTravel.AccountsFixtures
+  import HamsterTravel.PlanningFixtures
+  import HamsterTravel.GeoFixtures
+
+  setup do
+    user = user_fixture()
+    friend = user_fixture()
+    Social.add_friends(user.id, friend.id)
+    geonames_fixture()
+    berlin = HamsterTravel.Geo.find_city_by_geonames_id("2950159")
+
+    {:ok,
+     user: Repo.preload(user, :friendships),
+     friend: Repo.preload(friend, :friendships),
+     city: berlin}
+  end
+
   describe "trips" do
     alias HamsterTravel.Planning.Trip
-
-    import HamsterTravel.AccountsFixtures
-    import HamsterTravel.PlanningFixtures
-
-    setup do
-      user = user_fixture()
-      friend = user_fixture()
-      Social.add_friends(user.id, friend.id)
-      {:ok, user: Repo.preload(user, :friendships), friend: Repo.preload(friend, :friendships)}
-    end
 
     test "list_plans/1 returns all planned and finished trips including ones from friends", %{
       user: user,
@@ -457,6 +464,136 @@ defmodule HamsterTravel.PlanningTest do
       assert trip.name == Planning.get_trip!(trip.id).name
     end
 
+    test "update_trip/2 adjusts destinations when trip duration is reduced", %{city: city} do
+      # Create a trip with duration 5 days
+      trip =
+        trip_fixture(%{
+          dates_unknown: true,
+          duration: 5
+        })
+
+      # Create destinations spanning different days
+      {:ok, _} =
+        Planning.create_destination(trip, %{
+          city_id: city.id,
+          start_day: 0,
+          end_day: 2
+        })
+
+      {:ok, _} =
+        Planning.create_destination(trip, %{
+          city_id: city.id,
+          start_day: 3,
+          end_day: 4
+        })
+
+      # Update trip to reduce duration to 3 days
+      assert {:ok, updated_trip} = Planning.update_trip(trip, %{duration: 3})
+
+      # Verify trip was updated
+      assert updated_trip.duration == 3
+
+      # Verify destinations were adjusted
+      [updated_dest1, updated_dest2] =
+        Planning.list_destinations(updated_trip) |> Enum.sort_by(& &1.start_day)
+
+      assert updated_dest1.start_day == 0
+      assert updated_dest1.end_day == 2
+      assert updated_dest2.start_day == 3
+      assert updated_dest2.end_day == 4
+    end
+
+    test "update_trip/2 does not adjust destinations when trip duration is increased", %{
+      city: city
+    } do
+      # Create a trip with duration 3 days
+      trip =
+        trip_fixture(%{
+          dates_unknown: true,
+          duration: 3
+        })
+
+      # Create destinations
+      {:ok, _} =
+        Planning.create_destination(trip, %{
+          city_id: city.id,
+          start_day: 0,
+          end_day: 1
+        })
+
+      {:ok, _} =
+        Planning.create_destination(trip, %{
+          city_id: city.id,
+          start_day: 2,
+          end_day: 2
+        })
+
+      # Update trip to increase duration to 5 days
+      assert {:ok, updated_trip} = Planning.update_trip(trip, %{duration: 5})
+
+      # Verify trip was updated
+      assert updated_trip.duration == 5
+
+      # Verify destinations were not adjusted
+      [updated_dest1, updated_dest2] =
+        Planning.list_destinations(updated_trip) |> Enum.sort_by(& &1.start_day)
+
+      assert updated_dest1.start_day == 0
+      assert updated_dest1.end_day == 1
+      assert updated_dest2.start_day == 2
+      assert updated_dest2.end_day == 2
+    end
+
+    test "update_trip/2 doesn't adjust destination if it falls outside the new duration", %{
+      city: city
+    } do
+      # Create a trip with duration 7 days
+      trip =
+        trip_fixture(%{
+          dates_unknown: true,
+          duration: 7
+        })
+
+      # Create destinations spanning different days
+      {:ok, _dest1} =
+        Planning.create_destination(trip, %{
+          city_id: city.id,
+          start_day: 0,
+          end_day: 2
+        })
+
+      {:ok, _dest2} =
+        Planning.create_destination(trip, %{
+          city_id: city.id,
+          start_day: 3,
+          end_day: 5
+        })
+
+      {:ok, _dest3} =
+        Planning.create_destination(trip, %{
+          city_id: city.id,
+          start_day: 6,
+          end_day: 6
+        })
+
+      # Update trip to reduce duration to 4 days
+      assert {:ok, updated_trip} = Planning.update_trip(trip, %{duration: 4})
+
+      # Verify trip was updated
+      assert updated_trip.duration == 4
+
+      # Verify destinations were adjusted
+      [updated_dest1, updated_dest2, updated_dest3] =
+        Planning.list_destinations(updated_trip) |> Enum.sort_by(& &1.start_day)
+
+      assert updated_dest1.start_day == 0
+      assert updated_dest1.end_day == 2
+      assert updated_dest2.start_day == 3
+      assert updated_dest2.end_day == 3
+      assert updated_dest3.start_day == 6
+      assert updated_dest3.end_day == 6
+    end
+
     test "update_trip/2 validates that dates are required when status is finished" do
       trip = trip_fixture(%{status: Trip.finished()})
 
@@ -479,16 +616,15 @@ defmodule HamsterTravel.PlanningTest do
   describe "destinations" do
     alias HamsterTravel.Planning.Destination
 
-    import HamsterTravel.PlanningFixtures
-    import HamsterTravel.GeoFixtures
-
     @invalid_attrs %{start_day: nil, end_day: nil}
+    @update_attrs %{start_day: 43, end_day: 43}
 
     setup do
       geonames_fixture()
       berlin = HamsterTravel.Geo.find_city_by_geonames_id("2950159")
+      trip = trip_fixture()
 
-      {:ok, city: berlin}
+      {:ok, city: berlin, trip: trip}
     end
 
     test "list_destinations/1 returns all destinations for a trip" do
@@ -511,20 +647,35 @@ defmodule HamsterTravel.PlanningTest do
       assert result.end_day == destination.end_day
     end
 
-    test "create_destination/1 with valid data creates a destination", %{city: city} do
-      trip = trip_fixture()
-
+    test "create_destination/1 with valid data creates a destination", %{city: city, trip: trip} do
       valid_attrs = %{
-        start_day: 42,
-        end_day: 42,
-        city_id: city.id
+        city_id: city.id,
+        start_day: 0,
+        end_day: 1
       }
 
-      assert {:ok, %Destination{} = destination} =
-               Planning.create_destination(trip, valid_attrs)
+      assert {:ok, %Destination{} = destination} = Planning.create_destination(trip, valid_attrs)
+      assert destination.city_id == city.id
+      assert destination.start_day == 0
+      assert destination.end_day == 1
+      assert destination.trip_id == trip.id
+    end
 
-      assert destination.start_day == 42
-      assert destination.end_day == 42
+    test "create_destination/1 broadcasts destination creation", %{city: city, trip: trip} do
+      # Subscribe to the topic
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "trip_destinations:#{trip.id}")
+
+      valid_attrs = %{
+        city_id: city.id,
+        start_day: 0,
+        end_day: 1
+      }
+
+      # Act
+      {:ok, destination} = Planning.create_destination(trip, valid_attrs)
+
+      # Assert
+      assert_receive {[:destination, :created], %{value: ^destination}}
     end
 
     test "create_destination/1 with invalid data returns error changeset" do
@@ -546,13 +697,22 @@ defmodule HamsterTravel.PlanningTest do
 
     test "update_destination/2 with valid data updates the destination" do
       destination = destination_fixture()
-      update_attrs = %{start_day: 43, end_day: 43}
 
-      assert {:ok, %Destination{} = destination} =
-               Planning.update_destination(destination, update_attrs)
+      assert {:ok, %Destination{} = updated_destination} =
+               Planning.update_destination(destination, @update_attrs)
 
-      assert destination.start_day == 43
-      assert destination.end_day == 43
+      assert updated_destination.start_day == 43
+      assert updated_destination.end_day == 43
+    end
+
+    test "update_destination/2 sends pubsub event", %{trip: trip} do
+      destination = destination_fixture(%{trip_id: trip.id})
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "trip_destinations:#{trip.id}")
+
+      assert {:ok, %Destination{} = updated_destination} =
+               Planning.update_destination(destination, @update_attrs)
+
+      assert_receive {[:destination, :updated], %{value: ^updated_destination}}
     end
 
     test "update_destination/2 with invalid data returns error changeset" do
@@ -575,9 +735,206 @@ defmodule HamsterTravel.PlanningTest do
       assert_raise Ecto.NoResultsError, fn -> Planning.get_destination!(destination.id) end
     end
 
+    test "delete_destination/1 sends pubsub event", %{trip: trip} do
+      destination = destination_fixture(%{trip_id: trip.id})
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "trip_destinations:#{trip.id}")
+
+      assert {:ok, %Destination{} = deleted_destination} =
+               Planning.delete_destination(destination)
+
+      assert_receive {[:destination, :deleted], %{value: ^deleted_destination}}
+    end
+
     test "change_destination/1 returns a destination changeset" do
       destination = destination_fixture()
       assert %Ecto.Changeset{} = Planning.change_destination(destination)
+    end
+
+    test "new_destination/2 returns a new destination changeset with trip_id, nil city, start_day and end_day are for the whole trip" do
+      trip = trip_fixture() |> Repo.preload(:destinations)
+      changeset = Planning.new_destination(trip, 0)
+
+      assert %Ecto.Changeset{
+               data: %{
+                 trip_id: trip_id,
+                 city: nil,
+                 start_day: 0,
+                 end_day: 2
+               }
+             } = changeset
+
+      assert trip_id == trip.id
+    end
+
+    test "new_destination/2 when trip already has some destinations returns a new destination changeset start_day and end_day for the current day index" do
+      trip = trip_fixture()
+      destination_fixture(%{trip_id: trip.id, start_day: 0, end_day: 1})
+      trip = trip |> Repo.preload(:destinations)
+      changeset = Planning.new_destination(trip, 1)
+
+      assert %Ecto.Changeset{
+               data: %{
+                 trip_id: trip_id,
+                 city: nil,
+                 start_day: 1,
+                 end_day: 1
+               }
+             } = changeset
+
+      assert trip_id == trip.id
+    end
+
+    test "new_destination/2 with attributes overrides default values" do
+      trip = trip_fixture()
+      attrs = %{start_day: 1, end_day: 2}
+      changeset = Planning.new_destination(trip, 0, attrs)
+
+      assert %Ecto.Changeset{
+               data: %{
+                 trip_id: trip_id,
+                 city: nil
+               },
+               changes: %{
+                 start_day: 1,
+                 end_day: 2
+               }
+             } = changeset
+
+      assert trip_id == trip.id
+    end
+
+    test "destinations_for_day/2 returns destinations active on the given day" do
+      # Create destinations with different day ranges
+      destination1 = destination_fixture(%{start_day: 1, end_day: 3})
+      destination2 = destination_fixture(%{start_day: 2, end_day: 4})
+      destination3 = destination_fixture(%{start_day: 4, end_day: 6})
+
+      destinations = [destination1, destination2, destination3]
+
+      # Test day 2 (should include destination1 and destination2)
+      assert [^destination1, ^destination2] = Planning.destinations_for_day(2, destinations)
+
+      # Test day 4 (should include destination2 and destination3)
+      assert [^destination2, ^destination3] = Planning.destinations_for_day(4, destinations)
+
+      # Test day 5 (should only include destination3)
+      assert [^destination3] = Planning.destinations_for_day(5, destinations)
+
+      # Test day 0 (should return empty list as no destinations start on day 0)
+      assert [] = Planning.destinations_for_day(0, destinations)
+    end
+
+    test "destinations_for_day/2 handles single-day destinations" do
+      destination = destination_fixture(%{start_day: 2, end_day: 2})
+
+      assert [^destination] = Planning.destinations_for_day(2, [destination])
+      assert [] = Planning.destinations_for_day(1, [destination])
+      assert [] = Planning.destinations_for_day(3, [destination])
+    end
+
+    test "destinations_for_day/2 handles empty list of destinations" do
+      assert [] = Planning.destinations_for_day(1, [])
+    end
+  end
+
+  describe "trip associations" do
+    alias HamsterTravel.Planning.Trip
+
+    test "preloads countries through destinations and cities", %{user: user} do
+      # Setup test data
+      geonames_fixture()
+      berlin = HamsterTravel.Geo.find_city_by_geonames_id("2950159")
+      hamburg = HamsterTravel.Geo.find_city_by_geonames_id("2911298")
+
+      # Create a trip with multiple destinations
+      {:ok, trip} =
+        Planning.create_trip(
+          %{
+            name: "German Tour",
+            dates_unknown: false,
+            start_date: ~D[2023-06-12],
+            end_date: ~D[2023-06-14],
+            currency: "EUR",
+            status: Trip.planned(),
+            private: false,
+            people_count: 2
+          },
+          user
+        )
+
+      # Add destinations
+      {:ok, _} =
+        Planning.create_destination(trip, %{
+          city_id: berlin.id,
+          start_day: 0,
+          end_day: 1
+        })
+
+      {:ok, _} =
+        Planning.create_destination(trip, %{
+          city_id: hamburg.id,
+          start_day: 2,
+          end_day: 2
+        })
+
+      # Fetch trip with preloaded associations
+      trip =
+        Planning.get_trip!(trip.id)
+        |> Repo.preload([:cities])
+
+      # Verify the associations
+      assert length(trip.destinations) == 2
+      assert length(trip.cities) == 2
+      # Both cities are in Germany
+      assert length(trip.countries) == 1
+
+      # Verify we can access country data
+      [country] = trip.countries
+      assert country.iso == "DE"
+    end
+
+    test "preloads countries in list_plans", %{user: user} do
+      # Setup test data
+      geonames_fixture()
+      berlin = HamsterTravel.Geo.find_city_by_geonames_id("2950159")
+
+      # Create a trip
+      {:ok, trip} =
+        Planning.create_trip(
+          %{
+            name: "Berlin Trip",
+            dates_unknown: false,
+            start_date: ~D[2023-06-12],
+            end_date: ~D[2023-06-13],
+            currency: "EUR",
+            status: Trip.planned(),
+            private: false,
+            people_count: 2
+          },
+          user
+        )
+
+      # Add destination
+      {:ok, _} =
+        Planning.create_destination(trip, %{
+          city_id: berlin.id,
+          start_day: 0,
+          end_day: 1
+        })
+
+      # Fetch trips with preloaded associations
+      [loaded_trip] =
+        Planning.list_plans(user)
+        |> Repo.preload([:cities])
+
+      # Verify the associations
+      assert length(loaded_trip.destinations) == 1
+      assert length(loaded_trip.cities) == 1
+      assert length(loaded_trip.countries) == 1
+
+      # Verify country data
+      [country] = loaded_trip.countries
+      assert country.iso == "DE"
     end
   end
 end

@@ -47,7 +47,7 @@ if config_env() == :prod do
 
   config :hamster_travel, HamsterTravelWeb.Telemetry,
     report_metrics: true,
-    periodic_measurements_enabled: true
+    periodic_measurements_enabled: false
 
   # ## Configuring the mailer
   #

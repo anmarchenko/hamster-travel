@@ -4,9 +4,9 @@ defmodule HamsterTravel.Geo do
   """
 
   import Ecto.Query, warn: false
-  alias HamsterTravel.Repo
 
   alias HamsterTravel.Geo.{City, Country, Region}
+  alias HamsterTravel.Repo
 
   @doc """
   Returns the list of countries.
@@ -92,8 +92,28 @@ defmodule HamsterTravel.Geo do
   """
   def get_city!(id), do: Repo.get!(City, id)
 
+  def get_city(id) do
+    query =
+      from(
+        c in City,
+        where: c.id == ^id,
+        preload: [:country],
+        join: r in Region,
+        on: c.region_code == r.region_code and c.country_code == r.country_code,
+        select: %{c | region_name: r.name, region_name_ru: r.name_ru}
+      )
+
+    Repo.one(query)
+  end
+
   def find_city_by_geonames_id(geonames_id) do
-    Repo.get_by(City, geonames_id: geonames_id)
+    query =
+      from(
+        c in city_preloading_query(),
+        where: c.geonames_id == ^geonames_id
+      )
+
+    Repo.one(query)
   end
 
   def search_cities(search_term) do
@@ -107,14 +127,10 @@ defmodule HamsterTravel.Geo do
 
     query =
       from(
-        c in City,
+        c in city_preloading_query(),
         where: ilike(field(c, ^column), ^search_term),
         order_by: [desc: fragment("? % ?", ^search_term, field(c, ^column)), desc: c.population],
-        limit: 10,
-        preload: [:country],
-        join: r in Region,
-        on: c.region_code == r.region_code and c.country_code == r.country_code,
-        select: %{c | region_name: r.name, region_name_ru: r.name_ru}
+        limit: 10
       )
 
     Repo.all(query)
@@ -128,5 +144,23 @@ defmodule HamsterTravel.Geo do
       _ ->
         "#{city.name}, #{city.region_name}, #{city.country.name}"
     end
+  end
+
+  def city_name(city) do
+    case Gettext.get_locale(HamsterTravelWeb.Gettext) do
+      "ru" ->
+        city.name_ru || city.name
+
+      _ ->
+        city.name
+    end
+  end
+
+  def city_preloading_query do
+    from c in City,
+      preload: [:country],
+      join: r in Region,
+      on: c.region_code == r.region_code and c.country_code == r.country_code,
+      select: %{c | region_name: r.name, region_name_ru: r.name_ru}
   end
 end

@@ -10,6 +10,20 @@ defmodule HamsterTravelWeb.Packing.CreateBackpack do
   alias HamsterTravelWeb.Packing.BackpackForm
 
   @impl true
+  def render(assigns) do
+    ~H"""
+    <.live_component
+      module={BackpackForm}
+      id="create-backpack-form"
+      action={:new}
+      current_user={@current_user}
+      copy_from={@copy_from}
+      back_url={@back_url}
+    />
+    """
+  end
+
+  @impl true
   def mount(params, _session, socket) do
     socket =
       with %{"copy" => backpack_id} <- params,

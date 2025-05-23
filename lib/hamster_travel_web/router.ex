@@ -18,14 +18,19 @@ defmodule HamsterTravelWeb.Router do
   end
 
   scope "/", HamsterTravelWeb do
-    pipe_through :browser
+    pipe_through [:browser, :require_authenticated_user]
+
+    delete "/users/log_out", UserSessionController, :delete
 
     live_session :authenticated,
       on_mount: [
         {HamsterTravelWeb.UserAuth, :ensure_authenticated}
       ] do
+      live "/", Planning.IndexPlans
+      live "/plans", Planning.IndexPlans
       live "/drafts", Planning.IndexDrafts
       live "/trips/new", Planning.CreateTrip
+      live "/trips/:trip_slug", Planning.ShowTrip
       live "/trips/:trip_slug/edit", Planning.EditTrip
 
       live "/backpacks", Packing.IndexBackpacks
@@ -34,23 +39,30 @@ defmodule HamsterTravelWeb.Router do
       live "/backpacks/:backpack_slug/edit", Packing.EditBackpack
 
       live "/profile", Accounts.Profile
+      live "/users/settings", UserSettingsLive, :edit
+    end
+  end
+
+  ## Authentication routes
+  scope "/", HamsterTravelWeb do
+    pipe_through [:browser, :redirect_if_user_is_authenticated]
+
+    live_session :redirect_if_user_is_authenticated,
+      on_mount: [{HamsterTravelWeb.UserAuth, :redirect_if_user_is_authenticated}] do
+      live "/users/log_in", UserLoginLive, :new
+      live "/users/reset_password", UserForgotPasswordLive, :new
+      live "/users/reset_password/:token", UserResetPasswordLive, :edit
     end
 
-    live_session :default,
-      on_mount: [
-        {HamsterTravelWeb.UserAuth, :mount_current_user}
-      ] do
-      live "/", Home
-
-      live "/plans", Planning.IndexPlans
-      live "/trips/:trip_slug", Planning.ShowTrip
-    end
+    post "/users/log_in", UserSessionController, :create
   end
 
   # Other scopes may use custom stacks.
   # scope "/api", HamsterTravelWeb do
   #   pipe_through :api
   # end
+
+  # Dev tools
 
   # Enables LiveDashboard only for development
   #
@@ -77,44 +89,6 @@ defmodule HamsterTravelWeb.Router do
       pipe_through :browser
 
       forward "/mailbox", Plug.Swoosh.MailboxPreview
-    end
-  end
-
-  ## Authentication routes
-
-  scope "/", HamsterTravelWeb do
-    pipe_through [:browser, :redirect_if_user_is_authenticated]
-
-    live_session :redirect_if_user_is_authenticated,
-      on_mount: [{HamsterTravelWeb.UserAuth, :redirect_if_user_is_authenticated}] do
-      live "/users/register", UserRegistrationLive, :new
-      live "/users/log_in", UserLoginLive, :new
-      live "/users/reset_password", UserForgotPasswordLive, :new
-      live "/users/reset_password/:token", UserResetPasswordLive, :edit
-    end
-
-    post "/users/log_in", UserSessionController, :create
-  end
-
-  scope "/", HamsterTravelWeb do
-    pipe_through [:browser, :require_authenticated_user]
-
-    live_session :require_authenticated_user,
-      on_mount: [{HamsterTravelWeb.UserAuth, :ensure_authenticated}] do
-      live "/users/settings", UserSettingsLive, :edit
-      live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
-    end
-  end
-
-  scope "/", HamsterTravelWeb do
-    pipe_through [:browser]
-
-    delete "/users/log_out", UserSessionController, :delete
-
-    live_session :current_user,
-      on_mount: [{HamsterTravelWeb.UserAuth, :mount_current_user}] do
-      live "/users/confirm/:token", UserConfirmationLive, :edit
-      live "/users/confirm", UserConfirmationInstructionsLive, :new
     end
   end
 end

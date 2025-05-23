@@ -1,52 +1,34 @@
 ---
-description: Rules about writing elixir code and using Phoenix framework
-globs: 
+description:
+globs: *.ex,*.exs
 alwaysApply: false
 ---
-# Elixir/Phoenix rules
-
-Follow the official Phoenix guides for best practices in routing, controllers, contexts, views, and other Phoenix components.
-
-## Phoenix Best Practices
+# Phoenix Best Practices
 - **LiveView-First**: Use LiveView as the primary UI technology
 - **Function Components**: Use function components for reusable UI elements
-- **PubSub for Real-time**: Use Phoenix PubSub for real-time features
 - **Context Boundaries**: Respect context boundaries in controllers and LiveViews
 - **Thin Controllers**: Keep controllers thin, delegating business logic to contexts
-- **Security First**: Always consider security implications (CSRF, XSS, etc.)
-
-## Project Structure
 - **Context-Based Organization**: Use Phoenix contexts to define domain boundaries
   lib/my_app/
     accounts/     # User management domain
     planning/     # Travel planning domain
     packing/      # Product catalog domain
 
-## Syntax and Formatting
-- Follow the Elixir Style Guide (https://github.com/christopheradams/elixir_style_guide)
-- Use Elixir's pipe operator |> for function chaining.
-- Always group together import, alias, using statements
-- Always sort import/alias/using statements alphabetically
-
-## Error Handling and Validation
-- Implement proper error logging and user-friendly messages.
-- Use Ecto changesets for data validation.
-- Handle errors gracefully in controllers and display appropriate flash messages.
-
-## UI and Styling
+# UI and Styling
 - Use Phoenix LiveView for dynamic, real-time interactions.
 - Implement responsive design with Tailwind CSS.
 
-## Testing
+# Testing
 - Write comprehensive tests using ExUnit.
 - **Test Public APIs**: Focus on testing public context APIs
 - **Mox for Dependencies**: Use Mox for mocking external dependencies
 - **Arrange-Act-Assert**: Structure tests with clear setup, action, and verification phases
-- Use fixtures for test data
+- Use fixtures for test data, look into `test/support/fixtures` folder for existing fixtures. Create new fixtures if necessary.
+- After any change to a test file run it with `mix test <file_path>`
+- After several changes run all tests with `mix test`
 
 ## HTTP and API Integration
 - **Req for HTTP Clients**: Use Req instead of HTTPoison or Tesla
 - **Behaviours for API Clients**: Define behaviours for API clients to allow easy mocking
 - **Error Handling**: Handle network failures and unexpected responses gracefully
 - **Timeouts**: Always set appropriate timeouts for external calls
-        

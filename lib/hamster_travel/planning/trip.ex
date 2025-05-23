@@ -39,6 +39,8 @@ defmodule HamsterTravel.Planning.Trip do
 
     belongs_to(:author, User)
     has_many(:destinations, Destination)
+    has_many(:cities, through: [:destinations, :city])
+    has_many(:countries, through: [:cities, :country])
     timestamps()
   end
 

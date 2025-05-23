@@ -10,6 +10,20 @@ defmodule HamsterTravelWeb.Planning.EditTrip do
   alias HamsterTravelWeb.Planning.TripForm
 
   @impl true
+  def render(assigns) do
+    ~H"""
+    <.live_component
+      id="edit-trip-form"
+      module={TripForm}
+      action={:edit}
+      current_user={@current_user}
+      back_url={@back_url}
+      trip={@trip}
+    />
+    """
+  end
+
+  @impl true
   def mount(%{"trip_slug" => slug}, _session, socket) do
     user = socket.assigns.current_user
     trip = Planning.fetch_trip!(slug, user)

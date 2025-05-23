@@ -16,10 +16,10 @@ defmodule HamsterTravelWeb.Layouts do
       <nav class="space-x-6 flex items-center">
         <div class="hidden sm:block">
           <div class="space-x-6 flex items-center">
-            <.nav_link to={plans_url()} active={@active_nav == plans_nav_item()}>
-              {gettext("Plans")}
-            </.nav_link>
             <%= if @current_user do %>
+              <.nav_link to={plans_url()} active={@active_nav == plans_nav_item()}>
+                {gettext("Plans")}
+              </.nav_link>
               <.nav_link to={~p"/drafts"} active={@active_nav == drafts_nav_item()}>
                 {gettext("Drafts")}
               </.nav_link>
@@ -93,9 +93,6 @@ defmodule HamsterTravelWeb.Layouts do
 
   def mobile_nav_global(assigns) do
     ~H"""
-    <.mobile_nav_link label={gettext("Homepage")} to={~p"/"} active={@active_nav == home_nav_item()}>
-      <.icon name="hero-home" class="w-6 h-6" />
-    </.mobile_nav_link>
     <.mobile_nav_link
       label={gettext("Plans")}
       to={plans_url()}

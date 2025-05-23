@@ -68,16 +68,16 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   ## Examples
 
-      <.modal id="confirm-modal">
-       This is a modal.
-     </.modal>
+    <.modal id="confirm-modal">
+      This is a modal.
+    </.modal>
 
   JS commands may be passed to the `:on_cancel` to configure
   the closing/cancel event, for example:
 
-      <.modal id="confirm" on_cancel={JS.navigate(~p"/posts")}>
-       This is another modal.
-     </.modal>
+    <.modal id="confirm" on_cancel={JS.navigate(~p"/posts")}>
+      This is another modal.
+    </.modal>
 
   """
   attr(:id, :string, required: true)
@@ -633,5 +633,43 @@ defmodule HamsterTravelWeb.CoreComponents do
     image_name = "placeholder-#{number}.jpg"
 
     ~p"/images/#{image_name}"
+  end
+
+  @doc """
+  Renders a collapsible toggle section with a clickable trigger.
+
+  ## Examples
+
+      <.toggle label="Click to expand">
+        This content will be shown/hidden when clicking the trigger.
+      </.toggle>
+  """
+  attr(:label, :string, required: true)
+  attr(:id, :string, default: nil)
+  attr(:class, :string, default: nil)
+  slot(:inner_block, required: true)
+
+  def toggle(assigns) do
+    ~H"""
+    <div class={"inline-block #{@class}"} id={@id} x-data="{ open: false }">
+      <div
+        @click="open = !open"
+        class="flex items-center text-left text-sm font-medium cursor-pointer hover:text-zinc-900 dark:hover:text-zinc-100"
+      >
+        <span>{@label}</span>
+        <span class="ml-1 p-1 h-7 items-center" x-bind:class="{ 'rotate-180': open }">
+          <.icon name="hero-chevron-down" class="h-5 w-5" />
+        </span>
+      </div>
+      <div
+        x-data
+        x-collapse
+        x-show="open"
+        class="inline-block mt-2 text-sm text-zinc-600 dark:text-zinc-400"
+      >
+        {render_slot(@inner_block)}
+      </div>
+    </div>
+    """
   end
 end
