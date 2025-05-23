@@ -71,13 +71,13 @@ defmodule HamsterTravel.Planning do
   def get_trip(id) do
     Trip
     |> Repo.get(id)
-    |> trip_preloading()
+    |> single_trip_preloading()
   end
 
   def get_trip!(id) do
     Trip
     |> Repo.get!(id)
-    |> trip_preloading()
+    |> single_trip_preloading()
   end
 
   # when there is no current user then we show only public trips
@@ -88,7 +88,7 @@ defmodule HamsterTravel.Planning do
 
     query
     |> Repo.one!()
-    |> trip_preloading()
+    |> single_trip_preloading()
   end
 
   # when current user is present then we show public trips and user's private trips
@@ -100,7 +100,7 @@ defmodule HamsterTravel.Planning do
     query
     |> Policy.user_trip_visibility_scope(user)
     |> Repo.one!()
-    |> trip_preloading()
+    |> single_trip_preloading()
   end
 
   def trip_changeset(params) do
@@ -228,6 +228,11 @@ defmodule HamsterTravel.Planning do
   end
 
   defp trip_preloading(query) do
+    query
+    |> Repo.preload([:author, :countries])
+  end
+
+  defp single_trip_preloading(query) do
     query
     |> Repo.preload([:author, :countries, destinations: [city: Geo.city_preloading_query()]])
   end
