@@ -695,6 +695,36 @@ defmodule HamsterTravel.PlanningTest do
       assert {:error, %Ecto.Changeset{}} = Planning.create_destination(trip, invalid_attrs)
     end
 
+    test "no negative start_day", %{city: city} do
+      trip = trip_fixture()
+
+      # Try to insert destination with negative start_day using Planning context
+      attrs = %{start_day: -1, end_day: 0, city_id: city.id}
+
+      assert {:error, %Ecto.Changeset{} = changeset} = Planning.create_destination(trip, attrs)
+      assert %{start_day: ["must be greater than or equal to 0"]} = errors_on(changeset)
+    end
+
+    test "no negative end_day", %{city: city} do
+      trip = trip_fixture()
+
+      # Try to insert destination with negative end_day using Planning context
+      attrs = %{start_day: 0, end_day: -1, city_id: city.id}
+
+      assert {:error, %Ecto.Changeset{} = changeset} = Planning.create_destination(trip, attrs)
+      assert errors_on(changeset).end_day |> Enum.member?("must be greater than or equal to 0")
+    end
+
+    test "start_day must be less than end_day", %{city: city} do
+      trip = trip_fixture()
+
+      # Try to insert destination with start_day > end_day using Planning context
+      attrs = %{start_day: 5, end_day: 3, city_id: city.id}
+
+      assert {:error, %Ecto.Changeset{} = changeset} = Planning.create_destination(trip, attrs)
+      assert %{end_day: ["must be greater than or equal to start_day"]} = errors_on(changeset)
+    end
+
     test "update_destination/2 with valid data updates the destination" do
       destination = destination_fixture()
 
