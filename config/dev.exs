@@ -62,3 +62,9 @@ config :phoenix_live_view,
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
+
+config :ex_money,
+  auto_start_exchange_rate_service: true,
+  # 10 hours
+  exchange_rates_retrieve_every: 36_000_000,
+  open_exchange_rates_app_id: {:system, "OPEN_EXCHANGE_RATES_APP_ID"}

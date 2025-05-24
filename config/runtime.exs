@@ -49,6 +49,12 @@ if config_env() == :prod do
     report_metrics: true,
     periodic_measurements_enabled: false
 
+  config :ex_money,
+    auto_start_exchange_rate_service: true,
+    # 2 hours
+    exchange_rates_retrieve_every: 7_200_000,
+    open_exchange_rates_app_id: System.fetch_env!("OPEN_EXCHANGE_RATES_APP_ID")
+
   # ## Configuring the mailer
   #
   # In production you need to configure the mailer to use a different adapter.
