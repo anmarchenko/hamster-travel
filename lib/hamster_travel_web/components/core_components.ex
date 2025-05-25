@@ -18,6 +18,8 @@ defmodule HamsterTravelWeb.CoreComponents do
   use HamsterTravelWeb, :verified_routes
 
   import PetalComponents.Icon
+  import PetalComponents.Field
+
   use Gettext, backend: HamsterTravelWeb.Gettext
 
   alias Phoenix.LiveView.JS
@@ -670,6 +672,23 @@ defmodule HamsterTravelWeb.CoreComponents do
         {render_slot(@inner_block)}
       </div>
     </div>
+    """
+  end
+
+  @doc """
+  Renders a money input with a dropdown of currencies.
+  """
+  attr(:field, Phoenix.HTML.FormField, required: true)
+
+  def money_input(assigns) do
+    errors = if used_input?(assigns.field), do: assigns.field.errors, else: []
+
+    assigns =
+      assigns
+      |> assign(:errors, Enum.map(errors, &translate_error(&1)))
+
+    ~H"""
+    <.field type="text" field={@field} />
     """
   end
 end
