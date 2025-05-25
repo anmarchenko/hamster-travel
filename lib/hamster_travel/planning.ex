@@ -6,10 +6,25 @@ defmodule HamsterTravel.Planning do
   import Ecto.Query, warn: false
 
   alias HamsterTravel.Geo
-  alias HamsterTravel.Planning.{Destination, Policy, Trip}
+  alias HamsterTravel.Planning.{Destination, Expense, Policy, Trip}
   alias HamsterTravel.Repo
 
+  # PubSub functions
   @topic "trip_destinations"
+
+  defp send_pubsub_event({:ok, result} = return_tuple, event, trip_id) do
+    Phoenix.PubSub.broadcast(
+      HamsterTravel.PubSub,
+      @topic <> ":#{trip_id}",
+      {event, %{value: result}}
+    )
+
+    return_tuple
+  end
+
+  defp send_pubsub_event({:error, _reason} = result, _, _), do: result
+
+  # Trip functions
 
   def list_plans(user \\ nil) do
     query =
@@ -161,6 +176,18 @@ defmodule HamsterTravel.Planning do
     Trip.changeset(trip, attrs)
   end
 
+  defp trip_preloading(query) do
+    query
+    |> Repo.preload([:author, :countries])
+  end
+
+  defp single_trip_preloading(query) do
+    query
+    |> Repo.preload([:author, :countries, destinations: [city: Geo.city_preloading_query()]])
+  end
+
+  # Destinations functions
+
   def get_destination!(id) do
     Repo.get!(Destination, id)
     |> destinations_preloading()
@@ -227,16 +254,6 @@ defmodule HamsterTravel.Planning do
     end)
   end
 
-  defp trip_preloading(query) do
-    query
-    |> Repo.preload([:author, :countries])
-  end
-
-  defp single_trip_preloading(query) do
-    query
-    |> Repo.preload([:author, :countries, destinations: [city: Geo.city_preloading_query()]])
-  end
-
   defp destinations_preloading(query) do
     query
     |> Repo.preload(city: Geo.city_preloading_query())
@@ -250,15 +267,47 @@ defmodule HamsterTravel.Planning do
     {:ok, destination}
   end
 
-  defp send_pubsub_event({:ok, result} = return_tuple, event, trip_id) do
-    Phoenix.PubSub.broadcast(
-      HamsterTravel.PubSub,
-      @topic <> ":#{trip_id}",
-      {event, %{value: result}}
-    )
+  # Expense functions
 
-    return_tuple
+  def get_expense!(id) do
+    Repo.get!(Expense, id)
   end
 
-  defp send_pubsub_event({:error, _reason} = result, _, _), do: result
+  def list_expenses(%Trip{id: trip_id}) do
+    list_expenses(trip_id)
+  end
+
+  def list_expenses(trip_id) do
+    Repo.all(from e in Expense, where: e.trip_id == ^trip_id, order_by: [desc: e.inserted_at])
+  end
+
+  def create_expense(trip, attrs \\ %{}) do
+    %Expense{trip_id: trip.id}
+    |> Expense.changeset(attrs)
+    |> Repo.insert()
+    |> send_pubsub_event([:expense, :created], trip.id)
+  end
+
+  def update_expense(%Expense{} = expense, attrs) do
+    expense
+    |> Expense.changeset(attrs)
+    |> Repo.update()
+    |> send_pubsub_event([:expense, :updated], expense.trip_id)
+  end
+
+  def new_expense(trip, attrs \\ %{}) do
+    %Expense{
+      trip_id: trip.id
+    }
+    |> Expense.changeset(attrs)
+  end
+
+  def change_expense(%Expense{} = expense, attrs \\ %{}) do
+    Expense.changeset(expense, attrs)
+  end
+
+  def delete_expense(%Expense{} = expense) do
+    Repo.delete(expense)
+    |> send_pubsub_event([:expense, :deleted], expense.trip_id)
+  end
 end
