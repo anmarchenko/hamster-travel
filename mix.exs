@@ -68,12 +68,8 @@ defmodule HamsterTravel.MixProject do
       {:bcrypt_elixir, "~> 3.0"},
       {:secure_random, "~> 0.5"},
 
-      # mails
-      {:swoosh, "~> 1.3"},
-
       # http client
       {:req, "~> 0.5"},
-      {:finch, "~> 0.13"},
 
       # i18n, l10n
       {:gettext, "~> 0.22"},
