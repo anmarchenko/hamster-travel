@@ -22,6 +22,7 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   use Gettext, backend: HamsterTravelWeb.Gettext
 
+  alias HamsterTravelWeb.Cldr
   alias Phoenix.LiveView.JS
 
   def plans_nav_item, do: :plans
@@ -678,17 +679,64 @@ defmodule HamsterTravelWeb.CoreComponents do
   @doc """
   Renders a money input with a dropdown of currencies.
   """
+  attr(:label, :string, required: true)
   attr(:field, Phoenix.HTML.FormField, required: true)
+  attr(:default_currency, :string, default: "EUR")
 
   def money_input(assigns) do
+    field = assigns.field
     errors = if used_input?(assigns.field), do: assigns.field.errors, else: []
 
     assigns =
       assigns
       |> assign(:errors, Enum.map(errors, &translate_error(&1)))
+      |> assign_new(:id, fn -> field.id end)
+      |> assign_new(:name, fn -> field.name end)
+      |> assign_new(:value, fn -> field.value end)
+      |> update(:value, &money_value/1)
 
     ~H"""
-    <.field type="text" field={@field} />
+    <div>
+      <.label for={@id}>{@label}</.label>
+      <div class="flex flex-row">
+        <div class="w-3/4">
+          <.field
+            type="text"
+            name={"#{@name}[amount]"}
+            id={"#{@id}_amount"}
+            value={@value[:amount]}
+            inputmode="numeric"
+            placeholder="0.00"
+            class="rounded-r-none border-r-0"
+            label=""
+          />
+        </div>
+        <div class="w-1/4">
+          <.field
+            type="select"
+            id={"#{@id}_currency"}
+            name={"#{@name}[currency]"}
+            options={Cldr.all_currencies()}
+            value={@value[:currency] || @default_currency}
+            class="rounded-l-none"
+            label=""
+          />
+        </div>
+      </div>
+      <.error :for={msg <- @errors}>{msg}</.error>
+    </div>
     """
+  end
+
+  defp money_value(nil) do
+    nil
+  end
+
+  defp money_value(money) when is_struct(money, Money) do
+    %{amount: money.amount, currency: money.currency}
+  end
+
+  defp money_value(%{"amount" => amount, "currency" => currency}) do
+    %{amount: amount, currency: currency}
   end
 end
