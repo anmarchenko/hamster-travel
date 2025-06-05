@@ -81,10 +81,7 @@ defmodule HamsterTravelWeb.Planning.TripForm do
               <.field
                 type="select"
                 field={@form[:currency]}
-                options={
-                  for currency <- Money.known_current_currencies(),
-                      do: {Cldr.localize_currency(currency), currency}
-                }
+                options={Cldr.all_currencies()}
                 label={gettext("Trip currency")}
                 required={true}
               />

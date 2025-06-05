@@ -4,6 +4,9 @@ defmodule HamsterTravel.AccountsFixtures do
   entities via the `HamsterTravel.Accounts` context.
   """
 
+  alias HamsterTravel.Accounts.UserToken
+  alias HamsterTravel.Repo
+
   def unique_user_email, do: "user#{System.unique_integer()}@example.com"
   def valid_user_password, do: "hello world!"
   def valid_user_name, do: "John Doe"
@@ -26,9 +29,10 @@ defmodule HamsterTravel.AccountsFixtures do
     user
   end
 
-  def extract_user_token(fun) do
-    {:ok, captured_email} = fun.(&"[TOKEN]#{&1}[TOKEN]")
-    [_, token | _] = String.split(captured_email.text_body, "[TOKEN]")
+  def user_token_fixture(user, context \\ "confirm", sent_to \\ nil) do
+    {token, user_token} = UserToken.build_email_token(user, context)
+    user_token = %{user_token | sent_to: sent_to || user.email}
+    Repo.insert!(user_token)
     token
   end
 end

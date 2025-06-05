@@ -967,4 +967,110 @@ defmodule HamsterTravel.PlanningTest do
       assert country.iso == "DE"
     end
   end
+
+  describe "expenses" do
+    alias HamsterTravel.Planning.Expense
+
+    test "list_expenses/1 returns all expenses for a trip" do
+      trip = trip_fixture()
+      expense1 = expense_fixture(%{trip_id: trip.id, name: "Hotel"})
+      expense2 = expense_fixture(%{trip_id: trip.id, name: "Food"})
+      _other_expense = expense_fixture()
+
+      expenses = Planning.list_expenses(trip)
+      expense_ids = Enum.map(expenses, & &1.id)
+
+      assert length(expenses) == 2
+      assert expense1.id in expense_ids
+      assert expense2.id in expense_ids
+    end
+
+    test "get_expense!/1 returns the expense with given id" do
+      expense = expense_fixture()
+      assert Planning.get_expense!(expense.id).id == expense.id
+    end
+
+    test "create_expense/2 with valid data creates an expense" do
+      trip = trip_fixture()
+      valid_attrs = %{price: Money.new(:EUR, 2500), name: "Restaurant"}
+
+      assert {:ok, %Expense{} = expense} = Planning.create_expense(trip, valid_attrs)
+      assert expense.price == Money.new(:EUR, 2500)
+      assert expense.name == "Restaurant"
+      assert expense.trip_id == trip.id
+    end
+
+    test "create_expense/2 with invalid data returns error changeset" do
+      trip = trip_fixture()
+      assert {:error, %Ecto.Changeset{}} = Planning.create_expense(trip, %{})
+    end
+
+    test "update_expense/2 with valid data updates the expense" do
+      expense = expense_fixture()
+      update_attrs = %{price: Money.new(:USD, 3000), name: "Updated expense"}
+
+      assert {:ok, %Expense{} = expense} = Planning.update_expense(expense, update_attrs)
+      assert expense.price == Money.new(:USD, 3000)
+      assert expense.name == "Updated expense"
+    end
+
+    test "update_expense/2 with invalid data returns error changeset" do
+      expense = expense_fixture()
+      assert {:error, %Ecto.Changeset{}} = Planning.update_expense(expense, %{price: nil})
+      assert expense == Planning.get_expense!(expense.id)
+    end
+
+    test "delete_expense/1 deletes the expense" do
+      expense = expense_fixture()
+      assert {:ok, %Expense{}} = Planning.delete_expense(expense)
+      assert_raise Ecto.NoResultsError, fn -> Planning.get_expense!(expense.id) end
+    end
+
+    test "change_expense/1 returns an expense changeset" do
+      expense = expense_fixture()
+      assert %Ecto.Changeset{} = Planning.change_expense(expense)
+    end
+
+    test "new_expense/1 returns a new expense changeset with trip_id" do
+      trip = trip_fixture()
+      changeset = Planning.new_expense(trip)
+
+      assert %Ecto.Changeset{
+               data: %{
+                 trip_id: trip_id
+               }
+             } = changeset
+
+      assert trip_id == trip.id
+    end
+
+    test "create_expense/2 broadcasts pubsub event" do
+      trip = trip_fixture()
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "trip_destinations:#{trip.id}")
+
+      assert {:ok, %Expense{} = expense} =
+               Planning.create_expense(trip, %{price: Money.new(:EUR, 1000), name: "Test"})
+
+      assert_receive {[:expense, :created], %{value: ^expense}}
+    end
+
+    test "update_expense/2 broadcasts pubsub event" do
+      expense = expense_fixture()
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "trip_destinations:#{expense.trip_id}")
+
+      assert {:ok, %Expense{} = updated_expense} =
+               Planning.update_expense(expense, %{name: "Updated"})
+
+      assert_receive {[:expense, :updated], %{value: ^updated_expense}}
+    end
+
+    test "delete_expense/1 broadcasts pubsub event" do
+      expense = expense_fixture()
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "trip_destinations:#{expense.trip_id}")
+
+      assert {:ok, %Expense{} = deleted_expense} = Planning.delete_expense(expense)
+
+      assert_receive {[:expense, :deleted], %{value: ^deleted_expense}}
+    end
+  end
 end

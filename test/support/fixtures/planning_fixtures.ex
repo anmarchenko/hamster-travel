@@ -52,4 +52,23 @@ defmodule HamsterTravel.PlanningFixtures do
 
     destination
   end
+
+  @doc """
+  Generate an expense.
+  """
+  def expense_fixture(attrs \\ %{}) do
+    trip = trip_fixture()
+
+    attrs =
+      attrs
+      |> Enum.into(%{
+        price: Money.new(:EUR, 1500),
+        name: "Hotel booking"
+      })
+
+    {:ok, expense} =
+      HamsterTravel.Planning.create_expense(trip, attrs)
+
+    expense
+  end
 end

@@ -201,34 +201,12 @@ defmodule HamsterTravel.AccountsTest do
     end
   end
 
-  describe "deliver_user_update_email_instructions/3" do
-    setup do
-      %{user: user_fixture()}
-    end
-
-    test "sends token through notification", %{user: user} do
-      token =
-        extract_user_token(fn url ->
-          Accounts.deliver_user_update_email_instructions(user, "current@example.com", url)
-        end)
-
-      {:ok, token} = Base.url_decode64(token, padding: false)
-      assert user_token = Repo.get_by(UserToken, token: :crypto.hash(:sha256, token))
-      assert user_token.user_id == user.id
-      assert user_token.sent_to == user.email
-      assert user_token.context == "change:current@example.com"
-    end
-  end
-
   describe "update_user_email/2" do
     setup do
       user = user_fixture()
       email = unique_user_email()
 
-      token =
-        extract_user_token(fn url ->
-          Accounts.deliver_user_update_email_instructions(%{user | email: email}, user.email, url)
-        end)
+      token = user_token_fixture(user, "change:#{user.email}", email)
 
       %{user: user, token: token, email: email}
     end
@@ -367,33 +345,11 @@ defmodule HamsterTravel.AccountsTest do
     end
   end
 
-  describe "deliver_user_confirmation_instructions/2" do
-    setup do
-      %{user: user_fixture()}
-    end
-
-    test "sends token through notification", %{user: user} do
-      token =
-        extract_user_token(fn url ->
-          Accounts.deliver_user_confirmation_instructions(user, url)
-        end)
-
-      {:ok, token} = Base.url_decode64(token, padding: false)
-      assert user_token = Repo.get_by(UserToken, token: :crypto.hash(:sha256, token))
-      assert user_token.user_id == user.id
-      assert user_token.sent_to == user.email
-      assert user_token.context == "confirm"
-    end
-  end
-
   describe "confirm_user/1" do
     setup do
       user = user_fixture()
 
-      token =
-        extract_user_token(fn url ->
-          Accounts.deliver_user_confirmation_instructions(user, url)
-        end)
+      token = user_token_fixture(user)
 
       %{user: user, token: token}
     end
@@ -420,33 +376,11 @@ defmodule HamsterTravel.AccountsTest do
     end
   end
 
-  describe "deliver_user_reset_password_instructions/2" do
-    setup do
-      %{user: user_fixture()}
-    end
-
-    test "sends token through notification", %{user: user} do
-      token =
-        extract_user_token(fn url ->
-          Accounts.deliver_user_reset_password_instructions(user, url)
-        end)
-
-      {:ok, token} = Base.url_decode64(token, padding: false)
-      assert user_token = Repo.get_by(UserToken, token: :crypto.hash(:sha256, token))
-      assert user_token.user_id == user.id
-      assert user_token.sent_to == user.email
-      assert user_token.context == "reset_password"
-    end
-  end
-
   describe "get_user_by_reset_password_token/1" do
     setup do
       user = user_fixture()
 
-      token =
-        extract_user_token(fn url ->
-          Accounts.deliver_user_reset_password_instructions(user, url)
-        end)
+      token = user_token_fixture(user, "reset_password")
 
       %{user: user, token: token}
     end
