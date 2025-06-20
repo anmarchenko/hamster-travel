@@ -88,6 +88,6 @@ defmodule HamsterTravelWeb.Cldr do
             Enum.filter(Money.known_current_currencies(), fn currency ->
               currency not in not_real_currencies && currency not in important_currencies
             end),
-        do: {localize_currency(currency), currency}
+        do: {currency, currency}
   end
 end

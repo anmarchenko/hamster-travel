@@ -690,6 +690,7 @@ defmodule HamsterTravelWeb.CoreComponents do
     assigns =
       assigns
       |> assign(:errors, Enum.map(errors, &translate_error(&1)))
+      |> assign(:locale, Gettext.get_locale(HamsterTravelWeb.Gettext))
       |> assign_new(:id, fn -> field.id end)
       |> assign_new(:name, fn -> field.name end)
       |> assign_new(:value, fn -> field.value end)
@@ -709,6 +710,8 @@ defmodule HamsterTravelWeb.CoreComponents do
             placeholder="0.00"
             class="rounded-r-none border-r-0"
             label=""
+            phx-hook="MoneyInput"
+            data-user-locale={@locale}
           />
         </div>
         <div class="w-1/4">
