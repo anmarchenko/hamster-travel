@@ -80,6 +80,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> assign(active_nav: active_nav(trip))
       |> assign(page_title: trip.name)
       |> assign(trip: trip)
+      |> assign(active_destination_adding_component_id: nil)
 
     {:ok, socket}
   end
@@ -154,6 +155,30 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     {:noreply, socket}
   end
 
+  @impl true
+  def handle_info({:start_adding, component_type, component_id}, socket) do
+    assign_key = get_key_for_component_adding_active_state_assign(component_type)
+
+    socket =
+      socket
+      |> assign(assign_key, component_id)
+      |> send_edit_state_to_entity_creation_components(component_type)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:finish_adding, component_type}, socket) do
+    assign_key = get_key_for_component_adding_active_state_assign(component_type)
+
+    socket =
+      socket
+      |> assign(assign_key, nil)
+      |> send_edit_state_to_entity_creation_components(component_type)
+
+    {:noreply, socket}
+  end
+
   def render_tab(%{active_tab: "itinerary"} = assigns) do
     ~H"""
     <.tab_itinerary
@@ -195,5 +220,35 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     |> Enum.filter(fn destination ->
       destination.start_day >= trip.duration
     end)
+  end
+
+  defp get_key_for_component_adding_active_state_assign(component_type) do
+    case component_type do
+      "destination" -> :active_destination_adding_component_id
+      "accommodation" -> :active_accommodation_adding_component_id
+      "transfer" -> :active_transfer_adding_component_id
+      "activity" -> :active_activity_adding_component_id
+      _ -> raise ArgumentError, "Unsupported component type: #{component_type}"
+    end
+  end
+
+  defp send_edit_state_to_entity_creation_components(socket, component_type) do
+    case component_type do
+      "destination" ->
+        # Update all DestinationNew components
+        trip = socket.assigns.trip
+
+        for i <- 0..(trip.duration - 1) do
+          send_update(HamsterTravelWeb.Planning.DestinationNew,
+            id: "destination-new-#{i}",
+            edit: socket.assigns.active_destination_adding_component_id == "destination-new-#{i}"
+          )
+        end
+
+        socket
+
+      _ ->
+        socket
+    end
   end
 end

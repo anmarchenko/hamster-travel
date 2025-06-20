@@ -8,6 +8,7 @@ defmodule HamsterTravelWeb.Planning.DestinationNew do
   attr :id, :string, required: true
   attr :day_index, :integer, required: true
   attr :class, :string, default: nil
+  attr :edit, :boolean, default: false
 
   def render(%{edit: true} = assigns) do
     ~H"""
@@ -18,7 +19,7 @@ defmodule HamsterTravelWeb.Planning.DestinationNew do
         trip={@trip}
         day_index={@day_index}
         action={:new}
-        on_finish={fn -> send_update(@myself, edit: false) end}
+        on_finish={fn -> send(self(), {:finish_adding, "destination"}) end}
       />
     </div>
     """
@@ -29,7 +30,7 @@ defmodule HamsterTravelWeb.Planning.DestinationNew do
     <div class={@class}>
       <a
         href="#"
-        phx-click="edit"
+        phx-click="start_adding"
         phx-target={@myself}
         class="text-sm text-primary-500 hover:text-primary-800 dark:text-primary-500 dark:hover:text-primary-300"
       >
@@ -46,24 +47,12 @@ defmodule HamsterTravelWeb.Planning.DestinationNew do
     socket =
       socket
       |> assign(assigns)
-      |> assign(edit: false)
 
     {:ok, socket}
   end
 
-  def handle_event("edit", _, socket) do
-    socket =
-      socket
-      |> assign(:edit, true)
-
-    {:noreply, socket}
-  end
-
-  def handle_event("finish", _, socket) do
-    socket =
-      socket
-      |> assign(:edit, false)
-
+  def handle_event("start_adding", _, socket) do
+    send(self(), {:start_adding, "destination", socket.assigns.id})
     {:noreply, socket}
   end
 end
