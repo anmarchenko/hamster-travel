@@ -5,6 +5,7 @@ defmodule HamsterTravelWeb.Planning.DestinationNew do
 
   use HamsterTravelWeb, :live_component
 
+  attr :id, :string, required: true
   attr :day_index, :integer, required: true
   attr :class, :string, default: nil
 

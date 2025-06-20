@@ -20,7 +20,7 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
     ~H"""
     <div>
       <.form
-        id="destination-form"
+        id={"destination-form-#{@id}"}
         for={@form}
         as={:destination}
         phx-target={@myself}
