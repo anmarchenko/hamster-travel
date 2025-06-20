@@ -679,6 +679,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   @doc """
   Renders a money input with a dropdown of currencies.
   """
+  attr(:id, :string, required: true)
   attr(:label, :string, required: true)
   attr(:field, Phoenix.HTML.FormField, required: true)
   attr(:default_currency, :string, default: "EUR")
@@ -693,7 +694,6 @@ defmodule HamsterTravelWeb.CoreComponents do
       |> assign(:errors, Enum.map(errors, &translate_error(&1)))
       |> assign(:locale, locale)
       |> assign(:placeholder, money_placeholder(locale))
-      |> assign_new(:id, fn -> field.id end)
       |> assign_new(:name, fn -> field.name end)
       |> assign_new(:value, fn -> field.value end)
       |> update(:value, &money_value/1)
