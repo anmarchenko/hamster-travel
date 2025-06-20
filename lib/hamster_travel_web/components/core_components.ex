@@ -686,11 +686,13 @@ defmodule HamsterTravelWeb.CoreComponents do
   def money_input(assigns) do
     field = assigns.field
     errors = if used_input?(assigns.field), do: assigns.field.errors, else: []
+    locale = Gettext.get_locale(HamsterTravelWeb.Gettext)
 
     assigns =
       assigns
       |> assign(:errors, Enum.map(errors, &translate_error(&1)))
-      |> assign(:locale, Gettext.get_locale(HamsterTravelWeb.Gettext))
+      |> assign(:locale, locale)
+      |> assign(:placeholder, money_placeholder(locale))
       |> assign_new(:id, fn -> field.id end)
       |> assign_new(:name, fn -> field.name end)
       |> assign_new(:value, fn -> field.value end)
@@ -707,7 +709,7 @@ defmodule HamsterTravelWeb.CoreComponents do
             id={"#{@id}_amount"}
             value={@value[:amount]}
             inputmode="numeric"
-            placeholder="0.00"
+            placeholder={@placeholder}
             class="rounded-r-none border-r-0"
             label=""
             phx-hook="MoneyInput"
@@ -729,6 +731,13 @@ defmodule HamsterTravelWeb.CoreComponents do
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
+  end
+
+  defp money_placeholder(locale) do
+    case Cldr.Number.to_string(0, locale: locale, fractional_digits: 2) do
+      {:ok, placeholder} -> placeholder
+      _ -> "0.00"
+    end
   end
 
   defp money_value(nil) do
