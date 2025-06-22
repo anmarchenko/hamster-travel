@@ -250,9 +250,7 @@ defmodule HamsterTravel.Planning do
   the day index and its end_day is greater than or equal to the day index.
   """
   def destinations_for_day(day_index, destinations) do
-    Enum.filter(destinations, fn destination ->
-      destination.start_day <= day_index && destination.end_day >= day_index
-    end)
+    items_for_day(day_index, destinations)
   end
 
   defp destinations_preloading(query) do
@@ -367,9 +365,7 @@ defmodule HamsterTravel.Planning do
   the day index and its end_day is greater than or equal to the day index.
   """
   def accommodations_for_day(day_index, accommodations) do
-    Enum.filter(accommodations, fn accommodation ->
-      accommodation.start_day <= day_index && accommodation.end_day >= day_index
-    end)
+    items_for_day(day_index, accommodations)
   end
 
   defp accommodations_preloading(query) do
@@ -378,6 +374,12 @@ defmodule HamsterTravel.Planning do
   end
 
   # utils
+  defp items_for_day(day_index, items) do
+    Enum.filter(items, fn item ->
+      item.start_day <= day_index && item.end_day >= day_index
+    end)
+  end
+
   defp preload_after_db_call({:error, _} = res, _preload_fun), do: res
 
   defp preload_after_db_call({:ok, record}, preload_fun) do
