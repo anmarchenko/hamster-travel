@@ -123,7 +123,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       # Assert
       # Verify the form appears with its components
-      assert has_element?(view, "form#destination-form")
+      assert has_element?(view, "form#destination-form-new-destination-new-0")
       assert has_element?(view, "label", "City")
       assert has_element?(view, "label", "Date range")
       assert has_element?(view, "button", "Save")

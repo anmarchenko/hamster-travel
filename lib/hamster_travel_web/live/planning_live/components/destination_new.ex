@@ -15,7 +15,7 @@ defmodule HamsterTravelWeb.Planning.DestinationNew do
     <div class={@class}>
       <.live_component
         module={HamsterTravelWeb.Planning.DestinationForm}
-        id={"destination-form-#{@id}"}
+        id={"new-#{@id}"}
         trip={@trip}
         day_index={@day_index}
         action={:new}

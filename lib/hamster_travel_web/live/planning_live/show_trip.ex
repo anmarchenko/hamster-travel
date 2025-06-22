@@ -2,12 +2,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   @moduledoc """
   Trip page
   """
-  alias HamsterTravel.Repo
   use HamsterTravelWeb, :live_view
 
   import HamsterTravelWeb.Planning.PlanningComponents
 
   alias HamsterTravel.Planning
+  alias HamsterTravel.Repo
   alias HamsterTravelWeb.Cldr
 
   @tabs ["itinerary", "activities"]
@@ -67,7 +67,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
     socket =
       if connected?(socket) do
-        Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "trip_destinations:#{trip.id}")
+        Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
         socket
       else
         socket

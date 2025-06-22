@@ -6,11 +6,11 @@ defmodule HamsterTravel.Planning do
   import Ecto.Query, warn: false
 
   alias HamsterTravel.Geo
-  alias HamsterTravel.Planning.{Destination, Expense, Policy, Trip}
+  alias HamsterTravel.Planning.{Accommodation, Destination, Expense, Policy, Trip}
   alias HamsterTravel.Repo
 
   # PubSub functions
-  @topic "trip_destinations"
+  @topic "planning"
 
   defp send_pubsub_event({:ok, result} = return_tuple, event, trip_id) do
     Phoenix.PubSub.broadcast(
@@ -206,7 +206,7 @@ defmodule HamsterTravel.Planning do
     %Destination{trip_id: trip.id}
     |> Destination.changeset(attrs)
     |> Repo.insert()
-    |> destinations_preloading_after_create()
+    |> destinations_preloading_after_db_call()
     |> send_pubsub_event([:destination, :created], trip.id)
   end
 
@@ -214,6 +214,7 @@ defmodule HamsterTravel.Planning do
     destination
     |> Destination.changeset(attrs)
     |> Repo.update()
+    |> destinations_preloading_after_db_call()
     |> send_pubsub_event([:destination, :updated], destination.trip_id)
   end
 
@@ -259,9 +260,9 @@ defmodule HamsterTravel.Planning do
     |> Repo.preload(city: Geo.city_preloading_query())
   end
 
-  defp destinations_preloading_after_create({:error, _} = res), do: res
+  defp destinations_preloading_after_db_call({:error, _} = res), do: res
 
-  defp destinations_preloading_after_create({:ok, destination}) do
+  defp destinations_preloading_after_db_call({:ok, destination}) do
     destination = Repo.preload(destination, city: Geo.city_preloading_query())
 
     {:ok, destination}
@@ -309,5 +310,86 @@ defmodule HamsterTravel.Planning do
   def delete_expense(%Expense{} = expense) do
     Repo.delete(expense)
     |> send_pubsub_event([:expense, :deleted], expense.trip_id)
+  end
+
+  # Accommodation functions
+
+  def get_accommodation!(id) do
+    Repo.get!(Accommodation, id)
+    |> accommodations_preloading()
+  end
+
+  def list_accommodations(%Trip{id: trip_id}) do
+    list_accommodations(trip_id)
+  end
+
+  def list_accommodations(trip_id) do
+    Repo.all(from a in Accommodation, where: a.trip_id == ^trip_id, order_by: [asc: a.start_day])
+    |> accommodations_preloading()
+  end
+
+  def create_accommodation(trip, attrs \\ %{}) do
+    %Accommodation{trip_id: trip.id}
+    |> Accommodation.changeset(attrs)
+    |> Repo.insert()
+    |> accommodations_preloading_after_db_call()
+    |> send_pubsub_event([:accommodation, :created], trip.id)
+  end
+
+  def update_accommodation(%Accommodation{} = accommodation, attrs) do
+    accommodation
+    |> Accommodation.changeset(attrs)
+    |> Repo.update()
+    |> accommodations_preloading_after_db_call()
+    |> send_pubsub_event([:accommodation, :updated], accommodation.trip_id)
+  end
+
+  def new_accommodation(trip, day_index, attrs \\ %{}) do
+    default_days =
+      if Ecto.assoc_loaded?(trip.accommodations) && Enum.empty?(trip.accommodations) do
+        %{start_day: 0, end_day: trip.duration - 1}
+      else
+        %{start_day: day_index, end_day: day_index}
+      end
+
+    %Accommodation{
+      start_day: default_days.start_day,
+      end_day: default_days.end_day,
+      trip_id: trip.id
+    }
+    |> Accommodation.changeset(attrs)
+  end
+
+  def change_accommodation(%Accommodation{} = accommodation, attrs \\ %{}) do
+    Accommodation.changeset(accommodation, attrs)
+  end
+
+  def delete_accommodation(%Accommodation{} = accommodation) do
+    Repo.delete(accommodation)
+    |> send_pubsub_event([:accommodation, :deleted], accommodation.trip_id)
+  end
+
+  @doc """
+  Returns a list of accommodations that are active on a given day index.
+  An accommodation is considered active if its start_day is less than or equal to
+  the day index and its end_day is greater than or equal to the day index.
+  """
+  def accommodations_for_day(day_index, accommodations) do
+    Enum.filter(accommodations, fn accommodation ->
+      accommodation.start_day <= day_index && accommodation.end_day >= day_index
+    end)
+  end
+
+  defp accommodations_preloading(query) do
+    query
+    |> Repo.preload([:expense])
+  end
+
+  defp accommodations_preloading_after_db_call({:error, _} = res), do: res
+
+  defp accommodations_preloading_after_db_call({:ok, accommodation}) do
+    accommodation = Repo.preload(accommodation, [:expense])
+
+    {:ok, accommodation}
   end
 end

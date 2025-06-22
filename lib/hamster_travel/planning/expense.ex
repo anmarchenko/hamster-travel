@@ -7,6 +7,7 @@ defmodule HamsterTravel.Planning.Expense do
     field :name, :string
 
     belongs_to(:trip, HamsterTravel.Planning.Trip, type: :binary_id)
+    belongs_to(:accommodation, HamsterTravel.Planning.Accommodation)
 
     timestamps()
   end
@@ -14,7 +15,7 @@ defmodule HamsterTravel.Planning.Expense do
   @doc false
   def changeset(expense, attrs) do
     expense
-    |> cast(attrs, [:price, :name, :trip_id])
+    |> cast(attrs, [:price, :name, :trip_id, :accommodation_id])
     |> validate_required([:price, :trip_id])
   end
 end
