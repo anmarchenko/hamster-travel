@@ -3,6 +3,7 @@ defmodule HamsterTravel.Planning.Accommodation do
   import Ecto.Changeset
 
   alias HamsterTravel.Planning.Expense
+  alias HamsterTravel.Planning.Validations
 
   schema "accommodations" do
     field :name, :string
@@ -26,22 +27,6 @@ defmodule HamsterTravel.Planning.Accommodation do
     |> validate_required([:name, :start_day, :end_day, :trip_id])
     |> validate_number(:start_day, greater_than_or_equal_to: 0)
     |> validate_number(:end_day, greater_than_or_equal_to: 0)
-    |> validate_end_day_after_start_day()
-  end
-
-  defp validate_end_day_after_start_day(changeset) do
-    start_day = get_field(changeset, :start_day)
-    end_day = get_field(changeset, :end_day)
-
-    cond do
-      is_nil(start_day) or is_nil(end_day) ->
-        changeset
-
-      end_day < start_day ->
-        add_error(changeset, :end_day, "must be greater than or equal to start_day")
-
-      true ->
-        changeset
-    end
+    |> Validations.validate_end_day_after_start_day()
   end
 end
