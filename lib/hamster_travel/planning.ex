@@ -206,7 +206,7 @@ defmodule HamsterTravel.Planning do
     %Destination{trip_id: trip.id}
     |> Destination.changeset(attrs)
     |> Repo.insert()
-    |> destinations_preloading_after_db_call()
+    |> preload_after_db_call(&Repo.preload(&1, city: Geo.city_preloading_query()))
     |> send_pubsub_event([:destination, :created], trip.id)
   end
 
@@ -214,7 +214,7 @@ defmodule HamsterTravel.Planning do
     destination
     |> Destination.changeset(attrs)
     |> Repo.update()
-    |> destinations_preloading_after_db_call()
+    |> preload_after_db_call(&Repo.preload(&1, city: Geo.city_preloading_query()))
     |> send_pubsub_event([:destination, :updated], destination.trip_id)
   end
 
@@ -258,14 +258,6 @@ defmodule HamsterTravel.Planning do
   defp destinations_preloading(query) do
     query
     |> Repo.preload(city: Geo.city_preloading_query())
-  end
-
-  defp destinations_preloading_after_db_call({:error, _} = res), do: res
-
-  defp destinations_preloading_after_db_call({:ok, destination}) do
-    destination = Repo.preload(destination, city: Geo.city_preloading_query())
-
-    {:ok, destination}
   end
 
   # Expense functions
@@ -332,7 +324,7 @@ defmodule HamsterTravel.Planning do
     %Accommodation{trip_id: trip.id}
     |> Accommodation.changeset(attrs)
     |> Repo.insert()
-    |> accommodations_preloading_after_db_call()
+    |> preload_after_db_call(&Repo.preload(&1, [:expense]))
     |> send_pubsub_event([:accommodation, :created], trip.id)
   end
 
@@ -340,7 +332,7 @@ defmodule HamsterTravel.Planning do
     accommodation
     |> Accommodation.changeset(attrs)
     |> Repo.update()
-    |> accommodations_preloading_after_db_call()
+    |> preload_after_db_call(&Repo.preload(&1, [:expense]))
     |> send_pubsub_event([:accommodation, :updated], accommodation.trip_id)
   end
 
@@ -385,11 +377,11 @@ defmodule HamsterTravel.Planning do
     |> Repo.preload([:expense])
   end
 
-  defp accommodations_preloading_after_db_call({:error, _} = res), do: res
+  # utils
+  defp preload_after_db_call({:error, _} = res, _preload_fun), do: res
 
-  defp accommodations_preloading_after_db_call({:ok, accommodation}) do
-    accommodation = Repo.preload(accommodation, [:expense])
-
-    {:ok, accommodation}
+  defp preload_after_db_call({:ok, record}, preload_fun) do
+    record = preload_fun.(record)
+    {:ok, record}
   end
 end
