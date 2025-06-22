@@ -1270,6 +1270,54 @@ defmodule HamsterTravel.PlanningTest do
       assert result.end_day == accommodation.end_day
     end
 
+    test "update_accommodation/2 with expense data updates both accommodation and expense", %{
+      trip: trip
+    } do
+      # Create accommodation with expense
+      accommodation =
+        accommodation_fixture(%{
+          trip_id: trip.id,
+          name: "Original Hotel",
+          start_day: 0,
+          end_day: 2,
+          expense: %{
+            price: Money.new(:EUR, 10_000),
+            name: "Original Hotel Booking",
+            trip_id: trip.id
+          }
+        })
+
+      accommodation = accommodation |> Repo.preload(:expense)
+
+      update_attrs = %{
+        name: "Updated Hotel",
+        start_day: 1,
+        end_day: 3,
+        expense: %{
+          # note that we need to pass the expense id to update the expense
+          # Think how would this work with a form?
+          id: accommodation.expense.id,
+          price: Money.new(:EUR, 15_000),
+          name: "Updated Hotel Booking"
+        }
+      }
+
+      assert {:ok, %Accommodation{} = updated_accommodation} =
+               Planning.update_accommodation(accommodation, update_attrs)
+
+      # Verify accommodation was updated
+      assert updated_accommodation.name == "Updated Hotel"
+      assert updated_accommodation.start_day == 1
+      assert updated_accommodation.end_day == 3
+
+      # Verify expense was updated
+      updated_accommodation = updated_accommodation |> Repo.preload(:expense)
+      assert updated_accommodation.expense.price == Money.new(:EUR, 15_000)
+      assert updated_accommodation.expense.name == "Updated Hotel Booking"
+      assert updated_accommodation.expense.trip_id == trip.id
+      assert updated_accommodation.expense.accommodation_id == updated_accommodation.id
+    end
+
     test "delete_accommodation/1 deletes the accommodation" do
       accommodation = accommodation_fixture()
       assert {:ok, %Accommodation{}} = Planning.delete_accommodation(accommodation)
