@@ -30,14 +30,14 @@ defmodule HamsterTravel.PolicyTest do
     friend: friend,
     backpack: backpack
   } do
-    assert !Policy.authorized?(:edit, backpack, friend)
+    refute Policy.authorized?(:edit, backpack, friend)
   end
 
   test "authorized?/3 :edit disallows any user", %{
     backpack: backpack
   } do
     user = user_fixture()
-    assert !Policy.authorized?(:edit, backpack, user)
+    refute Policy.authorized?(:edit, backpack, user)
   end
 
   test "authorized?/3 :copy allows author", %{author: author, backpack: backpack} do
@@ -55,7 +55,7 @@ defmodule HamsterTravel.PolicyTest do
     backpack: backpack
   } do
     user = user_fixture() |> Repo.preload(:friendships)
-    assert !Policy.authorized?(:copy, backpack, user)
+    refute Policy.authorized?(:copy, backpack, user)
   end
 
   test "authorized?/3 :delete allows author", %{author: author, backpack: backpack} do
@@ -66,7 +66,7 @@ defmodule HamsterTravel.PolicyTest do
     friend: friend,
     backpack: backpack
   } do
-    assert !Policy.authorized?(:delete, backpack, friend)
+    refute Policy.authorized?(:delete, backpack, friend)
   end
 
   test "user_scope/2 returns backpacks from the whole friends circle", %{

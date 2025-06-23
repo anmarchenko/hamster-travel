@@ -25,7 +25,7 @@ mix phx.server
 ```
 
 Visit `http://localhost:4000` to start using the app.
-For login use `admin2@mail.test/12345678`.
+Use credentials from `priv/repo/seeds.exs`, for example `bunny@hamsters.test` with password `test1234`.
 
 ## Run tests
 
