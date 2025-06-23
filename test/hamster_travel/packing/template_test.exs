@@ -37,7 +37,7 @@ defmodule HamsterTravel.Packing.TemplateTest do
     assert {:ok, _} = Template.execute("default", %{days: 3, nights: 2})
   end
 
-  test "when file does not exists it returns an error" do
+  test "when file does not exist it returns an error" do
     assert {:error, _} = Template.execute("non_existing")
   end
 
