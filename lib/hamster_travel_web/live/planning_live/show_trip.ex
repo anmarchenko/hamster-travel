@@ -157,6 +157,69 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   @impl true
+  def handle_info({[:accommodation, :created], %{value: created_accommodation}}, socket) do
+    # Preload expense before sending to component
+    created_accommodation = Repo.preload(created_accommodation, [:expense])
+
+    trip =
+      socket.assigns.trip
+      |> Map.put(:accommodations, socket.assigns.trip.accommodations ++ [created_accommodation])
+
+    trip = Repo.preload(trip, :countries)
+
+    socket =
+      socket
+      |> assign(trip: trip)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({[:accommodation, :updated], %{value: updated_accommodation}}, socket) do
+    # Preload expense before sending to component
+    updated_accommodation = Repo.preload(updated_accommodation, [:expense])
+
+    trip =
+      socket.assigns.trip
+      |> Map.put(
+        :accommodations,
+        Enum.map(socket.assigns.trip.accommodations, fn accommodation ->
+          if accommodation.id == updated_accommodation.id,
+            do: updated_accommodation,
+            else: accommodation
+        end)
+      )
+
+    trip = Repo.preload(trip, :countries)
+
+    socket =
+      socket
+      |> assign(trip: trip)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({[:accommodation, :deleted], %{value: deleted_accommodation}}, socket) do
+    trip =
+      socket.assigns.trip
+      |> Map.put(
+        :accommodations,
+        Enum.reject(socket.assigns.trip.accommodations, fn accommodation ->
+          accommodation.id == deleted_accommodation.id
+        end)
+      )
+
+    trip = Repo.preload(trip, :countries)
+
+    socket =
+      socket
+      |> assign(trip: trip)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info({:start_adding, component_type, component_id}, socket) do
     assign_key = get_key_for_component_adding_active_state_assign(component_type)
 
@@ -187,7 +250,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       destinations={@trip.destinations}
       destinations_outside={destinations_outside(@trip)}
       transfers={[]}
-      hotels={[]}
+      accommodations={@trip.accommodations}
+      accommodations_outside={accommodations_outside(@trip)}
       budget={0}
     />
     """
@@ -220,6 +284,13 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     trip.destinations
     |> Enum.filter(fn destination ->
       destination.start_day >= trip.duration
+    end)
+  end
+
+  defp accommodations_outside(trip) do
+    trip.accommodations
+    |> Enum.filter(fn accommodation ->
+      accommodation.start_day >= trip.duration
     end)
   end
 

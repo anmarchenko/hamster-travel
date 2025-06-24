@@ -405,7 +405,12 @@ defmodule HamsterTravelWeb.CoreComponents do
     """
   end
 
-  attr(:link, :string, required: true)
+  attr(:link, :string)
+
+  def external_link(%{link: nil} = assigns) do
+    ~H"""
+    """
+  end
 
   def external_link(assigns) do
     ~H"""

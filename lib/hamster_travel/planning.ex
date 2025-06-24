@@ -183,7 +183,12 @@ defmodule HamsterTravel.Planning do
 
   defp single_trip_preloading(query) do
     query
-    |> Repo.preload([:author, :countries, destinations: [city: Geo.city_preloading_query()]])
+    |> Repo.preload([
+      :author,
+      :countries,
+      destinations: [city: Geo.city_preloading_query()],
+      accommodations: :expense
+    ])
   end
 
   # Destinations functions
