@@ -81,6 +81,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> assign(page_title: trip.name)
       |> assign(trip: trip)
       |> assign(active_destination_adding_component_id: nil)
+      |> assign(active_accommodation_adding_component_id: nil)
 
     {:ok, socket}
   end
@@ -242,6 +243,20 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           send_update(HamsterTravelWeb.Planning.DestinationNew,
             id: "destination-new-#{i}",
             edit: socket.assigns.active_destination_adding_component_id == "destination-new-#{i}"
+          )
+        end
+
+        socket
+
+      "accommodation" ->
+        # Update all AccommodationNew components
+        trip = socket.assigns.trip
+
+        for i <- 0..(trip.duration - 1) do
+          send_update(HamsterTravelWeb.Planning.AccommodationNew,
+            id: "accommodation-new-#{i}",
+            edit:
+              socket.assigns.active_accommodation_adding_component_id == "accommodation-new-#{i}"
           )
         end
 

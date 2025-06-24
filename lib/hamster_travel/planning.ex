@@ -319,6 +319,13 @@ defmodule HamsterTravel.Planning do
   end
 
   def create_accommodation(trip, attrs \\ %{}) do
+    # Ensure the expense has trip_id if it exists in attrs
+    attrs =
+      case Map.get(attrs, "expense") do
+        nil -> attrs
+        expense_attrs -> Map.put(attrs, "expense", Map.put(expense_attrs, "trip_id", trip.id))
+      end
+
     %Accommodation{trip_id: trip.id}
     |> Accommodation.changeset(attrs)
     |> Repo.insert()

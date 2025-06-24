@@ -6,7 +6,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.Trip
   alias HamsterTravelWeb.CoreComponents
-  alias HamsterTravelWeb.Planning.{Destination, DestinationNew, Hotel, Transfer}
+  alias HamsterTravelWeb.Planning.{AccommodationNew, Destination, DestinationNew, Hotel, Transfer}
 
   attr(:trip, :map, required: true)
   attr(:active_tab, :string, required: true)
@@ -284,6 +284,13 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
               <div class="flex flex-col gap-y-8">
                 <.hotels hotels={HamsterTravel.filter_hotels_by_day(@hotels, i)} day_index={i} />
+                <.live_component
+                  module={AccommodationNew}
+                  id={"accommodation-new-#{i}"}
+                  trip={@trip}
+                  day_index={i}
+                  class="mt-2"
+                />
               </div>
             </td>
           </tr>
