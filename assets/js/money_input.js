@@ -6,6 +6,13 @@ let MoneyInput = {
     const parts = fmtr.formatToParts(1.1);
     const decSep = parts.find((part) => part.type === 'decimal')?.value || '.';
 
+    // Format initial value if present
+    const initialValue = this.el.value;
+    if (initialValue && !isNaN(parseFloat(initialValue))) {
+      const numValue = parseFloat(initialValue);
+      this.el.value = fmtr.format(numValue);
+    }
+
     this.el.addEventListener('input', (e) => {
       const start = this.el.selectionStart;
 
@@ -16,7 +23,7 @@ let MoneyInput = {
 
       // Split int/frac to preserve user-typed decimals
       const [intPart, fracPart] = raw.split(decSep);
-      const formattedInt = fmtr.format(intPart || '0').replace(/[^0-9]/g, '');
+      const formattedInt = fmtr.format(intPart || '0');
 
       this.el.value =
         fracPart === undefined

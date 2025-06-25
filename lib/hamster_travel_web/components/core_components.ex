@@ -743,7 +743,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   defp money_placeholder(locale) do
     case Cldr.Number.to_string(0, locale: locale, fractional_digits: 2) do
       {:ok, placeholder} -> placeholder
-      _ -> "0.00"
+      _ -> "0,00"
     end
   end
 
