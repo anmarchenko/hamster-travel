@@ -388,6 +388,7 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   attr(:href, :string, required: true)
   attr(:method, :string, default: nil)
+  attr(:class, :string, default: "")
   attr(:rest, :global)
 
   slot(:inner_block, required: true)
@@ -396,7 +397,7 @@ defmodule HamsterTravelWeb.CoreComponents do
     ~H"""
     <.link
       href={@href}
-      class="underline text-indigo-500 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-100"
+      class={"underline text-indigo-500 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-100 #{@class}"}
       method={@method}
       {@rest}
     >
@@ -406,6 +407,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   end
 
   attr(:link, :string)
+  attr(:class, :string, default: "")
 
   def external_link(%{link: nil} = assigns) do
     ~H"""
@@ -414,8 +416,8 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   def external_link(assigns) do
     ~H"""
-    <.ht_link href={@link}>
-      {URI.parse(@link).host}
+    <.ht_link href={@link} class={@class}>
+      {URI.parse(@link).host |> String.replace_prefix("www.", "") |> String.capitalize()}
     </.ht_link>
     """
   end

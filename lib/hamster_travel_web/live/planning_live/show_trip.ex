@@ -247,11 +247,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     ~H"""
     <.tab_itinerary
       trip={@trip}
+      accommodations={@trip.accommodations}
+      accommodations_outside={accommodations_outside(@trip)}
       destinations={@trip.destinations}
       destinations_outside={destinations_outside(@trip)}
       transfers={[]}
-      accommodations={@trip.accommodations}
-      accommodations_outside={accommodations_outside(@trip)}
       budget={0}
     />
     """
