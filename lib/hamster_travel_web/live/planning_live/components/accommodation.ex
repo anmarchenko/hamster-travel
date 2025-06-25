@@ -8,14 +8,22 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
   alias HamsterTravel.Planning.Accommodation
   alias HamsterTravelWeb.Cldr, as: Formatters
 
-  import HamsterTravelWeb.Icons.HomeSimple
-
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :accommodation, HamsterTravel.Planning.Accommodation, required: true
 
   def render(%{edit: true} = assigns) do
     ~H"""
-    <span>edit mode to be implemented</span>
+    <div>
+      <.live_component
+        module={HamsterTravelWeb.Planning.AccommodationForm}
+        id={"accommodation-form-#{@accommodation.id}"}
+        accommodation={@accommodation}
+        trip={@trip}
+        day_index={@accommodation.start_day}
+        action={:edit}
+        on_finish={fn -> send_update(@myself, edit: false) end}
+      />
+    </div>
     """
   end
 
@@ -43,12 +51,29 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
             </span>
           </div>
           <div class="flex items-center space-x-1 flex-shrink-0">
+            <.icon_button size="xs" phx-click="edit" phx-target={@myself} class="justify-self-end">
+              <.icon name="hero-pencil" class="w-4 h-4" />
+            </.icon_button>
             <.icon_button
+              class="justify-self-end"
               size="xs"
-              phx-click="edit"
+              phx-click="delete"
               phx-target={@myself}
-              class="justify-self-end ml-2"
+              data-confirm={
+                gettext("Are you sure you want to delete %{accommodation_name} from your trip?",
+                  accommodation_name: @accommodation.name
+                )
+              }
             >
+              <.icon name="hero-trash" class="w-4 h-4" />
+            </.icon_button>
+          </div>
+        </div>
+        <div class="flex justify-between items-center">
+          <.external_link link={@accommodation.link} />
+
+          <div :if={!@accommodation.address} class="flex items-center space-x-1 flex-shrink-0">
+            <.icon_button size="xs" phx-click="edit" phx-target={@myself} class="justify-self-end">
               <.icon name="hero-pencil" class="w-4 h-4" />
             </.icon_button>
             <.icon_button
@@ -67,8 +92,6 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
           </div>
         </div>
       </div>
-
-      <.external_link link={@accommodation.link} class="mb-3" />
 
       <div :if={@accommodation.note} class="pt-4 border-t border-slate-200">
         <div class="flex items-center text-sm text-slate-700 bg-gray-50/70 p-3.5 rounded-lg">
