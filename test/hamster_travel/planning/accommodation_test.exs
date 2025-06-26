@@ -14,7 +14,7 @@ defmodule HamsterTravel.Planning.AccommodationTest do
         accommodation_fixture(%{
           trip_id: trip.id,
           start_day: 1,
-          end_day: 4,
+          end_day: 3,
           expense: %{
             price: Money.new(:EUR, 30_000),
             name: "Hotel booking",
@@ -33,7 +33,7 @@ defmodule HamsterTravel.Planning.AccommodationTest do
         accommodation_fixture(%{
           trip_id: trip.id,
           start_day: 2,
-          end_day: 3,
+          end_day: 2,
           expense: %{
             price: Money.new(:EUR, 12_000),
             name: "Hotel booking",
@@ -43,25 +43,6 @@ defmodule HamsterTravel.Planning.AccommodationTest do
 
       result = Accommodation.price_per_night(accommodation)
       assert Money.equal?(result, Money.new(:EUR, 12_000))
-    end
-
-    test "handles same-day accommodation (0 nights, treats as 1 night)" do
-      trip = trip_fixture()
-
-      accommodation =
-        accommodation_fixture(%{
-          trip_id: trip.id,
-          start_day: 2,
-          end_day: 2,
-          expense: %{
-            price: Money.new(:EUR, 15_000),
-            name: "Day use booking",
-            trip_id: trip.id
-          }
-        })
-
-      result = Accommodation.price_per_night(accommodation)
-      assert Money.equal?(result, Money.new(:EUR, 15_000))
     end
 
     test "returns nil when accommodation has no expense" do
@@ -105,7 +86,7 @@ defmodule HamsterTravel.Planning.AccommodationTest do
         accommodation_fixture(%{
           trip_id: trip.id,
           start_day: 0,
-          end_day: 7,
+          end_day: 6,
           expense: %{
             price: Money.new(:EUR, 210_000_000),
             name: "Luxury suite",
@@ -124,7 +105,7 @@ defmodule HamsterTravel.Planning.AccommodationTest do
         accommodation_fixture(%{
           trip_id: trip.id,
           start_day: 1,
-          end_day: 6,
+          end_day: 5,
           expense: %{
             price: Money.new(:USD, 50_000),
             name: "Hotel booking",
@@ -144,7 +125,7 @@ defmodule HamsterTravel.Planning.AccommodationTest do
         accommodation_fixture(%{
           trip_id: trip.id,
           start_day: 0,
-          end_day: 3,
+          end_day: 2,
           expense: %{
             price: Money.new(:EUR, 10_000),
             name: "Hotel booking",
@@ -158,14 +139,14 @@ defmodule HamsterTravel.Planning.AccommodationTest do
       assert Money.equal?(result, expected)
     end
 
-    test "handles edge case with start_day 0 and end_day 1" do
+    test "handles edge case with start_day 0 and end_day 0" do
       trip = trip_fixture()
 
       accommodation =
         accommodation_fixture(%{
           trip_id: trip.id,
           start_day: 0,
-          end_day: 1,
+          end_day: 0,
           expense: %{
             price: Money.new(:EUR, 8_000),
             name: "First night",
@@ -184,7 +165,7 @@ defmodule HamsterTravel.Planning.AccommodationTest do
         accommodation_fixture(%{
           trip_id: trip.id,
           start_day: 5,
-          end_day: 35,
+          end_day: 34,
           expense: %{
             price: Money.new(:EUR, 600_000),
             name: "Monthly rental",
@@ -222,7 +203,7 @@ defmodule HamsterTravel.Planning.AccommodationTest do
         accommodation_fixture(%{
           trip_id: trip.id,
           start_day: 2,
-          end_day: 5,
+          end_day: 4,
           expense: %{
             price: Money.new(:EUR, 18_000),
             name: "Hotel booking",
@@ -245,7 +226,7 @@ defmodule HamsterTravel.Planning.AccommodationTest do
         accommodation_fixture(%{
           trip_id: trip.id,
           start_day: 1,
-          end_day: 4,
+          end_day: 3,
           expense: %{
             price: Money.new(:JPY, 30_000),
             name: "Tokyo hotel",
@@ -266,7 +247,7 @@ defmodule HamsterTravel.Planning.AccommodationTest do
         accommodation_fixture(%{
           trip_id: trip.id,
           start_day: 0,
-          end_day: 7,
+          end_day: 6,
           expense: %{
             price: Money.new(:EUR, 22_222),
             name: "Week stay",
