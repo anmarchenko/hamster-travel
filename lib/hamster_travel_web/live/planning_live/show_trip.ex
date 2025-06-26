@@ -211,36 +211,36 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   defp send_edit_state_to_entity_creation_components(socket, component_type) do
+    case get_creation_component_info(component_type) do
+      {module, active_assign_key} ->
+        trip = socket.assigns.trip
+
+        for i <- 0..(trip.duration - 1) do
+          component_id = "#{component_type}-new-#{i}"
+
+          send_update(module,
+            id: component_id,
+            edit: Map.get(socket.assigns, active_assign_key) == component_id
+          )
+        end
+
+        socket
+
+      nil ->
+        socket
+    end
+  end
+
+  defp get_creation_component_info(component_type) do
     case component_type do
       "destination" ->
-        # Update all DestinationNew components
-        trip = socket.assigns.trip
-
-        for i <- 0..(trip.duration - 1) do
-          send_update(HamsterTravelWeb.Planning.DestinationNew,
-            id: "destination-new-#{i}",
-            edit: socket.assigns.active_destination_adding_component_id == "destination-new-#{i}"
-          )
-        end
-
-        socket
+        {HamsterTravelWeb.Planning.DestinationNew, :active_destination_adding_component_id}
 
       "accommodation" ->
-        # Update all AccommodationNew components
-        trip = socket.assigns.trip
-
-        for i <- 0..(trip.duration - 1) do
-          send_update(HamsterTravelWeb.Planning.AccommodationNew,
-            id: "accommodation-new-#{i}",
-            edit:
-              socket.assigns.active_accommodation_adding_component_id == "accommodation-new-#{i}"
-          )
-        end
-
-        socket
+        {HamsterTravelWeb.Planning.AccommodationNew, :active_accommodation_adding_component_id}
 
       _ ->
-        socket
+        nil
     end
   end
 
