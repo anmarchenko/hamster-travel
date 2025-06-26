@@ -24,12 +24,6 @@ config :hamster_travel, HamsterTravelWeb.Endpoint,
   secret_key_base: "bzF8EWBJ+pkl2OM+PqSzBYcjf1WOthtn/Hl7Nluh2b+JuvuGjPGHnRx4hTERT0qx",
   server: false
 
-# In test we don't send emails.
-config :hamster_travel, HamsterTravel.Mailer, adapter: Swoosh.Adapters.Test
-
-# Disable swoosh api client as it is only required for production adapters.
-config :swoosh, :api_client, false
-
 # Print only warnings and errors during test
 config :logger, level: :warning
 
@@ -41,3 +35,7 @@ config :hamster_travel, HamsterTravelWeb.Telemetry,
   periodic_measurements_enabled: false
 
 config :hamster_travel, :geonames_req_options, plug: {Req.Test, HamsterTravel.Geo.Geonames}
+
+config :ex_money,
+  auto_start_exchange_rate_service: true,
+  api_module: HamsterTravel.TestExchangeRates

@@ -1,5 +1,6 @@
 // Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
 import 'phoenix_html';
+
 // Establish Phoenix Socket and LiveView configuration.
 import { Socket } from 'phoenix';
 import { LiveSocket } from 'phoenix_live_view';
@@ -15,6 +16,7 @@ import live_select from 'live_select';
 
 // hamster travel components
 import DayRangeSelect from './day_range_select';
+import MoneyInput from './money_input';
 
 Alpine.plugin(persist);
 Alpine.plugin(collapse);
@@ -29,6 +31,7 @@ let csrfToken = document
 let hooks = {
   ...live_select,
   ...DayRangeSelect,
+  ...MoneyInput,
 };
 
 let liveSocket = new LiveSocket('/live', Socket, {

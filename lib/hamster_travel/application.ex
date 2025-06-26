@@ -12,8 +12,6 @@ defmodule HamsterTravel.Application do
       HamsterTravel.Repo,
       # Start the Telemetry supervisor
       HamsterTravelWeb.Telemetry,
-      # Start Finch
-      {Finch, name: HamsterTravel.Finch},
       # Start the PubSub system
       {Phoenix.PubSub, name: HamsterTravel.PubSub},
       # Start the Endpoint (http/https)

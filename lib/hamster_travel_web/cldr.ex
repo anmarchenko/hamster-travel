@@ -38,4 +38,56 @@ defmodule HamsterTravelWeb.Cldr do
 
     "#{currency_name} - #{currency_code}"
   end
+
+  def all_currencies do
+    not_real_currencies = [
+      :XAG,
+      :XAU,
+      :XXX,
+      :CHE,
+      :CHW,
+      :CLF,
+      :COU,
+      :CUC,
+      :XBA,
+      :XBB,
+      :XBC,
+      :XBD,
+      :XTS,
+      :XCD,
+      :SDR,
+      :XOF,
+      :XPD,
+      :XPT,
+      :XDR,
+      :XPF,
+      :XUA,
+      :UYI,
+      :UYW
+    ]
+
+    important_currencies = [
+      :EUR,
+      :USD,
+      :GBP,
+      :CHF,
+      :CZK,
+      :DKK,
+      :HUF,
+      :ISK,
+      :NOK,
+      :PLN,
+      :SEK,
+      :AUD,
+      :CAD,
+      :JPY
+    ]
+
+    for currency <-
+          important_currencies ++
+            Enum.filter(Money.known_current_currencies(), fn currency ->
+              currency not in not_real_currencies && currency not in important_currencies
+            end),
+        do: {currency, currency}
+  end
 end

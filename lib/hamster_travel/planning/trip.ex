@@ -8,7 +8,9 @@ defmodule HamsterTravel.Planning.Trip do
 
   alias HamsterTravel.Accounts.User
   alias HamsterTravel.Dates
+  alias HamsterTravel.Planning.Accommodation
   alias HamsterTravel.Planning.Destination
+  alias HamsterTravel.Planning.Expense
   alias HamsterTravel.Planning.Trip.NameSlug
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -38,9 +40,14 @@ defmodule HamsterTravel.Planning.Trip do
     field :private, :boolean, default: false
 
     belongs_to(:author, User)
+
     has_many(:destinations, Destination)
     has_many(:cities, through: [:destinations, :city])
     has_many(:countries, through: [:cities, :country])
+
+    has_many(:expenses, Expense)
+    has_many(:accommodations, Accommodation)
+
     timestamps()
   end
 

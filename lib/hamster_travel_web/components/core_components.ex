@@ -18,8 +18,11 @@ defmodule HamsterTravelWeb.CoreComponents do
   use HamsterTravelWeb, :verified_routes
 
   import PetalComponents.Icon
+  import PetalComponents.Field
+
   use Gettext, backend: HamsterTravelWeb.Gettext
 
+  alias HamsterTravelWeb.Cldr
   alias Phoenix.LiveView.JS
 
   def plans_nav_item, do: :plans
@@ -385,6 +388,7 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   attr(:href, :string, required: true)
   attr(:method, :string, default: nil)
+  attr(:class, :string, default: "")
   attr(:rest, :global)
 
   slot(:inner_block, required: true)
@@ -393,7 +397,7 @@ defmodule HamsterTravelWeb.CoreComponents do
     ~H"""
     <.link
       href={@href}
-      class="underline text-indigo-500 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-100"
+      class={"underline text-indigo-500 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-100 #{@class}"}
       method={@method}
       {@rest}
     >
@@ -402,12 +406,18 @@ defmodule HamsterTravelWeb.CoreComponents do
     """
   end
 
-  attr(:link, :string, required: true)
+  attr(:link, :string)
+  attr(:class, :string, default: "")
+
+  def external_link(%{link: nil} = assigns) do
+    ~H"""
+    """
+  end
 
   def external_link(assigns) do
     ~H"""
-    <.ht_link href={@link}>
-      {URI.parse(@link).host}
+    <.ht_link href={@link} class={@class}>
+      {URI.parse(@link).host |> String.replace_prefix("www.", "") |> String.capitalize()}
     </.ht_link>
     """
   end
@@ -477,11 +487,12 @@ defmodule HamsterTravelWeb.CoreComponents do
   Renders a label.
   """
   attr :for, :string, default: nil
+  attr :class, :string, default: nil
   slot :inner_block, required: true
 
   def label(assigns) do
     ~H"""
-    <label for={@for} class="pc-label">
+    <label for={@for} class={["pc-label", @class]}>
       {render_slot(@inner_block)}
     </label>
     """
@@ -671,5 +682,83 @@ defmodule HamsterTravelWeb.CoreComponents do
       </div>
     </div>
     """
+  end
+
+  @doc """
+  Renders a money input with a dropdown of currencies.
+  """
+  attr(:id, :string, required: true)
+  attr(:label, :string, required: true)
+  attr(:field, Phoenix.HTML.FormField, required: true)
+  attr(:default_currency, :string, default: "EUR")
+
+  def money_input(assigns) do
+    field = assigns.field
+    errors = if used_input?(assigns.field), do: assigns.field.errors, else: []
+    locale = Gettext.get_locale(HamsterTravelWeb.Gettext)
+
+    assigns =
+      assigns
+      |> assign(:errors, Enum.map(errors, &translate_error(&1)))
+      |> assign(:locale, locale)
+      |> assign(:placeholder, money_placeholder(locale))
+      |> assign_new(:name, fn -> field.name end)
+      |> assign_new(:value, fn -> field.value end)
+      |> update(:value, &money_value/1)
+
+    ~H"""
+    <div>
+      <.label class="mb-0" for={@id}>{@label}</.label>
+      <div class="flex flex-row">
+        <div class="w-3/4">
+          <.field
+            type="text"
+            name={"#{@name}[amount]"}
+            id={"#{@id}_amount"}
+            value={@value[:amount]}
+            inputmode="numeric"
+            placeholder={@placeholder}
+            class="rounded-r-none border-r-0"
+            wrapper_class="mb-0"
+            label=""
+            phx-hook="MoneyInput"
+            data-user-locale={@locale}
+          />
+        </div>
+        <div class="w-1/4">
+          <.field
+            type="select"
+            id={"#{@id}_currency"}
+            name={"#{@name}[currency]"}
+            options={Cldr.all_currencies()}
+            value={@value[:currency] || @default_currency}
+            class="rounded-l-none"
+            wrapper_class="mb-0"
+            label=""
+          />
+        </div>
+      </div>
+      <.error :for={msg <- @errors}>{msg}</.error>
+    </div>
+    """
+  end
+
+  defp money_placeholder(locale) do
+    case Cldr.Number.to_string(0, locale: locale, fractional_digits: 2) do
+      {:ok, placeholder} -> placeholder
+      _ -> "0,00"
+    end
+  end
+
+  defp money_value(nil) do
+    nil
+  end
+
+  defp money_value(money) when is_struct(money, Money) do
+    %{amount: money.amount, currency: money.currency}
+  end
+
+  defp money_value(%{"amount" => amount, "currency" => currency}) do
+    %{amount: amount, currency: currency}
   end
 end

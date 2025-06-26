@@ -37,12 +37,12 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
 
       <div id={"day-range-select-#{@id}"} class="day-range-select relative" class="space-y-4">
         <button
-          id="day-range-trigger"
+          id={"day-range-trigger-#{@id}"}
           phx-click={toggle_dropdown(@id)}
           type="button"
           class="w-full flex items-center justify-between px-3 py-2 text-left bg-white border border-gray-300 rounded-md shadow-xs text-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:focus:border-primary-500 dark:bg-gray-800 dark:text-gray-300 focus:outline-hidden"
         >
-          <span id="selected-range-display">
+          <span id={"selected-range-display-#{@id}"}>
             <%= cond do %>
               <% @start_day_selection == nil -> %>
                 {gettext("Select day")}

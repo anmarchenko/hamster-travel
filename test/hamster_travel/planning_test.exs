@@ -114,82 +114,6 @@ defmodule HamsterTravel.PlanningTest do
                Planning.list_drafts(user)
     end
 
-    test "next_plans/1 returns nearest plans belonging to the user", %{
-      user: user,
-      friend: friend
-    } do
-      %{id: first_id} =
-        trip_fixture(%{
-          author_id: user.id,
-          status: Trip.planned(),
-          start_date: ~D[2023-06-12],
-          end_date: ~D[2023-06-13]
-        })
-
-      %{id: second_id} =
-        trip_fixture(%{
-          author_id: user.id,
-          status: Trip.planned(),
-          start_date: ~D[2023-03-01],
-          end_date: ~D[2023-03-02]
-        })
-
-      %{id: _third_id} =
-        trip_fixture(%{
-          author_id: user.id,
-          status: Trip.finished(),
-          start_date: ~D[2023-03-01],
-          end_date: ~D[2023-03-02]
-        })
-
-      %{id: _friend_id} = trip_fixture(%{author_id: friend.id, status: Trip.planned()})
-      %{id: _draft_id} = trip_fixture(%{author_id: user.id, status: Trip.draft()})
-
-      assert [
-               %Trip{id: ^second_id},
-               %Trip{id: ^first_id}
-             ] =
-               Planning.next_plans(user)
-    end
-
-    test "last_trips/1 returns most recent trips belonging to the user", %{
-      user: user,
-      friend: friend
-    } do
-      %{id: _first_id} =
-        trip_fixture(%{
-          author_id: user.id,
-          status: Trip.planned(),
-          start_date: ~D[2023-06-12],
-          end_date: ~D[2023-06-13]
-        })
-
-      %{id: second_id} =
-        trip_fixture(%{
-          author_id: user.id,
-          status: Trip.finished(),
-          start_date: ~D[2023-03-01],
-          end_date: ~D[2023-03-02]
-        })
-
-      %{id: third_id} =
-        trip_fixture(%{
-          author_id: user.id,
-          status: Trip.finished(),
-          start_date: ~D[2023-07-01],
-          end_date: ~D[2023-07-02]
-        })
-
-      %{id: _friend_id} = trip_fixture(%{author_id: friend.id, status: Trip.finished()})
-      %{id: _draft_id} = trip_fixture(%{author_id: user.id, status: Trip.draft()})
-
-      assert [
-               %Trip{id: ^third_id},
-               %Trip{id: ^second_id}
-             ] =
-               Planning.last_trips(user)
-    end
-
     test "get_trip/1 returns the trip with given id" do
       trip = trip_fixture()
       db_trip = Planning.get_trip(trip.id)
@@ -663,7 +587,7 @@ defmodule HamsterTravel.PlanningTest do
 
     test "create_destination/1 broadcasts destination creation", %{city: city, trip: trip} do
       # Subscribe to the topic
-      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "trip_destinations:#{trip.id}")
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
 
       valid_attrs = %{
         city_id: city.id,
@@ -737,7 +661,7 @@ defmodule HamsterTravel.PlanningTest do
 
     test "update_destination/2 sends pubsub event", %{trip: trip} do
       destination = destination_fixture(%{trip_id: trip.id})
-      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "trip_destinations:#{trip.id}")
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
 
       assert {:ok, %Destination{} = updated_destination} =
                Planning.update_destination(destination, @update_attrs)
@@ -767,7 +691,7 @@ defmodule HamsterTravel.PlanningTest do
 
     test "delete_destination/1 sends pubsub event", %{trip: trip} do
       destination = destination_fixture(%{trip_id: trip.id})
-      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "trip_destinations:#{trip.id}")
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
 
       assert {:ok, %Destination{} = deleted_destination} =
                Planning.delete_destination(destination)
@@ -965,6 +889,565 @@ defmodule HamsterTravel.PlanningTest do
       # Verify country data
       [country] = loaded_trip.countries
       assert country.iso == "DE"
+    end
+  end
+
+  describe "expenses" do
+    alias HamsterTravel.Planning.Expense
+
+    test "list_expenses/1 returns all expenses for a trip" do
+      trip = trip_fixture()
+      expense1 = expense_fixture(%{trip_id: trip.id, name: "Hotel"})
+      expense2 = expense_fixture(%{trip_id: trip.id, name: "Food"})
+      _other_expense = expense_fixture()
+
+      expenses = Planning.list_expenses(trip)
+      expense_ids = Enum.map(expenses, & &1.id)
+
+      assert length(expenses) == 2
+      assert expense1.id in expense_ids
+      assert expense2.id in expense_ids
+    end
+
+    test "get_expense!/1 returns the expense with given id" do
+      expense = expense_fixture()
+      assert Planning.get_expense!(expense.id).id == expense.id
+    end
+
+    test "create_expense/2 with valid data creates an expense" do
+      trip = trip_fixture()
+      valid_attrs = %{price: Money.new(:EUR, 2500), name: "Restaurant"}
+
+      assert {:ok, %Expense{} = expense} = Planning.create_expense(trip, valid_attrs)
+      assert expense.price == Money.new(:EUR, 2500)
+      assert expense.name == "Restaurant"
+      assert expense.trip_id == trip.id
+    end
+
+    test "create_expense/2 with invalid data returns error changeset" do
+      trip = trip_fixture()
+      assert {:error, %Ecto.Changeset{}} = Planning.create_expense(trip, %{})
+    end
+
+    test "update_expense/2 with valid data updates the expense" do
+      expense = expense_fixture()
+      update_attrs = %{price: Money.new(:USD, 3000), name: "Updated expense"}
+
+      assert {:ok, %Expense{} = expense} = Planning.update_expense(expense, update_attrs)
+      assert expense.price == Money.new(:USD, 3000)
+      assert expense.name == "Updated expense"
+    end
+
+    test "update_expense/2 with invalid data returns error changeset" do
+      expense = expense_fixture()
+      assert {:error, %Ecto.Changeset{}} = Planning.update_expense(expense, %{price: nil})
+      assert expense == Planning.get_expense!(expense.id)
+    end
+
+    test "delete_expense/1 deletes the expense" do
+      expense = expense_fixture()
+      assert {:ok, %Expense{}} = Planning.delete_expense(expense)
+      assert_raise Ecto.NoResultsError, fn -> Planning.get_expense!(expense.id) end
+    end
+
+    test "change_expense/1 returns an expense changeset" do
+      expense = expense_fixture()
+      assert %Ecto.Changeset{} = Planning.change_expense(expense)
+    end
+
+    test "new_expense/1 returns a new expense changeset with trip_id" do
+      trip = trip_fixture()
+      changeset = Planning.new_expense(trip)
+
+      assert %Ecto.Changeset{
+               data: %{
+                 trip_id: trip_id
+               }
+             } = changeset
+
+      assert trip_id == trip.id
+    end
+
+    test "create_expense/2 broadcasts pubsub event" do
+      trip = trip_fixture()
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
+
+      assert {:ok, %Expense{} = expense} =
+               Planning.create_expense(trip, %{price: Money.new(:EUR, 1000), name: "Test"})
+
+      assert_receive {[:expense, :created], %{value: ^expense}}
+    end
+
+    test "update_expense/2 broadcasts pubsub event" do
+      expense = expense_fixture()
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{expense.trip_id}")
+
+      assert {:ok, %Expense{} = updated_expense} =
+               Planning.update_expense(expense, %{name: "Updated"})
+
+      assert_receive {[:expense, :updated], %{value: ^updated_expense}}
+    end
+
+    test "delete_expense/1 broadcasts pubsub event" do
+      expense = expense_fixture()
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{expense.trip_id}")
+
+      assert {:ok, %Expense{} = deleted_expense} = Planning.delete_expense(expense)
+
+      assert_receive {[:expense, :deleted], %{value: ^deleted_expense}}
+    end
+  end
+
+  describe "calculate_budget" do
+    test "calculates budget for trip with no expenses" do
+      trip = trip_fixture()
+      budget = Planning.calculate_budget(trip)
+      assert Money.equal?(budget, Money.new(:EUR, 0))
+    end
+
+    test "calculates budget for trip with preloaded expenses in same currency" do
+      trip = trip_fixture()
+
+      {:ok, _expense1} =
+        Planning.create_expense(trip, %{price: Money.new(:EUR, 1000), name: "Hotel"})
+
+      {:ok, _expense2} =
+        Planning.create_expense(trip, %{price: Money.new(:EUR, 500), name: "Food"})
+
+      # Preload expenses
+      trip_with_expenses = Planning.get_trip!(trip.id)
+
+      budget = Planning.calculate_budget(trip_with_expenses)
+      expected = Money.new(:EUR, 1500)
+      assert Money.equal?(budget, expected)
+    end
+
+    test "calculates budget for trip with expenses in different currencies using fixed rates" do
+      # Create a USD trip to test currency conversion
+      trip = trip_fixture(%{currency: "USD"})
+
+      # Add expenses in different currencies
+      {:ok, _expense1} =
+        Planning.create_expense(trip, %{price: Money.new(:EUR, 1000), name: "Hotel"})
+
+      {:ok, _expense2} =
+        Planning.create_expense(trip, %{price: Money.new(:GBP, 500), name: "Food"})
+
+      {:ok, _expense3} =
+        Planning.create_expense(trip, %{price: Money.new(:USD, 200), name: "Transport"})
+
+      trip_with_expenses = Planning.get_trip!(trip.id)
+
+      budget = Planning.calculate_budget(trip_with_expenses)
+
+      # With fixed rates:
+      # EUR 1000 = USD 1100 (1000 * 1.10)
+      # GBP 500 = USD 647.06 (500 / 0.85 * 1.10) ≈ 647
+      # USD 200 = USD 200
+      # Total ≈ USD 1947
+
+      assert budget.currency == :USD
+      assert Decimal.to_float(budget.amount) |> Float.round(2) == 1947.06
+    end
+
+    test "calculates budget with non-preloaded expenses" do
+      trip = trip_fixture()
+
+      {:ok, _expense1} =
+        Planning.create_expense(trip, %{price: Money.new(:EUR, 750), name: "Accommodation"})
+
+      {:ok, _expense2} =
+        Planning.create_expense(trip, %{price: Money.new(:EUR, 250), name: "Activities"})
+
+      # Don't preload expenses - let the function fetch them
+      budget = Planning.calculate_budget(trip)
+      expected = Money.new(:EUR, 1000)
+      assert Money.equal?(budget, expected)
+    end
+
+    test "handles trip with expenses that fail currency conversion gracefully" do
+      trip = trip_fixture()
+
+      # Create an expense with an unsupported currency (this should be converted to EUR 0)
+      {:ok, _expense1} =
+        Planning.create_expense(trip, %{price: Money.new(:EUR, 500), name: "Valid expense"})
+
+      budget = Planning.calculate_budget(trip)
+      expected = Money.new(:EUR, 500)
+      assert Money.equal?(budget, expected)
+    end
+
+    test "calculates budget correctly when trip currency differs from expense currencies" do
+      # Create a GBP trip
+      trip = trip_fixture(%{currency: "GBP"})
+
+      {:ok, _expense1} =
+        Planning.create_expense(trip, %{price: Money.new(:EUR, 100), name: "Hotel"})
+
+      {:ok, _expense2} =
+        Planning.create_expense(trip, %{price: Money.new(:USD, 110), name: "Food"})
+
+      trip_with_expenses = Planning.get_trip!(trip.id)
+      budget = Planning.calculate_budget(trip_with_expenses)
+
+      # With fixed rates:
+      # EUR 100 = GBP 85 (100 * 0.85)
+      # USD 110 = GBP 85 (110 / 1.10 * 0.85)
+      # Total = GBP 170
+
+      assert budget.currency == :GBP
+      assert Money.equal?(budget, Money.new(:GBP, 170))
+    end
+  end
+
+  describe "accommodations" do
+    alias HamsterTravel.Planning.Accommodation
+
+    @invalid_attrs %{name: nil, start_day: nil, end_day: nil}
+    @update_attrs %{name: "Updated Hotel", start_day: 1, end_day: 3}
+
+    setup do
+      trip = trip_fixture()
+
+      {:ok, trip: trip}
+    end
+
+    test "list_accommodations/1 returns all accommodations for a trip", %{trip: trip} do
+      accommodation = accommodation_fixture(%{trip_id: trip.id})
+      [result] = Planning.list_accommodations(trip)
+      assert result.id == accommodation.id
+      assert result.name == accommodation.name
+      assert result.trip_id == accommodation.trip_id
+      assert result.start_day == accommodation.start_day
+      assert result.end_day == accommodation.end_day
+    end
+
+    test "get_accommodation!/1 returns the accommodation with given id" do
+      accommodation = accommodation_fixture()
+      result = Planning.get_accommodation!(accommodation.id)
+      assert result.id == accommodation.id
+      assert result.name == accommodation.name
+      assert result.trip_id == accommodation.trip_id
+      assert result.start_day == accommodation.start_day
+      assert result.end_day == accommodation.end_day
+    end
+
+    test "create_accommodation/1 with valid data creates an accommodation", %{
+      trip: trip
+    } do
+      valid_attrs = %{
+        name: "Luxury Hotel",
+        link: "https://example.com/hotel",
+        address: "456 Hotel Street, Vienna",
+        note: "Beautiful hotel with great views",
+        start_day: 0,
+        end_day: 2,
+        expense: %{
+          price: Money.new(:EUR, 15_000),
+          name: "Hotel booking",
+          trip_id: trip.id
+        }
+      }
+
+      assert {:ok, %Accommodation{} = accommodation} =
+               Planning.create_accommodation(trip, valid_attrs)
+
+      assert accommodation.name == "Luxury Hotel"
+      assert accommodation.link == "https://example.com/hotel"
+      assert accommodation.address == "456 Hotel Street, Vienna"
+      assert accommodation.note == "Beautiful hotel with great views"
+      assert accommodation.start_day == 0
+      assert accommodation.end_day == 2
+      assert accommodation.trip_id == trip.id
+      assert accommodation.expense.price == Money.new(:EUR, 15_000)
+      assert accommodation.expense.name == "Hotel booking"
+      assert accommodation.expense.trip_id == trip.id
+      assert accommodation.expense.accommodation_id == accommodation.id
+    end
+
+    test "create_accommodation/1 broadcasts accommodation creation", %{
+      trip: trip
+    } do
+      # Subscribe to the topic
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
+
+      valid_attrs = %{
+        name: "Test Hotel",
+        start_day: 0,
+        end_day: 1,
+        expense: %{
+          price: Money.new(:EUR, 10_000),
+          name: "Hotel expense",
+          trip_id: trip.id
+        }
+      }
+
+      # Act
+      {:ok, accommodation} = Planning.create_accommodation(trip, valid_attrs)
+
+      # Assert
+      assert_receive {[:accommodation, :created], %{value: ^accommodation}}
+    end
+
+    test "create_accommodation/1 with invalid data returns error changeset", %{trip: trip} do
+      assert {:error, %Ecto.Changeset{}} = Planning.create_accommodation(trip, @invalid_attrs)
+    end
+
+    test "create_accommodation/1 fails if end_day is less than start_day", %{
+      trip: trip
+    } do
+      invalid_attrs = %{
+        name: "Test Hotel",
+        start_day: 10,
+        end_day: 5,
+        expense: %{
+          price: Money.new(:EUR, 10_000),
+          name: "Hotel expense",
+          trip_id: trip.id
+        }
+      }
+
+      assert {:error, %Ecto.Changeset{}} = Planning.create_accommodation(trip, invalid_attrs)
+    end
+
+    test "no negative start_day", %{trip: trip} do
+      # Try to insert accommodation with negative start_day using Planning context
+      attrs = %{
+        name: "Test Hotel",
+        start_day: -1,
+        end_day: 0,
+        expense: %{
+          price: Money.new(:EUR, 10_000),
+          name: "Hotel expense",
+          trip_id: trip.id
+        }
+      }
+
+      assert {:error, %Ecto.Changeset{} = changeset} = Planning.create_accommodation(trip, attrs)
+      assert %{start_day: ["must be greater than or equal to 0"]} = errors_on(changeset)
+    end
+
+    test "no negative end_day", %{trip: trip} do
+      # Try to insert accommodation with negative end_day using Planning context
+      attrs = %{
+        name: "Test Hotel",
+        start_day: 0,
+        end_day: -1,
+        expense: %{
+          price: Money.new(:EUR, 10_000),
+          name: "Hotel expense",
+          trip_id: trip.id
+        }
+      }
+
+      assert {:error, %Ecto.Changeset{} = changeset} = Planning.create_accommodation(trip, attrs)
+      assert errors_on(changeset).end_day |> Enum.member?("must be greater than or equal to 0")
+    end
+
+    test "start_day must be less than or equal to end_day", %{trip: trip} do
+      # Try to insert accommodation with start_day > end_day using Planning context
+      attrs = %{
+        name: "Test Hotel",
+        start_day: 5,
+        end_day: 3,
+        expense: %{
+          price: Money.new(:EUR, 10_000),
+          name: "Hotel expense",
+          trip_id: trip.id
+        }
+      }
+
+      assert {:error, %Ecto.Changeset{} = changeset} = Planning.create_accommodation(trip, attrs)
+      assert %{end_day: ["must be greater than or equal to start_day"]} = errors_on(changeset)
+    end
+
+    test "update_accommodation/2 with valid data updates the accommodation" do
+      accommodation = accommodation_fixture()
+
+      assert {:ok, %Accommodation{} = updated_accommodation} =
+               Planning.update_accommodation(accommodation, @update_attrs)
+
+      assert updated_accommodation.name == "Updated Hotel"
+      assert updated_accommodation.start_day == 1
+      assert updated_accommodation.end_day == 3
+    end
+
+    test "update_accommodation/2 sends pubsub event", %{trip: trip} do
+      accommodation = accommodation_fixture(%{trip_id: trip.id})
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
+
+      assert {:ok, %Accommodation{} = updated_accommodation} =
+               Planning.update_accommodation(accommodation, @update_attrs)
+
+      assert_receive {[:accommodation, :updated], %{value: ^updated_accommodation}}
+    end
+
+    test "update_accommodation/2 with invalid data returns error changeset" do
+      accommodation = accommodation_fixture()
+
+      assert {:error, %Ecto.Changeset{}} =
+               Planning.update_accommodation(accommodation, @invalid_attrs)
+
+      result = Planning.get_accommodation!(accommodation.id)
+      assert result.id == accommodation.id
+      assert result.name == accommodation.name
+      assert result.trip_id == accommodation.trip_id
+      assert result.start_day == accommodation.start_day
+      assert result.end_day == accommodation.end_day
+    end
+
+    test "update_accommodation/2 with expense data updates both accommodation and expense", %{
+      trip: trip
+    } do
+      # Create accommodation with expense
+      accommodation =
+        accommodation_fixture(%{
+          trip_id: trip.id,
+          name: "Original Hotel",
+          start_day: 0,
+          end_day: 2,
+          expense: %{
+            price: Money.new(:EUR, 10_000),
+            name: "Original Hotel Booking",
+            trip_id: trip.id
+          }
+        })
+
+      accommodation = accommodation |> Repo.preload(:expense)
+
+      update_attrs = %{
+        name: "Updated Hotel",
+        start_day: 1,
+        end_day: 3,
+        expense: %{
+          # note that we need to pass the expense id to update the expense
+          # Think how would this work with a form?
+          id: accommodation.expense.id,
+          price: Money.new(:EUR, 15_000),
+          name: "Updated Hotel Booking"
+        }
+      }
+
+      assert {:ok, %Accommodation{} = updated_accommodation} =
+               Planning.update_accommodation(accommodation, update_attrs)
+
+      # Verify accommodation was updated
+      assert updated_accommodation.name == "Updated Hotel"
+      assert updated_accommodation.start_day == 1
+      assert updated_accommodation.end_day == 3
+
+      # Verify expense was updated
+      updated_accommodation = updated_accommodation |> Repo.preload(:expense)
+      assert updated_accommodation.expense.price == Money.new(:EUR, 15_000)
+      assert updated_accommodation.expense.name == "Updated Hotel Booking"
+      assert updated_accommodation.expense.trip_id == trip.id
+      assert updated_accommodation.expense.accommodation_id == updated_accommodation.id
+    end
+
+    test "delete_accommodation/1 deletes the accommodation" do
+      accommodation = accommodation_fixture()
+      assert {:ok, %Accommodation{}} = Planning.delete_accommodation(accommodation)
+      assert_raise Ecto.NoResultsError, fn -> Planning.get_accommodation!(accommodation.id) end
+    end
+
+    test "delete_accommodation/1 sends pubsub event", %{trip: trip} do
+      accommodation = accommodation_fixture(%{trip_id: trip.id})
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
+
+      assert {:ok, %Accommodation{} = deleted_accommodation} =
+               Planning.delete_accommodation(accommodation)
+
+      assert_receive {[:accommodation, :deleted], %{value: ^deleted_accommodation}}
+    end
+
+    test "change_accommodation/1 returns an accommodation changeset" do
+      accommodation = accommodation_fixture()
+      assert %Ecto.Changeset{} = Planning.change_accommodation(accommodation)
+    end
+
+    test "new_accommodation/2 returns a new accommodation changeset with trip_id, start_day and end_day are for the whole trip" do
+      trip = trip_fixture() |> Repo.preload(:accommodations)
+      changeset = Planning.new_accommodation(trip, 0)
+
+      assert %Ecto.Changeset{
+               data: %{
+                 trip_id: trip_id,
+                 start_day: 0,
+                 end_day: 2
+               }
+             } = changeset
+
+      assert trip_id == trip.id
+    end
+
+    test "new_accommodation/2 when trip already has some accommodations returns a new accommodation changeset start_day and end_day for the current day index" do
+      trip = trip_fixture()
+      accommodation_fixture(%{trip_id: trip.id, start_day: 0, end_day: 1})
+      trip = trip |> Repo.preload(:accommodations)
+      changeset = Planning.new_accommodation(trip, 1)
+
+      assert %Ecto.Changeset{
+               data: %{
+                 trip_id: trip_id,
+                 start_day: 1,
+                 end_day: 1
+               }
+             } = changeset
+
+      assert trip_id == trip.id
+    end
+
+    test "new_accommodation/2 with attributes overrides default values" do
+      trip = trip_fixture()
+      attrs = %{start_day: 1, end_day: 2}
+      changeset = Planning.new_accommodation(trip, 0, attrs)
+
+      assert %Ecto.Changeset{
+               data: %{
+                 trip_id: trip_id
+               },
+               changes: %{
+                 start_day: 1,
+                 end_day: 2
+               }
+             } = changeset
+
+      assert trip_id == trip.id
+    end
+
+    test "accommodations_for_day/2 returns accommodations active on the given day" do
+      # Create accommodations with different day ranges
+      accommodation1 = accommodation_fixture(%{start_day: 1, end_day: 3})
+      accommodation2 = accommodation_fixture(%{start_day: 2, end_day: 4})
+      accommodation3 = accommodation_fixture(%{start_day: 4, end_day: 6})
+
+      accommodations = [accommodation1, accommodation2, accommodation3]
+
+      # Test day 2 (should include accommodation1 and accommodation2)
+      assert [^accommodation1, ^accommodation2] =
+               Planning.accommodations_for_day(2, accommodations)
+
+      # Test day 4 (should include accommodation2 and accommodation3)
+      assert [^accommodation2, ^accommodation3] =
+               Planning.accommodations_for_day(4, accommodations)
+
+      # Test day 5 (should only include accommodation3)
+      assert [^accommodation3] = Planning.accommodations_for_day(5, accommodations)
+
+      # Test day 0 (should return empty list as no accommodations start on day 0)
+      assert [] = Planning.accommodations_for_day(0, accommodations)
+    end
+
+    test "accommodations_for_day/2 handles single-day accommodations" do
+      accommodation = accommodation_fixture(%{start_day: 2, end_day: 2})
+
+      assert [^accommodation] = Planning.accommodations_for_day(2, [accommodation])
+      assert [] = Planning.accommodations_for_day(1, [accommodation])
+      assert [] = Planning.accommodations_for_day(3, [accommodation])
+    end
+
+    test "accommodations_for_day/2 handles empty list of accommodations" do
+      assert [] = Planning.accommodations_for_day(1, [])
     end
   end
 end

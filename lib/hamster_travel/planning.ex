@@ -5,11 +5,28 @@ defmodule HamsterTravel.Planning do
 
   import Ecto.Query, warn: false
 
+  require Logger
+
   alias HamsterTravel.Geo
-  alias HamsterTravel.Planning.{Destination, Policy, Trip}
+  alias HamsterTravel.Planning.{Accommodation, Destination, Expense, Policy, Trip}
   alias HamsterTravel.Repo
 
-  @topic "trip_destinations"
+  # PubSub functions
+  @topic "planning"
+
+  defp send_pubsub_event({:ok, result} = return_tuple, event, trip_id) do
+    Phoenix.PubSub.broadcast(
+      HamsterTravel.PubSub,
+      @topic <> ":#{trip_id}",
+      {event, %{value: result}}
+    )
+
+    return_tuple
+  end
+
+  defp send_pubsub_event({:error, _reason} = result, _, _), do: result
+
+  # Trip functions
 
   def list_plans(user \\ nil) do
     query =
@@ -36,34 +53,6 @@ defmodule HamsterTravel.Planning do
 
     query
     |> Policy.user_drafts_scope(user)
-    |> Repo.all()
-    |> trip_preloading()
-  end
-
-  def next_plans(user \\ nil) do
-    query =
-      from t in Trip,
-        where: t.status == ^Trip.planned() and t.author_id == ^user.id,
-        order_by: [
-          asc: t.start_date
-        ],
-        limit: 4
-
-    query
-    |> Repo.all()
-    |> trip_preloading()
-  end
-
-  def last_trips(user \\ nil) do
-    query =
-      from t in Trip,
-        where: t.status == ^Trip.finished() and t.author_id == ^user.id,
-        order_by: [
-          desc: t.start_date
-        ],
-        limit: 6
-
-    query
     |> Repo.all()
     |> trip_preloading()
   end
@@ -161,6 +150,23 @@ defmodule HamsterTravel.Planning do
     Trip.changeset(trip, attrs)
   end
 
+  defp trip_preloading(query) do
+    query
+    |> Repo.preload([:author, :countries])
+  end
+
+  defp single_trip_preloading(query) do
+    query
+    |> Repo.preload([
+      :author,
+      :countries,
+      destinations: [city: Geo.city_preloading_query()],
+      accommodations: :expense
+    ])
+  end
+
+  # Destinations functions
+
   def get_destination!(id) do
     Repo.get!(Destination, id)
     |> destinations_preloading()
@@ -179,7 +185,7 @@ defmodule HamsterTravel.Planning do
     %Destination{trip_id: trip.id}
     |> Destination.changeset(attrs)
     |> Repo.insert()
-    |> destinations_preloading_after_create()
+    |> preload_after_db_call(&Repo.preload(&1, city: Geo.city_preloading_query()))
     |> send_pubsub_event([:destination, :created], trip.id)
   end
 
@@ -187,6 +193,7 @@ defmodule HamsterTravel.Planning do
     destination
     |> Destination.changeset(attrs)
     |> Repo.update()
+    |> preload_after_db_call(&Repo.preload(&1, city: Geo.city_preloading_query()))
     |> send_pubsub_event([:destination, :updated], destination.trip_id)
   end
 
@@ -222,19 +229,7 @@ defmodule HamsterTravel.Planning do
   the day index and its end_day is greater than or equal to the day index.
   """
   def destinations_for_day(day_index, destinations) do
-    Enum.filter(destinations, fn destination ->
-      destination.start_day <= day_index && destination.end_day >= day_index
-    end)
-  end
-
-  defp trip_preloading(query) do
-    query
-    |> Repo.preload([:author, :countries])
-  end
-
-  defp single_trip_preloading(query) do
-    query
-    |> Repo.preload([:author, :countries, destinations: [city: Geo.city_preloading_query()]])
+    items_for_day(day_index, destinations)
   end
 
   defp destinations_preloading(query) do
@@ -242,23 +237,187 @@ defmodule HamsterTravel.Planning do
     |> Repo.preload(city: Geo.city_preloading_query())
   end
 
-  defp destinations_preloading_after_create({:error, _} = res), do: res
+  # Expense functions
 
-  defp destinations_preloading_after_create({:ok, destination}) do
-    destination = Repo.preload(destination, city: Geo.city_preloading_query())
-
-    {:ok, destination}
+  def get_expense!(id) do
+    Repo.get!(Expense, id)
   end
 
-  defp send_pubsub_event({:ok, result} = return_tuple, event, trip_id) do
-    Phoenix.PubSub.broadcast(
-      HamsterTravel.PubSub,
-      @topic <> ":#{trip_id}",
-      {event, %{value: result}}
-    )
-
-    return_tuple
+  def list_expenses(%Trip{id: trip_id}) do
+    list_expenses(trip_id)
   end
 
-  defp send_pubsub_event({:error, _reason} = result, _, _), do: result
+  def list_expenses(trip_id) do
+    Repo.all(from e in Expense, where: e.trip_id == ^trip_id, order_by: [desc: e.inserted_at])
+  end
+
+  def create_expense(trip, attrs \\ %{}) do
+    %Expense{trip_id: trip.id}
+    |> Expense.changeset(attrs)
+    |> Repo.insert()
+    |> send_pubsub_event([:expense, :created], trip.id)
+  end
+
+  def update_expense(%Expense{} = expense, attrs) do
+    expense
+    |> Expense.changeset(attrs)
+    |> Repo.update()
+    |> send_pubsub_event([:expense, :updated], expense.trip_id)
+  end
+
+  def new_expense(trip, attrs \\ %{}) do
+    %Expense{
+      trip_id: trip.id
+    }
+    |> Expense.changeset(attrs)
+  end
+
+  def change_expense(%Expense{} = expense, attrs \\ %{}) do
+    Expense.changeset(expense, attrs)
+  end
+
+  def delete_expense(%Expense{} = expense) do
+    Repo.delete(expense)
+    |> send_pubsub_event([:expense, :deleted], expense.trip_id)
+  end
+
+  @doc """
+  Calculates the total budget for a trip by summing all expenses.
+
+  If expenses are not preloaded, they will be fetched from the database.
+  Each expense is converted to the trip's currency before summing.
+  Returns a Money struct in the trip's currency.
+
+  ## Examples
+
+      iex> trip = %Trip{currency: "EUR", expenses: [%Expense{price: Money.new(:EUR, 1000)}]}
+      iex> calculate_budget(trip)
+      %Money{amount: 1000, currency: :EUR}
+
+  """
+  def calculate_budget(%Trip{} = trip) do
+    trip
+    |> get_trip_expenses()
+    |> Enum.map(&convert_expense_to_currency(&1, trip.currency))
+    |> Enum.reduce(Money.new(trip.currency, 0), fn converted_price, acc ->
+      case Money.add(acc, converted_price) do
+        {:ok, result} -> result
+        {:error, _} -> acc
+      end
+    end)
+  end
+
+  defp get_trip_expenses(%Trip{expenses: %Ecto.Association.NotLoaded{}} = trip) do
+    list_expenses(trip.id)
+  end
+
+  defp get_trip_expenses(%Trip{expenses: expenses}), do: expenses
+
+  defp convert_expense_to_currency(%Expense{price: price}, target_currency)
+       when price.currency == target_currency,
+       do: price
+
+  defp convert_expense_to_currency(%Expense{price: price}, target_currency) do
+    case Money.to_currency(price, target_currency) do
+      {:ok, converted_money} ->
+        converted_money
+
+      {:error, _} ->
+        Logger.error("Failed to convert expense to currency: #{inspect(price)}")
+
+        Money.new(target_currency, 0)
+    end
+  end
+
+  # Accommodation functions
+
+  def get_accommodation!(id) do
+    Repo.get!(Accommodation, id)
+    |> accommodations_preloading()
+  end
+
+  def list_accommodations(%Trip{id: trip_id}) do
+    list_accommodations(trip_id)
+  end
+
+  def list_accommodations(trip_id) do
+    Repo.all(from a in Accommodation, where: a.trip_id == ^trip_id, order_by: [asc: a.start_day])
+    |> accommodations_preloading()
+  end
+
+  def create_accommodation(trip, attrs \\ %{}) do
+    # Ensure the expense has trip_id if it exists in attrs
+    attrs =
+      case Map.get(attrs, "expense") do
+        nil -> attrs
+        expense_attrs -> Map.put(attrs, "expense", Map.put(expense_attrs, "trip_id", trip.id))
+      end
+
+    %Accommodation{trip_id: trip.id}
+    |> Accommodation.changeset(attrs)
+    |> Repo.insert()
+    |> preload_after_db_call(&Repo.preload(&1, [:expense]))
+    |> send_pubsub_event([:accommodation, :created], trip.id)
+  end
+
+  def update_accommodation(%Accommodation{} = accommodation, attrs) do
+    accommodation
+    |> Accommodation.changeset(attrs)
+    |> Repo.update()
+    |> preload_after_db_call(&Repo.preload(&1, [:expense]))
+    |> send_pubsub_event([:accommodation, :updated], accommodation.trip_id)
+  end
+
+  def new_accommodation(trip, day_index, attrs \\ %{}) do
+    default_days =
+      if Ecto.assoc_loaded?(trip.accommodations) && Enum.empty?(trip.accommodations) do
+        %{start_day: 0, end_day: trip.duration - 1}
+      else
+        %{start_day: day_index, end_day: day_index}
+      end
+
+    %Accommodation{
+      start_day: default_days.start_day,
+      end_day: default_days.end_day,
+      trip_id: trip.id
+    }
+    |> Accommodation.changeset(attrs)
+  end
+
+  def change_accommodation(%Accommodation{} = accommodation, attrs \\ %{}) do
+    Accommodation.changeset(accommodation, attrs)
+  end
+
+  def delete_accommodation(%Accommodation{} = accommodation) do
+    Repo.delete(accommodation)
+    |> send_pubsub_event([:accommodation, :deleted], accommodation.trip_id)
+  end
+
+  @doc """
+  Returns a list of accommodations that are active on a given day index.
+  An accommodation is considered active if its start_day is less than or equal to
+  the day index and its end_day is greater than or equal to the day index.
+  """
+  def accommodations_for_day(day_index, accommodations) do
+    items_for_day(day_index, accommodations)
+  end
+
+  defp accommodations_preloading(query) do
+    query
+    |> Repo.preload([:expense])
+  end
+
+  # utils
+  defp items_for_day(day_index, items) do
+    Enum.filter(items, fn item ->
+      item.start_day <= day_index && item.end_day >= day_index
+    end)
+  end
+
+  defp preload_after_db_call({:error, _} = res, _preload_fun), do: res
+
+  defp preload_after_db_call({:ok, record}, preload_fun) do
+    record = preload_fun.(record)
+    {:ok, record}
+  end
 end

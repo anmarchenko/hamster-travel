@@ -1,13 +1,12 @@
-defmodule HamsterTravelWeb.Planning.DestinationForm do
+defmodule HamsterTravelWeb.Planning.AccommodationForm do
   @moduledoc """
-  Destination create/edit form.
+  Accommodation create/edit form.
   """
 
   use HamsterTravelWeb, :live_component
 
   alias HamsterTravel.Planning
 
-  alias HamsterTravelWeb.Planning.CityInput
   alias HamsterTravelWeb.Planning.DayRangeSelect
 
   attr :action, :atom, required: true
@@ -20,20 +19,21 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
     ~H"""
     <div>
       <.form
-        id={"destination-form-#{@id}"}
+        id={"accommodation-form-#{@id}"}
         for={@form}
-        as={:destination}
+        as={:accommodation}
         phx-target={@myself}
         phx-submit="form_submit"
         class="space-y-4"
       >
-        <.live_component
-          id={"city-input-#{@id}"}
-          module={CityInput}
-          field={@form[:city]}
-          validated_field={@form[:city_id]}
-          label={gettext("City")}
+        <.field
+          field={@form[:name]}
+          type="text"
+          label={gettext("Name")}
+          wrapper_class="mb-0"
+          placeholder={gettext("Hotel name")}
         />
+
         <.live_component
           id={"day-range-#{@id}"}
           module={DayRangeSelect}
@@ -43,6 +43,37 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
           duration={@trip.duration}
           start_date={@trip.start_date}
         />
+
+        <.inputs_for :let={expense_form} field={@form[:expense]}>
+          <.money_input
+            id={"accommodation-expense-price-#{@id}"}
+            field={expense_form[:price]}
+            label={gettext("Price")}
+            default_currency={@trip.currency}
+          />
+        </.inputs_for>
+
+        <.field
+          field={@form[:link]}
+          type="url"
+          label={gettext("Link")}
+          placeholder={gettext("Website link")}
+        />
+
+        <.field
+          field={@form[:address]}
+          type="text"
+          label={gettext("Address")}
+          placeholder={gettext("Street address")}
+        />
+
+        <.field
+          field={@form[:note]}
+          type="textarea"
+          label={gettext("Note")}
+          placeholder={gettext("Additional notes or details")}
+        />
+
         <div class="flex justify-between mt-2">
           <.button color="light" type="button" phx-click="cancel" phx-target={@myself}>
             {gettext("Cancel")}
@@ -61,10 +92,10 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
     changeset =
       case assigns.action do
         :new ->
-          Planning.new_destination(assigns.trip, assigns.day_index)
+          Planning.new_accommodation(assigns.trip, assigns.day_index)
 
         :edit ->
-          Planning.change_destination(assigns.destination)
+          Planning.change_accommodation(assigns.accommodation)
       end
 
     socket =
@@ -76,10 +107,8 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
   end
 
   @impl true
-  def handle_event("form_submit", %{"destination" => destination_params}, socket) do
-    destination_params = CityInput.process_selected_value_on_submit(destination_params, "city")
-
-    on_submit(socket, socket.assigns.action, destination_params)
+  def handle_event("form_submit", %{"accommodation" => accommodation_params}, socket) do
+    on_submit(socket, socket.assigns.action, accommodation_params)
   end
 
   def handle_event("cancel", _, socket) do
@@ -92,19 +121,19 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
     assign(socket, :form, to_form(changeset))
   end
 
-  defp on_submit(socket, :new, destination_params) do
+  defp on_submit(socket, :new, accommodation_params) do
     socket.assigns.trip
-    |> Planning.create_destination(destination_params)
+    |> Planning.create_accommodation(accommodation_params)
     |> result(socket)
   end
 
-  defp on_submit(socket, :edit, destination_params) do
-    socket.assigns.destination
-    |> Planning.update_destination(destination_params)
+  defp on_submit(socket, :edit, accommodation_params) do
+    socket.assigns.accommodation
+    |> Planning.update_accommodation(accommodation_params)
     |> result(socket)
   end
 
-  defp result({:ok, _destination}, socket) do
+  defp result({:ok, _accommodation}, socket) do
     socket.assigns.on_finish.()
 
     {:noreply, socket}

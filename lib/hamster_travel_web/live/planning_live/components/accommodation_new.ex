@@ -1,11 +1,12 @@
-defmodule HamsterTravelWeb.Planning.DestinationNew do
+defmodule HamsterTravelWeb.Planning.AccommodationNew do
   @moduledoc """
-  Live component responsible for creating a new destination
+  Live component responsible for creating a new accommodation
   """
 
   use HamsterTravelWeb, :live_component
 
   attr :id, :string, required: true
+  attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :day_index, :integer, required: true
   attr :class, :string, default: nil
   attr :edit, :boolean, default: false
@@ -14,12 +15,12 @@ defmodule HamsterTravelWeb.Planning.DestinationNew do
     ~H"""
     <div class={@class}>
       <.live_component
-        module={HamsterTravelWeb.Planning.DestinationForm}
+        module={HamsterTravelWeb.Planning.AccommodationForm}
         id={"new-#{@id}"}
         trip={@trip}
         day_index={@day_index}
         action={:new}
-        on_finish={fn -> send(self(), {:finish_adding, "destination"}) end}
+        on_finish={fn -> send(self(), {:finish_adding, "accommodation"}) end}
       />
     </div>
     """
@@ -36,7 +37,7 @@ defmodule HamsterTravelWeb.Planning.DestinationNew do
       >
         <.inline>
           <.icon name="hero-plus-solid" class="w-5 h-5" />
-          {gettext("Add destination")}
+          {gettext("Add accommodation")}
         </.inline>
       </a>
     </div>
@@ -52,7 +53,7 @@ defmodule HamsterTravelWeb.Planning.DestinationNew do
   end
 
   def handle_event("start_adding", _, socket) do
-    send(self(), {:start_adding, "destination", socket.assigns.id})
+    send(self(), {:start_adding, "accommodation", socket.assigns.id})
     {:noreply, socket}
   end
 end

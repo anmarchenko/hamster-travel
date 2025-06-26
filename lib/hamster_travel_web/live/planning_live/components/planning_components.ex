@@ -6,7 +6,14 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.Trip
   alias HamsterTravelWeb.CoreComponents
-  alias HamsterTravelWeb.Planning.{Destination, DestinationNew, Hotel, Transfer}
+
+  alias HamsterTravelWeb.Planning.{
+    Accommodation,
+    AccommodationNew,
+    Destination,
+    DestinationNew,
+    Transfer
+  }
 
   attr(:trip, :map, required: true)
   attr(:active_tab, :string, required: true)
@@ -63,6 +70,25 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
       destination={destination}
       day_index={@day_index}
     />
+    """
+  end
+
+  attr(:budget, Money, required: true)
+  attr(:class, :string, default: nil)
+
+  def budget_display(assigns) do
+    ~H"""
+    <div class={
+      CoreComponents.build_class([
+        "flex flex-row gap-x-4 mt-4 sm:mt-8 text-xl",
+        @class
+      ])
+    }>
+      <.inline>
+        <.budget />
+        {Formatter.format_money(@budget.amount, @budget.currency)}
+      </.inline>
+    </div>
     """
   end
 
@@ -141,7 +167,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
     """
   end
 
-  attr(:trip, :map, required: true)
+  attr(:trip, Trip, required: true)
   attr(:class, :string, default: nil)
   attr(:flags_limit, :integer, default: 100)
 
@@ -212,28 +238,25 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   end
 
   attr(:trip, Trip, required: true)
-  attr(:budget, :integer, required: true)
+  attr(:budget, Money, required: true)
   attr(:destinations, :list, required: true)
   attr(:destinations_outside, :list, required: true)
   attr(:transfers, :list, required: true)
-  attr(:hotels, :list, required: true)
+  attr(:accommodations, :list, required: true)
+  attr(:accommodations_outside, :list, required: true)
 
   def tab_itinerary(assigns) do
     ~H"""
     <div>
-      <div class="flex flex-row gap-x-4 mt-4 sm:mt-8 text-xl">
-        <.inline>
-          <.budget />
-          {Formatter.format_money(@budget, @trip.currency)}
-        </.inline>
-      </div>
+      <.budget_display budget={@budget} />
 
       <.toggle
-        :if={Enum.any?(@destinations_outside)}
+        :if={Enum.any?(@destinations_outside) || Enum.any?(@accommodations_outside)}
         label={gettext("Some items are scheduled outside of the trip duration")}
         class="mt-4"
       >
         <.destinations_list trip={@trip} destinations={@destinations_outside} day_index={0} />
+        <.accommodations_list trip={@trip} accommodations={@accommodations_outside} day_index={0} />
       </.toggle>
 
       <table class="sm:mt-8 sm:table-auto sm:border-collapse sm:border sm:border-slate-500 sm:w-full">
@@ -283,7 +306,18 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
             </td>
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
               <div class="flex flex-col gap-y-8">
-                <.hotels hotels={HamsterTravel.filter_hotels_by_day(@hotels, i)} day_index={i} />
+                <.accommodations_list
+                  trip={@trip}
+                  accommodations={Planning.accommodations_for_day(i, @accommodations)}
+                  day_index={i}
+                />
+                <.live_component
+                  module={AccommodationNew}
+                  id={"accommodation-new-#{i}"}
+                  trip={@trip}
+                  day_index={i}
+                  class="mt-2"
+                />
               </div>
             </td>
           </tr>
@@ -315,30 +349,25 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
     """
   end
 
-  attr(:hotels, :list, required: true)
+  attr(:trip, Trip, required: true)
+  attr(:accommodations, :list, required: true)
   attr(:day_index, :integer, required: true)
 
-  def hotels(%{hotels: []} = assigns) do
-    ~H"""
-    <.secondary class="sm:hidden">
-      {gettext("No hotels for this day")}
-    </.secondary>
-    """
-  end
-
-  def hotels(assigns) do
+  def accommodations_list(assigns) do
     ~H"""
     <.live_component
-      :for={hotel <- @hotels}
-      module={Hotel}
-      id={"hotels-#{hotel.id}-day-#{@day_index}"}
-      hotel={hotel}
+      :for={accommodation <- @accommodations}
+      module={Accommodation}
+      id={"accommodation-#{accommodation.id}-day-#{@day_index}"}
+      trip={@trip}
+      accommodation={accommodation}
+      day_index={@day_index}
     />
     """
   end
 
   attr(:trip, Trip, required: true)
-  attr(:budget, :integer, required: true)
+  attr(:budget, Money, required: true)
   attr(:destinations, :list, required: true)
   attr(:destinations_outside, :list, required: true)
   attr(:activities, :list, required: true)
@@ -348,12 +377,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   def tab_activity(assigns) do
     ~H"""
     <div id={"activities-#{@trip.id}"}>
-      <div class="flex flex-row gap-x-4 mt-4 sm:mt-8 text-xl">
-        <.inline>
-          <.budget />
-          {Formatter.format_money(@budget, @trip.currency)}
-        </.inline>
-      </div>
+      <.budget_display budget={@budget} />
 
       <.toggle
         :if={Enum.any?(@destinations_outside)}

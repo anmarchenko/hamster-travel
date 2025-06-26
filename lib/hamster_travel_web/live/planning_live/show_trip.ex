@@ -2,12 +2,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   @moduledoc """
   Trip page
   """
-  alias HamsterTravel.Repo
   use HamsterTravelWeb, :live_view
 
   import HamsterTravelWeb.Planning.PlanningComponents
 
   alias HamsterTravel.Planning
+  alias HamsterTravel.Repo
   alias HamsterTravelWeb.Cldr
 
   @tabs ["itinerary", "activities"]
@@ -56,7 +56,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       class="!mt-* !p-* py-4 sm:py-6 px-6 sm:px-10 mb-10 mt-4 bg-white dark:bg-zinc-800 rounded-md"
     >
       <.planning_tabs trip={@trip} active_tab={@active_tab} />
-      <.render_tab trip={@trip} active_tab={@active_tab} />
+      <.render_tab trip={@trip} active_tab={@active_tab} budget={@budget} />
     </.container>
     """
   end
@@ -67,7 +67,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
     socket =
       if connected?(socket) do
-        Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "trip_destinations:#{trip.id}")
+        Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
         socket
       else
         socket
@@ -80,6 +80,9 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> assign(active_nav: active_nav(trip))
       |> assign(page_title: trip.name)
       |> assign(trip: trip)
+      |> assign(budget: Planning.calculate_budget(trip))
+      |> assign(active_destination_adding_component_id: nil)
+      |> assign(active_accommodation_adding_component_id: nil)
 
     {:ok, socket}
   end
@@ -95,61 +98,54 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   @impl true
   def handle_info({[:destination, :created], %{value: created_destination}}, socket) do
-    # Preload city before sending to component
-    created_destination = Repo.preload(created_destination, [:city])
-
-    trip =
-      socket.assigns.trip
-      |> Map.put(:destinations, socket.assigns.trip.destinations ++ [created_destination])
-
-    trip = Repo.preload(trip, :countries)
-
-    socket =
-      socket
-      |> assign(trip: trip)
-
-    {:noreply, socket}
+    handle_entity_event(:destination, :created, created_destination, socket)
   end
 
   @impl true
   def handle_info({[:destination, :updated], %{value: updated_destination}}, socket) do
-    # Preload city before sending to component
-    updated_destination = Repo.preload(updated_destination, [:city])
+    handle_entity_event(:destination, :updated, updated_destination, socket)
+  end
 
-    trip =
-      socket.assigns.trip
-      |> Map.put(
-        :destinations,
-        Enum.map(socket.assigns.trip.destinations, fn destination ->
-          if destination.id == updated_destination.id, do: updated_destination, else: destination
-        end)
-      )
+  @impl true
+  def handle_info({[:destination, :deleted], %{value: deleted_destination}}, socket) do
+    handle_entity_event(:destination, :deleted, deleted_destination, socket)
+  end
 
-    trip = Repo.preload(trip, :countries)
+  @impl true
+  def handle_info({[:accommodation, :created], %{value: created_accommodation}}, socket) do
+    handle_entity_event(:accommodation, :created, created_accommodation, socket)
+  end
+
+  @impl true
+  def handle_info({[:accommodation, :updated], %{value: updated_accommodation}}, socket) do
+    handle_entity_event(:accommodation, :updated, updated_accommodation, socket)
+  end
+
+  @impl true
+  def handle_info({[:accommodation, :deleted], %{value: deleted_accommodation}}, socket) do
+    handle_entity_event(:accommodation, :deleted, deleted_accommodation, socket)
+  end
+
+  @impl true
+  def handle_info({:start_adding, component_type, component_id}, socket) do
+    assign_key = get_key_for_component_adding_active_state_assign(component_type)
 
     socket =
       socket
-      |> assign(trip: trip)
+      |> assign(assign_key, component_id)
+      |> send_edit_state_to_entity_creation_components(component_type)
 
     {:noreply, socket}
   end
 
   @impl true
-  def handle_info({[:destination, :deleted], %{value: deleted_destination}}, socket) do
-    trip =
-      socket.assigns.trip
-      |> Map.put(
-        :destinations,
-        Enum.reject(socket.assigns.trip.destinations, fn destination ->
-          destination.id == deleted_destination.id
-        end)
-      )
-
-    trip = Repo.preload(trip, :countries)
+  def handle_info({:finish_adding, component_type}, socket) do
+    assign_key = get_key_for_component_adding_active_state_assign(component_type)
 
     socket =
       socket
-      |> assign(trip: trip)
+      |> assign(assign_key, nil)
+      |> send_edit_state_to_entity_creation_components(component_type)
 
     {:noreply, socket}
   end
@@ -158,11 +154,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     ~H"""
     <.tab_itinerary
       trip={@trip}
+      accommodations={@trip.accommodations}
+      accommodations_outside={accommodations_outside(@trip)}
       destinations={@trip.destinations}
       destinations_outside={destinations_outside(@trip)}
       transfers={[]}
-      hotels={[]}
-      budget={0}
+      budget={@budget}
     />
     """
   end
@@ -171,7 +168,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     ~H"""
     <.tab_activity
       trip={@trip}
-      budget={0}
+      budget={@budget}
       destinations={@trip.destinations}
       destinations_outside={destinations_outside(@trip)}
       activities={[]}
@@ -196,4 +193,116 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       destination.start_day >= trip.duration
     end)
   end
+
+  defp accommodations_outside(trip) do
+    trip.accommodations
+    |> Enum.filter(fn accommodation ->
+      accommodation.start_day >= trip.duration
+    end)
+  end
+
+  defp get_key_for_component_adding_active_state_assign(component_type) do
+    case component_type do
+      "destination" -> :active_destination_adding_component_id
+      "accommodation" -> :active_accommodation_adding_component_id
+      "transfer" -> :active_transfer_adding_component_id
+      "activity" -> :active_activity_adding_component_id
+      _ -> raise ArgumentError, "Unsupported component type: #{component_type}"
+    end
+  end
+
+  defp send_edit_state_to_entity_creation_components(socket, component_type) do
+    case get_creation_component_info(component_type) do
+      {module, active_assign_key} ->
+        trip = socket.assigns.trip
+
+        for i <- 0..(trip.duration - 1) do
+          component_id = "#{component_type}-new-#{i}"
+
+          send_update(module,
+            id: component_id,
+            edit: Map.get(socket.assigns, active_assign_key) == component_id
+          )
+        end
+
+        socket
+
+      nil ->
+        socket
+    end
+  end
+
+  defp get_creation_component_info(component_type) do
+    case component_type do
+      "destination" ->
+        {HamsterTravelWeb.Planning.DestinationNew, :active_destination_adding_component_id}
+
+      "accommodation" ->
+        {HamsterTravelWeb.Planning.AccommodationNew, :active_accommodation_adding_component_id}
+
+      _ ->
+        nil
+    end
+  end
+
+  defp handle_entity_event(entity_type, operation, entity, socket) do
+    # Preload associations based on entity type
+    entity = preload_entity_associations(entity_type, entity)
+
+    # Get the plural form for the trip field
+    entities_key = get_entities_key(entity_type)
+
+    # Update the trip's entity list based on operation
+    updated_entities =
+      update_entities_list(
+        Map.get(socket.assigns.trip, entities_key),
+        operation,
+        entity
+      )
+
+    # Update trip with new entities list and reload countries if destinations changed
+    trip =
+      socket.assigns.trip
+      |> Map.put(entities_key, updated_entities)
+      |> maybe_preload_countries(entity_type)
+
+    # Recalculate budget if accommodation changed
+    socket =
+      socket
+      |> assign(trip: trip)
+      |> maybe_recalculate_budget(entity_type, trip)
+
+    {:noreply, socket}
+  end
+
+  defp preload_entity_associations(:destination, entity), do: Repo.preload(entity, [:city])
+  defp preload_entity_associations(:accommodation, entity), do: Repo.preload(entity, [:expense])
+
+  defp get_entities_key(:destination), do: :destinations
+  defp get_entities_key(:accommodation), do: :accommodations
+
+  defp maybe_preload_countries(trip, :destination), do: Repo.preload(trip, :countries)
+  defp maybe_preload_countries(trip, _), do: trip
+
+  defp update_entities_list(entities, :created, entity) do
+    entities ++ [entity]
+  end
+
+  defp update_entities_list(entities, :updated, entity) do
+    Enum.map(entities, fn existing_entity ->
+      if existing_entity.id == entity.id, do: entity, else: existing_entity
+    end)
+  end
+
+  defp update_entities_list(entities, :deleted, entity) do
+    Enum.reject(entities, fn existing_entity ->
+      existing_entity.id == entity.id
+    end)
+  end
+
+  defp maybe_recalculate_budget(socket, :accommodation, trip) do
+    assign(socket, budget: Planning.calculate_budget(trip))
+  end
+
+  defp maybe_recalculate_budget(socket, _entity_type, _trip), do: socket
 end
