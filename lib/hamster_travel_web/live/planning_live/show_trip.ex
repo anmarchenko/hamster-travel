@@ -97,126 +97,32 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   @impl true
   def handle_info({[:destination, :created], %{value: created_destination}}, socket) do
-    # Preload city before sending to component
-    created_destination = Repo.preload(created_destination, [:city])
-
-    trip =
-      socket.assigns.trip
-      |> Map.put(:destinations, socket.assigns.trip.destinations ++ [created_destination])
-
-    trip = Repo.preload(trip, :countries)
-
-    socket =
-      socket
-      |> assign(trip: trip)
-
-    {:noreply, socket}
+    handle_entity_event(:destination, :created, created_destination, socket)
   end
 
   @impl true
   def handle_info({[:destination, :updated], %{value: updated_destination}}, socket) do
-    # Preload city before sending to component
-    updated_destination = Repo.preload(updated_destination, [:city])
-
-    trip =
-      socket.assigns.trip
-      |> Map.put(
-        :destinations,
-        Enum.map(socket.assigns.trip.destinations, fn destination ->
-          if destination.id == updated_destination.id, do: updated_destination, else: destination
-        end)
-      )
-
-    trip = Repo.preload(trip, :countries)
-
-    socket =
-      socket
-      |> assign(trip: trip)
-
-    {:noreply, socket}
+    handle_entity_event(:destination, :updated, updated_destination, socket)
   end
 
   @impl true
   def handle_info({[:destination, :deleted], %{value: deleted_destination}}, socket) do
-    trip =
-      socket.assigns.trip
-      |> Map.put(
-        :destinations,
-        Enum.reject(socket.assigns.trip.destinations, fn destination ->
-          destination.id == deleted_destination.id
-        end)
-      )
-
-    trip = Repo.preload(trip, :countries)
-
-    socket =
-      socket
-      |> assign(trip: trip)
-
-    {:noreply, socket}
+    handle_entity_event(:destination, :deleted, deleted_destination, socket)
   end
 
   @impl true
   def handle_info({[:accommodation, :created], %{value: created_accommodation}}, socket) do
-    # Preload expense before sending to component
-    created_accommodation = Repo.preload(created_accommodation, [:expense])
-
-    trip =
-      socket.assigns.trip
-      |> Map.put(:accommodations, socket.assigns.trip.accommodations ++ [created_accommodation])
-
-    trip = Repo.preload(trip, :countries)
-
-    socket =
-      socket
-      |> assign(trip: trip)
-
-    {:noreply, socket}
+    handle_entity_event(:accommodation, :created, created_accommodation, socket)
   end
 
   @impl true
   def handle_info({[:accommodation, :updated], %{value: updated_accommodation}}, socket) do
-    # Preload expense before sending to component
-    updated_accommodation = Repo.preload(updated_accommodation, [:expense])
-
-    trip =
-      socket.assigns.trip
-      |> Map.put(
-        :accommodations,
-        Enum.map(socket.assigns.trip.accommodations, fn accommodation ->
-          if accommodation.id == updated_accommodation.id,
-            do: updated_accommodation,
-            else: accommodation
-        end)
-      )
-
-    trip = Repo.preload(trip, :countries)
-
-    socket =
-      socket
-      |> assign(trip: trip)
-
-    {:noreply, socket}
+    handle_entity_event(:accommodation, :updated, updated_accommodation, socket)
   end
 
   @impl true
   def handle_info({[:accommodation, :deleted], %{value: deleted_accommodation}}, socket) do
-    trip =
-      socket.assigns.trip
-      |> Map.put(
-        :accommodations,
-        Enum.reject(socket.assigns.trip.accommodations, fn accommodation ->
-          accommodation.id == deleted_accommodation.id
-        end)
-      )
-
-    trip = Repo.preload(trip, :countries)
-
-    socket =
-      socket
-      |> assign(trip: trip)
-
-    {:noreply, socket}
+    handle_entity_event(:accommodation, :deleted, deleted_accommodation, socket)
   end
 
   @impl true
@@ -336,5 +242,55 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       _ ->
         socket
     end
+  end
+
+  defp handle_entity_event(entity_type, operation, entity, socket) do
+    # Preload associations based on entity type
+    entity = preload_entity_associations(entity_type, entity)
+
+    # Get the plural form for the trip field
+    entities_key = get_entities_key(entity_type)
+
+    # Update the trip's entity list based on operation
+    updated_entities =
+      update_entities_list(
+        Map.get(socket.assigns.trip, entities_key),
+        operation,
+        entity
+      )
+
+    # Update trip with new entities list and reload countries if destinations changed
+    trip =
+      socket.assigns.trip
+      |> Map.put(entities_key, updated_entities)
+      |> maybe_preload_countries(entity_type)
+
+    socket = assign(socket, trip: trip)
+    {:noreply, socket}
+  end
+
+  defp preload_entity_associations(:destination, entity), do: Repo.preload(entity, [:city])
+  defp preload_entity_associations(:accommodation, entity), do: Repo.preload(entity, [:expense])
+
+  defp get_entities_key(:destination), do: :destinations
+  defp get_entities_key(:accommodation), do: :accommodations
+
+  defp maybe_preload_countries(trip, :destination), do: Repo.preload(trip, :countries)
+  defp maybe_preload_countries(trip, _), do: trip
+
+  defp update_entities_list(entities, :created, entity) do
+    entities ++ [entity]
+  end
+
+  defp update_entities_list(entities, :updated, entity) do
+    Enum.map(entities, fn existing_entity ->
+      if existing_entity.id == entity.id, do: entity, else: existing_entity
+    end)
+  end
+
+  defp update_entities_list(entities, :deleted, entity) do
+    Enum.reject(entities, fn existing_entity ->
+      existing_entity.id == entity.id
+    end)
   end
 end
