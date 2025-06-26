@@ -4,7 +4,6 @@ defmodule HamsterTravel.Planning.AccommodationTest do
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.Accommodation
 
-  import HamsterTravel.AccountsFixtures
   import HamsterTravel.PlanningFixtures
 
   describe "price_per_night/1" do

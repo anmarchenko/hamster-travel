@@ -56,7 +56,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       class="!mt-* !p-* py-4 sm:py-6 px-6 sm:px-10 mb-10 mt-4 bg-white dark:bg-zinc-800 rounded-md"
     >
       <.planning_tabs trip={@trip} active_tab={@active_tab} />
-      <.render_tab trip={@trip} active_tab={@active_tab} />
+      <.render_tab trip={@trip} active_tab={@active_tab} budget={@budget} />
     </.container>
     """
   end
@@ -80,6 +80,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> assign(active_nav: active_nav(trip))
       |> assign(page_title: trip.name)
       |> assign(trip: trip)
+      |> assign(budget: Planning.calculate_budget(trip))
       |> assign(active_destination_adding_component_id: nil)
       |> assign(active_accommodation_adding_component_id: nil)
 
@@ -158,7 +159,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       destinations={@trip.destinations}
       destinations_outside={destinations_outside(@trip)}
       transfers={[]}
-      budget={0}
+      budget={@budget}
     />
     """
   end
@@ -167,7 +168,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     ~H"""
     <.tab_activity
       trip={@trip}
-      budget={0}
+      budget={@budget}
       destinations={@trip.destinations}
       destinations_outside={destinations_outside(@trip)}
       activities={[]}
@@ -265,7 +266,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> Map.put(entities_key, updated_entities)
       |> maybe_preload_countries(entity_type)
 
-    socket = assign(socket, trip: trip)
+    # Recalculate budget if accommodation changed
+    socket =
+      socket
+      |> assign(trip: trip)
+      |> maybe_recalculate_budget(entity_type, trip)
+
     {:noreply, socket}
   end
 
@@ -293,4 +299,10 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       existing_entity.id == entity.id
     end)
   end
+
+  defp maybe_recalculate_budget(socket, :accommodation, trip) do
+    assign(socket, budget: Planning.calculate_budget(trip))
+  end
+
+  defp maybe_recalculate_budget(socket, _entity_type, _trip), do: socket
 end

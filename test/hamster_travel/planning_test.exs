@@ -998,6 +998,108 @@ defmodule HamsterTravel.PlanningTest do
     end
   end
 
+  describe "calculate_budget" do
+    test "calculates budget for trip with no expenses" do
+      trip = trip_fixture()
+      budget = Planning.calculate_budget(trip)
+      assert Money.equal?(budget, Money.new(:EUR, 0))
+    end
+
+    test "calculates budget for trip with preloaded expenses in same currency" do
+      trip = trip_fixture()
+
+      {:ok, _expense1} =
+        Planning.create_expense(trip, %{price: Money.new(:EUR, 1000), name: "Hotel"})
+
+      {:ok, _expense2} =
+        Planning.create_expense(trip, %{price: Money.new(:EUR, 500), name: "Food"})
+
+      # Preload expenses
+      trip_with_expenses = Planning.get_trip!(trip.id)
+
+      budget = Planning.calculate_budget(trip_with_expenses)
+      expected = Money.new(:EUR, 1500)
+      assert Money.equal?(budget, expected)
+    end
+
+    test "calculates budget for trip with expenses in different currencies using fixed rates" do
+      # Create a USD trip to test currency conversion
+      trip = trip_fixture(%{currency: "USD"})
+
+      # Add expenses in different currencies
+      {:ok, _expense1} =
+        Planning.create_expense(trip, %{price: Money.new(:EUR, 1000), name: "Hotel"})
+
+      {:ok, _expense2} =
+        Planning.create_expense(trip, %{price: Money.new(:GBP, 500), name: "Food"})
+
+      {:ok, _expense3} =
+        Planning.create_expense(trip, %{price: Money.new(:USD, 200), name: "Transport"})
+
+      trip_with_expenses = Planning.get_trip!(trip.id)
+
+      budget = Planning.calculate_budget(trip_with_expenses)
+
+      # With fixed rates:
+      # EUR 1000 = USD 1100 (1000 * 1.10)
+      # GBP 500 = USD 647.06 (500 / 0.85 * 1.10) ≈ 647
+      # USD 200 = USD 200
+      # Total ≈ USD 1947
+
+      assert budget.currency == :USD
+      assert Decimal.to_float(budget.amount) |> Float.round(2) == 1947.06
+    end
+
+    test "calculates budget with non-preloaded expenses" do
+      trip = trip_fixture()
+
+      {:ok, _expense1} =
+        Planning.create_expense(trip, %{price: Money.new(:EUR, 750), name: "Accommodation"})
+
+      {:ok, _expense2} =
+        Planning.create_expense(trip, %{price: Money.new(:EUR, 250), name: "Activities"})
+
+      # Don't preload expenses - let the function fetch them
+      budget = Planning.calculate_budget(trip)
+      expected = Money.new(:EUR, 1000)
+      assert Money.equal?(budget, expected)
+    end
+
+    test "handles trip with expenses that fail currency conversion gracefully" do
+      trip = trip_fixture()
+
+      # Create an expense with an unsupported currency (this should be converted to EUR 0)
+      {:ok, _expense1} =
+        Planning.create_expense(trip, %{price: Money.new(:EUR, 500), name: "Valid expense"})
+
+      budget = Planning.calculate_budget(trip)
+      expected = Money.new(:EUR, 500)
+      assert Money.equal?(budget, expected)
+    end
+
+    test "calculates budget correctly when trip currency differs from expense currencies" do
+      # Create a GBP trip
+      trip = trip_fixture(%{currency: "GBP"})
+
+      {:ok, _expense1} =
+        Planning.create_expense(trip, %{price: Money.new(:EUR, 100), name: "Hotel"})
+
+      {:ok, _expense2} =
+        Planning.create_expense(trip, %{price: Money.new(:USD, 110), name: "Food"})
+
+      trip_with_expenses = Planning.get_trip!(trip.id)
+      budget = Planning.calculate_budget(trip_with_expenses)
+
+      # With fixed rates:
+      # EUR 100 = GBP 85 (100 * 0.85)
+      # USD 110 = GBP 85 (110 / 1.10 * 0.85)
+      # Total = GBP 170
+
+      assert budget.currency == :GBP
+      assert Money.equal?(budget, Money.new(:GBP, 170))
+    end
+  end
+
   describe "accommodations" do
     alias HamsterTravel.Planning.Accommodation
 

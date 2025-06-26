@@ -73,6 +73,25 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
     """
   end
 
+  attr(:budget, Money, required: true)
+  attr(:class, :string, default: nil)
+
+  def budget_display(assigns) do
+    ~H"""
+    <div class={
+      CoreComponents.build_class([
+        "flex flex-row gap-x-4 mt-4 sm:mt-8 text-xl",
+        @class
+      ])
+    }>
+      <.inline>
+        <.budget />
+        {Formatter.format_money(@budget.amount, @budget.currency)}
+      </.inline>
+    </div>
+    """
+  end
+
   attr(:trips, :list, required: true)
 
   def trips_grid(assigns) do
@@ -148,7 +167,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
     """
   end
 
-  attr(:trip, :map, required: true)
+  attr(:trip, Trip, required: true)
   attr(:class, :string, default: nil)
   attr(:flags_limit, :integer, default: 100)
 
@@ -219,7 +238,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   end
 
   attr(:trip, Trip, required: true)
-  attr(:budget, :integer, required: true)
+  attr(:budget, Money, required: true)
   attr(:destinations, :list, required: true)
   attr(:destinations_outside, :list, required: true)
   attr(:transfers, :list, required: true)
@@ -229,12 +248,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   def tab_itinerary(assigns) do
     ~H"""
     <div>
-      <div class="flex flex-row gap-x-4 mt-4 sm:mt-8 text-xl">
-        <.inline>
-          <.budget />
-          {Formatter.format_money(@budget, @trip.currency)}
-        </.inline>
-      </div>
+      <.budget_display budget={@budget} />
 
       <.toggle
         :if={Enum.any?(@destinations_outside) || Enum.any?(@accommodations_outside)}
@@ -353,7 +367,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   end
 
   attr(:trip, Trip, required: true)
-  attr(:budget, :integer, required: true)
+  attr(:budget, Money, required: true)
   attr(:destinations, :list, required: true)
   attr(:destinations_outside, :list, required: true)
   attr(:activities, :list, required: true)
@@ -363,12 +377,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   def tab_activity(assigns) do
     ~H"""
     <div id={"activities-#{@trip.id}"}>
-      <div class="flex flex-row gap-x-4 mt-4 sm:mt-8 text-xl">
-        <.inline>
-          <.budget />
-          {Formatter.format_money(@budget, @trip.currency)}
-        </.inline>
-      </div>
+      <.budget_display budget={@budget} />
 
       <.toggle
         :if={Enum.any?(@destinations_outside)}
