@@ -55,34 +55,6 @@ defmodule HamsterTravel.Planning do
     |> trip_preloading()
   end
 
-  def next_plans(user \\ nil) do
-    query =
-      from t in Trip,
-        where: t.status == ^Trip.planned() and t.author_id == ^user.id,
-        order_by: [
-          asc: t.start_date
-        ],
-        limit: 4
-
-    query
-    |> Repo.all()
-    |> trip_preloading()
-  end
-
-  def last_trips(user \\ nil) do
-    query =
-      from t in Trip,
-        where: t.status == ^Trip.finished() and t.author_id == ^user.id,
-        order_by: [
-          desc: t.start_date
-        ],
-        limit: 6
-
-    query
-    |> Repo.all()
-    |> trip_preloading()
-  end
-
   def get_trip(id) do
     Trip
     |> Repo.get(id)
