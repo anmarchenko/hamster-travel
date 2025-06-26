@@ -30,8 +30,8 @@ defmodule HamsterTravelWeb.Planning.AccommodationForm do
           field={@form[:name]}
           type="text"
           label={gettext("Name")}
+          wrapper_class="mb-0"
           placeholder={gettext("Hotel name")}
-          required
         />
 
         <.live_component
@@ -57,7 +57,7 @@ defmodule HamsterTravelWeb.Planning.AccommodationForm do
           field={@form[:link]}
           type="url"
           label={gettext("Link")}
-          placeholder={gettext("Booking link or website")}
+          placeholder={gettext("Website link")}
         />
 
         <.field

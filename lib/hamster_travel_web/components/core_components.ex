@@ -487,11 +487,12 @@ defmodule HamsterTravelWeb.CoreComponents do
   Renders a label.
   """
   attr :for, :string, default: nil
+  attr :class, :string, default: nil
   slot :inner_block, required: true
 
   def label(assigns) do
     ~H"""
-    <label for={@for} class="pc-label">
+    <label for={@for} class={["pc-label", @class]}>
       {render_slot(@inner_block)}
     </label>
     """
@@ -707,7 +708,7 @@ defmodule HamsterTravelWeb.CoreComponents do
 
     ~H"""
     <div>
-      <.label for={@id}>{@label}</.label>
+      <.label class="mb-0" for={@id}>{@label}</.label>
       <div class="flex flex-row">
         <div class="w-3/4">
           <.field
@@ -718,6 +719,7 @@ defmodule HamsterTravelWeb.CoreComponents do
             inputmode="numeric"
             placeholder={@placeholder}
             class="rounded-r-none border-r-0"
+            wrapper_class="mb-0"
             label=""
             phx-hook="MoneyInput"
             data-user-locale={@locale}
@@ -731,6 +733,7 @@ defmodule HamsterTravelWeb.CoreComponents do
             options={Cldr.all_currencies()}
             value={@value[:currency] || @default_currency}
             class="rounded-l-none"
+            wrapper_class="mb-0"
             label=""
           />
         </div>
