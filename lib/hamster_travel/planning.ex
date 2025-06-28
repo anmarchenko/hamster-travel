@@ -152,7 +152,7 @@ defmodule HamsterTravel.Planning do
 
   defp trip_preloading(query) do
     query
-    |> Repo.preload([:author, :countries])
+    |> Repo.preload([:author, :countries, :expenses])
   end
 
   defp single_trip_preloading(query) do

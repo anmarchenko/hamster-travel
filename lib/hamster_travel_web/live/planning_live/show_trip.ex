@@ -24,7 +24,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               {Cldr.year_with_month(@trip.start_date)}
             </:subtitle>
           </.header>
-          <.shorts trip={@trip} />
+          <.shorts trip={@trip} budget={@budget} />
           <.inline :if={@current_user} class="gap-3 text-xs sm:text-base">
             <.button link_type="live_redirect" to={trip_url(@trip.slug, :edit)} color="secondary">
               <.icon_text icon="hero-pencil" label={gettext("Edit")} />

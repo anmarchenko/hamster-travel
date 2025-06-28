@@ -78,17 +78,10 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
 
   def budget_display(assigns) do
     ~H"""
-    <div class={
-      CoreComponents.build_class([
-        "flex flex-row gap-x-4 mt-4 sm:mt-8 text-xl",
-        @class
-      ])
-    }>
-      <.inline>
-        <.budget />
-        {Formatter.format_money(@budget.amount, @budget.currency)}
-      </.inline>
-    </div>
+    <.inline class={@class}>
+      <.budget />
+      {Formatter.format_money(@budget.amount, @budget.currency)}
+    </.inline>
     """
   end
 
@@ -107,6 +100,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   end
 
   attr(:trip, Trip, required: true)
+  attr(:budget, Money, required: true)
   attr(:icon_class, :string, default: nil)
   attr(:class, :string, default: nil)
 
@@ -118,10 +112,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
         @class
       ])
     }>
-      <.inline class="gap-1">
-        <.budget class={@icon_class} />
-        {Formatter.format_money(0, @trip.currency)}
-      </.inline>
+      <.budget_display budget={@budget} class="gap-1" />
       <.inline class="gap-1">
         <.icon name="hero-calendar" class={"h-4 w-4 #{@icon_class}"} />
         {@trip.duration} {ngettext("day", "days", @trip.duration)}
@@ -135,9 +126,13 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   end
 
   attr(:id, :string, required: true)
-  attr(:trip, :map, required: true)
+  attr(:trip, Trip, required: true)
 
   def trip_card(assigns) do
+    budget = Planning.calculate_budget(assigns.trip)
+
+    assigns = assign(assigns, budget: budget)
+
     ~H"""
     <.card id={@id}>
       <div class="shrink-0">
@@ -159,7 +154,12 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
           </.link>
         </p>
         <.secondary tag="div" italic={false} class="font-light">
-          <.shorts trip={@trip} class="text-sm sm:text-base" icon_class="hidden sm:block" />
+          <.shorts
+            trip={@trip}
+            budget={@budget}
+            class="text-sm sm:text-base"
+            icon_class="hidden sm:block"
+          />
         </.secondary>
         <.status_row trip={@trip} flags_limit={1} />
       </div>
@@ -248,7 +248,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   def tab_itinerary(assigns) do
     ~H"""
     <div>
-      <.budget_display budget={@budget} />
+      <.budget_display budget={@budget} class="mt-4 sm:mt-8 text-xl" />
 
       <.toggle
         :if={Enum.any?(@destinations_outside) || Enum.any?(@accommodations_outside)}
@@ -377,7 +377,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   def tab_activity(assigns) do
     ~H"""
     <div id={"activities-#{@trip.id}"}>
-      <.budget_display budget={@budget} />
+      <.budget_display budget={@budget} class="mt-4 sm:mt-8 text-xl" />
 
       <.toggle
         :if={Enum.any?(@destinations_outside)}
