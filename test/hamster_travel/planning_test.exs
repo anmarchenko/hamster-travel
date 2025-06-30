@@ -1718,6 +1718,10 @@ defmodule HamsterTravel.PlanningTest do
       assert updated_transfer.expense.name == "Updated Flight Ticket"
       assert updated_transfer.expense.trip_id == trip.id
       assert updated_transfer.expense.transfer_id == updated_transfer.id
+
+      # validate updated transfer has city with region
+      assert updated_transfer.departure_city.region_name == "Land Berlin"
+      assert updated_transfer.arrival_city.region_name == "Free and Hanseatic City of Hamburg"
     end
 
     test "delete_transfer/1 deletes the transfer" do

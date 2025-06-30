@@ -449,7 +449,13 @@ defmodule HamsterTravel.Planning do
     %Transfer{trip_id: trip.id}
     |> Transfer.changeset(attrs)
     |> Repo.insert()
-    |> preload_after_db_call(&Repo.preload(&1, [:departure_city, :arrival_city, :expense]))
+    |> preload_after_db_call(
+      &Repo.preload(&1, [
+        :expense,
+        departure_city: Geo.city_preloading_query(),
+        arrival_city: Geo.city_preloading_query()
+      ])
+    )
     |> send_pubsub_event([:transfer, :created], trip.id)
   end
 
@@ -457,7 +463,13 @@ defmodule HamsterTravel.Planning do
     transfer
     |> Transfer.changeset(attrs)
     |> Repo.update()
-    |> preload_after_db_call(&Repo.preload(&1, [:departure_city, :arrival_city, :expense]))
+    |> preload_after_db_call(
+      &Repo.preload(&1, [
+        :expense,
+        departure_city: Geo.city_preloading_query(),
+        arrival_city: Geo.city_preloading_query()
+      ])
+    )
     |> send_pubsub_event([:transfer, :updated], transfer.trip_id)
   end
 
@@ -479,6 +491,10 @@ defmodule HamsterTravel.Planning do
 
   defp transfers_preloading(query) do
     query
-    |> Repo.preload([:departure_city, :arrival_city, :expense])
+    |> Repo.preload([
+      :expense,
+      departure_city: Geo.city_preloading_query(),
+      arrival_city: Geo.city_preloading_query()
+    ])
   end
 end
