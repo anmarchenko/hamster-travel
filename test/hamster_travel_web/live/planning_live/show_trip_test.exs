@@ -6,6 +6,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
   import HamsterTravel.PlanningFixtures
 
   alias HamsterTravel.Geo
+  alias HamsterTravel.Planning
   alias HamsterTravelWeb.Cldr
 
   describe "Show trip page" do
@@ -141,6 +142,101 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       # Assert
       assert has_element?(view, "#activities-#{trip.id}")
+    end
+
+    test "renders trip page with accommodations", %{conn: conn} do
+      # Arrange
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      # Create a trip with accommodations
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      accommodation =
+        accommodation_fixture(%{
+          trip_id: trip.id,
+          name: "Grand Hotel Vienna",
+          link: "https://example.com/hotel",
+          address: "123 Main Street, Vienna",
+          note: "Great location near the city center",
+          start_day: 0,
+          end_day: 2,
+          expense: %{
+            price: Money.new(:EUR, 150),
+            name: "Hotel booking",
+            trip_id: trip.id
+          }
+        })
+
+      # Act
+      {:ok, view, html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      # Assert
+      # Verify trip name is displayed
+      assert html =~ trip.name
+
+      # Verify accommodation details are rendered
+      assert html =~ accommodation.name
+
+      # 15000 cents = €150.00, 3 nights (end_day - start_day + 1 = 2 - 0 + 1 = 3), so €50.00 per night
+      assert html =~ "€50.00 / night"
+      assert html =~ "https://example.com/hotel"
+      assert html =~ "123 Main Street, Vienna"
+      assert html =~ "Great location near the city center"
+
+      # Verify that the accommodation has edit and delete buttons
+      assert has_element?(view, "[phx-click='edit']")
+      assert has_element?(view, "[phx-click='delete']")
+
+      # Verify that the itinerary tab is active and shows Hotel column
+      assert has_element?(view, "a.pc-tab__underline--is-active", "Transfers and hotels")
+      assert html =~ "Hotel"
+    end
+
+    test "shows accommodation form when clicking add accommodation link", %{conn: conn} do
+      # Arrange
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      # Act
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      # Click the first "Add accommodation" link in the first row
+      view
+      |> element("tr:first-child td a", "Add accommodation")
+      |> render_click()
+
+      # Assert
+      # Verify the accommodation form appears with its components
+      assert has_element?(view, "form[id^='accommodation-form-']")
+      assert has_element?(view, "label", "Name")
+      assert has_element?(view, "label", "Date range")
+      assert has_element?(view, "label", "Price")
+
+      # Fill in the form fields
+      view
+      |> form("form[id^='accommodation-form-']", %{
+        accommodation: %{
+          name: "Test Hotel",
+          expense: %{
+            price: %{
+              amount: "120.00",
+              currency: "EUR"
+            }
+          }
+        }
+      })
+      |> render_submit()
+
+      # Verify that the accommodation was created in the database
+      accommodations = Planning.list_accommodations(trip)
+      assert length(accommodations) == 1
+
+      accommodation = List.first(accommodations)
+      assert accommodation.name == "Test Hotel"
+      # 120.00 EUR
+      assert accommodation.expense.price == Money.new(:EUR, "120.00")
     end
   end
 end
