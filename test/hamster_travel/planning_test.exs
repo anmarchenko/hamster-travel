@@ -1450,4 +1450,379 @@ defmodule HamsterTravel.PlanningTest do
       assert [] = Planning.accommodations_for_day(1, [])
     end
   end
+
+  describe "transfers" do
+    alias HamsterTravel.Planning.Transfer
+
+    @invalid_attrs %{transport_mode: nil, departure_time: nil, arrival_time: nil}
+    @update_attrs %{
+      transport_mode: "flight",
+      departure_time: ~U[2023-06-12 10:00:00Z],
+      arrival_time: ~U[2023-06-12 14:00:00Z],
+      note: "Updated flight details"
+    }
+
+    setup do
+      geonames_fixture()
+      berlin = HamsterTravel.Geo.find_city_by_geonames_id("2950159")
+      hamburg = HamsterTravel.Geo.find_city_by_geonames_id("2911298")
+      trip = trip_fixture()
+
+      {:ok, berlin: berlin, hamburg: hamburg, trip: trip}
+    end
+
+    test "list_transfers/1 returns all transfers for a trip", %{trip: trip} do
+      transfer = transfer_fixture(%{trip_id: trip.id})
+      [result] = Planning.list_transfers(trip)
+      assert result.id == transfer.id
+      assert result.transport_mode == transfer.transport_mode
+      assert result.trip_id == transfer.trip_id
+      assert result.departure_city_id == transfer.departure_city_id
+      assert result.arrival_city_id == transfer.arrival_city_id
+    end
+
+    test "get_transfer!/1 returns the transfer with given id" do
+      transfer = transfer_fixture()
+      result = Planning.get_transfer!(transfer.id)
+      assert result.id == transfer.id
+      assert result.transport_mode == transfer.transport_mode
+      assert result.trip_id == transfer.trip_id
+      assert result.departure_city_id == transfer.departure_city_id
+      assert result.arrival_city_id == transfer.arrival_city_id
+    end
+
+    test "create_transfer/2 with valid data creates a transfer", %{
+      trip: trip,
+      berlin: berlin,
+      hamburg: hamburg
+    } do
+      valid_attrs = %{
+        transport_mode: "bus",
+        departure_city_id: berlin.id,
+        arrival_city_id: hamburg.id,
+        departure_time: ~U[2023-06-12 09:00:00Z],
+        arrival_time: ~U[2023-06-12 13:30:00Z],
+        note: "Comfortable bus ride",
+        vessel_number: "BUS456",
+        carrier: "FlixBus",
+        departure_station: "Berlin ZOB",
+        arrival_station: "Hamburg ZOB",
+        expense: %{
+          price: Money.new(:EUR, 2500),
+          name: "Bus ticket",
+          trip_id: trip.id
+        }
+      }
+
+      assert {:ok, %Transfer{} = transfer} = Planning.create_transfer(trip, valid_attrs)
+      assert transfer.transport_mode == "bus"
+      assert transfer.departure_city_id == berlin.id
+      assert transfer.arrival_city_id == hamburg.id
+      assert transfer.departure_time == ~U[2023-06-12 09:00:00Z]
+      assert transfer.arrival_time == ~U[2023-06-12 13:30:00Z]
+      assert transfer.note == "Comfortable bus ride"
+      assert transfer.vessel_number == "BUS456"
+      assert transfer.carrier == "FlixBus"
+      assert transfer.departure_station == "Berlin ZOB"
+      assert transfer.arrival_station == "Hamburg ZOB"
+      assert transfer.trip_id == trip.id
+      assert transfer.expense.price == Money.new(:EUR, 2500)
+      assert transfer.expense.name == "Bus ticket"
+      assert transfer.expense.trip_id == trip.id
+      assert transfer.expense.transfer_id == transfer.id
+    end
+
+    test "create_transfer/2 broadcasts transfer creation", %{
+      trip: trip,
+      berlin: berlin,
+      hamburg: hamburg
+    } do
+      # Subscribe to the topic
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
+
+      valid_attrs = %{
+        transport_mode: "flight",
+        departure_city_id: berlin.id,
+        arrival_city_id: hamburg.id,
+        departure_time: ~U[2023-06-12 08:00:00Z],
+        arrival_time: ~U[2023-06-12 09:30:00Z],
+        expense: %{
+          price: Money.new(:EUR, 15_000),
+          name: "Flight ticket",
+          trip_id: trip.id
+        }
+      }
+
+      # Act
+      {:ok, transfer} = Planning.create_transfer(trip, valid_attrs)
+
+      # Assert
+      assert_receive {[:transfer, :created], %{value: ^transfer}}
+    end
+
+    test "create_transfer/2 with invalid data returns error changeset", %{trip: trip} do
+      assert {:error, %Ecto.Changeset{}} = Planning.create_transfer(trip, @invalid_attrs)
+    end
+
+    test "create_transfer/2 with invalid transport mode returns error changeset", %{
+      trip: trip,
+      berlin: berlin,
+      hamburg: hamburg
+    } do
+      invalid_attrs = %{
+        transport_mode: "teleport",
+        departure_city_id: berlin.id,
+        arrival_city_id: hamburg.id,
+        departure_time: ~U[2023-06-12 08:00:00Z],
+        arrival_time: ~U[2023-06-12 08:01:00Z]
+      }
+
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               Planning.create_transfer(trip, invalid_attrs)
+
+      assert %{transport_mode: ["is invalid"]} = errors_on(changeset)
+    end
+
+    test "create_transfer/2 fails if arrival_time is before departure_time", %{
+      trip: trip,
+      berlin: berlin,
+      hamburg: hamburg
+    } do
+      invalid_attrs = %{
+        transport_mode: "train",
+        departure_city_id: berlin.id,
+        arrival_city_id: hamburg.id,
+        departure_time: ~U[2023-06-12 12:00:00Z],
+        arrival_time: ~U[2023-06-12 08:00:00Z]
+      }
+
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               Planning.create_transfer(trip, invalid_attrs)
+
+      assert %{arrival_time: ["must be after departure time"]} = errors_on(changeset)
+    end
+
+    test "create_transfer/2 fails if arrival_time equals departure_time", %{
+      trip: trip,
+      berlin: berlin,
+      hamburg: hamburg
+    } do
+      same_time = ~U[2023-06-12 10:00:00Z]
+
+      invalid_attrs = %{
+        transport_mode: "train",
+        departure_city_id: berlin.id,
+        arrival_city_id: hamburg.id,
+        departure_time: same_time,
+        arrival_time: same_time
+      }
+
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               Planning.create_transfer(trip, invalid_attrs)
+
+      assert %{arrival_time: ["must be after departure time"]} = errors_on(changeset)
+    end
+
+    test "create_transfer/2 fails if departure and arrival cities are the same", %{
+      trip: trip,
+      berlin: berlin
+    } do
+      invalid_attrs = %{
+        transport_mode: "train",
+        departure_city_id: berlin.id,
+        arrival_city_id: berlin.id,
+        departure_time: ~U[2023-06-12 08:00:00Z],
+        arrival_time: ~U[2023-06-12 12:00:00Z]
+      }
+
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               Planning.create_transfer(trip, invalid_attrs)
+
+      assert %{arrival_city_id: ["must be different from departure city"]} = errors_on(changeset)
+    end
+
+    test "update_transfer/2 with valid data updates the transfer" do
+      transfer = transfer_fixture()
+
+      assert {:ok, %Transfer{} = updated_transfer} =
+               Planning.update_transfer(transfer, @update_attrs)
+
+      assert updated_transfer.transport_mode == "flight"
+      assert updated_transfer.departure_time == ~U[2023-06-12 10:00:00Z]
+      assert updated_transfer.arrival_time == ~U[2023-06-12 14:00:00Z]
+      assert updated_transfer.note == "Updated flight details"
+    end
+
+    test "update_transfer/2 sends pubsub event", %{trip: trip} do
+      transfer = transfer_fixture(%{trip_id: trip.id})
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
+
+      assert {:ok, %Transfer{} = updated_transfer} =
+               Planning.update_transfer(transfer, @update_attrs)
+
+      assert_receive {[:transfer, :updated], %{value: ^updated_transfer}}
+    end
+
+    test "update_transfer/2 with invalid data returns error changeset" do
+      transfer = transfer_fixture()
+
+      assert {:error, %Ecto.Changeset{}} =
+               Planning.update_transfer(transfer, @invalid_attrs)
+
+      result = Planning.get_transfer!(transfer.id)
+      assert result.id == transfer.id
+      assert result.transport_mode == transfer.transport_mode
+      assert result.trip_id == transfer.trip_id
+      assert result.departure_city_id == transfer.departure_city_id
+      assert result.arrival_city_id == transfer.arrival_city_id
+    end
+
+    test "update_transfer/2 with expense data updates both transfer and expense", %{
+      trip: trip
+    } do
+      # Create transfer with expense
+      transfer =
+        transfer_fixture(%{
+          trip_id: trip.id,
+          transport_mode: "train",
+          expense: %{
+            price: Money.new(:EUR, 5000),
+            name: "Original Train Ticket",
+            trip_id: trip.id
+          }
+        })
+
+      transfer = transfer |> Repo.preload(:expense)
+
+      update_attrs = %{
+        transport_mode: "flight",
+        note: "Changed to flight",
+        expense: %{
+          # note that we need to pass the expense id to update the expense
+          id: transfer.expense.id,
+          price: Money.new(:EUR, 12_000),
+          name: "Updated Flight Ticket"
+        }
+      }
+
+      assert {:ok, %Transfer{} = updated_transfer} =
+               Planning.update_transfer(transfer, update_attrs)
+
+      # Verify transfer was updated
+      assert updated_transfer.transport_mode == "flight"
+      assert updated_transfer.note == "Changed to flight"
+
+      # Verify expense was updated
+      updated_transfer = updated_transfer |> Repo.preload(:expense)
+      assert updated_transfer.expense.price == Money.new(:EUR, 12_000)
+      assert updated_transfer.expense.name == "Updated Flight Ticket"
+      assert updated_transfer.expense.trip_id == trip.id
+      assert updated_transfer.expense.transfer_id == updated_transfer.id
+    end
+
+    test "delete_transfer/1 deletes the transfer" do
+      transfer = transfer_fixture()
+      assert {:ok, %Transfer{}} = Planning.delete_transfer(transfer)
+      assert_raise Ecto.NoResultsError, fn -> Planning.get_transfer!(transfer.id) end
+    end
+
+    test "delete_transfer/1 sends pubsub event", %{trip: trip} do
+      transfer = transfer_fixture(%{trip_id: trip.id})
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
+
+      assert {:ok, %Transfer{} = deleted_transfer} =
+               Planning.delete_transfer(transfer)
+
+      assert_receive {[:transfer, :deleted], %{value: ^deleted_transfer}}
+    end
+
+    test "change_transfer/1 returns a transfer changeset" do
+      transfer = transfer_fixture()
+      assert %Ecto.Changeset{} = Planning.change_transfer(transfer)
+    end
+
+    test "new_transfer/2 returns a new transfer changeset with trip_id" do
+      trip = trip_fixture()
+      changeset = Planning.new_transfer(trip)
+
+      assert %Ecto.Changeset{
+               data: %{
+                 trip_id: trip_id
+               }
+             } = changeset
+
+      assert trip_id == trip.id
+    end
+
+    test "new_transfer/2 with attributes overrides default values" do
+      trip = trip_fixture()
+      attrs = %{transport_mode: "flight", note: "Custom note"}
+      changeset = Planning.new_transfer(trip, attrs)
+
+      assert %Ecto.Changeset{
+               data: %{
+                 trip_id: trip_id
+               },
+               changes: %{
+                 transport_mode: "flight",
+                 note: "Custom note"
+               }
+             } = changeset
+
+      assert trip_id == trip.id
+    end
+
+    test "transport_modes/0 returns list of valid transport modes" do
+      expected_modes = ~w(flight train bus car taxi boat)
+      assert Transfer.transport_modes() == expected_modes
+    end
+
+    test "list_transfers/1 orders transfers by departure_time" do
+      trip = trip_fixture()
+
+      # Create transfers with different departure times
+      transfer1 =
+        transfer_fixture(%{
+          trip_id: trip.id,
+          departure_time: ~U[2023-06-12 10:00:00Z],
+          arrival_time: ~U[2023-06-12 14:00:00Z]
+        })
+
+      transfer2 =
+        transfer_fixture(%{
+          trip_id: trip.id,
+          departure_time: ~U[2023-06-12 08:00:00Z],
+          arrival_time: ~U[2023-06-12 12:00:00Z]
+        })
+
+      transfer3 =
+        transfer_fixture(%{
+          trip_id: trip.id,
+          departure_time: ~U[2023-06-12 15:00:00Z],
+          arrival_time: ~U[2023-06-12 18:00:00Z]
+        })
+
+      # Should be ordered by departure_time (earliest first)
+      [first, second, third] = Planning.list_transfers(trip)
+
+      # 08:00
+      assert first.id == transfer2.id
+      # 10:00
+      assert second.id == transfer1.id
+      # 15:00
+      assert third.id == transfer3.id
+    end
+
+    test "list_transfers/1 only returns transfers for the specified trip" do
+      trip1 = trip_fixture()
+      trip2 = trip_fixture()
+
+      transfer1 = transfer_fixture(%{trip_id: trip1.id})
+      _transfer2 = transfer_fixture(%{trip_id: trip2.id})
+
+      transfers = Planning.list_transfers(trip1)
+      assert length(transfers) == 1
+      assert hd(transfers).id == transfer1.id
+    end
+  end
 end

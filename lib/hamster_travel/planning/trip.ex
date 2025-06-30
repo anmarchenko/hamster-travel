@@ -11,6 +11,7 @@ defmodule HamsterTravel.Planning.Trip do
   alias HamsterTravel.Planning.Accommodation
   alias HamsterTravel.Planning.Destination
   alias HamsterTravel.Planning.Expense
+  alias HamsterTravel.Planning.Transfer
   alias HamsterTravel.Planning.Trip.NameSlug
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -47,6 +48,7 @@ defmodule HamsterTravel.Planning.Trip do
 
     has_many(:expenses, Expense)
     has_many(:accommodations, Accommodation)
+    has_many(:transfers, Transfer)
 
     timestamps()
   end

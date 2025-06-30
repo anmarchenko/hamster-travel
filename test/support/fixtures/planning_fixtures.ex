@@ -99,4 +99,41 @@ defmodule HamsterTravel.PlanningFixtures do
 
     accommodation
   end
+
+  @doc """
+  Generate a transfer.
+  """
+  def transfer_fixture(attrs \\ %{}) do
+    # Setup geonames data and get cities
+    geonames_fixture()
+    # Berlin and Hamburg
+    berlin = HamsterTravel.Geo.find_city_by_geonames_id("2950159")
+    hamburg = HamsterTravel.Geo.find_city_by_geonames_id("2911298")
+    trip = trip_fixture()
+
+    attrs =
+      attrs
+      |> Enum.into(%{
+        transport_mode: "train",
+        departure_city_id: berlin.id,
+        arrival_city_id: hamburg.id,
+        departure_time: ~U[2023-06-12 08:00:00Z],
+        arrival_time: ~U[2023-06-12 12:00:00Z],
+        note: "Fast train connection",
+        vessel_number: "ICE 123",
+        carrier: "Deutsche Bahn",
+        departure_station: "Berlin Hauptbahnhof",
+        arrival_station: "Hamburg Hauptbahnhof",
+        expense: %{
+          price: Money.new(:EUR, 8900),
+          name: "Train ticket",
+          trip_id: trip.id
+        }
+      })
+
+    {:ok, transfer} =
+      HamsterTravel.Planning.create_transfer(trip, attrs)
+
+    transfer
+  end
 end

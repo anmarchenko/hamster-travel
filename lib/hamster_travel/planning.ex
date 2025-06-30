@@ -8,7 +8,7 @@ defmodule HamsterTravel.Planning do
   require Logger
 
   alias HamsterTravel.Geo
-  alias HamsterTravel.Planning.{Accommodation, Destination, Expense, Policy, Trip}
+  alias HamsterTravel.Planning.{Accommodation, Destination, Expense, Policy, Transfer, Trip}
   alias HamsterTravel.Repo
 
   # PubSub functions
@@ -161,7 +161,8 @@ defmodule HamsterTravel.Planning do
       :author,
       :countries,
       destinations: [city: Geo.city_preloading_query()],
-      accommodations: :expense
+      accommodations: :expense,
+      transfers: [:departure_city, :arrival_city, :expense]
     ])
   end
 
@@ -419,5 +420,65 @@ defmodule HamsterTravel.Planning do
   defp preload_after_db_call({:ok, record}, preload_fun) do
     record = preload_fun.(record)
     {:ok, record}
+  end
+
+  # Transfer functions
+
+  def get_transfer!(id) do
+    Repo.get!(Transfer, id)
+    |> transfers_preloading()
+  end
+
+  def list_transfers(%Trip{id: trip_id}) do
+    list_transfers(trip_id)
+  end
+
+  def list_transfers(trip_id) do
+    Repo.all(from t in Transfer, where: t.trip_id == ^trip_id, order_by: [asc: t.departure_time])
+    |> transfers_preloading()
+  end
+
+  def create_transfer(trip, attrs \\ %{}) do
+    # Ensure the expense has trip_id if it exists in attrs
+    attrs =
+      case Map.get(attrs, "expense") do
+        nil -> attrs
+        expense_attrs -> Map.put(attrs, "expense", Map.put(expense_attrs, "trip_id", trip.id))
+      end
+
+    %Transfer{trip_id: trip.id}
+    |> Transfer.changeset(attrs)
+    |> Repo.insert()
+    |> preload_after_db_call(&Repo.preload(&1, [:departure_city, :arrival_city, :expense]))
+    |> send_pubsub_event([:transfer, :created], trip.id)
+  end
+
+  def update_transfer(%Transfer{} = transfer, attrs) do
+    transfer
+    |> Transfer.changeset(attrs)
+    |> Repo.update()
+    |> preload_after_db_call(&Repo.preload(&1, [:departure_city, :arrival_city, :expense]))
+    |> send_pubsub_event([:transfer, :updated], transfer.trip_id)
+  end
+
+  def new_transfer(trip, attrs \\ %{}) do
+    %Transfer{
+      trip_id: trip.id
+    }
+    |> Transfer.changeset(attrs)
+  end
+
+  def change_transfer(%Transfer{} = transfer, attrs \\ %{}) do
+    Transfer.changeset(transfer, attrs)
+  end
+
+  def delete_transfer(%Transfer{} = transfer) do
+    Repo.delete(transfer)
+    |> send_pubsub_event([:transfer, :deleted], transfer.trip_id)
+  end
+
+  defp transfers_preloading(query) do
+    query
+    |> Repo.preload([:departure_city, :arrival_city, :expense])
   end
 end
