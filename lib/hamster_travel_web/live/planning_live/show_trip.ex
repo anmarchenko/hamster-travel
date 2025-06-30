@@ -127,6 +127,21 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   @impl true
+  def handle_info({[:transfer, :created], %{value: created_transfer}}, socket) do
+    handle_entity_event(:transfer, :created, created_transfer, socket)
+  end
+
+  @impl true
+  def handle_info({[:transfer, :updated], %{value: updated_transfer}}, socket) do
+    handle_entity_event(:transfer, :updated, updated_transfer, socket)
+  end
+
+  @impl true
+  def handle_info({[:transfer, :deleted], %{value: deleted_transfer}}, socket) do
+    handle_entity_event(:transfer, :deleted, deleted_transfer, socket)
+  end
+
+  @impl true
   def handle_info({:start_adding, component_type, component_id}, socket) do
     assign_key = get_key_for_component_adding_active_state_assign(component_type)
 
@@ -240,6 +255,9 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       "accommodation" ->
         {HamsterTravelWeb.Planning.AccommodationNew, :active_accommodation_adding_component_id}
 
+      "transfer" ->
+        {HamsterTravelWeb.Planning.TransferNew, :active_transfer_adding_component_id}
+
       _ ->
         nil
     end
@@ -278,8 +296,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   defp preload_entity_associations(:destination, entity), do: Repo.preload(entity, [:city])
   defp preload_entity_associations(:accommodation, entity), do: Repo.preload(entity, [:expense])
 
+  defp preload_entity_associations(:transfer, entity),
+    do: Repo.preload(entity, [:expense, :departure_city, :arrival_city])
+
   defp get_entities_key(:destination), do: :destinations
   defp get_entities_key(:accommodation), do: :accommodations
+  defp get_entities_key(:transfer), do: :transfers
 
   defp maybe_preload_countries(trip, :destination), do: Repo.preload(trip, :countries)
   defp maybe_preload_countries(trip, _), do: trip
