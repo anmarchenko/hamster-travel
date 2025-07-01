@@ -1454,7 +1454,7 @@ defmodule HamsterTravel.PlanningTest do
   describe "transfers" do
     alias HamsterTravel.Planning.Transfer
 
-    @invalid_attrs %{transport_mode: nil, departure_time: nil, arrival_time: nil}
+    @invalid_attrs %{transport_mode: nil, departure_time: nil, arrival_time: nil, day_index: nil}
     @update_attrs %{
       transport_mode: "flight",
       departure_time: ~U[2023-06-12 10:00:00Z],
@@ -1507,6 +1507,7 @@ defmodule HamsterTravel.PlanningTest do
         carrier: "FlixBus",
         departure_station: "Berlin ZOB",
         arrival_station: "Hamburg ZOB",
+        day_index: 0,
         expense: %{
           price: Money.new(:EUR, 2500),
           name: "Bus ticket",
@@ -1525,6 +1526,7 @@ defmodule HamsterTravel.PlanningTest do
       assert transfer.carrier == "FlixBus"
       assert transfer.departure_station == "Berlin ZOB"
       assert transfer.arrival_station == "Hamburg ZOB"
+      assert transfer.day_index == 0
       assert transfer.trip_id == trip.id
       assert transfer.expense.price == Money.new(:EUR, 2500)
       assert transfer.expense.name == "Bus ticket"
@@ -1546,6 +1548,7 @@ defmodule HamsterTravel.PlanningTest do
         arrival_city_id: hamburg.id,
         departure_time: ~U[2023-06-12 08:00:00Z],
         arrival_time: ~U[2023-06-12 09:30:00Z],
+        day_index: 0,
         expense: %{
           price: Money.new(:EUR, 15_000),
           name: "Flight ticket",
@@ -1574,7 +1577,8 @@ defmodule HamsterTravel.PlanningTest do
         departure_city_id: berlin.id,
         arrival_city_id: hamburg.id,
         departure_time: ~U[2023-06-12 08:00:00Z],
-        arrival_time: ~U[2023-06-12 08:01:00Z]
+        arrival_time: ~U[2023-06-12 08:01:00Z],
+        day_index: 0
       }
 
       assert {:error, %Ecto.Changeset{} = changeset} =
@@ -1593,7 +1597,8 @@ defmodule HamsterTravel.PlanningTest do
         departure_city_id: berlin.id,
         arrival_city_id: hamburg.id,
         departure_time: ~U[2023-06-12 12:00:00Z],
-        arrival_time: ~U[2023-06-12 08:00:00Z]
+        arrival_time: ~U[2023-06-12 08:00:00Z],
+        day_index: 0
       }
 
       assert {:error, %Ecto.Changeset{} = changeset} =
@@ -1614,7 +1619,8 @@ defmodule HamsterTravel.PlanningTest do
         departure_city_id: berlin.id,
         arrival_city_id: hamburg.id,
         departure_time: same_time,
-        arrival_time: same_time
+        arrival_time: same_time,
+        day_index: 0
       }
 
       assert {:error, %Ecto.Changeset{} = changeset} =
@@ -1632,13 +1638,34 @@ defmodule HamsterTravel.PlanningTest do
         departure_city_id: berlin.id,
         arrival_city_id: berlin.id,
         departure_time: ~U[2023-06-12 08:00:00Z],
-        arrival_time: ~U[2023-06-12 12:00:00Z]
+        arrival_time: ~U[2023-06-12 12:00:00Z],
+        day_index: 0
       }
 
       assert {:error, %Ecto.Changeset{} = changeset} =
                Planning.create_transfer(trip, invalid_attrs)
 
       assert %{arrival_city_id: ["must be different from departure city"]} = errors_on(changeset)
+    end
+
+    test "create_transfer/2 fails if day_index is negative", %{
+      trip: trip,
+      berlin: berlin,
+      hamburg: hamburg
+    } do
+      invalid_attrs = %{
+        transport_mode: "train",
+        departure_city_id: berlin.id,
+        arrival_city_id: hamburg.id,
+        departure_time: ~U[2023-06-12 08:00:00Z],
+        arrival_time: ~U[2023-06-12 12:00:00Z],
+        day_index: -1
+      }
+
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               Planning.create_transfer(trip, invalid_attrs)
+
+      assert %{day_index: ["must be greater than or equal to 0"]} = errors_on(changeset)
     end
 
     test "update_transfer/2 with valid data updates the transfer" do

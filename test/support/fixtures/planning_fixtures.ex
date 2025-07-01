@@ -124,6 +124,7 @@ defmodule HamsterTravel.PlanningFixtures do
         carrier: "Deutsche Bahn",
         departure_station: "Berlin Hauptbahnhof",
         arrival_station: "Hamburg Hauptbahnhof",
+        day_index: 0,
         expense: %{
           price: Money.new(:EUR, 8900),
           name: "Train ticket",

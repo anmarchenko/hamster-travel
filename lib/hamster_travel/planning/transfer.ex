@@ -8,6 +8,7 @@ defmodule HamsterTravel.Planning.Transfer do
 
   schema "transfers" do
     field :transport_mode, :string
+    field :day_index, :integer
     field :departure_time, :utc_datetime
     field :arrival_time, :utc_datetime
     field :note, :string
@@ -36,6 +37,7 @@ defmodule HamsterTravel.Planning.Transfer do
       :carrier,
       :departure_station,
       :arrival_station,
+      :day_index,
       :trip_id,
       :departure_city_id,
       :arrival_city_id
@@ -45,11 +47,13 @@ defmodule HamsterTravel.Planning.Transfer do
       :transport_mode,
       :departure_time,
       :arrival_time,
+      :day_index,
       :trip_id,
       :departure_city_id,
       :arrival_city_id
     ])
     |> validate_inclusion(:transport_mode, @transport_modes)
+    |> validate_number(:day_index, greater_than_or_equal_to: 0)
     |> validate_arrival_after_departure()
     |> validate_different_cities()
   end
