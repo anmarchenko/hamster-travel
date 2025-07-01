@@ -160,14 +160,13 @@ defmodule HamsterTravel.Planning do
     |> Repo.preload([
       :author,
       :countries,
-      destinations: [city: Geo.city_preloading_query()],
       accommodations: :expense,
-      transfers: [:departure_city, :arrival_city, :expense]
+      destinations: destinations_preloading_query(),
+      transfers: transfers_preloading_query()
     ])
   end
 
   # Destinations functions
-
   def get_destination!(id) do
     Repo.get!(Destination, id)
     |> destinations_preloading()
@@ -235,7 +234,13 @@ defmodule HamsterTravel.Planning do
 
   defp destinations_preloading(query) do
     query
-    |> Repo.preload(city: Geo.city_preloading_query())
+    |> Repo.preload(destinations_preloading_query())
+  end
+
+  defp destinations_preloading_query do
+    [
+      city: Geo.city_preloading_query()
+    ]
   end
 
   # Expense functions
@@ -449,13 +454,7 @@ defmodule HamsterTravel.Planning do
     %Transfer{trip_id: trip.id}
     |> Transfer.changeset(attrs)
     |> Repo.insert()
-    |> preload_after_db_call(
-      &Repo.preload(&1, [
-        :expense,
-        departure_city: Geo.city_preloading_query(),
-        arrival_city: Geo.city_preloading_query()
-      ])
-    )
+    |> preload_after_db_call(&transfers_preloading(&1))
     |> send_pubsub_event([:transfer, :created], trip.id)
   end
 
@@ -463,13 +462,7 @@ defmodule HamsterTravel.Planning do
     transfer
     |> Transfer.changeset(attrs)
     |> Repo.update()
-    |> preload_after_db_call(
-      &Repo.preload(&1, [
-        :expense,
-        departure_city: Geo.city_preloading_query(),
-        arrival_city: Geo.city_preloading_query()
-      ])
-    )
+    |> preload_after_db_call(&transfers_preloading(&1))
     |> send_pubsub_event([:transfer, :updated], transfer.trip_id)
   end
 
@@ -491,10 +484,14 @@ defmodule HamsterTravel.Planning do
 
   defp transfers_preloading(query) do
     query
-    |> Repo.preload([
+    |> Repo.preload(transfers_preloading_query())
+  end
+
+  defp transfers_preloading_query do
+    [
       :expense,
       departure_city: Geo.city_preloading_query(),
       arrival_city: Geo.city_preloading_query()
-    ])
+    ]
   end
 end
