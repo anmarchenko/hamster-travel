@@ -22,19 +22,17 @@ defmodule HamsterTravelWeb.Planning.Transfer do
   def render(%{edit: false} = assigns) do
     ~H"""
     <div class="flex flex-col gap-y-1">
-      <.secondary italic={false} tag="div">
-        <.inline>
-          <.transfer_icon type={@transfer.transport_mode} />
-          {@transfer.vessel_number}
-          {@transfer.carrier}
-          <.budget />
-          {Formatters.format_money(@transfer.expense.price.amount, @transfer.expense.price.currency)}
-        </.inline>
-      </.secondary>
+      <.inline>
+        <.transfer_icon type={@transfer.transport_mode} />
+        {@transfer.vessel_number}
+        {@transfer.carrier}
+        <.budget />
+        {Formatters.format_money(@transfer.expense.price.amount, @transfer.expense.price.currency)}
+      </.inline>
       <div class="flex flex-row text-lg mt-2">
         <div class="flex flex-col gap-y-2 pr-6 border-r-2 font-medium">
-          <div>{@transfer.departure_time}</div>
-          <div>{@transfer.arrival_time}</div>
+          <div>{Formatters.format_time(@transfer.departure_time)}</div>
+          <div>{Formatters.format_time(@transfer.arrival_time)}</div>
         </div>
         <div class="flex flex-col pl-6 gap-y-2">
           <div>

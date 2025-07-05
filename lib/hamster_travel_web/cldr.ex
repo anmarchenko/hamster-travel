@@ -30,6 +30,12 @@ defmodule HamsterTravelWeb.Cldr do
     HamsterTravelWeb.Cldr.Date.to_string!(date, format: "LLLL yyyy")
   end
 
+  def format_time(nil), do: nil
+
+  def format_time(naive_datetime) do
+    HamsterTravelWeb.Cldr.Time.to_string!(naive_datetime, format: "HH:mm")
+  end
+
   def localize_currency(currency_code) do
     currency_name =
       currency_code
