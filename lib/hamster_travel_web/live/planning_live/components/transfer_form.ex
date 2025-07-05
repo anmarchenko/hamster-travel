@@ -27,24 +27,21 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
         class="space-y-4"
       >
         <.field
-          type="radio-card"
+          type="select"
           field={@form[:transport_mode]}
-          label={gettext("Transport Mode")}
+          label={gettext("Transport")}
           options={transport_mode_options()}
-          size="sm"
-          variant="outline"
-          group_layout="row"
           required
         />
 
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-          <div class="md:col-span-2">
+        <div class="grid grid-cols-1 md:grid-cols-9 gap-4 items-end">
+          <div class="md:col-span-4">
             <.live_component
               id={"departure-city-input-#{@id}"}
               module={CityInput}
               field={@form[:departure_city]}
               validated_field={@form[:departure_city_id]}
-              label={gettext("Departure City")}
+              label={gettext("Departure city")}
             />
           </div>
 
@@ -52,31 +49,35 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
             <.icon name="hero-arrow-right" class="w-6 h-6" />
           </div>
 
-          <div class="md:col-span-2">
+          <div class="md:col-span-4">
             <.live_component
               id={"arrival-city-input-#{@id}"}
               module={CityInput}
               field={@form[:arrival_city]}
               validated_field={@form[:arrival_city_id]}
-              label={gettext("Arrival City")}
+              label={gettext("Arrival city")}
             />
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <.field
-            field={@form[:departure_time]}
-            type="datetime-local"
-            label={gettext("Departure Time")}
-            wrapper_class="mb-0"
-          />
+          <div class="md:col-span-1">
+            <.field
+              field={@form[:departure_time]}
+              type="time"
+              label={gettext("Departure time")}
+              wrapper_class="mb-0"
+            />
+          </div>
 
-          <.field
-            field={@form[:arrival_time]}
-            type="datetime-local"
-            label={gettext("Arrival Time")}
-            wrapper_class="mb-0"
-          />
+          <div class="md:col-span-1">
+            <.field
+              field={@form[:arrival_time]}
+              type="time"
+              label={gettext("Arrival time")}
+              wrapper_class="mb-0"
+            />
+          </div>
         </div>
 
         <.inputs_for :let={expense_form} field={@form[:expense]}>
@@ -88,7 +89,7 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
           />
         </.inputs_for>
 
-        <.field
+        <%!-- <.field
           field={@form[:vessel_number]}
           type="text"
           label={gettext("Vessel Number")}
@@ -100,9 +101,9 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
           type="text"
           label={gettext("Carrier")}
           placeholder={gettext("Airline, train company, etc.")}
-        />
+        /> --%>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <%!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <.field
             field={@form[:departure_station]}
             type="text"
@@ -116,13 +117,13 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
             label={gettext("Arrival Station")}
             placeholder={gettext("Airport, train station, etc.")}
           />
-        </div>
+        </div> --%>
 
         <.field
           field={@form[:note]}
           type="textarea"
           label={gettext("Note")}
-          placeholder={gettext("Additional notes or details")}
+          placeholder={gettext("Additional transfer details")}
         />
 
         <.field field={@form[:day_index]} type="hidden" />
@@ -145,10 +146,11 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
     changeset =
       case assigns.action do
         :new ->
-          Planning.new_transfer(assigns.trip, %{day_index: assigns.day_index})
+          Planning.new_transfer(assigns.trip, assigns.day_index)
 
         :edit ->
           Planning.change_transfer(assigns.transfer)
+          |> convert_datetime_to_time_for_form()
       end
 
     socket =
@@ -157,6 +159,29 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
       |> assign_form(changeset)
 
     {:ok, socket}
+  end
+
+  # Convert datetime fields to time format for form display
+  defp convert_datetime_to_time_for_form(changeset) do
+    changeset
+    |> convert_field_to_time(:departure_time)
+    |> convert_field_to_time(:arrival_time)
+  end
+
+  defp convert_field_to_time(changeset, field) do
+    case Ecto.Changeset.get_field(changeset, field) do
+      %DateTime{} = datetime ->
+        # Convert to HH:MM format (without seconds)
+        time = DateTime.to_time(datetime)
+
+        time_string =
+          "#{String.pad_leading(Integer.to_string(time.hour), 2, "0")}:#{String.pad_leading(Integer.to_string(time.minute), 2, "0")}"
+
+        Ecto.Changeset.put_change(changeset, field, time_string)
+
+      _ ->
+        changeset
+    end
   end
 
   @impl true
@@ -204,10 +229,7 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
   defp transport_mode_options do
     Planning.Transfer.transport_modes()
     |> Enum.map(fn mode ->
-      %{
-        label: transport_mode_label(mode),
-        value: mode
-      }
+      {transport_mode_label(mode), mode}
     end)
   end
 

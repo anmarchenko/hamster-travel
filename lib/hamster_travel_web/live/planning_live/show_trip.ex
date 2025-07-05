@@ -83,6 +83,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> assign(budget: Planning.calculate_budget(trip))
       |> assign(active_destination_adding_component_id: nil)
       |> assign(active_accommodation_adding_component_id: nil)
+      |> assign(active_transfer_adding_component_id: nil)
 
     {:ok, socket}
   end
@@ -173,7 +174,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       accommodations_outside={accommodations_outside(@trip)}
       destinations={@trip.destinations}
       destinations_outside={destinations_outside(@trip)}
-      transfers={[]}
+      transfers={@trip.transfers}
       budget={@budget}
     />
     """
@@ -323,6 +324,10 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   defp maybe_recalculate_budget(socket, :accommodation, trip) do
+    assign(socket, budget: Planning.calculate_budget(trip))
+  end
+
+  defp maybe_recalculate_budget(socket, :transfer, trip) do
     assign(socket, budget: Planning.calculate_budget(trip))
   end
 

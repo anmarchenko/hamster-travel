@@ -7,8 +7,9 @@ defmodule HamsterTravel.Planning.Transfer do
   @transport_modes ~w(flight train bus car taxi boat)
 
   schema "transfers" do
-    field :transport_mode, :string
     field :day_index, :integer
+
+    field :transport_mode, :string
     field :departure_time, :utc_datetime
     field :arrival_time, :utc_datetime
     field :note, :string
@@ -27,6 +28,9 @@ defmodule HamsterTravel.Planning.Transfer do
 
   @doc false
   def changeset(transfer, attrs) do
+    # Pre-process time strings to datetime before main cast
+    attrs = convert_time_strings_to_datetime(attrs)
+
     transfer
     |> cast(attrs, [
       :transport_mode,
@@ -56,6 +60,57 @@ defmodule HamsterTravel.Planning.Transfer do
     |> validate_number(:day_index, greater_than_or_equal_to: 0)
     |> validate_arrival_after_departure()
     |> validate_different_cities()
+  end
+
+  # Convert time strings to datetime with anchored date 1970-01-01
+  defp convert_time_strings_to_datetime(attrs) do
+    attrs
+    |> convert_time_field_to_datetime(:departure_time)
+    |> convert_time_field_to_datetime(:arrival_time)
+    |> convert_time_field_to_datetime("departure_time")
+    |> convert_time_field_to_datetime("arrival_time")
+  end
+
+  defp convert_time_field_to_datetime(attrs, field) do
+    case Map.get(attrs, field) do
+      nil ->
+        attrs
+
+      time_string when is_binary(time_string) ->
+        # Normalize time string to include seconds if missing
+        normalized_time = normalize_time_string(time_string)
+
+        case Time.from_iso8601(normalized_time) do
+          {:ok, time} ->
+            # Create datetime with anchored date 1970-01-01
+            {:ok, datetime} = DateTime.new(~D[1970-01-01], time, "Etc/UTC")
+            Map.put(attrs, field, datetime)
+
+          {:error, _} ->
+            attrs
+        end
+
+      datetime when is_struct(datetime, DateTime) ->
+        # Already a datetime, no conversion needed
+        attrs
+
+      _ ->
+        attrs
+    end
+  end
+
+  # Normalize time string to include seconds if missing
+  defp normalize_time_string(time_string) do
+    case String.split(time_string, ":") do
+      [hours, minutes] ->
+        "#{hours}:#{minutes}:00"
+
+      [hours, minutes, seconds] ->
+        "#{hours}:#{minutes}:#{seconds}"
+
+      _ ->
+        time_string
+    end
   end
 
   @doc """

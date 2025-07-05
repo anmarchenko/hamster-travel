@@ -12,7 +12,8 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
     AccommodationNew,
     Destination,
     DestinationNew,
-    Transfer
+    Transfer,
+    TransferNew
   }
 
   attr(:trip, :map, required: true)
@@ -298,9 +299,17 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
             </td>
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
               <div class="flex flex-col gap-y-8">
-                <.transfers
-                  transfers={HamsterTravel.filter_transfers_by_day(@transfers, i)}
+                <.transfers_list
+                  trip={@trip}
+                  transfers={Planning.transfers_for_day(i, @transfers)}
                   day_index={i}
+                />
+                <.live_component
+                  module={TransferNew}
+                  id={"transfer-new-#{i}"}
+                  trip={@trip}
+                  day_index={i}
+                  class="mt-2"
                 />
               </div>
             </td>
@@ -327,24 +336,19 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
     """
   end
 
+  attr(:trip, Trip, required: true)
   attr(:transfers, :list, required: true)
   attr(:day_index, :integer, required: true)
 
-  def transfers(%{transfers: []} = assigns) do
-    ~H"""
-    <.secondary class="sm:hidden">
-      {gettext("No transfers planned for this day")}
-    </.secondary>
-    """
-  end
-
-  def transfers(assigns) do
+  def transfers_list(assigns) do
     ~H"""
     <.live_component
       :for={transfer <- @transfers}
       module={Transfer}
-      id={"transfers-#{transfer.id}-day-#{@day_index}"}
+      id={"transfer-#{transfer.id}-day-#{@day_index}"}
+      trip={@trip}
       transfer={transfer}
+      day_index={@day_index}
     />
     """
   end

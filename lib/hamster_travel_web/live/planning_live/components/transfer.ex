@@ -4,15 +4,14 @@ defmodule HamsterTravelWeb.Planning.Transfer do
   """
   use HamsterTravelWeb, :live_component
 
+  alias HamsterTravel.Geo
+  alias HamsterTravel.Planning.{Transfer, Trip}
+  alias HamsterTravelWeb.Cldr, as: Formatters
+
   import HamsterTravelWeb.Icons.{Airplane, Budget, Bus, Car, Ship, Taxi, Train}
 
-  def mount(socket) do
-    socket =
-      socket
-      |> assign(edit: false)
-
-    {:ok, socket}
-  end
+  attr(:transfer, Transfer, required: true)
+  attr(:trip, Trip, required: true)
 
   def render(%{edit: true} = assigns) do
     ~H"""
@@ -25,40 +24,46 @@ defmodule HamsterTravelWeb.Planning.Transfer do
     <div class="flex flex-col gap-y-1">
       <.secondary italic={false} tag="div">
         <.inline>
-          <.transfer_icon type={@transfer.type} />
-          {@transfer.vehicle_id}
-          {@transfer.company}
+          <.transfer_icon type={@transfer.transport_mode} />
+          {@transfer.vessel_number}
+          {@transfer.carrier}
           <.budget />
-          {Formatter.format_money(@transfer.price, @transfer.price_currency)}
+          {Formatters.format_money(@transfer.expense.price.amount, @transfer.expense.price.currency)}
         </.inline>
       </.secondary>
       <div class="flex flex-row text-lg mt-2">
         <div class="flex flex-col gap-y-2 pr-6 border-r-2 font-medium">
-          <div>{@transfer.time_from}</div>
-          <div>{@transfer.time_to}</div>
+          <div>{@transfer.departure_time}</div>
+          <div>{@transfer.arrival_time}</div>
         </div>
         <div class="flex flex-col pl-6 gap-y-2">
           <div>
-            {@transfer.city_from.name}
-            <.station station={@transfer.station_from} />
+            {Geo.city_name(@transfer.departure_city)}
+            <.station station={@transfer.departure_station} />
           </div>
           <div>
-            {@transfer.city_to.name}
-            <.station station={@transfer.station_to} />
+            {Geo.city_name(@transfer.arrival_city)}
+            <.station station={@transfer.arrival_station} />
           </div>
         </div>
       </div>
 
       <.secondary>
-        {@transfer.comment}
+        {@transfer.note}
       </.secondary>
-
-      <.external_links links={@transfer.links} />
     </div>
     """
   end
 
-  def transfer_icon(%{type: "plane"} = assigns) do
+  def mount(socket) do
+    socket =
+      socket
+      |> assign(edit: false)
+
+    {:ok, socket}
+  end
+
+  def transfer_icon(%{type: "flight"} = assigns) do
     ~H"""
     <.airplane />
     """
@@ -88,7 +93,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
     """
   end
 
-  def transfer_icon(%{type: "ship"} = assigns) do
+  def transfer_icon(%{type: "boat"} = assigns) do
     ~H"""
     <.ship />
     """

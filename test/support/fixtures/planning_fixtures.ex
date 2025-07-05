@@ -106,6 +106,7 @@ defmodule HamsterTravel.PlanningFixtures do
   def transfer_fixture(attrs \\ %{}) do
     # Setup geonames data and get cities
     geonames_fixture()
+
     # Berlin and Hamburg
     berlin = HamsterTravel.Geo.find_city_by_geonames_id("2950159")
     hamburg = HamsterTravel.Geo.find_city_by_geonames_id("2911298")
@@ -117,8 +118,8 @@ defmodule HamsterTravel.PlanningFixtures do
         transport_mode: "train",
         departure_city_id: berlin.id,
         arrival_city_id: hamburg.id,
-        departure_time: ~U[2023-06-12 08:00:00Z],
-        arrival_time: ~U[2023-06-12 12:00:00Z],
+        departure_time: "08:00",
+        arrival_time: "12:00",
         note: "Fast train connection",
         vessel_number: "ICE 123",
         carrier: "Deutsche Bahn",

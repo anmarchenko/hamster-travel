@@ -420,6 +420,12 @@ defmodule HamsterTravel.Planning do
     end)
   end
 
+  defp singular_items_for_day(day_index, items) do
+    Enum.filter(items, fn item ->
+      item.day_index == day_index
+    end)
+  end
+
   defp preload_after_db_call({:error, _} = res, _preload_fun), do: res
 
   defp preload_after_db_call({:ok, record}, preload_fun) do
@@ -466,9 +472,12 @@ defmodule HamsterTravel.Planning do
     |> send_pubsub_event([:transfer, :updated], transfer.trip_id)
   end
 
-  def new_transfer(trip, attrs \\ %{}) do
+  def new_transfer(trip, day_index, attrs \\ %{}) do
     %Transfer{
-      trip_id: trip.id
+      trip_id: trip.id,
+      departure_city: nil,
+      arrival_city: nil,
+      day_index: day_index
     }
     |> Transfer.changeset(attrs)
   end
@@ -480,6 +489,10 @@ defmodule HamsterTravel.Planning do
   def delete_transfer(%Transfer{} = transfer) do
     Repo.delete(transfer)
     |> send_pubsub_event([:transfer, :deleted], transfer.trip_id)
+  end
+
+  def transfers_for_day(day_index, transfers) do
+    singular_items_for_day(day_index, transfers)
   end
 
   defp transfers_preloading(query) do

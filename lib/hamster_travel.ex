@@ -7,12 +7,6 @@ defmodule HamsterTravel do
   if it comes from the database, an external API or others.
   """
 
-  def filter_transfers_by_day(transfers, day_index) do
-    transfers
-    |> Enum.filter(fn tr -> tr.day_index == day_index end)
-    |> Enum.sort(fn l, r -> l.time_from <= r.time_from end)
-  end
-
   def filter_activities_by_day(activities, day_index) do
     activities
     |> Enum.filter(fn act -> act.day_index == day_index end)
