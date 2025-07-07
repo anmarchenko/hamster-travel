@@ -81,7 +81,7 @@ defmodule HamsterTravel.MixProject do
       {:jason, "~> 1.2"},
       {:yaml_elixir, "~> 2.9"},
 
-      # math formulas
+      # math formulas - used for backpack packing templates
       {:abacus, "~> 2.0"},
 
       # money
@@ -97,7 +97,8 @@ defmodule HamsterTravel.MixProject do
       # test/lint/dev tools
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:floki, ">= 0.30.0", only: :test},
-      {:credo, "~> 1.6", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:live_debugger, "~> 0.3.0", only: :dev}
     ]
   end
 
