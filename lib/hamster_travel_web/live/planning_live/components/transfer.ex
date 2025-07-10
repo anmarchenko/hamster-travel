@@ -26,8 +26,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
         <.transfer_icon type={@transfer.transport_mode} />
         {@transfer.vessel_number}
         {@transfer.carrier}
-        <.budget />
-        {Formatters.format_money(@transfer.expense.price.amount, @transfer.expense.price.currency)}
+        <.money_display money={@transfer.expense.price} />
       </.inline>
       <div class="flex flex-row text-lg mt-2">
         <div class="flex flex-col gap-y-2 pr-6 border-r-2 font-medium">

@@ -32,13 +32,13 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
 
     ~H"""
     <div class="flex flex-col gap-y-1">
-      <.inline class="gap-[0px]">
-        <h2 class="text-md font-bold text-slate-800 dark:text-slate-200 leading-tight pr-3">
+      <.inline class="gap-[0px] text-md font-bold">
+        <h2 class="leading-tight pr-3">
           {@accommodation.name}
         </h2>
-        <p class="text-md font-bold text-purple-600 dark:text-purple-400 whitespace-nowrap ml-auto flex-shrink-0">
-          {Formatters.format_money(@price.amount, @price.currency)} / {gettext("night")}
-        </p>
+        <.money_display money={@price} class="ml-auto">
+          <:suffix>&nbsp;/&nbsp;{gettext("night")}</:suffix>
+        </.money_display>
       </.inline>
 
       <div class="flex-grow space-y-3 text-sm text-slate-600 dark:text-slate-400 mb-2 mt-2">

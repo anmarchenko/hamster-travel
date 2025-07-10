@@ -81,7 +81,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
     ~H"""
     <.inline class={@class}>
       <.budget />
-      {Formatter.format_money(@budget.amount, @budget.currency)}
+      <.money_display money={@budget} />
     </.inline>
     """
   end

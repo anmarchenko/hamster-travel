@@ -761,4 +761,27 @@ defmodule HamsterTravelWeb.CoreComponents do
   defp money_value(%{"amount" => amount, "currency" => currency}) do
     %{amount: amount, currency: currency}
   end
+
+  @doc """
+  Renders a formatted money amount with optional suffix.
+
+  ## Examples
+
+      <.money_display money={%Money{amount: 100, currency: :EUR}} />
+
+      <.money_display money={%Money{amount: 50, currency: :USD}} class="ml-auto">
+        <:suffix> / {gettext("night")}</:suffix>
+      </.money_display>
+  """
+  attr(:money, Money, required: true)
+  attr(:class, :string, default: nil)
+  slot(:suffix)
+
+  def money_display(assigns) do
+    ~H"""
+    <p class={build_class(["whitespace-nowrap", @class])}>
+      {Cldr.format_money(@money.amount, @money.currency)}<span :if={@suffix != []}>{render_slot(@suffix)}</span>
+    </p>
+    """
+  end
 end
