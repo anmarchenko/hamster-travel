@@ -8,10 +8,11 @@ defmodule HamsterTravelWeb.Planning.Transfer do
   alias HamsterTravel.Planning.{Transfer, Trip}
   alias HamsterTravelWeb.Cldr, as: Formatters
 
-  import HamsterTravelWeb.Icons.{Airplane, Budget, Bus, Car, Ship, Taxi, Train}
+  import HamsterTravelWeb.Icons.{Airplane, Bus, Car, Ship, Taxi, Train}
 
   attr(:transfer, Transfer, required: true)
   attr(:trip, Trip, required: true)
+  attr(:display_currency, :string, required: true)
 
   def render(%{edit: true} = assigns) do
     ~H"""
@@ -26,7 +27,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
         <.transfer_icon type={@transfer.transport_mode} />
         {@transfer.vessel_number}
         {@transfer.carrier}
-        <.money_display money={@transfer.expense.price} />
+        <.money_display money={@transfer.expense.price} display_currency={@display_currency} />
       </.inline>
       <div class="flex flex-row text-lg mt-2">
         <div class="flex flex-col gap-y-2 pr-6 border-r-2 font-medium">

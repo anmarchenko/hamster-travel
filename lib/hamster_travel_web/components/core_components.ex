@@ -774,7 +774,9 @@ defmodule HamsterTravelWeb.CoreComponents do
       </.money_display>
   """
   attr(:money, Money, required: true)
+  attr(:display_currency, :string, required: true)
   attr(:class, :string, default: nil)
+
   slot(:suffix)
 
   def money_display(assigns) do

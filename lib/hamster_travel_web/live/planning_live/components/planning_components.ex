@@ -75,18 +75,20 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   end
 
   attr(:budget, Money, required: true)
+  attr(:display_currency, :string, required: true)
   attr(:class, :string, default: nil)
 
   def budget_display(assigns) do
     ~H"""
     <.inline class={@class}>
       <.budget />
-      <.money_display money={@budget} />
+      <.money_display money={@budget} display_currency={@display_currency} />
     </.inline>
     """
   end
 
   attr(:trips, :list, required: true)
+  attr(:display_currency, :string, required: true)
 
   def trips_grid(assigns) do
     ~H"""
@@ -95,13 +97,19 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
       class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-8"
       phx-update="stream"
     >
-      <.trip_card :for={{id, trip} <- @trips} trip={trip} id={id} />
+      <.trip_card
+        :for={{id, trip} <- @trips}
+        trip={trip}
+        id={id}
+        display_currency={@display_currency}
+      />
     </div>
     """
   end
 
   attr(:trip, Trip, required: true)
   attr(:budget, Money, required: true)
+  attr(:display_currency, :string, required: true)
   attr(:icon_class, :string, default: nil)
   attr(:class, :string, default: nil)
 
@@ -113,7 +121,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
         @class
       ])
     }>
-      <.budget_display budget={@budget} class="gap-1" />
+      <.budget_display budget={@budget} display_currency={@display_currency} class="gap-1" />
       <.inline class="gap-1">
         <.icon name="hero-calendar" class={"h-4 w-4 #{@icon_class}"} />
         {@trip.duration} {ngettext("day", "days", @trip.duration)}
@@ -128,6 +136,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
 
   attr(:id, :string, required: true)
   attr(:trip, Trip, required: true)
+  attr(:display_currency, :string, required: true)
 
   def trip_card(assigns) do
     budget = Planning.calculate_budget(assigns.trip)
@@ -158,6 +167,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
           <.shorts
             trip={@trip}
             budget={@budget}
+            display_currency={@display_currency}
             class="text-sm sm:text-base"
             icon_class="hidden sm:block"
           />
@@ -240,6 +250,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
 
   attr(:trip, Trip, required: true)
   attr(:budget, Money, required: true)
+  attr(:display_currency, :string, required: true)
   attr(:destinations, :list, required: true)
   attr(:destinations_outside, :list, required: true)
   attr(:transfers, :list, required: true)
@@ -249,7 +260,11 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   def tab_itinerary(assigns) do
     ~H"""
     <div>
-      <.budget_display budget={@budget} class="mt-4 sm:mt-8 text-xl" />
+      <.budget_display
+        budget={@budget}
+        display_currency={@display_currency}
+        class="mt-4 sm:mt-8 text-xl"
+      />
 
       <.toggle
         :if={Enum.any?(@destinations_outside) || Enum.any?(@accommodations_outside)}
@@ -257,7 +272,12 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
         class="mt-4"
       >
         <.destinations_list trip={@trip} destinations={@destinations_outside} day_index={0} />
-        <.accommodations_list trip={@trip} accommodations={@accommodations_outside} day_index={0} />
+        <.accommodations_list
+          trip={@trip}
+          accommodations={@accommodations_outside}
+          display_currency={@display_currency}
+          day_index={0}
+        />
       </.toggle>
 
       <table class="sm:mt-8 sm:table-auto sm:border-collapse sm:border sm:border-slate-500 sm:w-full">
@@ -302,6 +322,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
                 <.transfers_list
                   trip={@trip}
                   transfers={Planning.transfers_for_day(i, @transfers)}
+                  display_currency={@display_currency}
                   day_index={i}
                 />
                 <.live_component
@@ -318,6 +339,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
                 <.accommodations_list
                   trip={@trip}
                   accommodations={Planning.accommodations_for_day(i, @accommodations)}
+                  display_currency={@display_currency}
                   day_index={i}
                 />
                 <.live_component
@@ -339,6 +361,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   attr(:trip, Trip, required: true)
   attr(:transfers, :list, required: true)
   attr(:day_index, :integer, required: true)
+  attr(:display_currency, :string, required: true)
 
   def transfers_list(assigns) do
     ~H"""
@@ -348,6 +371,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
       id={"transfer-#{transfer.id}-day-#{@day_index}"}
       trip={@trip}
       transfer={transfer}
+      display_currency={@display_currency}
       day_index={@day_index}
     />
     """
@@ -356,6 +380,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   attr(:trip, Trip, required: true)
   attr(:accommodations, :list, required: true)
   attr(:day_index, :integer, required: true)
+  attr(:display_currency, :string, required: true)
 
   def accommodations_list(assigns) do
     ~H"""
@@ -365,6 +390,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
       id={"accommodation-#{accommodation.id}-day-#{@day_index}"}
       trip={@trip}
       accommodation={accommodation}
+      display_currency={@display_currency}
       day_index={@day_index}
     />
     """
@@ -372,6 +398,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
 
   attr(:trip, Trip, required: true)
   attr(:budget, Money, required: true)
+  attr(:display_currency, :string, required: true)
   attr(:destinations, :list, required: true)
   attr(:destinations_outside, :list, required: true)
   attr(:activities, :list, required: true)
@@ -381,7 +408,11 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   def tab_activity(assigns) do
     ~H"""
     <div id={"activities-#{@trip.id}"}>
-      <.budget_display budget={@budget} class="mt-4 sm:mt-8 text-xl" />
+      <.budget_display
+        budget={@budget}
+        display_currency={@display_currency}
+        class="mt-4 sm:mt-8 text-xl"
+      />
 
       <.toggle
         :if={Enum.any?(@destinations_outside)}

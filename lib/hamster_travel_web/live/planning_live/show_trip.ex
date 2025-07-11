@@ -24,7 +24,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               {Cldr.year_with_month(@trip.start_date)}
             </:subtitle>
           </.header>
-          <.shorts trip={@trip} budget={@budget} />
+          <.shorts trip={@trip} budget={@budget} display_currency={@display_currency} />
           <.inline :if={@current_user} class="gap-3 text-xs sm:text-base">
             <.button link_type="live_redirect" to={trip_url(@trip.slug, :edit)} color="secondary">
               <.icon_text icon="hero-pencil" label={gettext("Edit")} />
@@ -56,7 +56,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       class="!mt-* !p-* py-4 sm:py-6 px-6 sm:px-10 mb-10 mt-4 bg-white dark:bg-zinc-800 rounded-md"
     >
       <.planning_tabs trip={@trip} active_tab={@active_tab} />
-      <.render_tab trip={@trip} active_tab={@active_tab} budget={@budget} />
+      <.render_tab
+        trip={@trip}
+        active_tab={@active_tab}
+        budget={@budget}
+        display_currency={@display_currency}
+      />
     </.container>
     """
   end
@@ -81,6 +86,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> assign(page_title: trip.name)
       |> assign(trip: trip)
       |> assign(budget: Planning.calculate_budget(trip))
+      # get from user settings
+      |> assign(display_currency: "EUR")
       |> assign(active_destination_adding_component_id: nil)
       |> assign(active_accommodation_adding_component_id: nil)
       |> assign(active_transfer_adding_component_id: nil)
@@ -176,6 +183,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       destinations_outside={destinations_outside(@trip)}
       transfers={@trip.transfers}
       budget={@budget}
+      display_currency={@display_currency}
     />
     """
   end
@@ -184,12 +192,13 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     ~H"""
     <.tab_activity
       trip={@trip}
-      budget={@budget}
       destinations={@trip.destinations}
       destinations_outside={destinations_outside(@trip)}
       activities={[]}
       notes={[]}
       expenses={[]}
+      budget={@budget}
+      display_currency={@display_currency}
     />
     """
   end

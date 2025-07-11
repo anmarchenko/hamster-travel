@@ -6,10 +6,10 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
 
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.Accommodation
-  alias HamsterTravelWeb.Cldr, as: Formatters
 
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :accommodation, HamsterTravel.Planning.Accommodation, required: true
+  attr :display_currency, :string, required: true
 
   def render(%{edit: true} = assigns) do
     ~H"""
@@ -36,7 +36,7 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
         <h2 class="leading-tight pr-3">
           {@accommodation.name}
         </h2>
-        <.money_display money={@price} class="ml-auto">
+        <.money_display money={@price} display_currency={@display_currency} class="ml-auto">
           <:suffix>&nbsp;/&nbsp;{gettext("night")}</:suffix>
         </.money_display>
       </.inline>

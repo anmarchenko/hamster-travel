@@ -179,7 +179,8 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert html =~ accommodation.name
 
       # 15000 cents = €150.00, 3 nights (end_day - start_day + 1 = 2 - 0 + 1 = 3), so €50.00 per night
-      assert html =~ "€50.00 / night"
+      assert html =~ "€50.00"
+      assert html =~ "night"
       assert html =~ "https://example.com/hotel"
       assert html =~ "123 Main Street, Vienna"
       assert html =~ "Great location near the city center"

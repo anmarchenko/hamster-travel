@@ -18,7 +18,7 @@ defmodule HamsterTravelWeb.Planning.IndexDrafts do
           {gettext("Create draft")}
         </.button>
       </div>
-      <.trips_grid trips={@streams.plans} />
+      <.trips_grid trips={@streams.plans} display_currency={@display_currency} />
     </.container>
     """
   end
@@ -29,6 +29,8 @@ defmodule HamsterTravelWeb.Planning.IndexDrafts do
       socket
       |> assign(active_nav: drafts_nav_item())
       |> assign(page_title: gettext("Drafts"))
+      # get the display currency from the user
+      |> assign(display_currency: "EUR")
       |> stream(:plans, Planning.list_drafts(socket.assigns.current_user))
 
     {:ok, socket}

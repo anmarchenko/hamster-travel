@@ -18,7 +18,7 @@ defmodule HamsterTravelWeb.Planning.IndexPlans do
           {gettext("Create trip")}
         </.button>
       </div>
-      <.trips_grid trips={@streams.plans} />
+      <.trips_grid trips={@streams.plans} display_currency={@display_currency} />
     </.container>
     """
   end
@@ -29,6 +29,8 @@ defmodule HamsterTravelWeb.Planning.IndexPlans do
       socket
       |> assign(active_nav: plans_nav_item())
       |> assign(page_title: gettext("Plans"))
+      # get the display currency from the user
+      |> assign(display_currency: "EUR")
       |> stream(:plans, Planning.list_plans(socket.assigns.current_user))
 
     {:ok, socket}
