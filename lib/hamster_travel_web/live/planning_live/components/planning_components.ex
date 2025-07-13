@@ -499,12 +499,12 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   attr(:note, :map, required: true)
   attr(:day_index, :integer, required: true)
 
-  def note(%{note: nil} = assigns) do
+  def old_note(%{note: nil} = assigns) do
     ~H"""
     """
   end
 
-  def note(assigns) do
+  def old_note(assigns) do
     ~H"""
     <.live_component module={Note} id={"notes-#{@note.id}-day-#{@day_index}"} note={@note} />
     """

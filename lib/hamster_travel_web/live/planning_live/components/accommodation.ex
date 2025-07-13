@@ -63,12 +63,7 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
         </div>
       </div>
 
-      <div :if={@accommodation.note} class="pt-4 border-t border-slate-200 dark:border-slate-700">
-        <div class="flex items-center text-sm text-slate-700 dark:text-slate-300 bg-gray-50/70 dark:bg-slate-800/70 p-3.5 rounded-lg">
-          <.icon name="hero-information-circle" class="w-4 h-4 mr-2" />
-          <p class="leading-relaxed">{@accommodation.note}</p>
-        </div>
-      </div>
+      <.note note={@accommodation.note} />
     </div>
     """
   end

@@ -786,4 +786,29 @@ defmodule HamsterTravelWeb.CoreComponents do
     </p>
     """
   end
+
+  @doc """
+  Renders a note with consistent styling including an information icon.
+
+  ## Examples
+
+      <.note note={@item.note} />
+      <.note note={@item.note} class="mt-6" />
+  """
+  attr(:note, :string, required: true)
+  attr(:class, :string, default: nil)
+
+  def note(assigns) do
+    ~H"""
+    <div
+      :if={@note}
+      class={build_class(["pt-4 border-t border-slate-200 dark:border-slate-700", @class])}
+    >
+      <div class="flex items-center text-sm text-slate-700 dark:text-slate-300 bg-gray-50/70 dark:bg-slate-800/70 p-3.5 rounded-lg">
+        <.icon name="hero-information-circle" class="w-4 h-4 mr-2" />
+        <p class="leading-relaxed">{@note}</p>
+      </div>
+    </div>
+    """
+  end
 end

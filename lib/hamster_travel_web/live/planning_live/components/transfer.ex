@@ -40,7 +40,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
         <.money_display money={@transfer.expense.price} display_currency={@display_currency} />
         <.action_buttons transfer={@transfer} myself={@myself} />
       </.inline>
-      <div class="flex flex-row text-lg mt-2">
+      <div class="flex flex-row text-lg mt-2 mb-2">
         <div class="flex flex-col gap-y-2 pr-6 border-r-2 font-medium">
           <div>{Formatters.format_time(@transfer.departure_time)}</div>
           <div>{Formatters.format_time(@transfer.arrival_time)}</div>
@@ -57,9 +57,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
         </div>
       </div>
 
-      <.secondary>
-        {@transfer.note}
-      </.secondary>
+      <.note note={@transfer.note} />
     </div>
     """
   end
