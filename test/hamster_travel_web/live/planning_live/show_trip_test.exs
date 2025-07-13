@@ -194,6 +194,83 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert html =~ "Hotel"
     end
 
+    test "renders trip page with transfers", %{conn: conn} do
+      # Arrange
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      # Create a trip with transfers
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      transfer =
+        transfer_fixture(%{
+          trip_id: trip.id,
+          transport_mode: "train",
+          departure_time: "08:00",
+          arrival_time: "12:00",
+          note: "Fast train connection",
+          vessel_number: "ICE 123",
+          carrier: "Deutsche Bahn",
+          departure_station: "Berlin Hauptbahnhof",
+          arrival_station: "Hamburg Hauptbahnhof",
+          day_index: 0,
+          expense: %{
+            price: Money.new(:EUR, 8900),
+            name: "Train ticket",
+            trip_id: trip.id
+          }
+        })
+
+      # Act
+      {:ok, view, html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      # Assert
+      # Verify trip name is displayed
+      assert html =~ trip.name
+
+      # Verify transfer details are rendered
+      assert html =~ transfer.vessel_number
+      assert html =~ transfer.carrier
+      assert html =~ "€8,900.00"
+      assert html =~ "08:00"
+      assert html =~ "12:00"
+      assert html =~ "Fast train connection"
+
+      # Verify that the transfer has edit and delete buttons
+      assert has_element?(view, "[phx-click='edit']")
+      assert has_element?(view, "[phx-click='delete']")
+
+      # Verify that the itinerary tab is active
+      assert has_element?(view, "a.pc-tab__underline--is-active", "Transfers and hotels")
+    end
+
+    test "shows transfer form when clicking add transfer link", %{conn: conn} do
+      # Arrange
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      # Act
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      # Click the first "Add transfer" link in the first row
+      view
+      |> element("tr:first-child td a", "Add transfer")
+      |> render_click()
+
+      # Assert
+      # Verify the transfer form appears with its components
+      assert has_element?(view, "form[id^='transfer-form-']")
+      assert has_element?(view, "label", "Transport")
+      assert has_element?(view, "label", "Departure city")
+      assert has_element?(view, "label", "Arrival city")
+      assert has_element?(view, "label", "Departure time")
+      assert has_element?(view, "label", "Arrival time")
+      assert has_element?(view, "label", "Price")
+      assert has_element?(view, "button", "Save")
+      assert has_element?(view, "button", "Cancel")
+    end
+
     test "shows accommodation form when clicking add accommodation link", %{conn: conn} do
       # Arrange
       user = user_fixture()

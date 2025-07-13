@@ -58,7 +58,6 @@ defmodule HamsterTravel.Planning.Transfer do
     ])
     |> validate_inclusion(:transport_mode, @transport_modes)
     |> validate_number(:day_index, greater_than_or_equal_to: 0)
-    |> validate_arrival_after_departure()
     |> validate_different_cities()
   end
 
@@ -117,22 +116,6 @@ defmodule HamsterTravel.Planning.Transfer do
   Returns the list of valid transport modes.
   """
   def transport_modes, do: @transport_modes
-
-  defp validate_arrival_after_departure(changeset) do
-    departure_time = get_field(changeset, :departure_time)
-    arrival_time = get_field(changeset, :arrival_time)
-
-    cond do
-      is_nil(departure_time) or is_nil(arrival_time) ->
-        changeset
-
-      DateTime.compare(arrival_time, departure_time) in [:lt, :eq] ->
-        add_error(changeset, :arrival_time, "must be after departure time")
-
-      true ->
-        changeset
-    end
-  end
 
   defp validate_different_cities(changeset) do
     departure_city_id = get_field(changeset, :departure_city_id)

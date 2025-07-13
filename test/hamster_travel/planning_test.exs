@@ -1614,68 +1614,6 @@ defmodule HamsterTravel.PlanningTest do
       assert transfer.trip_id == trip.id
     end
 
-    test "create_transfer/2 fails if arrival_time is before departure_time with time strings", %{
-      trip: trip,
-      berlin: berlin,
-      hamburg: hamburg
-    } do
-      invalid_attrs = %{
-        transport_mode: "train",
-        departure_city_id: berlin.id,
-        arrival_city_id: hamburg.id,
-        departure_time: "12:00",
-        arrival_time: "08:00",
-        day_index: 0
-      }
-
-      assert {:error, %Ecto.Changeset{} = changeset} =
-               Planning.create_transfer(trip, invalid_attrs)
-
-      assert %{arrival_time: ["must be after departure time"]} = errors_on(changeset)
-    end
-
-    test "create_transfer/2 fails if arrival_time is before departure_time", %{
-      trip: trip,
-      berlin: berlin,
-      hamburg: hamburg
-    } do
-      invalid_attrs = %{
-        transport_mode: "train",
-        departure_city_id: berlin.id,
-        arrival_city_id: hamburg.id,
-        departure_time: "12:00",
-        arrival_time: "08:00",
-        day_index: 0
-      }
-
-      assert {:error, %Ecto.Changeset{} = changeset} =
-               Planning.create_transfer(trip, invalid_attrs)
-
-      assert %{arrival_time: ["must be after departure time"]} = errors_on(changeset)
-    end
-
-    test "create_transfer/2 fails if arrival_time equals departure_time", %{
-      trip: trip,
-      berlin: berlin,
-      hamburg: hamburg
-    } do
-      same_time = "10:00"
-
-      invalid_attrs = %{
-        transport_mode: "train",
-        departure_city_id: berlin.id,
-        arrival_city_id: hamburg.id,
-        departure_time: same_time,
-        arrival_time: same_time,
-        day_index: 0
-      }
-
-      assert {:error, %Ecto.Changeset{} = changeset} =
-               Planning.create_transfer(trip, invalid_attrs)
-
-      assert %{arrival_time: ["must be after departure time"]} = errors_on(changeset)
-    end
-
     test "create_transfer/2 fails if departure and arrival cities are the same", %{
       trip: trip,
       berlin: berlin
