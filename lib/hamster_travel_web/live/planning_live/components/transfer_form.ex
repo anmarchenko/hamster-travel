@@ -80,6 +80,8 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
           </div>
         </div>
 
+        <.field field={@form[:plus_one_day]} type="checkbox" label={gettext("Next day")} />
+
         <.inputs_for :let={expense_form} field={@form[:expense]}>
           <.money_input
             id={"transfer-expense-price-#{@id}"}
@@ -164,6 +166,7 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
   # Convert datetime fields to time format for form display
   defp convert_datetime_to_time_for_form(changeset) do
     changeset
+    |> set_plus_one_day_from_datetime()
     |> convert_field_to_time(:departure_time)
     |> convert_field_to_time(:arrival_time)
   end
@@ -178,6 +181,22 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
           "#{String.pad_leading(Integer.to_string(time.hour), 2, "0")}:#{String.pad_leading(Integer.to_string(time.minute), 2, "0")}"
 
         Ecto.Changeset.put_change(changeset, field, time_string)
+
+      _ ->
+        changeset
+    end
+  end
+
+  defp set_plus_one_day_from_datetime(changeset) do
+    case Ecto.Changeset.get_field(changeset, :departure_time) do
+      %DateTime{} = datetime ->
+        date = DateTime.to_date(datetime)
+
+        if Date.compare(date, ~D[1970-01-02]) == :eq do
+          Ecto.Changeset.put_change(changeset, :plus_one_day, true)
+        else
+          changeset
+        end
 
       _ ->
         changeset

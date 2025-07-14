@@ -10,8 +10,11 @@ defmodule HamsterTravel.Planning.Transfer do
     field :day_index, :integer
 
     field :transport_mode, :string
+
     field :departure_time, :utc_datetime
     field :arrival_time, :utc_datetime
+    field :plus_one_day, :boolean, virtual: true
+
     field :note, :string
     field :vessel_number, :string
     field :carrier, :string
@@ -28,8 +31,15 @@ defmodule HamsterTravel.Planning.Transfer do
 
   @doc false
   def changeset(transfer, attrs) do
+    # First cast to get the plus_one_day field
+    temp_changeset =
+      transfer
+      |> cast(attrs, [:plus_one_day])
+
+    plus_one_day = get_field(temp_changeset, :plus_one_day, false)
+
     # Pre-process time strings to datetime before main cast
-    attrs = convert_time_strings_to_datetime(attrs)
+    attrs = convert_time_strings_to_datetime(attrs, plus_one_day)
 
     transfer
     |> cast(attrs, [
@@ -61,16 +71,16 @@ defmodule HamsterTravel.Planning.Transfer do
     |> validate_different_cities()
   end
 
-  # Convert time strings to datetime with anchored date 1970-01-01
-  defp convert_time_strings_to_datetime(attrs) do
+  # Convert time strings to datetime with anchored date
+  defp convert_time_strings_to_datetime(attrs, plus_one_day) do
     attrs
-    |> convert_time_field_to_datetime(:departure_time)
-    |> convert_time_field_to_datetime(:arrival_time)
-    |> convert_time_field_to_datetime("departure_time")
-    |> convert_time_field_to_datetime("arrival_time")
+    |> convert_time_field_to_datetime(:departure_time, plus_one_day)
+    |> convert_time_field_to_datetime(:arrival_time, plus_one_day)
+    |> convert_time_field_to_datetime("departure_time", plus_one_day)
+    |> convert_time_field_to_datetime("arrival_time", plus_one_day)
   end
 
-  defp convert_time_field_to_datetime(attrs, field) do
+  defp convert_time_field_to_datetime(attrs, field, plus_one_day) do
     case Map.get(attrs, field) do
       nil ->
         attrs
@@ -81,8 +91,9 @@ defmodule HamsterTravel.Planning.Transfer do
 
         case Time.from_iso8601(normalized_time) do
           {:ok, time} ->
-            # Create datetime with anchored date 1970-01-01
-            {:ok, datetime} = DateTime.new(~D[1970-01-01], time, "Etc/UTC")
+            # Create datetime with anchored date - use 1970-01-02 if plus_one_day is true
+            anchor_date = if plus_one_day, do: ~D[1970-01-02], else: ~D[1970-01-01]
+            {:ok, datetime} = DateTime.new(anchor_date, time, "Etc/UTC")
             Map.put(attrs, field, datetime)
 
           {:error, _} ->

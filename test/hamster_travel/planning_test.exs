@@ -1607,7 +1607,6 @@ defmodule HamsterTravel.PlanningTest do
       assert transfer.departure_city_id == berlin.id
       assert transfer.arrival_city_id == hamburg.id
 
-      # Verify times are converted to datetime with anchored date 1970-01-01
       assert transfer.departure_time == ~U[1970-01-01 09:00:00Z]
       assert transfer.arrival_time == ~U[1970-01-01 13:30:00Z]
       assert transfer.day_index == 0
@@ -1651,6 +1650,62 @@ defmodule HamsterTravel.PlanningTest do
                Planning.create_transfer(trip, invalid_attrs)
 
       assert %{day_index: ["must be greater than or equal to 0"]} = errors_on(changeset)
+    end
+
+    test "create_transfer/2 with plus_one_day uses 1970-01-02 as anchor date", %{
+      trip: trip,
+      berlin: berlin,
+      hamburg: hamburg
+    } do
+      # Test with plus_one_day: true
+      time_attrs = %{
+        transport_mode: "train",
+        departure_city_id: berlin.id,
+        arrival_city_id: hamburg.id,
+        departure_time: "23:45",
+        arrival_time: "01:30",
+        day_index: 0,
+        plus_one_day: true
+      }
+
+      assert {:ok, %Transfer{} = transfer} = Planning.create_transfer(trip, time_attrs)
+      assert transfer.transport_mode == "train"
+      assert transfer.departure_city_id == berlin.id
+      assert transfer.arrival_city_id == hamburg.id
+
+      # Verify times are converted to datetime with anchored date 1970-01-02
+      assert transfer.departure_time == ~U[1970-01-02 23:45:00Z]
+      assert transfer.arrival_time == ~U[1970-01-02 01:30:00Z]
+      assert transfer.day_index == 0
+      assert transfer.trip_id == trip.id
+    end
+
+    test "create_transfer/2 with plus_one_day: false uses default 1970-01-01 anchor date", %{
+      trip: trip,
+      berlin: berlin,
+      hamburg: hamburg
+    } do
+      # Test with plus_one_day: false (explicit)
+      time_attrs = %{
+        transport_mode: "flight",
+        departure_city_id: berlin.id,
+        arrival_city_id: hamburg.id,
+        departure_time: "14:15",
+        arrival_time: "15:45",
+        day_index: 0,
+        plus_one_day: false
+      }
+
+      assert {:ok, %Transfer{} = transfer} = Planning.create_transfer(trip, time_attrs)
+      assert transfer.transport_mode == "flight"
+      assert transfer.departure_city_id == berlin.id
+      assert transfer.arrival_city_id == hamburg.id
+
+      # Verify times are converted to datetime with anchored date 1970-01-01
+      assert transfer.departure_time == ~U[1970-01-01 14:15:00Z]
+      assert transfer.arrival_time == ~U[1970-01-01 15:45:00Z]
+      assert transfer.day_index == 0
+      assert transfer.trip_id == trip.id
     end
 
     test "update_transfer/2 with valid data updates the transfer" do
