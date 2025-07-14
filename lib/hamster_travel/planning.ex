@@ -385,7 +385,8 @@ defmodule HamsterTravel.Planning do
     %Accommodation{
       start_day: default_days.start_day,
       end_day: default_days.end_day,
-      trip_id: trip.id
+      trip_id: trip.id,
+      expense: %Expense{price: Money.new(trip.currency, 0)}
     }
     |> Accommodation.changeset(attrs)
   end
@@ -477,7 +478,8 @@ defmodule HamsterTravel.Planning do
       trip_id: trip.id,
       departure_city: nil,
       arrival_city: nil,
-      day_index: day_index
+      day_index: day_index,
+      expense: %Expense{price: Money.new(trip.currency, 0)}
     }
     |> Transfer.changeset(attrs)
   end
