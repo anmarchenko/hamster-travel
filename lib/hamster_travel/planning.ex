@@ -495,6 +495,7 @@ defmodule HamsterTravel.Planning do
 
   def transfers_for_day(day_index, transfers) do
     singular_items_for_day(day_index, transfers)
+    |> Enum.sort_by(& &1.departure_time)
   end
 
   defp transfers_preloading(query) do

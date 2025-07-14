@@ -444,7 +444,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
             />
           </div>
 
-          <.note note={HamsterTravel.find_note_by_day(@notes, i)} day_index={i} />
+          <.old_note note={HamsterTravel.find_note_by_day(@notes, i)} day_index={i} />
           <.expenses expenses={HamsterTravel.filter_expenses_by_day(@expenses, i)} day_index={i} />
           <div class="flex flex-col mt-4">
             <.activities
