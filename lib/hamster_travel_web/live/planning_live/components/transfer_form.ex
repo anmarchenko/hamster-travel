@@ -223,7 +223,7 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
   end
 
   defp result({:error, changeset}, socket) do
-    {:noreply, assign_form(socket, changeset)}
+    {:noreply, assign_form(socket, convert_datetime_to_time_for_form(changeset))}
   end
 
   defp transport_mode_options do
