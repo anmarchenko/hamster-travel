@@ -182,6 +182,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       destinations={@trip.destinations}
       destinations_outside={destinations_outside(@trip)}
       transfers={@trip.transfers}
+      transfers_outside={transfers_outside(@trip)}
       budget={@budget}
       display_currency={@display_currency}
     />
@@ -223,6 +224,13 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     trip.accommodations
     |> Enum.filter(fn accommodation ->
       accommodation.start_day >= trip.duration
+    end)
+  end
+
+  defp transfers_outside(trip) do
+    trip.transfers
+    |> Enum.filter(fn transfer ->
+      transfer.day_index >= trip.duration
     end)
   end
 

@@ -254,6 +254,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   attr(:destinations, :list, required: true)
   attr(:destinations_outside, :list, required: true)
   attr(:transfers, :list, required: true)
+  attr(:transfers_outside, :list, required: true)
   attr(:accommodations, :list, required: true)
   attr(:accommodations_outside, :list, required: true)
 
@@ -267,7 +268,10 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
       />
 
       <.toggle
-        :if={Enum.any?(@destinations_outside) || Enum.any?(@accommodations_outside)}
+        :if={
+          Enum.any?(@destinations_outside) || Enum.any?(@accommodations_outside) ||
+            Enum.any?(@transfers_outside)
+        }
         label={gettext("Some items are scheduled outside of the trip duration")}
         class="mt-4"
       >
@@ -275,6 +279,12 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
         <.accommodations_list
           trip={@trip}
           accommodations={@accommodations_outside}
+          display_currency={@display_currency}
+          day_index={0}
+        />
+        <.transfers_list
+          trip={@trip}
+          transfers={@transfers_outside}
           display_currency={@display_currency}
           day_index={0}
         />
