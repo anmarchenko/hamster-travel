@@ -1828,7 +1828,7 @@ defmodule HamsterTravel.PlanningTest do
 
     test "new_transfer/2 with attributes overrides default values" do
       trip = trip_fixture()
-      attrs = %{transport_mode: "flight", note: "Custom note"}
+      attrs = %{transport_mode: "train", note: "Custom note"}
       changeset = Planning.new_transfer(trip, 0, attrs)
 
       assert %Ecto.Changeset{
@@ -1837,7 +1837,7 @@ defmodule HamsterTravel.PlanningTest do
                  day_index: 0
                },
                changes: %{
-                 transport_mode: "flight",
+                 transport_mode: "train",
                  note: "Custom note"
                }
              } = changeset
