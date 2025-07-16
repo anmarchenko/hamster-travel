@@ -475,6 +475,7 @@ defmodule HamsterTravel.Planning do
 
   def new_transfer(trip, day_index, attrs \\ %{}) do
     %Transfer{
+      transport_mode: "flight",
       trip_id: trip.id,
       departure_city: nil,
       arrival_city: nil,

@@ -24,6 +24,7 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
         as={:transfer}
         phx-target={@myself}
         phx-submit="form_submit"
+        phx-change="form_changed"
         class="space-y-4"
       >
         <.field
@@ -91,35 +92,45 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
           />
         </.inputs_for>
 
-        <%!-- <.field
-          field={@form[:vessel_number]}
-          type="text"
-          label={gettext("Vessel Number")}
-          placeholder={gettext("Flight number, train number, etc.")}
-        />
+        <div :if={@show_carrier_info} class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="md:col-span-1">
+            <.field
+              field={@form[:departure_station]}
+              type="text"
+              label={departure_station_label(@transport_mode)}
+              wrapper_class="mb-0"
+            />
+          </div>
 
-        <.field
-          field={@form[:carrier]}
-          type="text"
-          label={gettext("Carrier")}
-          placeholder={gettext("Airline, train company, etc.")}
-        /> --%>
+          <div class="md:col-span-1">
+            <.field
+              field={@form[:arrival_station]}
+              type="text"
+              label={arrival_station_label(@transport_mode)}
+              wrapper_class="mb-0"
+            />
+          </div>
+        </div>
 
-        <%!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <.field
-            field={@form[:departure_station]}
-            type="text"
-            label={gettext("Departure Station")}
-            placeholder={gettext("Airport, train station, etc.")}
-          />
+        <div :if={@show_carrier_info} class="grid grid-cols-1 md:grid-cols-8 gap-4">
+          <div class="md:col-span-2">
+            <.field
+              field={@form[:vessel_number]}
+              type="text"
+              label={vessel_number_label(@transport_mode)}
+              wrapper_class="mb-0"
+            />
+          </div>
 
-          <.field
-            field={@form[:arrival_station]}
-            type="text"
-            label={gettext("Arrival Station")}
-            placeholder={gettext("Airport, train station, etc.")}
-          />
-        </div> --%>
+          <div class="md:col-span-6">
+            <.field
+              field={@form[:carrier]}
+              type="text"
+              label={carrier_label(@transport_mode)}
+              wrapper_class="mb-0"
+            />
+          </div>
+        </div>
 
         <.field
           field={@form[:note]}
@@ -155,9 +166,13 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
           |> convert_datetime_to_time_for_form()
       end
 
+    transport_mode = Ecto.Changeset.get_field(changeset, :transport_mode)
+
     socket =
       socket
       |> assign(assigns)
+      |> assign(:transport_mode, transport_mode)
+      |> assign(:show_carrier_info, show_carrier_info(transport_mode))
       |> assign_form(changeset)
 
     {:ok, socket}
@@ -209,8 +224,22 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
       transfer_params
       |> CityInput.process_selected_value_on_submit("departure_city")
       |> CityInput.process_selected_value_on_submit("arrival_city")
+      |> cleanup_carrier_fields_if_not_shown(socket.assigns.show_carrier_info)
 
     on_submit(socket, socket.assigns.action, transfer_params)
+  end
+
+  def handle_event("form_changed", %{"transfer" => %{"transport_mode" => transport_mode}}, socket) do
+    socket =
+      socket
+      |> assign(:transport_mode, transport_mode)
+      |> assign(:show_carrier_info, show_carrier_info(transport_mode))
+
+    {:noreply, socket}
+  end
+
+  def handle_event("form_changed", %{"transfer" => _transfer_params}, socket) do
+    {:noreply, socket}
   end
 
   def handle_event("cancel", _, socket) do
@@ -221,6 +250,16 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
     assign(socket, :form, to_form(changeset))
+  end
+
+  defp cleanup_carrier_fields_if_not_shown(transfer_params, true), do: transfer_params
+
+  defp cleanup_carrier_fields_if_not_shown(transfer_params, false) do
+    transfer_params
+    |> Map.put("vessel_number", nil)
+    |> Map.put("carrier", nil)
+    |> Map.put("departure_station", nil)
+    |> Map.put("arrival_station", nil)
   end
 
   defp on_submit(socket, :new, transfer_params) do
@@ -259,4 +298,24 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
   defp transport_mode_label("taxi"), do: gettext("Taxi")
   defp transport_mode_label("boat"), do: gettext("Boat")
   defp transport_mode_label(mode), do: String.capitalize(mode)
+
+  defp show_carrier_info("flight"), do: true
+  defp show_carrier_info("train"), do: true
+  defp show_carrier_info(_), do: false
+
+  defp vessel_number_label("flight"), do: gettext("Flight number")
+  defp vessel_number_label("train"), do: gettext("Train number")
+  defp vessel_number_label(_), do: gettext("Vessel")
+
+  defp carrier_label("flight"), do: gettext("Airline")
+  defp carrier_label("train"), do: gettext("Railway")
+  defp carrier_label(_), do: gettext("Carrier")
+
+  defp departure_station_label("flight"), do: gettext("Departure airport")
+  defp departure_station_label("train"), do: gettext("Departure station")
+  defp departure_station_label(_), do: gettext("Departure station")
+
+  defp arrival_station_label("flight"), do: gettext("Arrival airport")
+  defp arrival_station_label("train"), do: gettext("Arrival station")
+  defp arrival_station_label(_), do: gettext("Arrival station")
 end
