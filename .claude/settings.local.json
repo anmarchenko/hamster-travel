@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mix test)",
+      "Bash(psqlhtl:*)"
+    ],
+    "deny": []
+  }
+}

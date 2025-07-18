@@ -40,7 +40,7 @@ mix test --cover
 mix credo --strict
 ```
 
-### Database
+### Ecto database schema
 ```bash
 # Reset database (drop, create, migrate, seed)
 mix ecto.reset
@@ -50,6 +50,16 @@ mix ecto.migrate
 
 # Rollback migration
 mix ecto.rollback
+```
+
+### Query the database
+
+```bash
+# psql alias to connect to local database
+psqlhtl
+
+# execute a query
+psqlhtl -c "SELECT * FROM users;"
 ```
 
 ### Assets
