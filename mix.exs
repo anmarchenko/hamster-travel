@@ -98,7 +98,8 @@ defmodule HamsterTravel.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:floki, ">= 0.30.0", only: :test},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
-      {:live_debugger, "~> 0.3.0", only: :dev}
+      {:live_debugger, "~> 0.3.0", only: :dev},
+      {:tidewave, "~> 0.2", only: :dev}
     ]
   end
 

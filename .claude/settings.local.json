@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(mix test)",
-      "Bash(psqlhtl:*)"
+      "Bash(psqlhtl:*)",
+      "mcp__tidewave__get_logs"
     ],
     "deny": []
   }
