@@ -12,7 +12,10 @@
       "Bash(mix credo:*)",
       "Bash(mix test:*)",
       "WebFetch(domain:hexdocs.pm)",
-      "mcp__tidewave__execute_sql_query"
+      "mcp__tidewave__execute_sql_query",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_click"
     ],
     "deny": []
   }
