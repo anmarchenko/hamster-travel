@@ -17,6 +17,7 @@ import live_select from 'live_select';
 // hamster travel components
 import DayRangeSelect from './day_range_select';
 import MoneyInput from './money_input';
+import TransferDragDrop from './transfer_drag_drop';
 
 Alpine.plugin(persist);
 Alpine.plugin(collapse);
@@ -32,6 +33,7 @@ let hooks = {
   ...live_select,
   ...DayRangeSelect,
   ...MoneyInput,
+  ...TransferDragDrop,
 };
 
 let liveSocket = new LiveSocket('/live', Socket, {

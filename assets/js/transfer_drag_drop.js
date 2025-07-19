@@ -1,0 +1,38 @@
+import Sortable from "sortablejs";
+
+let TransferDragDrop = {
+  mounted() {
+    // Get all transfer drop zones that can accept drops
+    const transferDropZones = this.el.querySelectorAll(
+      "[data-transfer-drop-zone]",
+    );
+
+    transferDropZones.forEach((zone) => {
+      new Sortable(zone, {
+        group: "transfers", // Allow moving between zones
+        animation: 150,
+        ghostClass: "hamster-drag-ghost",
+        chosenClass: "hamster-drag-chosen",
+        dragClass: "hamster-drag-item",
+        sort: false, // Disable sorting within the same zone
+        draggable: ".draggable-transfer",
+        onEnd: (evt) => {
+          const transferId = evt.item.dataset.transferId;
+          const newDayIndex = evt.to.dataset.targetDay;
+          const oldDayIndex = evt.from.dataset.targetDay;
+
+          // Only send event if actually moved to different day
+          if (newDayIndex !== oldDayIndex) {
+            this.pushEvent("move_transfer", {
+              transfer_id: transferId,
+              new_day_index: parseInt(newDayIndex),
+              old_day_index: parseInt(oldDayIndex),
+            });
+          }
+        },
+      });
+    });
+  },
+};
+
+export default { TransferDragDrop };

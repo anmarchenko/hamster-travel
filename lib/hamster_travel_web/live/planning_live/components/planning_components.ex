@@ -260,7 +260,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
 
   def tab_itinerary(assigns) do
     ~H"""
-    <div>
+    <div phx-hook="TransferDragDrop" id="trip-itinerary">
       <.budget_display
         budget={@budget}
         display_currency={@display_currency}
@@ -328,7 +328,11 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
               </div>
             </td>
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
-              <div class="flex flex-col gap-y-8">
+              <div
+                class="transfers-column min-h-[100px] flex flex-col gap-y-8"
+                data-transfer-drop-zone
+                data-target-day={i}
+              >
                 <.transfers_list
                   trip={@trip}
                   transfers={Planning.transfers_for_day(i, @transfers)}

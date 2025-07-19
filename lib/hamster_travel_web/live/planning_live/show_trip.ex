@@ -8,6 +8,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   alias HamsterTravel.Geo
   alias HamsterTravel.Planning
+  alias HamsterTravel.Planning.Trip
   alias HamsterTravel.Repo
   alias HamsterTravelWeb.Cldr
 
@@ -172,6 +173,41 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> send_edit_state_to_entity_creation_components(component_type)
 
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event(
+        "move_transfer",
+        %{"transfer_id" => transfer_id, "new_day_index" => new_day_index},
+        socket
+      ) do
+    transfer_id = String.to_integer(transfer_id)
+    transfer = find_transfer_in_trip(transfer_id, socket.assigns.trip)
+
+    case Planning.move_transfer_to_day(
+           transfer,
+           new_day_index,
+           socket.assigns.trip,
+           socket.assigns.current_user
+         ) do
+      {:ok, _updated_transfer} ->
+        # Refetch only transfers to show updated data
+        updated_transfers = Planning.list_transfers(socket.assigns.trip.id)
+        updated_trip = Map.put(socket.assigns.trip, :transfers, updated_transfers)
+
+        socket =
+          socket
+          |> assign(trip: updated_trip)
+          |> put_flash(:info, gettext("Transfer moved successfully"))
+
+        {:noreply, socket}
+
+      {:error, reason} ->
+        socket =
+          put_flash(socket, :error, gettext("Failed to move transfer: %{reason}", reason: reason))
+
+        {:noreply, socket}
+    end
   end
 
   def render_tab(%{active_tab: "itinerary"} = assigns) do
@@ -357,4 +393,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   defp maybe_recalculate_budget(socket, _entity_type, _trip), do: socket
+
+  defp find_transfer_in_trip(transfer_id, %Trip{transfers: transfers}) do
+    Enum.find(transfers, &(&1.id == transfer_id))
+  end
 end

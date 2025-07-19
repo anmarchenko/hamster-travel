@@ -7,6 +7,7 @@ defmodule HamsterTravel.Planning do
 
   require Logger
 
+  alias HamsterTravel.Accounts.User
   alias HamsterTravel.Geo
   alias HamsterTravel.Planning.{Accommodation, Destination, Expense, Policy, Transfer, Trip}
   alias HamsterTravel.Repo
@@ -492,6 +493,50 @@ defmodule HamsterTravel.Planning do
   def delete_transfer(%Transfer{} = transfer) do
     Repo.delete(transfer)
     |> send_pubsub_event([:transfer, :deleted], transfer.trip_id)
+  end
+
+  def move_transfer_to_day(nil, _new_day_index, _trip, _user), do: {:error, "Transfer not found"}
+
+  def move_transfer_to_day(transfer, new_day_index, trip, user) do
+    with :ok <- validate_user_authorization(trip, user),
+         :ok <- validate_transfer_belongs_to_trip(transfer, trip),
+         :ok <- validate_day_index_in_trip_duration(new_day_index, trip),
+         {:ok, updated_transfer} <- update_transfer_day_index(transfer, new_day_index) do
+      {:ok, updated_transfer}
+    end
+  end
+
+  defp validate_user_authorization(%Trip{} = trip, %User{} = user) do
+    if Policy.authorized?(:edit, trip, user) do
+      :ok
+    else
+      {:error, "Unauthorized"}
+    end
+  end
+
+  defp validate_transfer_belongs_to_trip(transfer, %Trip{transfers: transfers}) do
+    IO.inspect(transfers)
+
+    if Enum.any?(transfers, &(&1.id == transfer.id)) do
+      :ok
+    else
+      {:error, "Transfer not found"}
+    end
+  end
+
+  defp validate_day_index_in_trip_duration(day_index, %Trip{duration: duration}) do
+    if day_index >= 0 and day_index < duration do
+      :ok
+    else
+      {:error, "Day index must be between 0 and #{duration - 1}"}
+    end
+  end
+
+  defp update_transfer_day_index(transfer, new_day_index) do
+    transfer
+    |> Transfer.changeset(%{day_index: new_day_index})
+    |> Repo.update(stale_error_field: :id)
+    |> preload_after_db_call(&transfers_preloading(&1))
   end
 
   def transfers_for_day(day_index, transfers) do

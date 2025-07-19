@@ -4,5 +4,29 @@
 @import "tailwindcss/utilities";
 
 [x-cloak] {
-  display: none !important;
+    display: none !important;
+}
+
+/* Drag and Drop Styles */
+.transfers-column {
+    min-height: 100px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.hamster-drag-ghost {
+    opacity: 0.4;
+}
+
+.hamster-drag-chosen {
+    background-color: #f3f4f6;
+}
+
+.hamster-drag-item {
+    transform: rotate(5deg);
+}
+
+.hamster-sortable-ghost {
+    background-color: #e5f3ff;
+    border: 2px dashed #3b82f6;
 }

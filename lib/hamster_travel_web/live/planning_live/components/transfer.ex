@@ -32,7 +32,10 @@ defmodule HamsterTravelWeb.Planning.Transfer do
 
   def render(%{edit: false} = assigns) do
     ~H"""
-    <div class="flex flex-col gap-y-1">
+    <div
+      class="draggable-transfer flex flex-col gap-y-1 cursor-grab hover:bg-gray-50 dark:hover:bg-gray-800 rounded p-2 transition-colors duration-200 active:cursor-grabbing"
+      data-transfer-id={@transfer.id}
+    >
       <.inline>
         <.transfer_icon type={@transfer.transport_mode} />
         {@transfer.vessel_number}
