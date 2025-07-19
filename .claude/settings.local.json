@@ -16,7 +16,8 @@
       "mcp__playwright__browser_navigate",
       "mcp__playwright__browser_type",
       "mcp__playwright__browser_click",
-      "WebFetch(domain:fly.io)"
+      "WebFetch(domain:fly.io)",
+      "Bash(find:*)"
     ],
     "deny": []
   }

@@ -19,7 +19,7 @@
 }
 
 .hamster-drag-chosen {
-    background-color: #f3f4f6;
+    @apply bg-gray-100 dark:bg-zinc-700;
 }
 
 .hamster-drag-item {
@@ -27,6 +27,5 @@
 }
 
 .hamster-sortable-ghost {
-    background-color: #e5f3ff;
-    border: 2px dashed #3b82f6;
+    @apply bg-blue-50 border-2 border-dashed border-blue-500 dark:bg-zinc-800 dark:border-zinc-600;
 }

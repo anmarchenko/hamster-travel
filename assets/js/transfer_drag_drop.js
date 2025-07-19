@@ -10,11 +10,11 @@ let TransferDragDrop = {
     transferDropZones.forEach((zone) => {
       new Sortable(zone, {
         group: "transfers", // Allow moving between zones
+        sort: false, // Disable sorting within the same zone
         animation: 150,
         ghostClass: "hamster-drag-ghost",
         chosenClass: "hamster-drag-chosen",
         dragClass: "hamster-drag-item",
-        sort: false, // Disable sorting within the same zone
         draggable: ".draggable-transfer",
         onEnd: (evt) => {
           const transferId = evt.item.dataset.transferId;
