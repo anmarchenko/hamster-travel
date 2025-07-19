@@ -198,7 +198,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         socket =
           socket
           |> assign(trip: updated_trip)
-          |> put_flash(:info, gettext("Transfer moved successfully"))
 
         {:noreply, socket}
 
