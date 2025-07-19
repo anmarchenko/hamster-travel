@@ -767,11 +767,13 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   ## Examples
 
-      <.money_display money={%Money{amount: 100, currency: :EUR}} />
+      <.money_display money={%Money{amount: 100, currency: :EUR}} display_currency="EUR" />
 
-      <.money_display money={%Money{amount: 50, currency: :USD}} class="ml-auto">
+      <.money_display money={%Money{amount: 50, currency: :USD}} class="ml-auto" display_currency="EUR">
         <:suffix> / {gettext("night")}</:suffix>
       </.money_display>
+
+      <.money_display money={%Money{amount: 50, currency: :USD}} display_currency="EUR" />
   """
   attr(:money, Money, required: true)
   attr(:display_currency, :string, required: true)
@@ -780,9 +782,27 @@ defmodule HamsterTravelWeb.CoreComponents do
   slot(:suffix)
 
   def money_display(assigns) do
+    {display_money, original_money, is_converted} =
+      Cldr.convert_money_for_display(assigns.money, assigns.display_currency)
+
+    assigns =
+      assigns
+      |> assign(:display_money, display_money)
+      |> assign(:original_money, original_money)
+      |> assign(:is_converted, is_converted)
+
     ~H"""
-    <p class={build_class(["whitespace-nowrap", @class])}>
-      {Cldr.format_money(@money.amount, @money.currency)}<span :if={@suffix != []}>{render_slot(@suffix)}</span>
+    <p
+      class={
+        build_class([
+          "whitespace-nowrap",
+          @is_converted && "border-b border-dotted border-gray-400 cursor-help",
+          @class
+        ])
+      }
+      title={@is_converted && Cldr.format_money(@original_money.amount, @original_money.currency)}
+    >
+      {Cldr.format_money(@display_money.amount, @display_money.currency)}<span :if={@suffix != []}>{render_slot(@suffix)}</span>
     </p>
     """
   end

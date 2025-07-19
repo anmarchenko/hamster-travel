@@ -96,4 +96,21 @@ defmodule HamsterTravelWeb.Cldr do
             end),
         do: {currency, currency}
   end
+
+  def convert_money_for_display(money, display_currency) do
+    original_money = money
+    is_converted = to_string(original_money.currency) != display_currency
+
+    {display_money, conversion_error} =
+      if is_converted do
+        case Money.to_currency(original_money, display_currency) do
+          {:ok, converted_money} -> {converted_money, false}
+          {:error, _} -> {original_money, true}
+        end
+      else
+        {original_money, false}
+      end
+
+    {display_money, original_money, is_converted && !conversion_error}
+  end
 end

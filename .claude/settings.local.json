@@ -3,7 +3,14 @@
     "allow": [
       "Bash(mix test)",
       "Bash(psqlhtl:*)",
-      "mcp__tidewave__get_logs"
+      "mcp__tidewave__get_logs",
+      "WebFetch(domain:petal.build)",
+      "mcp__tidewave__search_package_docs",
+      "mcp__tidewave__get_docs",
+      "mcp__tidewave__project_eval",
+      "Bash(mix compile)",
+      "Bash(mix credo:*)",
+      "Bash(mix test:*)"
     ],
     "deny": []
   }

@@ -316,5 +316,43 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       # 120.00 EUR
       assert accommodation.expense.price == Money.new(:EUR, "120.00")
     end
+
+    test "renders accommodation with currency conversion and tooltip", %{conn: conn} do
+      # Arrange
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft", currency: "EUR"})
+
+      # Create accommodation with USD price (different from user currency)
+      accommodation =
+        accommodation_fixture(%{
+          trip_id: trip.id,
+          name: "NYC Hotel",
+          start_day: 0,
+          end_day: 1,
+          expense: %{
+            # $100.00
+            price: Money.new(:USD, 100),
+            name: "Hotel booking",
+            trip_id: trip.id
+          }
+        })
+
+      # Act
+      {:ok, view, html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      # Assert
+      # accommodation name is displayed
+      assert html =~ accommodation.name
+
+      # The money display element should have conversion styling (dotted underline and cursor-help)
+      assert has_element?(view, "p.border-b.border-dotted.border-gray-400.cursor-help")
+
+      # tooltip contains the original USD amount in title attribute
+      assert html =~ "title="
+      # "$50.00" per night in the title
+      assert html =~ ~r/title="[^"]*\$50\.00/
+    end
   end
 end
