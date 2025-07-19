@@ -10,7 +10,9 @@
       "mcp__tidewave__project_eval",
       "Bash(mix compile)",
       "Bash(mix credo:*)",
-      "Bash(mix test:*)"
+      "Bash(mix test:*)",
+      "WebFetch(domain:hexdocs.pm)",
+      "mcp__tidewave__execute_sql_query"
     ],
     "deny": []
   }

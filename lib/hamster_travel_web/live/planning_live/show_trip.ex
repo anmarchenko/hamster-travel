@@ -6,6 +6,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   import HamsterTravelWeb.Planning.PlanningComponents
 
+  alias HamsterTravel.Geo
   alias HamsterTravel.Planning
   alias HamsterTravel.Repo
   alias HamsterTravelWeb.Cldr
@@ -311,11 +312,18 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     {:noreply, socket}
   end
 
-  defp preload_entity_associations(:destination, entity), do: Repo.preload(entity, [:city])
+  defp preload_entity_associations(:destination, entity),
+    do: Repo.preload(entity, city: Geo.city_preloading_query())
+
   defp preload_entity_associations(:accommodation, entity), do: Repo.preload(entity, [:expense])
 
   defp preload_entity_associations(:transfer, entity),
-    do: Repo.preload(entity, [:expense, :departure_city, :arrival_city])
+    do:
+      Repo.preload(entity, [
+        :expense,
+        departure_city: Geo.city_preloading_query(),
+        arrival_city: Geo.city_preloading_query()
+      ])
 
   defp get_entities_key(:destination), do: :destinations
   defp get_entities_key(:accommodation), do: :accommodations

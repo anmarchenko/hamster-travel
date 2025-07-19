@@ -8,6 +8,7 @@ defmodule HamsterTravelWeb.Planning.CityInput do
   attr :field, Phoenix.HTML.FormField, required: true
   attr :validated_field, Phoenix.HTML.FormField, required: false
   attr :label, :string, required: true
+  attr :trip_cities, :list, default: []
 
   @impl true
   def render(%{field: field} = assigns) do
@@ -31,6 +32,7 @@ defmodule HamsterTravelWeb.Planning.CityInput do
         active_option_class="font-bold bg-gray-200 dark:bg-zinc-700"
         option_class="rounded px-4 py-2 md:py-1"
         update_min_len={2}
+        options={initial_options(@trip_cities)}
       >
         <:option :let={option}>
           <.inline>
@@ -51,10 +53,7 @@ defmodule HamsterTravelWeb.Planning.CityInput do
 
   @impl true
   def handle_event("live_select_change", %{"text" => text, "id" => live_select_id}, socket) do
-    cities =
-      text
-      |> Geo.search_cities()
-      |> Enum.map(&value_mapper/1)
+    cities = get_cities_for_search(text, socket.assigns.trip_cities)
 
     send_update(LiveSelect.Component, id: live_select_id, options: cities)
 
@@ -88,5 +87,41 @@ defmodule HamsterTravelWeb.Planning.CityInput do
         country: city.country.iso
       }
     }
+  end
+
+  defp initial_options([]), do: []
+
+  defp initial_options(trip_cities) do
+    trip_cities
+    |> Enum.map(&value_mapper/1)
+  end
+
+  defp get_cities_for_search(text, []) do
+    search_cities(text)
+  end
+
+  defp get_cities_for_search(text, trip_cities) do
+    search_results = search_cities(text)
+    trip_city_ids = Enum.map(trip_cities, & &1.id)
+
+    # Filter search results that match trip_cities
+    matching_trip_cities =
+      search_results
+      |> Enum.filter(fn option ->
+        option.value.id in trip_city_ids
+      end)
+
+    other_results =
+      Enum.reject(search_results, fn option ->
+        option.value.id in trip_city_ids
+      end)
+
+    matching_trip_cities ++ other_results
+  end
+
+  defp search_cities(text) do
+    text
+    |> Geo.search_cities()
+    |> Enum.map(&value_mapper/1)
   end
 end

@@ -43,6 +43,7 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
               field={@form[:departure_city]}
               validated_field={@form[:departure_city_id]}
               label={gettext("Departure city")}
+              trip_cities={get_destination_cities(@trip, assigns)}
             />
           </div>
 
@@ -57,6 +58,7 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
               field={@form[:arrival_city]}
               validated_field={@form[:arrival_city_id]}
               label={gettext("Arrival city")}
+              trip_cities={get_destination_cities(@trip, assigns)}
             />
           </div>
         </div>
@@ -318,4 +320,27 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
   defp arrival_station_label("flight"), do: gettext("Arrival airport")
   defp arrival_station_label("train"), do: gettext("Arrival station")
   defp arrival_station_label(_), do: gettext("Arrival station")
+
+  defp get_destination_cities(trip, %{action: :edit, transfer: transfer}) do
+    destination_cities = extract_destination_cities(trip)
+
+    transfer_cities =
+      [transfer.departure_city, transfer.arrival_city]
+      |> Enum.reject(&is_nil/1)
+
+    (transfer_cities ++ destination_cities)
+    |> Enum.uniq_by(& &1.id)
+  end
+
+  defp get_destination_cities(trip, _assigns) do
+    trip
+    |> extract_destination_cities()
+    |> Enum.uniq_by(& &1.id)
+  end
+
+  defp extract_destination_cities(trip) do
+    trip.destinations
+    |> Enum.map(& &1.city)
+    |> Enum.reject(&is_nil/1)
+  end
 end
