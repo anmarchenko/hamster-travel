@@ -1945,23 +1945,24 @@ defmodule HamsterTravel.PlanningTest do
       author = user_fixture()
       friend = user_fixture()
       stranger = user_fixture()
-      
+
       # Create friendship
       Social.add_friends(author.id, friend.id)
-      
+
       # Create a trip with duration 5 days (days 0-4 are valid)
-      trip = trip_fixture(%{
-        author_id: author.id,
-        duration: 5,
-        dates_unknown: true
-      })
-      
+      trip =
+        trip_fixture(%{
+          author_id: author.id,
+          duration: 5,
+          dates_unknown: true
+        })
+
       # Preload transfers for the trip
       trip = Planning.get_trip!(trip.id)
-      
-      {:ok, 
+
+      {:ok,
        author: Repo.preload(author, :friendships),
-       friend: Repo.preload(friend, :friendships), 
+       friend: Repo.preload(friend, :friendships),
        stranger: Repo.preload(stranger, :friendships),
        trip: trip}
     end
@@ -1969,13 +1970,13 @@ defmodule HamsterTravel.PlanningTest do
     test "successfully moves transfer to valid day for trip author", %{author: author, trip: trip} do
       # Create a transfer on day 0
       transfer = transfer_fixture(%{trip_id: trip.id, day_index: 0})
-      
+
       # Reload trip to include the new transfer
       trip = Planning.get_trip!(trip.id)
-      
+
       # Move transfer to day 2
       assert {:ok, updated_transfer} = Planning.move_transfer_to_day(transfer, 2, trip, author)
-      
+
       assert updated_transfer.day_index == 2
       assert updated_transfer.id == transfer.id
       # Verify it has proper preloading
@@ -1984,16 +1985,19 @@ defmodule HamsterTravel.PlanningTest do
       assert updated_transfer.expense.price
     end
 
-    test "successfully moves transfer to valid day for friend in friends circle", %{friend: friend, trip: trip} do
+    test "successfully moves transfer to valid day for friend in friends circle", %{
+      friend: friend,
+      trip: trip
+    } do
       # Create a transfer on day 1
       transfer = transfer_fixture(%{trip_id: trip.id, day_index: 1})
-      
+
       # Reload trip to include the new transfer
       trip = Planning.get_trip!(trip.id)
-      
+
       # Move transfer to day 3
       assert {:ok, updated_transfer} = Planning.move_transfer_to_day(transfer, 3, trip, friend)
-      
+
       assert updated_transfer.day_index == 3
       assert updated_transfer.id == transfer.id
     end
@@ -2001,13 +2005,13 @@ defmodule HamsterTravel.PlanningTest do
     test "successfully moves transfer to same day (no-op)", %{author: author, trip: trip} do
       # Create a transfer on day 2
       transfer = transfer_fixture(%{trip_id: trip.id, day_index: 2})
-      
+
       # Reload trip to include the new transfer
       trip = Planning.get_trip!(trip.id)
-      
+
       # Move transfer to same day 2
       assert {:ok, updated_transfer} = Planning.move_transfer_to_day(transfer, 2, trip, author)
-      
+
       assert updated_transfer.day_index == 2
       assert updated_transfer.id == transfer.id
     end
@@ -2015,26 +2019,26 @@ defmodule HamsterTravel.PlanningTest do
     test "successfully moves transfer to day 0 (edge case)", %{author: author, trip: trip} do
       # Create a transfer on day 3
       transfer = transfer_fixture(%{trip_id: trip.id, day_index: 3})
-      
+
       # Reload trip to include the new transfer
       trip = Planning.get_trip!(trip.id)
-      
+
       # Move transfer to day 0 (first day)
       assert {:ok, updated_transfer} = Planning.move_transfer_to_day(transfer, 0, trip, author)
-      
+
       assert updated_transfer.day_index == 0
     end
 
     test "successfully moves transfer to last valid day", %{author: author, trip: trip} do
       # Create a transfer on day 1
       transfer = transfer_fixture(%{trip_id: trip.id, day_index: 1})
-      
+
       # Reload trip to include the new transfer
       trip = Planning.get_trip!(trip.id)
-      
+
       # Move transfer to day 4 (last valid day for duration 5)
       assert {:ok, updated_transfer} = Planning.move_transfer_to_day(transfer, 4, trip, author)
-      
+
       assert updated_transfer.day_index == 4
     end
 
@@ -2044,133 +2048,143 @@ defmodule HamsterTravel.PlanningTest do
 
     test "fails when user is not authorized (stranger)", %{stranger: stranger, trip: trip} do
       transfer = transfer_fixture(%{trip_id: trip.id, day_index: 0})
-      
+
       assert {:error, "Unauthorized"} = Planning.move_transfer_to_day(transfer, 2, trip, stranger)
     end
 
     test "fails when day_index is negative", %{author: author, trip: trip} do
       transfer = transfer_fixture(%{trip_id: trip.id, day_index: 1})
-      
+
       # Reload trip to include the new transfer
       trip = Planning.get_trip!(trip.id)
-      
-      assert {:error, "Day index must be between 0 and 4"} = Planning.move_transfer_to_day(transfer, -1, trip, author)
+
+      assert {:error, "Day index must be between 0 and 4"} =
+               Planning.move_transfer_to_day(transfer, -1, trip, author)
     end
 
     test "fails when day_index equals trip duration", %{author: author, trip: trip} do
       transfer = transfer_fixture(%{trip_id: trip.id, day_index: 1})
-      
+
       # Reload trip to include the new transfer
       trip = Planning.get_trip!(trip.id)
-      
+
       # Trip duration is 5, so valid days are 0-4, day 5 should fail
-      assert {:error, "Day index must be between 0 and 4"} = Planning.move_transfer_to_day(transfer, 5, trip, author)
+      assert {:error, "Day index must be between 0 and 4"} =
+               Planning.move_transfer_to_day(transfer, 5, trip, author)
     end
 
     test "fails when day_index is greater than trip duration", %{author: author, trip: trip} do
       transfer = transfer_fixture(%{trip_id: trip.id, day_index: 1})
-      
+
       # Reload trip to include the new transfer
       trip = Planning.get_trip!(trip.id)
-      
-      assert {:error, "Day index must be between 0 and 4"} = Planning.move_transfer_to_day(transfer, 10, trip, author)
+
+      assert {:error, "Day index must be between 0 and 4"} =
+               Planning.move_transfer_to_day(transfer, 10, trip, author)
     end
 
     test "works with trip duration 1 (only day 0 valid)", %{author: author} do
       # Create a trip with duration 1 (only day 0 is valid)
-      short_trip = trip_fixture(%{
-        author_id: author.id,
-        duration: 1,
-        dates_unknown: true
-      })
-      
+      short_trip =
+        trip_fixture(%{
+          author_id: author.id,
+          duration: 1,
+          dates_unknown: true
+        })
+
       transfer = transfer_fixture(%{trip_id: short_trip.id, day_index: 0})
-      
+
       # Reload trip to include the new transfer
       short_trip = Planning.get_trip!(short_trip.id)
-      
+
       # Moving to day 0 should work
       assert {:ok, _} = Planning.move_transfer_to_day(transfer, 0, short_trip, author)
-      
+
       # Moving to day 1 should fail
-      assert {:error, "Day index must be between 0 and 0"} = Planning.move_transfer_to_day(transfer, 1, short_trip, author)
+      assert {:error, "Day index must be between 0 and 0"} =
+               Planning.move_transfer_to_day(transfer, 1, short_trip, author)
     end
 
     test "works with maximum trip duration", %{author: author} do
       # Create a trip with duration 30 (maximum allowed)
-      long_trip = trip_fixture(%{
-        author_id: author.id,
-        duration: 30,
-        dates_unknown: true
-      })
-      
+      long_trip =
+        trip_fixture(%{
+          author_id: author.id,
+          duration: 30,
+          dates_unknown: true
+        })
+
       transfer = transfer_fixture(%{trip_id: long_trip.id, day_index: 0})
-      
+
       # Reload trip to include the new transfer
       long_trip = Planning.get_trip!(long_trip.id)
-      
+
       # Moving to day 29 (last valid day) should work
-      assert {:ok, updated_transfer} = Planning.move_transfer_to_day(transfer, 29, long_trip, author)
+      assert {:ok, updated_transfer} =
+               Planning.move_transfer_to_day(transfer, 29, long_trip, author)
+
       assert updated_transfer.day_index == 29
-      
+
       # Moving to day 30 should fail
-      assert {:error, "Day index must be between 0 and 29"} = Planning.move_transfer_to_day(transfer, 30, long_trip, author)
+      assert {:error, "Day index must be between 0 and 29"} =
+               Planning.move_transfer_to_day(transfer, 30, long_trip, author)
     end
 
     test "validates transfer belongs to the given trip", %{author: author, trip: trip} do
       # Add a transfer to the original trip first
       trip_transfer = transfer_fixture(%{trip_id: trip.id, day_index: 0})
-      
+
       # Create another trip with a different author to ensure complete separation
       other_user = user_fixture()
       other_trip = trip_fixture(%{author_id: other_user.id})
       other_trip = Planning.get_trip!(other_trip.id)
-      
+
       # Create transfer for the other trip
       other_transfer = transfer_fixture(%{trip_id: other_trip.id, day_index: 0})
-      
+
       # Reload the original trip to get fresh data
       trip = Planning.get_trip!(trip.id)
-      
+
       # Verify our original trip has only its own transfer
       assert length(trip.transfers) == 1
       assert hd(trip.transfers).id == trip_transfer.id
-      
+
       # Verify the other transfer is not in our trip
       transfer_ids = Enum.map(trip.transfers, & &1.id)
       refute other_transfer.id in transfer_ids
-      
+
       # Try to move the other trip's transfer using our trip context - should fail
-      assert {:error, "Transfer not found"} = Planning.move_transfer_to_day(other_transfer, 2, trip, author)
+      assert {:error, "Transfer not found"} =
+               Planning.move_transfer_to_day(other_transfer, 2, trip, author)
     end
 
     test "handles database errors gracefully", %{author: author, trip: trip} do
       transfer = transfer_fixture(%{trip_id: trip.id, day_index: 0})
-      
+
       # Delete the transfer from database but keep it in trip.transfers for testing
-      Planning.delete_transfer(transfer)
-      
+      {:ok, _} = Planning.delete_transfer(transfer)
+
       # Add the deleted transfer back to trip.transfers to simulate stale data
       trip = %{trip | transfers: [transfer | trip.transfers]}
-      
+
       # This should return an error when trying to update a deleted transfer
-      assert {:error, %Ecto.Changeset{}} = Planning.move_transfer_to_day(transfer, 2, trip, author)
+      assert {:error, %Ecto.Changeset{}} =
+               Planning.move_transfer_to_day(transfer, 2, trip, author)
     end
 
-    test "does not send pubsub event", %{author: author, trip: trip} do
+    test "sends pubsub event", %{author: author, trip: trip} do
       # Subscribe to the topic
       Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
-      
+
       transfer = transfer_fixture(%{trip_id: trip.id, day_index: 0})
-      
+
       # Reload trip to include the new transfer
       trip = Planning.get_trip!(trip.id)
-      
+
       # Move transfer
       assert {:ok, _} = Planning.move_transfer_to_day(transfer, 2, trip, author)
-      
-      # Should not receive any pubsub messages
-      refute_receive {[:transfer, :updated], %{value: _}}, 100
+
+      assert_receive {[:transfer, :updated], %{value: _}}, 100
     end
 
     test "preserves all transfer attributes except day_index", %{author: author, trip: trip} do
@@ -2187,15 +2201,15 @@ defmodule HamsterTravel.PlanningTest do
         departure_time: "14:30",
         arrival_time: "16:45"
       }
-      
+
       transfer = transfer_fixture(original_attrs)
-      
+
       # Reload trip to include the new transfer
       trip = Planning.get_trip!(trip.id)
-      
+
       # Move transfer to different day
       assert {:ok, updated_transfer} = Planning.move_transfer_to_day(transfer, 3, trip, author)
-      
+
       # Verify only day_index changed
       assert updated_transfer.day_index == 3
       assert updated_transfer.transport_mode == "bus"

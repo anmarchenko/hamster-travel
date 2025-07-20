@@ -535,6 +535,7 @@ defmodule HamsterTravel.Planning do
     |> Transfer.changeset(%{day_index: new_day_index})
     |> Repo.update(stale_error_field: :id)
     |> preload_after_db_call(&transfers_preloading(&1))
+    |> send_pubsub_event([:transfer, :updated], transfer.trip_id)
   end
 
   def transfers_for_day(day_index, transfers) do

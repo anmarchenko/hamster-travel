@@ -4,6 +4,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   """
   use HamsterTravelWeb, :live_view
 
+  require Logger
+
   import HamsterTravelWeb.Planning.PlanningComponents
 
   alias HamsterTravel.Geo
@@ -181,7 +183,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         %{"transfer_id" => transfer_id, "new_day_index" => new_day_index},
         socket
       ) do
-    transfer_id = String.to_integer(transfer_id)
     transfer = find_transfer_in_trip(transfer_id, socket.assigns.trip)
 
     case Planning.move_transfer_to_day(
@@ -191,19 +192,13 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
            socket.assigns.current_user
          ) do
       {:ok, _updated_transfer} ->
-        # Refetch only transfers to show updated data
-        updated_transfers = Planning.list_transfers(socket.assigns.trip.id)
-        updated_trip = Map.put(socket.assigns.trip, :transfers, updated_transfers)
-
-        socket =
-          socket
-          |> assign(trip: updated_trip)
-
         {:noreply, socket}
 
       {:error, reason} ->
         socket =
           put_flash(socket, :error, gettext("Failed to move transfer: %{reason}", reason: reason))
+
+        Logger.error("Failed to move transfer: #{inspect(reason)}")
 
         {:noreply, socket}
     end
@@ -394,6 +389,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   defp maybe_recalculate_budget(socket, _entity_type, _trip), do: socket
 
   defp find_transfer_in_trip(transfer_id, %Trip{transfers: transfers}) do
-    Enum.find(transfers, &(&1.id == transfer_id))
+    Enum.find(transfers, &(Integer.to_string(&1.id) == transfer_id))
   end
 end
