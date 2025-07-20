@@ -515,8 +515,6 @@ defmodule HamsterTravel.Planning do
   end
 
   defp validate_transfer_belongs_to_trip(transfer, %Trip{transfers: transfers}) do
-    IO.inspect(transfers)
-
     if Enum.any?(transfers, &(&1.id == transfer.id)) do
       :ok
     else
