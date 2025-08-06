@@ -8,8 +8,13 @@ let TransferDragDrop = {
     );
 
     transferDropZones.forEach((zone) => {
+      const isOutsideZone = zone.dataset.targetDay === "outside";
+      
       new Sortable(zone, {
-        group: "transfers", // Allow moving between zones
+        group: {
+          name: "transfers",
+          put: !isOutsideZone // Prevent dropping into outside zone
+        },
         sort: false, // Disable sorting within the same zone
         animation: 150,
         ghostClass: "hamster-drag-ghost",

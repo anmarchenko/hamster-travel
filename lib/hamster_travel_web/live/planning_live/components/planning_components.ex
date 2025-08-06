@@ -282,12 +282,18 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
           display_currency={@display_currency}
           day_index={0}
         />
-        <.transfers_list
-          trip={@trip}
-          transfers={@transfers_outside}
-          display_currency={@display_currency}
-          day_index={0}
-        />
+        <div
+          class="transfers-column min-h-[100px] flex flex-col gap-y-8"
+          data-transfer-drop-zone
+          data-target-day="outside"
+        >
+          <.transfers_list
+            trip={@trip}
+            transfers={@transfers_outside}
+            display_currency={@display_currency}
+            day_index={-1}
+          />
+        </div>
       </.toggle>
 
       <table class="sm:mt-8 sm:table-auto sm:border-collapse sm:border sm:border-slate-500 sm:w-full">
