@@ -16,6 +16,7 @@ import live_select from 'live_select';
 
 // hamster travel components
 import DayRangeSelect from './day_range_select';
+import DateRangePicker from './date_range_picker';
 import MoneyInput from './money_input';
 import TransferDragDrop from './transfer_drag_drop';
 
@@ -32,6 +33,7 @@ let csrfToken = document
 let hooks = {
   ...live_select,
   ...DayRangeSelect,
+  ...DateRangePicker,
   ...MoneyInput,
   ...TransferDragDrop,
 };

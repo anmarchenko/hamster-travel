@@ -19,6 +19,7 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   import PetalComponents.Icon
   import PetalComponents.Field
+  import PetalComponents.Form
 
   use Gettext, backend: HamsterTravelWeb.Gettext
 
@@ -828,6 +829,68 @@ defmodule HamsterTravelWeb.CoreComponents do
         <.icon name="hero-information-circle" class="w-4 h-4 mr-2" />
         <p class="leading-relaxed">{@note}</p>
       </div>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a date range picker using flatpickr.
+
+  ## Examples
+
+      <.date_range_field
+        id="trip-dates"
+        label="Trip dates"
+        start_date_field={@form[:start_date]}
+        end_date_field={@form[:end_date]}
+      />
+  """
+  attr(:id, :string, required: true)
+  attr(:label, :string, required: true)
+  attr(:locale, :string, required: true)
+  attr(:start_date_field, Phoenix.HTML.FormField, required: true)
+  attr(:end_date_field, Phoenix.HTML.FormField, required: true)
+  attr(:required, :boolean, default: false)
+
+  def date_range_field(assigns) do
+    ~H"""
+    <div>
+      <.label for={@id}>{@label}</.label>
+      <div
+        id={@id}
+        class="relative"
+        phx-hook="DateRangePicker"
+        phx-update="ignore"
+        data-start-date={@start_date_field.value}
+        data-end-date={@end_date_field.value}
+        data-user-locale={@locale}
+      >
+        <input
+          type="text"
+          readonly
+          placeholder={gettext("Select date range")}
+          class="w-full px-3 py-2 text-left bg-white border border-gray-300 rounded-md shadow-xs text-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:focus:border-primary-500 dark:bg-gray-800 dark:text-gray-300 focus:outline-hidden cursor-pointer"
+        />
+        <.icon
+          name="hero-calendar-days"
+          class="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-300 pointer-events-none"
+        />
+      </div>
+
+      <.hidden_input
+        form={@start_date_field.form}
+        field={@start_date_field.field}
+        value={@start_date_field.value}
+      />
+      <.hidden_input
+        form={@end_date_field.form}
+        field={@end_date_field.field}
+        value={@end_date_field.value}
+      />
+
+      <.field_error :for={{msg, opts} <- @start_date_field.errors}>
+        {translate_error({msg, opts})}
+      </.field_error>
     </div>
     """
   end

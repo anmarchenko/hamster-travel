@@ -17,7 +17,12 @@
       "mcp__playwright__browser_type",
       "mcp__playwright__browser_click",
       "WebFetch(domain:fly.io)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(mix assets.build:*)",
+      "mcp__playwright__browser_press_key",
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_close"
     ],
     "deny": []
   }

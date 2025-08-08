@@ -94,22 +94,13 @@ defmodule HamsterTravelWeb.Planning.TripForm do
                 label={gettext("Dates are yet unknown")}
               />
             </div>
-            <div :if={!@dates_unknown} class="col-span-3">
-              <.field
-                type="date"
-                field={@form[:start_date]}
-                label={gettext("Start date")}
-                required={true}
-              />
-            </div>
-
-            <div :if={!@dates_unknown} class="col-span-3">
-              <.field
-                type="date"
-                field={@form[:end_date]}
-                label={gettext("End date")}
-                min={@start_date}
-                max={max_end_date(@start_date)}
+            <div :if={!@dates_unknown} class="col-span-6">
+              <.date_range_field
+                id="trip-dates"
+                label={gettext("Trip dates")}
+                locale={@current_user.locale}
+                start_date_field={@form[:start_date]}
+                end_date_field={@form[:end_date]}
                 required={true}
               />
             </div>
@@ -274,20 +265,6 @@ defmodule HamsterTravelWeb.Planning.TripForm do
       socket
       |> assign_form(changeset)
     }
-  end
-
-  defp max_end_date(nil), do: nil
-
-  defp max_end_date(start_date) do
-    start_date = Dates.parse_iso_date_or(start_date)
-    # parse start_date as date
-    case start_date do
-      nil ->
-        nil
-
-      %Date{} ->
-        Date.add(start_date, 29)
-    end
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do

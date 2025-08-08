@@ -269,7 +269,8 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
 
       <.toggle
         :if={
-          Enum.any?(@destinations_outside) || Enum.any?(@accommodations_outside) ||
+          Enum.any?(@destinations_outside) ||
+            Enum.any?(@accommodations_outside) ||
             Enum.any?(@transfers_outside)
         }
         label={gettext("Some items are scheduled outside of the trip duration")}
