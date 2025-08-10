@@ -354,16 +354,27 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   attr(:id, :string, default: nil)
   attr(:class, :string, default: nil)
+  attr(:hover, :boolean, default: true)
 
   slot(:inner_block, required: true)
 
   def card(assigns) do
+    hover_class =
+      if assigns.hover do
+        "hover:shadow-lg hover:bg-white hover:dark:bg-zinc-800"
+      else
+        ""
+      end
+
+    assigns = assign(assigns, :hover_class, hover_class)
+
     ~H"""
     <div
       id={@id}
       class={
         build_class([
-          "flex flex-row bg-zinc-50 dark:bg-zinc-900 dark:border dark:border-zinc-600 shadow-md rounded-lg hover:shadow-lg hover:bg-white hover:dark:bg-zinc-800",
+          "flex flex-row bg-zinc-50 dark:bg-zinc-900 dark:border dark:border-zinc-600 shadow-md rounded-lg",
+          @hover_class,
           @class
         ])
       }

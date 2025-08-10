@@ -417,6 +417,126 @@ defmodule HamsterTravel.PackingTest do
       {:ok, deleted_item} = Packing.delete_item(item)
       assert_received {[:item, :deleted], %{value: ^deleted_item}}
     end
+
+    test "move_item_to_list/3 moves an item to a different list" do
+      backpack = backpack_fixture()
+      list1 = list_fixture(%{backpack_id: backpack.id, name: "Clothes"})
+      list2 = list_fixture(%{backpack_id: backpack.id, name: "Electronics"})
+      item = item_fixture(%{backpack_list_id: list1.id, name: "T-shirt"})
+
+      assert {:ok, moved_item} = Packing.move_item_to_list(item, list2.id, 1)
+      assert moved_item.backpack_list_id == list2.id
+      assert moved_item.position == 1
+      assert moved_item.name == "T-shirt"
+    end
+
+    test "move_item_to_list/3 updates item position and rank correctly" do
+      backpack = backpack_fixture()
+      list1 = list_fixture(%{backpack_id: backpack.id})
+      list2 = list_fixture(%{backpack_id: backpack.id})
+
+      # Create 3 items in list2 first
+      {:ok, existing_item1} = Packing.create_item(%{name: "Item 1"}, list2)
+      {:ok, existing_item2} = Packing.create_item(%{name: "Item 2"}, list2)
+      {:ok, existing_item3} = Packing.create_item(%{name: "Item 3"}, list2)
+
+      # Create item to move in list1
+      item = item_fixture(%{backpack_list_id: list1.id})
+
+      # Move item to position 2 in list2 (between item1 and item2)
+      assert {:ok, moved_item} = Packing.move_item_to_list(item, list2.id, 2)
+
+      # Verify the item was moved correctly
+      assert moved_item.backpack_list_id == list2.id
+      assert moved_item.position == 2
+
+      # Verify ordering is maintained - moved item should be in second position
+      updated_backpack = Packing.get_backpack!(backpack.id)
+      updated_list2 = Enum.find(updated_backpack.lists, &(&1.id == list2.id))
+      items_by_rank = Enum.sort_by(updated_list2.items, & &1.rank)
+
+      assert length(items_by_rank) == 4
+      assert Enum.at(items_by_rank, 0).id == existing_item1.id
+      assert Enum.at(items_by_rank, 1).id == existing_item2.id
+      assert Enum.at(items_by_rank, 2).id == moved_item.id
+      assert Enum.at(items_by_rank, 3).id == existing_item3.id
+    end
+
+    test "move_item_to_list/3 sends pubsub event" do
+      backpack = backpack_fixture()
+      list1 = list_fixture(%{backpack_id: backpack.id})
+      list2 = list_fixture(%{backpack_id: backpack.id})
+      item = item_fixture(%{backpack_list_id: list1.id})
+
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "backpacks" <> ":#{backpack.id}")
+
+      {:ok, moved_item} = Packing.move_item_to_list(item, list2.id, 1)
+      assert_received {[:item, :moved], %{value: ^moved_item}}
+    end
+
+    test "move_item_to_list/3 returns error for invalid list_id" do
+      item = item_fixture()
+      invalid_list_id = Ecto.UUID.generate()
+
+      assert {:error, %Ecto.Changeset{}} = Packing.move_item_to_list(item, invalid_list_id, 1)
+    end
+
+    test "reorder_item/2 changes item position within same list" do
+      list = list_fixture()
+
+      # Create multiple items
+      {:ok, _item1} = Packing.create_item(%{name: "First"}, list)
+      {:ok, _item2} = Packing.create_item(%{name: "Second"}, list)
+      {:ok, item3} = Packing.create_item(%{name: "Third"}, list)
+
+      # Get original rank of item3
+      original_rank = item3.rank
+
+      # Move item3 to position 1 (second position)
+      assert {:ok, reordered_item} = Packing.reorder_item(item3, 1)
+      assert reordered_item.position == 1
+      assert reordered_item.backpack_list_id == list.id
+
+      # Verify the item's rank has changed (moved to earlier position)
+      assert reordered_item.rank != original_rank
+
+      # Verify exact ordering - item3 should now be in the middle
+      updated_backpack = Packing.get_backpack!(list.backpack_id)
+      updated_list = Enum.find(updated_backpack.lists, &(&1.id == list.id))
+      items_by_rank = Enum.sort_by(updated_list.items, & &1.rank)
+
+      assert length(items_by_rank) == 3
+      assert Enum.at(items_by_rank, 1).id == item3.id
+    end
+
+    test "reorder_item/2 sends pubsub event" do
+      backpack = backpack_fixture()
+      list = list_fixture(%{backpack_id: backpack.id})
+      item = item_fixture(%{backpack_list_id: list.id})
+
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "backpacks" <> ":#{backpack.id}")
+
+      {:ok, reordered_item} = Packing.reorder_item(item, 2)
+      assert_received {[:item, :moved], %{value: ^reordered_item}}
+    end
+
+    test "reorder_item/2 handles position at end of list" do
+      list = list_fixture()
+      {:ok, item1} = Packing.create_item(%{name: "First"}, list)
+      {:ok, _item2} = Packing.create_item(%{name: "Second"}, list)
+
+      # Move item1 to last position
+      assert {:ok, reordered_item} = Packing.reorder_item(item1, 2)
+      assert reordered_item.position == 2
+
+      # Verify exact ordering - item1 should now be last
+      updated_backpack = Packing.get_backpack!(list.backpack_id)
+      updated_list = Enum.find(updated_backpack.lists, &(&1.id == list.id))
+      items_by_rank = Enum.sort_by(updated_list.items, & &1.rank)
+
+      assert length(items_by_rank) == 2
+      assert Enum.at(items_by_rank, -1).id == item1.id
+    end
   end
 
   describe "lists" do

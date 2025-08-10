@@ -115,7 +115,10 @@ defmodule HamsterTravelWeb.Packing.Item do
 
   def render(assigns) do
     ~H"""
-    <div class="mt-1">
+    <div
+      class="px-2 draggable-item rounded cursor-grab hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 active:cursor-grabbing"
+      data-item-id={@item.id}
+    >
       <.inline class="!gap gap-1">
         <.form :let={f} for={%{}} class="grow mr-2" phx-change="check" phx-target={@myself}>
           <label class="cursor-pointer">

@@ -23,6 +23,7 @@ defmodule HamsterTravel.Packing.Item do
     item
     |> cast(attrs, [:name, :checked, :count, :position, :backpack_list_id])
     |> validate_required([:name, :checked, :count, :backpack_list_id])
+    |> foreign_key_constraint(:backpack_list_id)
     |> set_order(:position, :rank, :backpack_list_id)
   end
 

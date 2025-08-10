@@ -71,7 +71,7 @@ defmodule HamsterTravelWeb.Packing.List do
   def render(assigns) do
     ~H"""
     <div>
-      <.card>
+      <.card hover={false}>
         <div
           class="flex flex-col w-full"
           x-data={"{ showItems: $persist(true).as('list-#{@list.id}') }"}
@@ -79,7 +79,13 @@ defmodule HamsterTravelWeb.Packing.List do
           <div class={"p-4 rounded-t-lg #{decoration_classes(@done)}"}>
             <.card_header edit={@edit} form={@form} list={@list} phx-target={@myself} />
           </div>
-          <div class="p-4" x-show="showItems" x-transition.duration.300ms>
+          <div
+            class="p-2 min-h-[50px]"
+            x-show="showItems"
+            x-transition.duration.300ms
+            data-packing-drop-zone
+            data-target-list-id={@list.id}
+          >
             <.live_component
               :for={item <- @list.items}
               module={Item}

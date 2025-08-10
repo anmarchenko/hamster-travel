@@ -190,6 +190,20 @@ defmodule HamsterTravel.Packing do
     |> send_pubsub_event([:item, :deleted])
   end
 
+  def move_item_to_list(%Item{} = item, new_list_id, position) do
+    item
+    |> Item.changeset(%{backpack_list_id: new_list_id, position: position})
+    |> Repo.update()
+    |> send_pubsub_event([:item, :moved])
+  end
+
+  def reorder_item(%Item{} = item, position) do
+    item
+    |> Item.changeset(%{position: position})
+    |> Repo.update()
+    |> send_pubsub_event([:item, :moved])
+  end
+
   def count_backpacks do
     backpacks_count = Repo.aggregate(Backpack, :count, :id)
     :telemetry.execute([:hamster_travel, :packing, :backpacks], %{count: backpacks_count})

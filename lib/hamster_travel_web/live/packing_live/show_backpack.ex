@@ -63,7 +63,11 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
 
     <.container full class="!mt-* mt-0">
       <.live_component module={ListNew} id={"add_item-#{@backpack.id}"} backpack={@backpack} />
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+        phx-hook="PackingDragDrop"
+        id="packing-lists-container"
+      >
         <.live_component
           :for={items_list <- @backpack.lists}
           module={ListComponent}
@@ -212,6 +216,53 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
   end
 
   @impl true
+  def handle_info({[:item, :moved], %{value: _moved_item}}, socket) do
+    # Refresh the entire backpack to get the correct ordering
+    backpack = Packing.get_backpack!(socket.assigns.backpack.id)
+    {:noreply, assign(socket, :backpack, backpack)}
+  end
+
+  @impl true
+  def handle_event(
+        "move_item_to_list",
+        %{"item_id" => item_id, "new_list_id" => new_list_id, "position" => position},
+        socket
+      ) do
+    item = find_item_in_backpack(socket.assigns.backpack, item_id)
+
+    if item do
+      case Packing.move_item_to_list(item, new_list_id, position) do
+        {:ok, _item} ->
+          # PubSub will handle the UI update
+          {:noreply, socket}
+
+        {:error, _changeset} ->
+          {:noreply, put_flash(socket, :error, gettext("Failed to move item"))}
+      end
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_event("reorder_item", %{"item_id" => item_id, "position" => position}, socket) do
+    item = find_item_in_backpack(socket.assigns.backpack, item_id)
+
+    if item do
+      case Packing.reorder_item(item, position) do
+        {:ok, _item} ->
+          # PubSub will handle the UI update
+          {:noreply, socket}
+
+        {:error, _changeset} ->
+          {:noreply, put_flash(socket, :error, gettext("Failed to reorder item"))}
+      end
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
   def handle_event("delete_backpack", _params, socket) do
     %{backpack: backpack, current_user: user} = socket.assigns
 
@@ -226,5 +277,11 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
     else
       {:noreply, socket}
     end
+  end
+
+  defp find_item_in_backpack(backpack, item_id) do
+    backpack.lists
+    |> Enum.flat_map(& &1.items)
+    |> Enum.find(&(&1.id == item_id))
   end
 end

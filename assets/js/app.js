@@ -19,6 +19,7 @@ import DayRangeSelect from './day_range_select';
 import DateRangePicker from './date_range_picker';
 import MoneyInput from './money_input';
 import TransferDragDrop from './transfer_drag_drop';
+import PackingDragDrop from './packing_drag_drop';
 
 Alpine.plugin(persist);
 Alpine.plugin(collapse);
@@ -36,6 +37,7 @@ let hooks = {
   ...DateRangePicker,
   ...MoneyInput,
   ...TransferDragDrop,
+  ...PackingDragDrop,
 };
 
 let liveSocket = new LiveSocket('/live', Socket, {
