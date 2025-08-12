@@ -223,6 +223,13 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
   end
 
   @impl true
+  def handle_info({[:list, :moved], %{value: _moved_list}}, socket) do
+    # Refresh the entire backpack to get the correct ordering
+    backpack = Packing.get_backpack!(socket.assigns.backpack.id)
+    {:noreply, assign(socket, :backpack, backpack)}
+  end
+
+  @impl true
   def handle_event(
         "move_item_to_list",
         %{"item_id" => item_id, "new_list_id" => new_list_id, "position" => position},
@@ -263,6 +270,24 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
   end
 
   @impl true
+  def handle_event("reorder_list", %{"list_id" => list_id, "position" => position}, socket) do
+    list = find_list_in_backpack(socket.assigns.backpack, list_id)
+
+    if list do
+      case Packing.reorder_list(list, position) do
+        {:ok, _list} ->
+          # PubSub will handle the UI update
+          {:noreply, socket}
+
+        {:error, _changeset} ->
+          {:noreply, put_flash(socket, :error, gettext("Failed to reorder list"))}
+      end
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
   def handle_event("delete_backpack", _params, socket) do
     %{backpack: backpack, current_user: user} = socket.assigns
 
@@ -283,5 +308,10 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
     backpack.lists
     |> Enum.flat_map(& &1.items)
     |> Enum.find(&(&1.id == item_id))
+  end
+
+  defp find_list_in_backpack(backpack, list_id) do
+    backpack.lists
+    |> Enum.find(&(&1.id == list_id))
   end
 end

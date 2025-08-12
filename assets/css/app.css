@@ -29,3 +29,8 @@
 .hamster-sortable-ghost {
     @apply bg-blue-50 border-2 border-dashed border-blue-500 dark:bg-zinc-800 dark:border-zinc-600;
 }
+
+.hamster-drag-list {
+    @apply opacity-50 rotate-2 scale-105;
+    transition: all 0.2s ease;
+}

@@ -146,6 +146,13 @@ defmodule HamsterTravel.Packing do
     |> send_pubsub_event([:list, :deleted])
   end
 
+  def reorder_list(%List{} = list, position) do
+    list
+    |> List.changeset(%{position: position})
+    |> Repo.update()
+    |> send_pubsub_event([:list, :moved])
+  end
+
   # ITEMS
 
   def new_item do

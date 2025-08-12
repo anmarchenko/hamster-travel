@@ -610,5 +610,53 @@ defmodule HamsterTravel.PackingTest do
       {:ok, deleted_list} = Packing.delete_list(list)
       assert_received {[:list, :deleted], %{value: ^deleted_list}}
     end
+
+    test "reorder_list/2 changes list position within same backpack", %{backpack: backpack} do
+      # Create multiple lists
+      {:ok, _list1} = Packing.create_list(%{name: "First"}, backpack)
+      {:ok, _list2} = Packing.create_list(%{name: "Second"}, backpack)
+      {:ok, list3} = Packing.create_list(%{name: "Third"}, backpack)
+
+      # Get original rank of list3
+      original_rank = list3.rank
+
+      # Move list3 to position 1 (second position)
+      assert {:ok, reordered_list} = Packing.reorder_list(list3, 1)
+      assert reordered_list.position == 1
+      assert reordered_list.backpack_id == backpack.id
+
+      # Verify the list's rank has changed (moved to earlier position)
+      assert reordered_list.rank != original_rank
+
+      # Verify exact ordering - list3 should now be in position 1 (second position in 0-based)
+      updated_backpack = Packing.get_backpack!(backpack.id)
+      lists_by_rank = Enum.sort_by(updated_backpack.lists, & &1.rank)
+
+      assert length(lists_by_rank) == 4  # 3 new + 1 from setup
+      assert Enum.at(lists_by_rank, 1).id == list3.id
+    end
+
+    test "reorder_list/2 sends pubsub event", %{backpack: backpack, list: list} do
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "backpacks" <> ":#{backpack.id}")
+
+      {:ok, reordered_list} = Packing.reorder_list(list, 1)
+      assert_received {[:list, :moved], %{value: ^reordered_list}}
+    end
+
+    test "reorder_list/2 handles position at end of list", %{backpack: backpack} do
+      {:ok, list1} = Packing.create_list(%{name: "First"}, backpack)
+      {:ok, _list2} = Packing.create_list(%{name: "Second"}, backpack)
+
+      # Move list1 to last position
+      assert {:ok, reordered_list} = Packing.reorder_list(list1, 2)
+      assert reordered_list.position == 2
+
+      # Verify exact ordering - list1 should now be last
+      updated_backpack = Packing.get_backpack!(backpack.id)
+      lists_by_rank = Enum.sort_by(updated_backpack.lists, & &1.rank)
+
+      assert length(lists_by_rank) == 3  # 2 new + 1 from setup
+      assert Enum.at(lists_by_rank, -1).id == list1.id
+    end
   end
 end

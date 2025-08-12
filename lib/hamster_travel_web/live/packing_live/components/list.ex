@@ -70,13 +70,13 @@ defmodule HamsterTravelWeb.Packing.List do
 
   def render(assigns) do
     ~H"""
-    <div>
+    <div class="draggable-list" data-list-id={@list.id}>
       <.card hover={false}>
         <div
           class="flex flex-col w-full"
           x-data={"{ showItems: $persist(true).as('list-#{@list.id}') }"}
         >
-          <div class={"p-4 rounded-t-lg #{decoration_classes(@done)}"}>
+          <div class={"p-4 rounded-t-lg draggable-list-handle cursor-grab active:cursor-grabbing #{decoration_classes(@done)}"}>
             <.card_header edit={@edit} form={@form} list={@list} phx-target={@myself} />
           </div>
           <div

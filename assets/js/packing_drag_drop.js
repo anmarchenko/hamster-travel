@@ -21,7 +21,7 @@ let PackingDragDrop = {
           const itemId = evt.item.dataset.itemId;
           const newListId = evt.to.dataset.targetListId;
           const oldListId = evt.from.dataset.targetListId;
-          const newPosition = evt.newIndex; // 1-based position for backend
+          const newPosition = evt.newIndex; // 0-based position for backend
 
           // Send event for both moving between lists and reordering within list
           if (newListId !== oldListId) {
@@ -41,6 +41,31 @@ let PackingDragDrop = {
           }
         },
       });
+    });
+
+    // Set up list reordering (drag lists by their headers)
+    const listsContainer = this.el;
+    new Sortable(listsContainer, {
+      group: "packing-lists",
+      sort: true,
+      animation: 150,
+      ghostClass: "hamster-drag-ghost",
+      chosenClass: "hamster-drag-chosen",
+      dragClass: "hamster-drag-list",
+      draggable: ".draggable-list",
+      handle: ".draggable-list-handle", // Only allow dragging from the header
+      onEnd: (evt) => {
+        const listId = evt.item.dataset.listId;
+        const newPosition = evt.newIndex; // 0-based position for backend
+
+        if (evt.newIndex !== evt.oldIndex) {
+          // List reordered
+          this.pushEvent("reorder_list", {
+            list_id: listId,
+            position: newPosition,
+          });
+        }
+      },
     });
   },
 };
