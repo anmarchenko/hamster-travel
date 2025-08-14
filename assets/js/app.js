@@ -20,6 +20,7 @@ import DateRangePicker from './date_range_picker';
 import MoneyInput from './money_input';
 import TransferDragDrop from './transfer_drag_drop';
 import PackingDragDrop from './packing_drag_drop';
+import FormattedTextArea from './formatted_text_area';
 
 Alpine.plugin(persist);
 Alpine.plugin(collapse);
@@ -38,6 +39,7 @@ let hooks = {
   ...MoneyInput,
   ...TransferDragDrop,
   ...PackingDragDrop,
+  ...FormattedTextArea,
 };
 
 let liveSocket = new LiveSocket('/live', Socket, {

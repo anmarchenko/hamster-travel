@@ -34,3 +34,105 @@
     @apply opacity-50 rotate-2 scale-105;
     transition: all 0.2s ease;
 }
+
+/* Rich Text Editor Styles */
+.toolbar-btn {
+    @apply p-1.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors duration-200;
+    @apply text-gray-600 dark:text-gray-400;
+}
+
+.toolbar-btn.active {
+    @apply bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400;
+}
+
+.toolbar-btn:hover {
+    @apply text-gray-900 dark:text-gray-200;
+}
+
+.formatted-text-area.focused {
+    @apply ring-2 ring-blue-500 border-blue-500;
+}
+
+/* Editor content placeholder */
+[data-editor-target][data-placeholder]:empty:before {
+    content: attr(data-placeholder);
+    @apply text-gray-400 dark:text-gray-500 pointer-events-none;
+}
+
+/* Prose styles for the editor content */
+.editor-content.prose {
+    @apply text-gray-900 dark:text-gray-100;
+}
+
+.editor-content.prose p {
+    @apply mb-3 last:mb-0;
+}
+
+.editor-content.prose ul {
+    @apply list-disc pl-6 mb-3;
+}
+
+.editor-content.prose ol {
+    @apply list-decimal pl-6 mb-3;
+}
+
+.editor-content.prose li {
+    @apply mb-1;
+}
+
+.editor-content.prose strong {
+    @apply font-semibold;
+}
+
+.editor-content.prose em {
+    @apply italic;
+}
+
+.editor-content.prose h1 {
+    @apply text-2xl font-bold mb-4 mt-6;
+}
+
+.editor-content.prose h2 {
+    @apply text-xl font-bold mb-3 mt-5;
+}
+
+.editor-content.prose h3 {
+    @apply text-lg font-bold mb-2 mt-4;
+}
+
+/* Formatted note display styles */
+.prose h1 {
+    @apply text-xl font-bold mb-3 mt-4 text-gray-900 dark:text-gray-100;
+}
+
+.prose h2 {
+    @apply text-lg font-semibold mb-2 mt-3 text-gray-900 dark:text-gray-100;
+}
+
+.prose h3 {
+    @apply text-base font-semibold mb-2 mt-3 text-gray-900 dark:text-gray-100;
+}
+
+.prose p {
+    @apply mb-2 text-gray-600 dark:text-gray-400;
+}
+
+.prose ul {
+    @apply list-disc pl-5 mb-3 text-gray-600 dark:text-gray-400;
+}
+
+.prose ol {
+    @apply list-decimal pl-5 mb-3 text-gray-600 dark:text-gray-400;
+}
+
+.prose li {
+    @apply mb-1;
+}
+
+.prose strong {
+    @apply font-semibold text-gray-900 dark:text-gray-100;
+}
+
+.prose em {
+    @apply italic;
+}

@@ -174,3 +174,5 @@ Follow this pattern for LiveComponents:
 
 ## Deployment
 Configured for Fly.io deployment with Docker. Configuration in `fly.toml`.
+
+- always check if app is already running on port 4000 before using phx.server command - most likely it is running already

@@ -8,6 +8,8 @@ defmodule HamsterTravelWeb.Planning.AccommodationForm do
   alias HamsterTravel.Planning
 
   alias HamsterTravelWeb.Planning.DayRangeSelect
+  
+  import HamsterTravelWeb.Planning.PlanningComponents, only: [formatted_text_area: 1]
 
   attr :action, :atom, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true
@@ -67,9 +69,8 @@ defmodule HamsterTravelWeb.Planning.AccommodationForm do
           placeholder={gettext("Street address")}
         />
 
-        <.field
+        <.formatted_text_area
           field={@form[:note]}
-          type="textarea"
           label={gettext("Note")}
           placeholder={gettext("Additional notes or details")}
         />

@@ -2,6 +2,9 @@
   "dependencies": {
     "@alpinejs/collapse": "^3.14.9",
     "@alpinejs/persist": "^3.10.5",
+    "@tiptap/core": "^3.2.0",
+    "@tiptap/pm": "^3.2.0",
+    "@tiptap/starter-kit": "^3.2.0",
     "alpinejs": "^3.9.0",
     "flatpickr": "^4.6.13",
     "live_select": "file:../deps/live_select",

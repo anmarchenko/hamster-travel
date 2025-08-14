@@ -22,8 +22,13 @@
       "mcp__playwright__browser_press_key",
       "mcp__playwright__browser_evaluate",
       "mcp__playwright__browser_console_messages",
-      "mcp__playwright__browser_close"
+      "mcp__playwright__browser_close",
+      "WebFetch(domain:tiptap.dev)",
+      "WebFetch(domain:gist.github.com)",
+      "Bash(npm install:*)",
+      "Bash(lsof:*)"
     ],
-    "deny": []
+    "deny": [],
+    "defaultMode": "acceptEdits"
   }
 }

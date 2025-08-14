@@ -10,6 +10,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
   alias HamsterTravelWeb.Cldr, as: Formatters
 
   import HamsterTravelWeb.Icons.{Airplane, Bus, Car, Ship, Taxi, Train}
+  import HamsterTravelWeb.Planning.PlanningComponents, only: [formatted_note: 1]
 
   attr(:transfer, Transfer, required: true)
   attr(:trip, Trip, required: true)
@@ -60,7 +61,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
         </div>
       </div>
 
-      <.note note={@transfer.note} />
+      <.formatted_note note={@transfer.note} />
     </div>
     """
   end

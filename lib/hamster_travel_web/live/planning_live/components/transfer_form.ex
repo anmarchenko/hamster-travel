@@ -8,6 +8,8 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
   alias HamsterTravel.Planning
 
   alias HamsterTravelWeb.Planning.CityInput
+  
+  import HamsterTravelWeb.Planning.PlanningComponents, only: [formatted_text_area: 1]
 
   attr :action, :atom, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true
@@ -134,9 +136,8 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
           </div>
         </div>
 
-        <.field
+        <.formatted_text_area
           field={@form[:note]}
-          type="textarea"
           label={gettext("Note")}
           placeholder={gettext("Additional transfer details")}
         />
