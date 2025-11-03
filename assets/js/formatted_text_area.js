@@ -3,7 +3,6 @@ import StarterKit from "@tiptap/starter-kit";
 
 const FormattedTextArea = {
   mounted() {
-    const fieldName = this.el.dataset.fieldName;
     const placeholder = this.el.dataset.placeholder || "";
     const editorTarget = this.el.querySelector("[data-editor-target]");
     const hiddenInput = this.el.querySelector("[data-editor-input]");

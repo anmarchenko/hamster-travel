@@ -79,7 +79,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
           </button>
         </div>
         <div
-          class="editor-content p-3 min-h-[120px] prose prose-sm dark:prose-invert max-w-none focus:outline-none"
+          class="editor-content px-0.5 py-1 min-h-[120px] prose prose-sm dark:prose-invert max-w-none focus:outline-none"
           data-editor-target
         >
         </div>
