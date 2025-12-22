@@ -859,23 +859,26 @@ defmodule HamsterTravelWeb.CoreComponents do
   end
 
   @doc """
-  Renders a formatted note inside the standard note component.
+  Renders sanitized formatted text content.
 
   ## Examples
 
-      <.formatted_note note="<p>This is a <strong>formatted</strong> note.</p>" />
+      <.formatted_text text="<p>This is a <strong>formatted</strong> block.</p>" />
   """
-  attr :note, :string, default: nil
+  attr :text, :string, default: nil
   attr :class, :string, default: nil
 
-  def formatted_note(assigns) do
-    if assigns.note && assigns.note != "" && assigns.note != "<p></p>" do
+  def formatted_text(assigns) do
+    if assigns.text && assigns.text != "" && assigns.text != "<p></p>" do
       ~H"""
-      <.note class={@class}>
-        <div class="prose prose-sm dark:prose-invert max-w-none text-gray-900 dark:text-gray-100">
-          {Phoenix.HTML.raw(@note)}
-        </div>
-      </.note>
+      <div class={
+        build_class([
+          "prose prose-sm dark:prose-invert max-w-none text-gray-900 dark:text-gray-100",
+          @class
+        ])
+      }>
+        {Phoenix.HTML.raw(@text)}
+      </div>
       """
     else
       ~H"""
