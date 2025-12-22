@@ -870,14 +870,16 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   def formatted_text(assigns) do
     if assigns.text && assigns.text != "" && assigns.text != "<p></p>" do
+      assigns = assign(assigns, :formatted_text_body, Phoenix.HTML.raw(assigns.text))
+
       ~H"""
       <div class={
         build_class([
-          "prose prose-sm dark:prose-invert max-w-none text-gray-900 dark:text-gray-100",
+          "space-y-2 leading-relaxed text-sm text-gray-900 dark:text-gray-100",
           @class
         ])
       }>
-        {Phoenix.HTML.raw(@text)}
+        {@formatted_text_body}
       </div>
       """
     else
@@ -919,7 +921,7 @@ defmodule HamsterTravelWeb.CoreComponents do
         data-field-name={@field.name}
         data-placeholder={@placeholder}
         class={[
-          "mt-2 block w-full rounded-lg border border-zinc-300 bg-white dark:bg-zinc-800 dark:border-zinc-600",
+          "formatted-text-area mt-2 block w-full rounded-lg border border-zinc-300 bg-white dark:bg-zinc-800 dark:border-zinc-600",
           @class
         ]}
       >
@@ -949,7 +951,7 @@ defmodule HamsterTravelWeb.CoreComponents do
           </button>
         </div>
         <div
-          class="editor-content px-0.5 py-1 min-h-[120px] prose prose-sm dark:prose-invert max-w-none focus:outline-none"
+          class="editor-content px-0.5 py-1 min-h-[120px] text-sm leading-relaxed space-y-2 focus:outline-none"
           data-editor-target
         >
         </div>

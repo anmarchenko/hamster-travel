@@ -10,7 +10,47 @@ const FormattedTextArea = {
     // Initialize Tiptap editor
     this.editor = new Editor({
       element: editorTarget,
-      extensions: [StarterKit],
+      extensions: [
+        StarterKit.configure({
+          heading: {
+            levels: [1, 2, 3],
+            HTMLAttributes: {
+              class:
+                "text-gray-900 dark:text-gray-100 font-semibold tracking-tight mt-5 mb-3 leading-tight",
+            },
+          },
+          paragraph: {
+            HTMLAttributes: {
+              class: "text-gray-700 dark:text-gray-300 leading-relaxed mb-3",
+            },
+          },
+          bulletList: {
+            HTMLAttributes: {
+              class: "list-disc pl-5 mb-3 text-gray-700 dark:text-gray-300 space-y-1",
+            },
+          },
+          orderedList: {
+            HTMLAttributes: {
+              class: "list-decimal pl-5 mb-3 text-gray-700 dark:text-gray-300 space-y-1",
+            },
+          },
+          listItem: {
+            HTMLAttributes: {
+              class: "mb-1",
+            },
+          },
+          bold: {
+            HTMLAttributes: {
+              class: "font-semibold text-gray-900 dark:text-gray-100",
+            },
+          },
+          italic: {
+            HTMLAttributes: {
+              class: "italic text-gray-800 dark:text-gray-200",
+            },
+          },
+        }),
+      ],
       content: hiddenInput.value || "",
       editorProps: {
         attributes: {
@@ -65,14 +105,11 @@ const FormattedTextArea = {
           case "italic":
             this.editor.chain().focus().toggleItalic().run();
             break;
-          case "heading1":
+          case "heading2":
             this.editor.chain().focus().toggleHeading({ level: 2 }).run();
             break;
-          case "heading2":
-            this.editor.chain().focus().toggleHeading({ level: 3 }).run();
-            break;
           case "heading3":
-            this.editor.chain().focus().toggleHeading({ level: 4 }).run();
+            this.editor.chain().focus().toggleHeading({ level: 3 }).run();
             break;
           case "bulletList":
             this.editor.chain().focus().toggleBulletList().run();
@@ -109,9 +146,6 @@ const FormattedTextArea = {
           break;
         case "italic":
           isActive = this.editor.isActive("italic");
-          break;
-        case "heading1":
-          isActive = this.editor.isActive("heading", { level: 1 });
           break;
         case "heading2":
           isActive = this.editor.isActive("heading", { level: 2 });
