@@ -8,8 +8,6 @@ defmodule HamsterTravelWeb.Planning.AccommodationForm do
   alias HamsterTravel.Planning
 
   alias HamsterTravelWeb.Planning.DayRangeSelect
-  
-  import HamsterTravelWeb.Planning.PlanningComponents, only: [formatted_text_area: 1]
 
   attr :action, :atom, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true

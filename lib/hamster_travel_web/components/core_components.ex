@@ -827,18 +827,138 @@ defmodule HamsterTravelWeb.CoreComponents do
       <.note note={@item.note} />
       <.note note={@item.note} class="mt-6" />
   """
-  attr(:note, :string, required: true)
+  attr(:note, :string, default: nil)
   attr(:class, :string, default: nil)
+  slot(:inner_block)
 
   def note(assigns) do
+    has_note? = assigns.note && assigns.note != ""
+    has_inner_block? = assigns.inner_block != []
+
+    assigns =
+      assigns
+      |> assign(:has_note?, has_note?)
+      |> assign(:has_inner_block?, has_inner_block?)
+
     ~H"""
     <div
-      :if={@note}
+      :if={@has_note? || @has_inner_block?}
       class={build_class(["pt-4 border-t border-slate-200 dark:border-slate-700", @class])}
     >
-      <div class="flex items-center text-sm text-slate-700 dark:text-slate-300 bg-gray-50/70 dark:bg-slate-800/70 p-3.5 rounded-lg">
-        <.icon name="hero-information-circle" class="w-4 h-4 mr-2" />
-        <p class="leading-relaxed">{@note}</p>
+      <div class="flex items-start text-sm text-slate-700 dark:text-slate-300 bg-gray-50/70 dark:bg-slate-800/70 p-3.5 rounded-lg gap-2">
+        <.icon name="hero-information-circle" class="w-4 h-4 mt-0.5" />
+        <div class="leading-relaxed space-y-2 w-full">
+          <p :if={@has_note?}>{@note}</p>
+          <div :if={@has_inner_block?}>
+            {render_slot(@inner_block)}
+          </div>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a formatted note inside the standard note component.
+
+  ## Examples
+
+      <.formatted_note note="<p>This is a <strong>formatted</strong> note.</p>" />
+  """
+  attr :note, :string, default: nil
+  attr :class, :string, default: nil
+
+  def formatted_note(assigns) do
+    if assigns.note && assigns.note != "" && assigns.note != "<p></p>" do
+      ~H"""
+      <.note class={@class}>
+        <div class="prose prose-sm dark:prose-invert max-w-none text-gray-900 dark:text-gray-100">
+          {Phoenix.HTML.raw(@note)}
+        </div>
+      </.note>
+      """
+    else
+      ~H"""
+      """
+    end
+  end
+
+  @doc """
+  Renders a rich text editor using Tiptap.js.
+
+  ## Examples
+
+      <.formatted_text_area
+        field={@form[:note]}
+        label="Note"
+        placeholder="Enter your note here..."
+      />
+  """
+  attr :field, Phoenix.HTML.FormField, required: true
+  attr :label, :string, default: nil
+  attr :placeholder, :string, default: nil
+  attr :class, :string, default: nil
+
+  def formatted_text_area(assigns) do
+    ~H"""
+    <div class="mb-4">
+      <label
+        :if={@label}
+        for={@field.id}
+        class="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
+      >
+        {@label}
+      </label>
+      <div
+        id={"#{@field.id}-editor"}
+        phx-hook="FormattedTextArea"
+        phx-update="ignore"
+        data-field-name={@field.name}
+        data-placeholder={@placeholder}
+        class={[
+          "mt-2 block w-full rounded-lg border border-zinc-300 bg-white dark:bg-zinc-800 dark:border-zinc-600",
+          @class
+        ]}
+      >
+        <div class="toolbar border-b border-zinc-300 dark:border-zinc-600 px-2 py-1 flex gap-1 flex-wrap">
+          <button type="button" data-command="bold" class="toolbar-btn" title="Bold">
+            <.icon name="hero-bold" class="w-4 h-4" />
+          </button>
+          <button type="button" data-command="italic" class="toolbar-btn" title="Italic">
+            <.icon name="hero-italic" class="w-4 h-4" />
+          </button>
+          <div class="border-l border-zinc-300 dark:border-zinc-600 mx-1"></div>
+          <button type="button" data-command="heading1" class="toolbar-btn" title="Heading 1">
+            <span class="text-xs font-bold">H1</span>
+          </button>
+          <button type="button" data-command="heading2" class="toolbar-btn" title="Heading 2">
+            <span class="text-xs font-bold">H2</span>
+          </button>
+          <button type="button" data-command="heading3" class="toolbar-btn" title="Heading 3">
+            <span class="text-xs font-bold">H3</span>
+          </button>
+          <div class="border-l border-zinc-300 dark:border-zinc-600 mx-1"></div>
+          <button type="button" data-command="bulletList" class="toolbar-btn" title="Bullet List">
+            <.icon name="hero-list-bullet" class="w-4 h-4" />
+          </button>
+          <button type="button" data-command="orderedList" class="toolbar-btn" title="Numbered List">
+            <.icon name="hero-numbered-list" class="w-4 h-4" />
+          </button>
+        </div>
+        <div
+          class="editor-content px-0.5 py-1 min-h-[120px] prose prose-sm dark:prose-invert max-w-none focus:outline-none"
+          data-editor-target
+        >
+        </div>
+        <input type="hidden" name={@field.name} value={@field.value} data-editor-input />
+      </div>
+      <div
+        :if={@field.errors != []}
+        class="mt-3 flex gap-3 text-sm leading-6 text-rose-600 phx-no-feedback:hidden"
+      >
+        <div class="flex">
+          <div :for={msg <- @field.errors} class="ml-1">{translate_error(msg)}</div>
+        </div>
       </div>
     </div>
     """

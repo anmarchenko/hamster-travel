@@ -6,8 +6,6 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
 
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.Accommodation
-  
-  import HamsterTravelWeb.Planning.PlanningComponents, only: [formatted_note: 1]
 
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :accommodation, HamsterTravel.Planning.Accommodation, required: true
