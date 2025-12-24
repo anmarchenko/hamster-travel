@@ -1,5 +1,6 @@
 import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
 
 const FormattedTextArea = {
   mounted() {
@@ -12,13 +13,7 @@ const FormattedTextArea = {
       element: editorTarget,
       extensions: [
         StarterKit.configure({
-          heading: {
-            levels: [1, 2, 3],
-            HTMLAttributes: {
-              class:
-                "text-gray-900 dark:text-gray-100 font-semibold tracking-tight mt-5 mb-3 leading-tight",
-            },
-          },
+          heading: false,
           paragraph: {
             HTMLAttributes: {
               class: "text-gray-700 dark:text-gray-300 leading-relaxed mb-3",
@@ -26,12 +21,14 @@ const FormattedTextArea = {
           },
           bulletList: {
             HTMLAttributes: {
-              class: "list-disc pl-5 mb-3 text-gray-700 dark:text-gray-300 space-y-1",
+              class:
+                "list-disc pl-5 mb-3 text-gray-700 dark:text-gray-300 space-y-1",
             },
           },
           orderedList: {
             HTMLAttributes: {
-              class: "list-decimal pl-5 mb-3 text-gray-700 dark:text-gray-300 space-y-1",
+              class:
+                "list-decimal pl-5 mb-3 text-gray-700 dark:text-gray-300 space-y-1",
             },
           },
           listItem: {
@@ -48,6 +45,11 @@ const FormattedTextArea = {
             HTMLAttributes: {
               class: "italic text-gray-800 dark:text-gray-200",
             },
+          },
+        }),
+        Underline.configure({
+          HTMLAttributes: {
+            class: "underline decoration-gray-400 dark:decoration-gray-300",
           },
         }),
       ],
@@ -105,11 +107,8 @@ const FormattedTextArea = {
           case "italic":
             this.editor.chain().focus().toggleItalic().run();
             break;
-          case "heading2":
-            this.editor.chain().focus().toggleHeading({ level: 2 }).run();
-            break;
-          case "heading3":
-            this.editor.chain().focus().toggleHeading({ level: 3 }).run();
+          case "underline":
+            this.editor.chain().focus().toggleUnderline().run();
             break;
           case "bulletList":
             this.editor.chain().focus().toggleBulletList().run();
@@ -147,11 +146,8 @@ const FormattedTextArea = {
         case "italic":
           isActive = this.editor.isActive("italic");
           break;
-        case "heading2":
-          isActive = this.editor.isActive("heading", { level: 2 });
-          break;
-        case "heading3":
-          isActive = this.editor.isActive("heading", { level: 3 });
+        case "underline":
+          isActive = this.editor.isActive("underline");
           break;
         case "bulletList":
           isActive = this.editor.isActive("bulletList");

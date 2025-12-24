@@ -932,15 +932,8 @@ defmodule HamsterTravelWeb.CoreComponents do
           <button type="button" data-command="italic" class="toolbar-btn" title="Italic">
             <.icon name="hero-italic" class="w-4 h-4" />
           </button>
-          <div class="border-l border-zinc-300 dark:border-zinc-600 mx-1"></div>
-          <button type="button" data-command="heading1" class="toolbar-btn" title="Heading 1">
-            <span class="text-xs font-bold">H1</span>
-          </button>
-          <button type="button" data-command="heading2" class="toolbar-btn" title="Heading 2">
-            <span class="text-xs font-bold">H2</span>
-          </button>
-          <button type="button" data-command="heading3" class="toolbar-btn" title="Heading 3">
-            <span class="text-xs font-bold">H3</span>
+          <button type="button" data-command="underline" class="toolbar-btn" title="Underline">
+            <span class="text-xs font-semibold underline">U</span>
           </button>
           <div class="border-l border-zinc-300 dark:border-zinc-600 mx-1"></div>
           <button type="button" data-command="bulletList" class="toolbar-btn" title="Bullet List">
