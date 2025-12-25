@@ -936,6 +936,10 @@ defmodule HamsterTravelWeb.CoreComponents do
             <span class="text-xs font-semibold underline">U</span>
           </button>
           <div class="border-l border-zinc-300 dark:border-zinc-600 mx-1"></div>
+          <button type="button" data-command="link" class="toolbar-btn" title="Insert link">
+            <.icon name="hero-link" class="w-4 h-4" />
+          </button>
+          <div class="border-l border-zinc-300 dark:border-zinc-600 mx-1"></div>
           <button type="button" data-command="bulletList" class="toolbar-btn" title="Bullet List">
             <.icon name="hero-list-bullet" class="w-4 h-4" />
           </button>

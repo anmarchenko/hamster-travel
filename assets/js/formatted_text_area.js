@@ -1,6 +1,8 @@
 import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
+import Link from "@tiptap/extension-link";
+import { Markdown } from "@tiptap/markdown";
 
 const FormattedTextArea = {
   mounted() {
@@ -45,9 +47,25 @@ const FormattedTextArea = {
             },
           },
         }),
+        Link.configure({
+          openOnClick: false,
+          HTMLAttributes: {
+            class:
+              "text-primary-600 dark:text-primary-400 underline underline-offset-2",
+          },
+        }),
         Underline.configure({
           HTMLAttributes: {
             class: "underline decoration-gray-400 dark:decoration-gray-300",
+          },
+        }),
+        Markdown.configure({
+          indentation: { style: "space", size: 2 },
+          markedOptions: {
+            gfm: true,
+            breaks: false,
+            mangle: false,
+            headerIds: false,
           },
         }),
       ],
@@ -85,6 +103,9 @@ const FormattedTextArea = {
     // Set up toolbar buttons
     this.setupToolbar();
 
+    // Enable markdown-aware paste handling
+    this.handleMarkdownPaste(editorTarget);
+
     // Handle clicks outside editor to maintain focus behavior
     this.handleFocusEvents();
   },
@@ -107,6 +128,9 @@ const FormattedTextArea = {
             break;
           case "underline":
             this.editor.chain().focus().toggleUnderline().run();
+            break;
+          case "link":
+            this.promptForLink();
             break;
           case "bulletList":
             this.editor.chain().focus().toggleBulletList().run();
@@ -147,6 +171,9 @@ const FormattedTextArea = {
         case "underline":
           isActive = this.editor.isActive("underline");
           break;
+        case "link":
+          isActive = this.editor.isActive("link");
+          break;
         case "bulletList":
           isActive = this.editor.isActive("bulletList");
           break;
@@ -161,6 +188,27 @@ const FormattedTextArea = {
         button.classList.remove("active");
       }
     });
+  },
+
+  promptForLink() {
+    const previousUrl = this.editor.getAttributes("link").href || "";
+    const url = prompt("Enter URL", previousUrl || "https://");
+
+    if (url === null) {
+      return;
+    }
+
+    if (url === "") {
+      this.editor.chain().focus().extendMarkRange("link").unsetLink().run();
+      return;
+    }
+
+    this.editor
+      .chain()
+      .focus()
+      .extendMarkRange("link")
+      .setLink({ href: url })
+      .run();
   },
 
   handleFocusEvents() {
@@ -185,6 +233,24 @@ const FormattedTextArea = {
 
     this.editor.on("blur", () => {
       this.el.classList.remove("focused");
+    });
+  },
+
+  handleMarkdownPaste(editorTarget) {
+    editorTarget.addEventListener("paste", (event) => {
+      if (!this.editor?.storage?.markdown) {
+        return;
+      }
+
+      const text = event.clipboardData?.getData("text/plain");
+      const html = event.clipboardData?.getData("text/html");
+
+      if (!text || (html && html.trim() !== "")) {
+        return;
+      }
+
+      event.preventDefault();
+      this.editor.commands.insertContent(text, { contentType: "markdown" });
     });
   },
 
