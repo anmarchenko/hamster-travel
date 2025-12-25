@@ -875,7 +875,7 @@ defmodule HamsterTravelWeb.CoreComponents do
       ~H"""
       <div class={
         build_class([
-          "space-y-2 leading-relaxed text-sm text-gray-900 dark:text-gray-100",
+          "space-y-1 leading-relaxed text-sm",
           @class
         ])
       }>
@@ -944,7 +944,7 @@ defmodule HamsterTravelWeb.CoreComponents do
           </button>
         </div>
         <div
-          class="editor-content px-0.5 py-1 min-h-[120px] text-sm leading-relaxed space-y-2 focus:outline-none"
+          class="editor-content px-0.5 py-1 min-h-[120px] text-sm leading-relaxed space-y-1 focus:outline-none"
           data-editor-target
         >
         </div>

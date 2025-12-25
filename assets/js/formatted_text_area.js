@@ -16,19 +16,17 @@ const FormattedTextArea = {
           heading: false,
           paragraph: {
             HTMLAttributes: {
-              class: "text-gray-700 dark:text-gray-300 leading-relaxed mb-3",
+              class: "leading-relaxed mb-1.5",
             },
           },
           bulletList: {
             HTMLAttributes: {
-              class:
-                "list-disc pl-5 mb-3 text-gray-700 dark:text-gray-300 space-y-1",
+              class: "list-disc pl-5 mb-1.5 space-y-1",
             },
           },
           orderedList: {
             HTMLAttributes: {
-              class:
-                "list-decimal pl-5 mb-3 text-gray-700 dark:text-gray-300 space-y-1",
+              class: "list-decimal pl-5 mb-1.5 space-y-1",
             },
           },
           listItem: {
@@ -38,12 +36,12 @@ const FormattedTextArea = {
           },
           bold: {
             HTMLAttributes: {
-              class: "font-semibold text-gray-900 dark:text-gray-100",
+              class: "font-semibold",
             },
           },
           italic: {
             HTMLAttributes: {
-              class: "italic text-gray-800 dark:text-gray-200",
+              class: "italic",
             },
           },
         }),
