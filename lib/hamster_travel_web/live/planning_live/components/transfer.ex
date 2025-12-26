@@ -60,7 +60,9 @@ defmodule HamsterTravelWeb.Planning.Transfer do
         </div>
       </div>
 
-      <.note note={@transfer.note} />
+      <.note :if={formatted_text_present?(@transfer.note)}>
+        <.formatted_text text={@transfer.note} />
+      </.note>
     </div>
     """
   end

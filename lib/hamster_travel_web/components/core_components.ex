@@ -827,18 +827,169 @@ defmodule HamsterTravelWeb.CoreComponents do
       <.note note={@item.note} />
       <.note note={@item.note} class="mt-6" />
   """
-  attr(:note, :string, required: true)
+  attr(:note, :string, default: nil)
   attr(:class, :string, default: nil)
+  slot(:inner_block)
 
   def note(assigns) do
+    has_note? = formatted_text_present?(assigns.note)
+    has_inner_block? = assigns.inner_block != []
+
+    assigns =
+      assigns
+      |> assign(:has_note?, has_note?)
+      |> assign(:has_inner_block?, has_inner_block?)
+
     ~H"""
     <div
-      :if={@note}
+      :if={@has_note? || @has_inner_block?}
       class={build_class(["pt-4 border-t border-slate-200 dark:border-slate-700", @class])}
     >
-      <div class="flex items-center text-sm text-slate-700 dark:text-slate-300 bg-gray-50/70 dark:bg-slate-800/70 p-3.5 rounded-lg">
-        <.icon name="hero-information-circle" class="w-4 h-4 mr-2" />
-        <p class="leading-relaxed">{@note}</p>
+      <div class="flex items-start text-sm text-slate-700 dark:text-slate-300 bg-gray-50/70 dark:bg-slate-800/70 p-3.5 rounded-lg gap-2">
+        <.icon name="hero-information-circle" class="w-4 h-4 mt-0.5" />
+        <div class="leading-relaxed space-y-2 w-full">
+          <p :if={@has_note?}>{@note}</p>
+          <div :if={@has_inner_block?}>
+            {render_slot(@inner_block)}
+          </div>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders sanitized formatted text content.
+
+  ## Examples
+
+      <.formatted_text text="<p>This is a <strong>formatted</strong> block.</p>" />
+  """
+  attr :text, :string, default: nil
+  attr :class, :string, default: nil
+
+  def formatted_text(assigns) do
+    if formatted_text_present?(assigns.text) do
+      sanitized_text = sanitize_formatted_text(assigns.text)
+      assigns = assign(assigns, :formatted_text_body, Phoenix.HTML.raw(sanitized_text))
+
+      ~H"""
+      <div class={
+        build_class([
+          "formatted-content space-y-1 leading-relaxed text-sm",
+          @class
+        ])
+      }>
+        {@formatted_text_body}
+      </div>
+      """
+    else
+      ~H"""
+      """
+    end
+  end
+
+  defp sanitize_formatted_text(nil), do: ""
+  defp sanitize_formatted_text(text) when is_binary(text), do: HtmlSanitizeEx.basic_html(text)
+  defp sanitize_formatted_text(_), do: ""
+
+  def formatted_text_present?(nil), do: false
+
+  def formatted_text_present?(text) when is_binary(text) do
+    text
+    |> String.replace(~r/<[^>]*>/, "")
+    |> String.replace("&nbsp;", " ")
+    |> String.trim()
+    |> case do
+      "" -> false
+      _ -> true
+    end
+  end
+
+  def formatted_text_present?(_), do: false
+
+  @doc """
+  Renders a rich text editor using Tiptap.js.
+
+  ## Examples
+
+      <.formatted_text_area
+        field={@form[:note]}
+        label="Note"
+        placeholder="Enter your note here..."
+      />
+  """
+  attr :field, Phoenix.HTML.FormField, required: true
+  attr :label, :string, default: nil
+  attr :placeholder, :string, default: nil
+  attr :class, :string, default: nil
+
+  def formatted_text_area(assigns) do
+    ~H"""
+    <div class="mb-4">
+      <label
+        :if={@label}
+        for={@field.id}
+        class="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
+      >
+        {@label}
+      </label>
+      <div
+        id={"#{@field.id}-editor"}
+        phx-hook="FormattedTextArea"
+        phx-update="ignore"
+        data-field-name={@field.name}
+        data-placeholder={@placeholder}
+        class={[
+          "formatted-text-area mt-2 block w-full rounded-lg border border-zinc-300 bg-white dark:bg-zinc-800 dark:border-zinc-600",
+          @class
+        ]}
+      >
+        <div class="toolbar border-b border-zinc-300 dark:border-zinc-600 px-2 py-1 flex gap-1 flex-wrap">
+          <button type="button" data-command="bold" class="toolbar-btn" title="Bold">
+            <.icon name="hero-bold" class="w-4 h-4" />
+          </button>
+          <button type="button" data-command="italic" class="toolbar-btn" title="Italic">
+            <.icon name="hero-italic" class="w-4 h-4" />
+          </button>
+          <button type="button" data-command="underline" class="toolbar-btn" title="Underline">
+            <span class="text-xs font-semibold underline">U</span>
+          </button>
+          <div class="border-l border-zinc-300 dark:border-zinc-600 mx-1"></div>
+          <button type="button" data-command="bulletList" class="toolbar-btn" title="Bullet List">
+            <.icon name="hero-list-bullet" class="w-4 h-4" />
+          </button>
+          <button type="button" data-command="orderedList" class="toolbar-btn" title="Numbered List">
+            <.icon name="hero-numbered-list" class="w-4 h-4" />
+          </button>
+          <button type="button" data-command="taskList" class="toolbar-btn" title="Task List">
+            <.icon name="hero-check-circle" class="w-4 h-4" />
+          </button>
+          <div class="border-l border-zinc-300 dark:border-zinc-600 mx-1"></div>
+          <button type="button" data-command="link" class="toolbar-btn" title="Insert link">
+            <.icon name="hero-link" class="w-4 h-4" />
+          </button>
+          <button type="button" data-command="image" class="toolbar-btn" title="Insert image">
+            <.icon name="hero-photo" class="w-4 h-4" />
+          </button>
+          <button type="button" data-command="youtube" class="toolbar-btn" title="Embed YouTube video">
+            <.icon name="hero-play" class="w-4 h-4" />
+          </button>
+        </div>
+        <div
+          class="editor-content px-0.5 py-1 min-h-[120px] text-sm leading-relaxed space-y-1 focus:outline-none"
+          data-editor-target
+        >
+        </div>
+        <input type="hidden" name={@field.name} value={@field.value} data-editor-input />
+      </div>
+      <div
+        :if={@field.errors != []}
+        class="mt-3 flex gap-3 text-sm leading-6 text-rose-600 phx-no-feedback:hidden"
+      >
+        <div class="flex">
+          <div :for={msg <- @field.errors} class="ml-1">{translate_error(msg)}</div>
+        </div>
       </div>
     </div>
     """

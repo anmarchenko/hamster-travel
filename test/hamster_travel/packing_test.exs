@@ -632,7 +632,8 @@ defmodule HamsterTravel.PackingTest do
       updated_backpack = Packing.get_backpack!(backpack.id)
       lists_by_rank = Enum.sort_by(updated_backpack.lists, & &1.rank)
 
-      assert length(lists_by_rank) == 4  # 3 new + 1 from setup
+      # 3 new + 1 from setup
+      assert length(lists_by_rank) == 4
       assert Enum.at(lists_by_rank, 1).id == list3.id
     end
 
@@ -655,7 +656,8 @@ defmodule HamsterTravel.PackingTest do
       updated_backpack = Packing.get_backpack!(backpack.id)
       lists_by_rank = Enum.sort_by(updated_backpack.lists, & &1.rank)
 
-      assert length(lists_by_rank) == 3  # 2 new + 1 from setup
+      # 2 new + 1 from setup
+      assert length(lists_by_rank) == 3
       assert Enum.at(lists_by_rank, -1).id == list1.id
     end
   end

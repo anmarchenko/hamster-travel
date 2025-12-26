@@ -67,9 +67,8 @@ defmodule HamsterTravelWeb.Planning.AccommodationForm do
           placeholder={gettext("Street address")}
         />
 
-        <.field
+        <.formatted_text_area
           field={@form[:note]}
-          type="textarea"
           label={gettext("Note")}
           placeholder={gettext("Additional notes or details")}
         />

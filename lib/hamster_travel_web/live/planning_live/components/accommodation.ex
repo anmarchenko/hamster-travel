@@ -63,7 +63,9 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
         </div>
       </div>
 
-      <.note note={@accommodation.note} />
+      <.note :if={formatted_text_present?(@accommodation.note)}>
+        <.formatted_text text={@accommodation.note} />
+      </.note>
     </div>
     """
   end

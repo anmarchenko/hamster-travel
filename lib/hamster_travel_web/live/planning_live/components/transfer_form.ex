@@ -134,9 +134,8 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
           </div>
         </div>
 
-        <.field
+        <.formatted_text_area
           field={@form[:note]}
-          type="textarea"
           label={gettext("Note")}
           placeholder={gettext("Additional transfer details")}
         />

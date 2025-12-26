@@ -500,9 +500,8 @@ defmodule HamsterTravel.Planning do
   def move_transfer_to_day(transfer, new_day_index, trip, user) do
     with :ok <- validate_user_authorization(trip, user),
          :ok <- validate_transfer_belongs_to_trip(transfer, trip),
-         :ok <- validate_day_index_in_trip_duration(new_day_index, trip),
-         {:ok, updated_transfer} <- update_transfer_day_index(transfer, new_day_index) do
-      {:ok, updated_transfer}
+         :ok <- validate_day_index_in_trip_duration(new_day_index, trip) do
+      update_transfer_day_index(transfer, new_day_index)
     end
   end
 
