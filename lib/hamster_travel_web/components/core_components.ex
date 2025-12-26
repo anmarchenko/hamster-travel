@@ -875,7 +875,7 @@ defmodule HamsterTravelWeb.CoreComponents do
       ~H"""
       <div class={
         build_class([
-          "space-y-1 leading-relaxed text-sm",
+          "formatted-content space-y-1 leading-relaxed text-sm",
           @class
         ])
       }>
@@ -945,6 +945,9 @@ defmodule HamsterTravelWeb.CoreComponents do
           </button>
           <button type="button" data-command="orderedList" class="toolbar-btn" title="Numbered List">
             <.icon name="hero-numbered-list" class="w-4 h-4" />
+          </button>
+          <button type="button" data-command="taskList" class="toolbar-btn" title="Task List">
+            <.icon name="hero-check-circle" class="w-4 h-4" />
           </button>
         </div>
         <div

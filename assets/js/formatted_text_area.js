@@ -3,6 +3,8 @@ import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import { Markdown } from "@tiptap/markdown";
+import TaskList from "@tiptap/extension-task-list";
+import TaskItem from "@tiptap/extension-task-item";
 
 const FormattedTextArea = {
   mounted() {
@@ -66,6 +68,18 @@ const FormattedTextArea = {
             breaks: false,
             mangle: false,
             headerIds: false,
+          },
+        }),
+        TaskList.configure({
+          HTMLAttributes: {
+            class: "list-none pl-0 flex flex-col",
+            "data-task-list": "true",
+          },
+        }),
+        TaskItem.configure({
+          nested: false,
+          HTMLAttributes: {
+            class: "inline-flex items-center gap-2 shrink-0 cursor-default",
           },
         }),
       ],
@@ -138,6 +152,9 @@ const FormattedTextArea = {
           case "orderedList":
             this.editor.chain().focus().toggleOrderedList().run();
             break;
+          case "taskList":
+            this.editor.chain().focus().toggleTaskList().run();
+            break;
         }
 
         this.updateButtonStates();
@@ -179,6 +196,9 @@ const FormattedTextArea = {
           break;
         case "orderedList":
           isActive = this.editor.isActive("orderedList");
+          break;
+        case "taskList":
+          isActive = this.editor.isActive("taskList");
           break;
       }
 
@@ -299,6 +319,7 @@ function looksLikeMarkdown(text) {
     /!\[[^\]]*]\([^)]+\)/, // images
     /\[[^\]]+]\([^)]+\)/, // links
     /-{3,}/, // horizontal rule
+    /^(\s*(-|\d+\.)\s+\[( |x|X)\]\s+)/m, // task list items
   ];
 
   return markdownPatterns.some((regex) => regex.test(trimmed));
