@@ -6,6 +6,7 @@ import { Markdown } from "@tiptap/markdown";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import Youtube from "@tiptap/extension-youtube";
+import Image from "@tiptap/extension-image";
 
 const FormattedTextArea = {
   mounted() {
@@ -93,6 +94,13 @@ const FormattedTextArea = {
             class: "formatted-video",
           },
         }),
+        Image.configure({
+          allowBase64: false,
+          HTMLAttributes: {
+            class: "formatted-image",
+            loading: "lazy",
+          },
+        }),
       ],
       content: hiddenInput.value || "",
       editorProps: {
@@ -157,6 +165,9 @@ const FormattedTextArea = {
           case "link":
             this.promptForLink();
             break;
+          case "image":
+            this.promptForImage();
+            break;
           case "bulletList":
             this.editor.chain().focus().toggleBulletList().run();
             break;
@@ -205,6 +216,9 @@ const FormattedTextArea = {
         case "link":
           isActive = this.editor.isActive("link");
           break;
+        case "image":
+          isActive = this.editor.isActive("image");
+          break;
         case "bulletList":
           isActive = this.editor.isActive("bulletList");
           break;
@@ -246,6 +260,23 @@ const FormattedTextArea = {
       .extendMarkRange("link")
       .setLink({ href: url })
       .run();
+  },
+
+  promptForImage() {
+    const url = prompt("Enter image URL", "https://");
+
+    if (url === null) {
+      return;
+    }
+
+    const sanitizedUrl = sanitizeImageUrl(url);
+
+    if (!sanitizedUrl) {
+      alert("Please enter a valid image URL (http/https).");
+      return;
+    }
+
+    this.editor.chain().focus().setImage({ src: sanitizedUrl }).run();
   },
 
   promptForYoutube() {
@@ -409,6 +440,28 @@ function sanitizeYoutubeId(value) {
 
   const match = value.match(/[a-zA-Z0-9_-]{11}/);
   return match ? match[0] : null;
+}
+
+function sanitizeImageUrl(url) {
+  if (!url) {
+    return null;
+  }
+
+  let parsed;
+
+  try {
+    parsed = new URL(url.trim());
+  } catch (_error) {
+    return null;
+  }
+
+  const protocol = parsed.protocol.toLowerCase();
+
+  if (protocol !== "http:" && protocol !== "https:") {
+    return null;
+  }
+
+  return parsed.toString();
 }
 
 export default { FormattedTextArea };

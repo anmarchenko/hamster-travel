@@ -107,3 +107,11 @@ ul[data-task-list="true"] li > div p {
     height: auto;
     aspect-ratio: 16 / 9;
 }
+
+.formatted-content img.formatted-image,
+.formatted-text-area img.formatted-image {
+    @apply rounded-lg;
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
