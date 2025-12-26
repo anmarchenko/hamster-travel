@@ -98,3 +98,12 @@ ul[data-task-list="true"] li > div p {
 .formatted-text-area ul[data-task-list="true"] li label {
     @apply pointer-events-auto cursor-pointer;
 }
+
+.formatted-content iframe.formatted-video,
+.formatted-text-area iframe.formatted-video {
+    @apply rounded-lg;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+}

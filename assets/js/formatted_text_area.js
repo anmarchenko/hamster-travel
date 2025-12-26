@@ -5,6 +5,7 @@ import Link from "@tiptap/extension-link";
 import { Markdown } from "@tiptap/markdown";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
+import Youtube from "@tiptap/extension-youtube";
 
 const FormattedTextArea = {
   mounted() {
@@ -82,6 +83,16 @@ const FormattedTextArea = {
             class: "inline-flex items-center gap-2 shrink-0 cursor-default",
           },
         }),
+        Youtube.configure({
+          addPasteHandler: false,
+          controls: true,
+          allowFullscreen: true,
+          width: 640,
+          height: 360,
+          HTMLAttributes: {
+            class: "formatted-video",
+          },
+        }),
       ],
       content: hiddenInput.value || "",
       editorProps: {
@@ -155,6 +166,9 @@ const FormattedTextArea = {
           case "taskList":
             this.editor.chain().focus().toggleTaskList().run();
             break;
+          case "youtube":
+            this.promptForYoutube();
+            break;
         }
 
         this.updateButtonStates();
@@ -200,6 +214,9 @@ const FormattedTextArea = {
         case "taskList":
           isActive = this.editor.isActive("taskList");
           break;
+        case "youtube":
+          isActive = this.editor.isActive("youtube");
+          break;
       }
 
       if (isActive) {
@@ -228,6 +245,27 @@ const FormattedTextArea = {
       .focus()
       .extendMarkRange("link")
       .setLink({ href: url })
+      .run();
+  },
+
+  promptForYoutube() {
+    const url = prompt("Enter YouTube URL", "https://www.youtube.com/watch?v=");
+
+    if (url === null) {
+      return;
+    }
+
+    const embedUrl = buildYoutubeEmbedUrl(url);
+
+    if (!embedUrl) {
+      alert("Please enter a valid YouTube URL.");
+      return;
+    }
+
+    this.editor
+      .chain()
+      .focus()
+      .setYoutubeVideo({ src: embedUrl })
       .run();
   },
 
@@ -323,6 +361,54 @@ function looksLikeMarkdown(text) {
   ];
 
   return markdownPatterns.some((regex) => regex.test(trimmed));
+}
+
+function buildYoutubeEmbedUrl(url) {
+  if (!url) {
+    return null;
+  }
+
+  let parsed;
+
+  try {
+    parsed = new URL(url.trim());
+  } catch (_error) {
+    return null;
+  }
+
+  const hostname = parsed.hostname.replace(/^www\./i, "").toLowerCase();
+  let videoId = null;
+
+  if (hostname === "youtu.be") {
+    videoId = parsed.pathname.replace("/", "");
+  } else if (hostname.endsWith("youtube.com")) {
+    if (parsed.pathname.startsWith("/watch")) {
+      videoId = parsed.searchParams.get("v");
+    } else if (parsed.pathname.startsWith("/shorts/")) {
+      videoId = parsed.pathname.split("/")[2];
+    } else if (parsed.pathname.startsWith("/embed/")) {
+      videoId = parsed.pathname.split("/")[2];
+    } else {
+      videoId = parsed.pathname.replace("/", "");
+    }
+  }
+
+  const sanitizedId = sanitizeYoutubeId(videoId);
+
+  if (!sanitizedId) {
+    return null;
+  }
+
+  return `https://www.youtube.com/embed/${sanitizedId}`;
+}
+
+function sanitizeYoutubeId(value) {
+  if (!value) {
+    return null;
+  }
+
+  const match = value.match(/[a-zA-Z0-9_-]{11}/);
+  return match ? match[0] : null;
 }
 
 export default { FormattedTextArea };
