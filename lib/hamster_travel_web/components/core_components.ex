@@ -870,7 +870,8 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   def formatted_text(assigns) do
     if formatted_text_present?(assigns.text) do
-      assigns = assign(assigns, :formatted_text_body, Phoenix.HTML.raw(assigns.text))
+      sanitized_text = sanitize_formatted_text(assigns.text)
+      assigns = assign(assigns, :formatted_text_body, Phoenix.HTML.raw(sanitized_text))
 
       ~H"""
       <div class={
@@ -887,6 +888,10 @@ defmodule HamsterTravelWeb.CoreComponents do
       """
     end
   end
+
+  defp sanitize_formatted_text(nil), do: ""
+  defp sanitize_formatted_text(text) when is_binary(text), do: HtmlSanitizeEx.basic_html(text)
+  defp sanitize_formatted_text(_), do: ""
 
   def formatted_text_present?(nil), do: false
 
