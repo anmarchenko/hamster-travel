@@ -832,7 +832,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   slot(:inner_block)
 
   def note(assigns) do
-    has_note? = assigns.note && assigns.note != ""
+    has_note? = formatted_text_present?(assigns.note)
     has_inner_block? = assigns.inner_block != []
 
     assigns =
@@ -869,7 +869,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   attr :class, :string, default: nil
 
   def formatted_text(assigns) do
-    if assigns.text && assigns.text != "" && assigns.text != "<p></p>" do
+    if formatted_text_present?(assigns.text) do
       assigns = assign(assigns, :formatted_text_body, Phoenix.HTML.raw(assigns.text))
 
       ~H"""
@@ -887,6 +887,21 @@ defmodule HamsterTravelWeb.CoreComponents do
       """
     end
   end
+
+  def formatted_text_present?(nil), do: false
+
+  def formatted_text_present?(text) when is_binary(text) do
+    text
+    |> String.replace(~r/<[^>]*>/, "")
+    |> String.replace("&nbsp;", " ")
+    |> String.trim()
+    |> case do
+      "" -> false
+      _ -> true
+    end
+  end
+
+  def formatted_text_present?(_), do: false
 
   @doc """
   Renders a rich text editor using Tiptap.js.
