@@ -237,7 +237,7 @@ const FormattedTextArea = {
   },
 
   handleMarkdownPaste(editorTarget) {
-    editorTarget.addEventListener("paste", (event) => {
+    const handlePaste = (event) => {
       if (!this.editor?.storage?.markdown) {
         return;
       }
@@ -245,20 +245,63 @@ const FormattedTextArea = {
       const text = event.clipboardData?.getData("text/plain");
       const html = event.clipboardData?.getData("text/html");
 
-      if (!text || (html && html.trim() !== "")) {
+      if (
+        !text ||
+        (html && html.trim() !== "") ||
+        looksLikePlainUrl(text) ||
+        !looksLikeMarkdown(text)
+      ) {
         return;
       }
 
       event.preventDefault();
+      event.stopPropagation();
+      if (event.stopImmediatePropagation) {
+        event.stopImmediatePropagation();
+      }
+
       this.editor.commands.insertContent(text, { contentType: "markdown" });
-    });
+    };
+
+    editorTarget.addEventListener("paste", handlePaste, true);
+    this.cleanupMarkdownPaste = () =>
+      editorTarget.removeEventListener("paste", handlePaste, true);
   },
 
   beforeDestroy() {
     if (this.editor) {
       this.editor.destroy();
     }
+
+    if (this.cleanupMarkdownPaste) {
+      this.cleanupMarkdownPaste();
+      this.cleanupMarkdownPaste = null;
+    }
   },
 };
+
+function looksLikePlainUrl(text) {
+  return /^https?:\/\/\S+$/i.test(text.trim());
+}
+
+function looksLikeMarkdown(text) {
+  const trimmed = text.trim();
+
+  const markdownPatterns = [
+    /^\s{0,3}(#{1,6})\s+\S+/, // headings
+    /\*\*[^*]+\*\*/, // bold
+    /__[^_]+__/, // bold underscores
+    /\*[^*]+\*/, // italics
+    /_[^_]+_/, // italics underscores
+    /`{1,3}[^`]+`{1,3}/, // inline code or fenced
+    /^(\s*(-|\d+\.)\s+)/m, // lists
+    /^>\s+\S+/m, // blockquote
+    /!\[[^\]]*]\([^)]+\)/, // images
+    /\[[^\]]+]\([^)]+\)/, // links
+    /-{3,}/, // horizontal rule
+  ];
+
+  return markdownPatterns.some((regex) => regex.test(trimmed));
+}
 
 export default { FormattedTextArea };
