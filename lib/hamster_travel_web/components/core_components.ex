@@ -890,7 +890,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   end
 
   defp sanitize_formatted_text(nil), do: ""
-  defp sanitize_formatted_text(text) when is_binary(text), do: HtmlSanitizeEx.basic_html(text)
+  defp sanitize_formatted_text(text) when is_binary(text), do: HtmlSanitizeEx.Scrubber.scrub(text, HamsterTravel.Utilities.HtmlScrubber)
   defp sanitize_formatted_text(_), do: ""
 
   def formatted_text_present?(nil), do: false
