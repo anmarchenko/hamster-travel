@@ -48,12 +48,18 @@ defmodule HamsterTravelWeb.Planning.CityInput do
 
   @impl true
   def update(assigns, socket) do
-    {:ok, assign(socket, assigns)}
+    socket =
+      socket
+      |> assign(assigns)
+      |> assign_new(:trip_cities, fn -> [] end)
+
+    {:ok, socket}
   end
 
   @impl true
   def handle_event("live_select_change", %{"text" => text, "id" => live_select_id}, socket) do
-    cities = get_cities_for_search(text, socket.assigns.trip_cities)
+    trip_cities = Map.get(socket.assigns, :trip_cities, [])
+    cities = get_cities_for_search(text, trip_cities)
 
     send_update(LiveSelect.Component, id: live_select_id, options: cities)
 
