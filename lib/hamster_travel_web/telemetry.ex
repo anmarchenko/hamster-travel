@@ -124,16 +124,7 @@ defmodule HamsterTravelWeb.Telemetry do
   end
 
   defp periodic_measurements do
-    if Application.fetch_env!(:hamster_travel, __MODULE__)[:periodic_measurements_enabled] do
-      [
-        # A module, function and arguments to be invoked periodically.
-        # This function must call :telemetry.execute/3 and a metric must be added above.
-        {Accounts, :count_users, []},
-        {Packing, :count_backpacks, []}
-      ]
-    else
-      []
-    end
+    []
   end
 
   defp view_tag_value(metadata) do
@@ -141,17 +132,6 @@ defmodule HamsterTravelWeb.Telemetry do
   end
 
   defp reporters do
-    if Application.fetch_env!(:hamster_travel, __MODULE__)[:report_metrics] do
-      [
-        {TelemetryMetricsStatsd,
-         metrics: metrics(),
-         global_tags: [env: "fly", service: "hamster_travel"],
-         host: "ddagent.internal",
-         inet_address_family: :inet6,
-         formatter: :datadog}
-      ]
-    else
-      []
-    end
+    []
   end
 end
