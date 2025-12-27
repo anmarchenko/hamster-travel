@@ -284,7 +284,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
           day_index={0}
         />
         <div
-          class="transfers-column min-h-[100px] flex flex-col gap-y-8"
+          class="transfers-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-2 sm:gap-y-8"
           data-transfer-drop-zone
           data-target-day="outside"
         >
@@ -313,7 +313,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
         <tbody>
           <tr
             :for={i <- 0..(@trip.duration - 1)}
-            class="flex flex-col gap-y-6 mt-10 sm:table-row sm:gap-y-0 sm:mt-0"
+            class="flex flex-col gap-y-2 mt-10 sm:table-row sm:gap-y-0 sm:mt-0"
           >
             <td class="text-xl font-bold sm:font-normal sm:text-base sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
               <.day_label day_index={i} start_date={@trip.start_date} />
@@ -336,7 +336,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
             </td>
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
               <div
-                class="transfers-column min-h-[100px] flex flex-col gap-y-8"
+                class="transfers-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-2 sm:gap-y-8"
                 data-transfer-drop-zone
                 data-target-day={i}
               >
@@ -356,7 +356,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
               </div>
             </td>
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
-              <div class="flex flex-col gap-y-8">
+              <div class="flex flex-col gap-y-2 sm:gap-y-8">
                 <.accommodations_list
                   trip={@trip}
                   accommodations={Planning.accommodations_for_day(i, @accommodations)}
