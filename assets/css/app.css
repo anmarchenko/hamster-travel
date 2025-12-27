@@ -9,7 +9,6 @@
 
 /* Drag and Drop Styles */
 .transfers-column {
-    min-height: 100px;
     border-radius: 4px;
     transition: background-color 0.2s;
 }
