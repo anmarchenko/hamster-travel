@@ -319,7 +319,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
               <.day_label day_index={i} start_date={@trip.start_date} />
             </td>
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
-              <div class="flex flex-col gap-y-1 sm:gap-y-8">
+              <div class="flex flex-col gap-y-1">
                 <.destinations_list
                   trip={@trip}
                   destinations={Planning.destinations_for_day(i, @destinations)}
@@ -335,7 +335,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
             </td>
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
               <div
-                class="transfers-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-1 sm:gap-y-8"
+                class="transfers-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-1"
                 data-transfer-drop-zone
                 data-target-day={i}
               >
@@ -354,7 +354,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
               </div>
             </td>
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
-              <div class="flex flex-col gap-y-1 sm:gap-y-8">
+              <div class="flex flex-col gap-y-1">
                 <.accommodations_list
                   trip={@trip}
                   accommodations={Planning.accommodations_for_day(i, @accommodations)}
