@@ -2374,4 +2374,159 @@ defmodule HamsterTravel.PlanningTest do
       assert [] = Planning.activities_for_day(2, activities)
     end
   end
+
+  describe "move_activity_to_day/5" do
+    setup do
+      author = user_fixture()
+      friend = user_fixture()
+      stranger = user_fixture()
+
+      # Create friendship
+      Social.add_friends(author.id, friend.id)
+
+      # Create a trip with duration 5 days (days 0-4 are valid)
+      trip =
+        trip_fixture(%{
+          author_id: author.id,
+          duration: 5,
+          dates_unknown: true
+        })
+
+      # Preload activities for the trip
+      trip = Planning.get_trip!(trip.id)
+
+      {:ok,
+       author: Repo.preload(author, :friendships),
+       friend: Repo.preload(friend, :friendships),
+       stranger: Repo.preload(stranger, :friendships),
+       trip: trip}
+    end
+
+    test "successfully moves activity to valid day for trip author", %{author: author, trip: trip} do
+      # Create an activity on day 0
+      activity = activity_fixture(%{trip_id: trip.id, day_index: 0})
+
+      # Reload trip to include the new activity
+      trip = Planning.get_trip!(trip.id)
+
+      # Move activity to day 2
+      assert {:ok, updated_activity} = Planning.move_activity_to_day(activity, 2, trip, author)
+
+      assert updated_activity.day_index == 2
+      assert updated_activity.id == activity.id
+    end
+
+    test "successfully moves activity to valid day for friend", %{friend: friend, trip: trip} do
+      activity = activity_fixture(%{trip_id: trip.id, day_index: 1})
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:ok, updated_activity} = Planning.move_activity_to_day(activity, 3, trip, friend)
+      assert updated_activity.day_index == 3
+    end
+
+    test "successfully moves activity to same day (updates rank)", %{author: author, trip: trip} do
+      activity1 = activity_fixture(%{trip_id: trip.id, day_index: 0, name: "A1"})
+      activity2 = activity_fixture(%{trip_id: trip.id, day_index: 0, name: "A2"})
+      trip = Planning.get_trip!(trip.id)
+
+      # Move A2 to first position (it was last)
+      assert {:ok, updated_activity2} = Planning.move_activity_to_day(activity2, 0, trip, author, 0)
+      assert updated_activity2.day_index == 0
+      # Rank should be lower than A1's original rank (or A1 is shifted)
+      # We can check order by listing activities
+      [a1, a2] = Planning.list_activities(trip)
+      # Wait, list_activities orders by rank. So the first one should be A2 now.
+      assert a1.id == updated_activity2.id
+      assert a2.id == activity1.id
+    end
+
+    test "fails when activity is nil", %{author: author, trip: trip} do
+      assert {:error, "Activity not found"} = Planning.move_activity_to_day(nil, 2, trip, author)
+    end
+
+    test "fails when user is not authorized", %{stranger: stranger, trip: trip} do
+      activity = activity_fixture(%{trip_id: trip.id, day_index: 0})
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:error, "Unauthorized"} = Planning.move_activity_to_day(activity, 2, trip, stranger)
+    end
+
+    test "fails when day_index is out of bounds", %{author: author, trip: trip} do
+      activity = activity_fixture(%{trip_id: trip.id, day_index: 0})
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:error, "Day index must be between 0 and 4"} = Planning.move_activity_to_day(activity, 5, trip, author)
+    end
+
+    test "fails when activity does not belong to trip", %{author: author, trip: trip} do
+      other_user = user_fixture()
+      other_trip = trip_fixture(%{author_id: other_user.id})
+      other_activity = activity_fixture(%{trip_id: other_trip.id})
+
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:error, "Activity not found"} = Planning.move_activity_to_day(other_activity, 2, trip, author)
+    end
+
+    test "sends pubsub event", %{author: author, trip: trip} do
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
+      activity = activity_fixture(%{trip_id: trip.id, day_index: 0})
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:ok, _} = Planning.move_activity_to_day(activity, 2, trip, author)
+      assert_receive {[:activity, :updated], %{value: _}}
+    end
+  end
+
+  describe "reorder_activity/4" do
+    setup do
+      author = user_fixture()
+      trip = trip_fixture(%{author_id: author.id})
+
+      # Create 3 activities on day 0
+      {:ok, a1} = Planning.create_activity(trip, %{name: "A1", day_index: 0, priority: 2})
+      {:ok, a2} = Planning.create_activity(trip, %{name: "A2", day_index: 0, priority: 2})
+      {:ok, a3} = Planning.create_activity(trip, %{name: "A3", day_index: 0, priority: 2})
+
+      # Reload to get ranks
+      trip = Planning.get_trip!(trip.id)
+
+      {:ok, author: Repo.preload(author, :friendships), trip: trip, a1: a1, a2: a2, a3: a3}
+    end
+
+    test "reorders activity within same day", %{author: author, trip: trip, a1: a1, a2: a2, a3: a3} do
+      # Initial order: A1, A2, A3
+      [first, second, third] = Planning.list_activities(trip)
+      assert first.id == a1.id
+      assert second.id == a2.id
+      assert third.id == a3.id
+
+      # Move A3 to first position (index 0)
+      assert {:ok, _} = Planning.reorder_activity(a3, 0, trip, author)
+
+      # New order: A3, A1, A2
+      [first, second, third] = Planning.list_activities(trip)
+      assert first.id == a3.id
+      assert second.id == a1.id
+      assert third.id == a2.id
+    end
+
+    test "fails when unauthorized", %{trip: trip, a1: a1} do
+      stranger = user_fixture() |> Repo.preload(:friendships)
+      assert {:error, "Unauthorized"} = Planning.reorder_activity(a1, 1, trip, stranger)
+    end
+
+    test "fails when activity not in trip", %{author: author, trip: trip} do
+      other_trip = trip_fixture()
+      {:ok, other_activity} = Planning.create_activity(other_trip, %{name: "OA", day_index: 0, priority: 2})
+
+      assert {:error, "Activity not found"} = Planning.reorder_activity(other_activity, 0, trip, author)
+    end
+
+    test "sends pubsub event", %{author: author, trip: trip, a1: a1} do
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
+      assert {:ok, _} = Planning.reorder_activity(a1, 1, trip, author)
+      assert_receive {[:activity, :updated], %{value: _}}
+    end
+  end
 end

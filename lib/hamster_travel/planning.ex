@@ -614,6 +614,44 @@ defmodule HamsterTravel.Planning do
     |> send_pubsub_event([:activity, :deleted], activity.trip_id)
   end
 
+  def move_activity_to_day(activity, new_day_index, trip, user, position \\ :last)
+
+  def move_activity_to_day(nil, _new_day_index, _trip, _user, _position),
+    do: {:error, "Activity not found"}
+
+  def move_activity_to_day(activity, new_day_index, trip, user, position) do
+    with :ok <- validate_user_authorization(trip, user),
+         :ok <- validate_activity_belongs_to_trip(activity, trip),
+         :ok <- validate_day_index_in_trip_duration(new_day_index, trip) do
+      update_activity_position(activity, %{day_index: new_day_index, position: position})
+    end
+  end
+
+  def reorder_activity(nil, _position, _trip, _user), do: {:error, "Activity not found"}
+
+  def reorder_activity(activity, position, trip, user) do
+    with :ok <- validate_user_authorization(trip, user),
+         :ok <- validate_activity_belongs_to_trip(activity, trip) do
+      update_activity_position(activity, %{position: position})
+    end
+  end
+
+  defp validate_activity_belongs_to_trip(activity, %Trip{activities: activities}) do
+    if Enum.any?(activities, &(&1.id == activity.id)) do
+      :ok
+    else
+      {:error, "Activity not found"}
+    end
+  end
+
+  defp update_activity_position(activity, attrs) do
+    activity
+    |> Activity.changeset(attrs)
+    |> Repo.update(stale_error_field: :id)
+    |> preload_after_db_call(&activities_preloading(&1))
+    |> send_pubsub_event([:activity, :updated], activity.trip_id)
+  end
+
   def activities_for_day(day_index, activities) do
     singular_items_for_day(day_index, activities)
     |> Enum.sort_by(& &1.rank)
