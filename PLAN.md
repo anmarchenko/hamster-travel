@@ -114,7 +114,7 @@ Goal: add LiveView UI and drag-and-drop integration for activities, with tests.
 
 Requirements:
 - Create new LiveComponents: `Activity`, `ActivityForm`, `ActivityNew` similar to `Transfer`/`Accommodation` components.
-- Display activity fields: name with priority styling (bold if 3, normal if 2, secondary if 1), optional link + address, rich `description` (render using `formatted_text`), and price from associated expense (use `money_display`). Use `live/planning_live/components/old/activity.ex` as a reference for the design of `Activity` component
+- Display activity fields: name with priority styling (bold if 3, normal if 2, secondary if 1), optional link + address, rich `description` (render using `formatted_text`), and price from associated expense (use `money_display`). Use `live/planning_live/components/old/activity.ex` as a reference for the design of `Activity` component. The design of the new Activity component must be the same as in this old component.
 - Add add/edit/delete flows using the form component; use `formatted_text_area` for description input.
 - In the Activity form, use the Petal Components `Rating` input for priority selection (1-3).
 - Wire into `planning_components.ex` and `show_trip.ex`: pass activities to `tab_activity`, use `Planning.activities_for_day/2`, and hook PubSub events for activity create/update/delete.
