@@ -1056,4 +1056,55 @@ defmodule HamsterTravelWeb.CoreComponents do
     </div>
     """
   end
+
+  @doc """
+  Renders a rating input component (stars).
+  """
+  attr :field, Phoenix.HTML.FormField, required: true
+  attr :max, :integer, default: 5
+  attr :icon, :string, default: "hero-star-solid"
+  attr :class, :string, default: nil
+
+  def rating_input(assigns) do
+    value =
+      case assigns.field.value do
+        v when is_binary(v) ->
+          case Integer.parse(v) do
+            {i, _} -> i
+            _ -> 0
+          end
+
+        v when is_integer(v) ->
+          v
+
+        _ ->
+          0
+      end
+
+    assigns = assign(assigns, :value, value)
+
+    ~H"""
+    <div class={["flex items-center gap-0.5", @class]}>
+      <%= for i <- 1..@max do %>
+        <label class="cursor-pointer group">
+          <input
+            type="radio"
+            name={@field.name}
+            value={i}
+            checked={@value == i}
+            class="sr-only"
+          />
+          <.icon
+            name={@icon}
+            class={[
+              "w-6 h-6 transition-colors duration-200",
+              i <= @value && "text-yellow-400",
+              i > @value && "text-gray-300 dark:text-gray-600 group-hover:text-yellow-200"
+            ]}
+          />
+        </label>
+      <% end %>
+    </div>
+    """
+  end
 end

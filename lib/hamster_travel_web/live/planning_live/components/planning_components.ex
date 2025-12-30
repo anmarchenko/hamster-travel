@@ -10,6 +10,8 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   alias HamsterTravelWeb.Planning.{
     Accommodation,
     AccommodationNew,
+    ActivityNew,
+    Activity,
     Destination,
     DestinationNew,
     Transfer,
@@ -425,7 +427,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
 
   def tab_activity(assigns) do
     ~H"""
-    <div id={"activities-#{@trip.id}"}>
+    <div id={"activities-#{@trip.id}"} phx-hook="ActivityDragDrop">
       <.budget_display
         budget={@budget}
         display_currency={@display_currency}
@@ -464,9 +466,21 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
 
           <.old_note note={HamsterTravel.find_note_by_day(@notes, i)} day_index={i} />
           <.expenses expenses={HamsterTravel.filter_expenses_by_day(@expenses, i)} day_index={i} />
-          <div class="flex flex-col mt-4">
+          <div
+            class="flex flex-col mt-4 gap-y-1 min-h-[2rem]"
+            data-activity-drop-zone
+            data-target-day={i}
+          >
             <.activities
-              activities={HamsterTravel.filter_activities_by_day(@activities, i)}
+              activities={Planning.activities_for_day(i, @activities)}
+              day_index={i}
+              trip={@trip}
+              display_currency={@display_currency}
+            />
+            <.live_component
+              module={ActivityNew}
+              id={"activity-new-#{i}"}
+              trip={@trip}
               day_index={i}
             />
           </div>
@@ -479,14 +493,8 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
 
   attr(:activities, :list, required: true)
   attr(:day_index, :integer, required: true)
-
-  def activities(%{activities: []} = assigns) do
-    ~H"""
-    <.secondary class="sm:hidden">
-      {gettext("No activities planned for this day")}
-    </.secondary>
-    """
-  end
+  attr(:trip, Trip, required: true)
+  attr(:display_currency, :string, required: true)
 
   def activities(assigns) do
     ~H"""
@@ -495,6 +503,8 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
       module={Activity}
       id={"activities-#{activity.id}-day-#{@day_index}"}
       activity={activity}
+      trip={@trip}
+      display_currency={@display_currency}
       index={index}
     />
     """

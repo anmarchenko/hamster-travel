@@ -19,6 +19,7 @@ import DayRangeSelect from './day_range_select';
 import DateRangePicker from './date_range_picker';
 import MoneyInput from './money_input';
 import TransferDragDrop from './transfer_drag_drop';
+import ActivityDragDrop from './activity_drag_drop';
 import PackingDragDrop from './packing_drag_drop';
 import FormattedTextArea from './formatted_text_area';
 
@@ -38,6 +39,7 @@ let hooks = {
   ...DateRangePicker,
   ...MoneyInput,
   ...TransferDragDrop,
+  ...ActivityDragDrop,
   ...PackingDragDrop,
   ...FormattedTextArea,
 };

@@ -154,6 +154,21 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   @impl true
+  def handle_info({[:activity, :created], %{value: created_activity}}, socket) do
+    handle_entity_event(:activity, :created, created_activity, socket)
+  end
+
+  @impl true
+  def handle_info({[:activity, :updated], %{value: updated_activity}}, socket) do
+    handle_entity_event(:activity, :updated, updated_activity, socket)
+  end
+
+  @impl true
+  def handle_info({[:activity, :deleted], %{value: deleted_activity}}, socket) do
+    handle_entity_event(:activity, :deleted, deleted_activity, socket)
+  end
+
+  @impl true
   def handle_info({:start_adding, component_type, component_id}, socket) do
     assign_key = get_key_for_component_adding_active_state_assign(component_type)
 
@@ -204,6 +219,72 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     end
   end
 
+  @impl true
+  def handle_event(
+        "move_activity",
+        %{
+          "activity_id" => activity_id,
+          "new_day_index" => new_day_index,
+          "position" => position
+        },
+        socket
+      ) do
+    activity = find_activity_in_trip(activity_id, socket.assigns.trip)
+    new_day_index = ensure_int(new_day_index)
+    position = ensure_int(position)
+
+    case Planning.move_activity_to_day(
+           activity,
+           new_day_index,
+           socket.assigns.trip,
+           socket.assigns.current_user,
+           position
+         ) do
+      {:ok, _updated_activity} ->
+        {:noreply, socket}
+
+      {:error, reason} ->
+        socket =
+          put_flash(socket, :error, gettext("Failed to move activity: %{reason}", reason: reason))
+
+        Logger.error("Failed to move activity: #{inspect(reason)}")
+
+        {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_event(
+        "reorder_activity",
+        %{"activity_id" => activity_id, "position" => position},
+        socket
+      ) do
+    activity = find_activity_in_trip(activity_id, socket.assigns.trip)
+    position = ensure_int(position)
+
+    case Planning.reorder_activity(
+           activity,
+           position,
+           socket.assigns.trip,
+           socket.assigns.current_user
+         ) do
+      {:ok, _updated_activity} ->
+        {:noreply, socket}
+
+      {:error, reason} ->
+        socket =
+          put_flash(socket, :error, gettext("Failed to reorder activity: %{reason}", reason: reason))
+
+        Logger.error("Failed to reorder activity: #{inspect(reason)}")
+
+        {:noreply, socket}
+    end
+  end
+
+  defp ensure_int(val) when is_binary(val), do: String.to_integer(val)
+  defp ensure_int(val) when is_integer(val), do: val
+  defp ensure_int(val), do: val
+
   def render_tab(%{active_tab: "itinerary"} = assigns) do
     ~H"""
     <.tab_itinerary
@@ -226,7 +307,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       trip={@trip}
       destinations={@trip.destinations}
       destinations_outside={destinations_outside(@trip)}
-      activities={[]}
+      activities={@trip.activities}
       notes={[]}
       expenses={[]}
       budget={@budget}
@@ -307,6 +388,9 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       "transfer" ->
         {HamsterTravelWeb.Planning.TransferNew, :active_transfer_adding_component_id}
 
+      "activity" ->
+        {HamsterTravelWeb.Planning.ActivityNew, :active_activity_adding_component_id}
+
       _ ->
         nil
     end
@@ -347,6 +431,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   defp preload_entity_associations(:accommodation, entity), do: Repo.preload(entity, [:expense])
 
+  defp preload_entity_associations(:activity, entity), do: Repo.preload(entity, [:expense])
+
   defp preload_entity_associations(:transfer, entity),
     do:
       Repo.preload(entity, [
@@ -357,6 +443,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   defp get_entities_key(:destination), do: :destinations
   defp get_entities_key(:accommodation), do: :accommodations
+  defp get_entities_key(:activity), do: :activities
   defp get_entities_key(:transfer), do: :transfers
 
   defp maybe_preload_countries(trip, :destination), do: Repo.preload(trip, :countries)
@@ -386,9 +473,17 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     assign(socket, budget: Planning.calculate_budget(trip))
   end
 
+  defp maybe_recalculate_budget(socket, :activity, trip) do
+    assign(socket, budget: Planning.calculate_budget(trip))
+  end
+
   defp maybe_recalculate_budget(socket, _entity_type, _trip), do: socket
 
   defp find_transfer_in_trip(transfer_id, %Trip{transfers: transfers}) do
     Enum.find(transfers, &(Integer.to_string(&1.id) == transfer_id))
+  end
+
+  defp find_activity_in_trip(activity_id, %Trip{activities: activities}) do
+    Enum.find(activities, &(Integer.to_string(&1.id) == activity_id))
   end
 end

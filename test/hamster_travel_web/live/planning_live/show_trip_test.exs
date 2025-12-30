@@ -354,5 +354,288 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       # "$50.00" per night in the title
       assert html =~ ~r/title="[^"]*\$50\.00/
     end
+
+    test "renders trip page with activities", %{conn: conn} do
+      # Arrange
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      _ =
+        activity_fixture(%{
+          trip_id: trip.id,
+          name: "Louvre Museum",
+          # Must see
+          priority: 3,
+          day_index: 0,
+          expense: %{
+            price: Money.new(:EUR, 2000),
+            name: "Louvre Ticket",
+            trip_id: trip.id
+          }
+        })
+
+      # Act
+      {:ok, view, html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+            # Assert
+
+            assert html =~ "Louvre Museum"
+
+            assert html =~ "€2,000.00"
+
+            
+
+            # Verify priority styling (bold for priority 3)
+
+            assert has_element?(view, ".font-bold", "Louvre Museum")
+
+            
+
+            # Verify edit/delete buttons
+
+            assert has_element?(view, "[phx-click='edit']")
+
+            assert has_element?(view, "[phx-click='delete']")
+
+          end
+
+      
+
+          test "shows activity form when clicking add activity button", %{conn: conn} do
+
+            # Arrange
+
+            user = user_fixture()
+
+            conn = log_in_user(conn, user)
+
+            trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      
+
+            # Act
+
+            {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      
+
+            # Click the add activity button for day 0
+
+            view
+
+            |> element("#activity-new-0 [phx-click='add_activity']")
+
+            |> render_click()
+
+      
+
+            # Assert
+
+            assert has_element?(view, "form[id*='activity-form-new-activity-new-0']")
+
+            assert has_element?(view, "label", "Activity Name")
+
+            assert has_element?(view, "label", "Priority")
+
+            assert has_element?(view, "label", "Price")
+
+          end
+
+      
+
+          test "can create activity via form", %{conn: conn} do
+
+            # Arrange
+
+            user = user_fixture()
+
+            conn = log_in_user(conn, user)
+
+            trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      
+
+            # Act
+
+            {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      
+
+            # Open form
+
+            view
+
+            |> element("#activity-new-0 [phx-click='add_activity']")
+
+            |> render_click()
+
+      
+
+            # Submit form
+
+            view
+
+            |> form("form[id*='activity-form-new-activity-new-0']", %{
+
+              activity: %{
+
+                name: "Eiffel Tower",
+
+                priority: "3",
+
+                day_index: "0",
+
+                expense: %{
+
+                  price: %{
+
+                    amount: "25.00",
+
+                    currency: "EUR"
+
+                  }
+
+                }
+
+              }
+
+            })
+
+            |> render_submit()
+
+      
+
+            # Assert
+
+            assert has_element?(view, "div", "Eiffel Tower")
+
+            assert has_element?(view, ".font-bold", "Eiffel Tower")
+
+            
+
+            # Verify DB
+
+            activities = Planning.list_activities(trip)
+
+            assert length(activities) == 1
+
+            activity = List.first(activities)
+
+            assert activity.name == "Eiffel Tower"
+
+            assert activity.priority == 3
+
+          end
+
+      
+
+          test "can move activity via drag and drop", %{conn: conn} do
+
+            # Arrange
+
+            user = user_fixture()
+
+            conn = log_in_user(conn, user)
+
+            trip = trip_fixture(%{author_id: user.id, status: "0_draft", duration: 3})
+
+            
+
+            activity = activity_fixture(%{
+
+              trip_id: trip.id,
+
+              day_index: 0,
+
+              name: "Morning Walk"
+
+            })
+
+      
+
+            # Act
+
+            {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      
+
+            # Simulate drag and drop via hook event
+
+            render_hook(view, "move_activity", %{
+
+              "activity_id" => to_string(activity.id),
+
+              "new_day_index" => 1,
+
+              "position" => 0
+
+            })
+
+      
+
+            # Assert
+
+            updated_activity = Planning.get_activity!(activity.id)
+
+            assert updated_activity.day_index == 1
+
+          end
+
+      
+
+          test "can reorder activity within day", %{conn: conn} do
+
+            # Arrange
+
+            user = user_fixture()
+
+            conn = log_in_user(conn, user)
+
+            trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+            
+
+            # Create two activities on same day
+
+            a1 = activity_fixture(%{trip_id: trip.id, day_index: 0, name: "First"})
+
+            a2 = activity_fixture(%{trip_id: trip.id, day_index: 0, name: "Second"})
+
+            
+
+            # Act
+
+            {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      
+
+            # Move "First" (a1) to position 1 (after "Second")
+
+            render_hook(view, "reorder_activity", %{
+
+              "activity_id" => to_string(a1.id),
+
+              "position" => 1
+
+            })
+
+      
+
+            # Assert
+
+            # Need to reload to check order
+
+            activities = Planning.activities_for_day(0, Planning.list_activities(trip))
+
+            [first, second] = activities
+
+            
+
+            assert first.id == a2.id
+
+            assert second.id == a1.id
+
+          end
   end
 end
