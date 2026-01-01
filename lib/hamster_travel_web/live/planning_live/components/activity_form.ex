@@ -65,6 +65,15 @@ defmodule HamsterTravelWeb.Planning.ActivityForm do
               label={gettext("Address")}
               placeholder={gettext("e.g. Rue de Rivoli, 75001 Paris")}
             />
+
+            <div class="flex justify-between mt-2">
+              <.button color="light" type="button" phx-click="cancel" phx-target={@myself}>
+                {gettext("Cancel")}
+              </.button>
+              <.button color="primary" size="xs" type="submit">
+                {gettext("Save")}
+              </.button>
+            </div>
           </div>
 
           <div class="md:col-span-2 flex flex-col h-full">
@@ -80,15 +89,6 @@ defmodule HamsterTravelWeb.Planning.ActivityForm do
         </div>
 
         <.field field={@form[:day_index]} type="hidden" />
-
-        <div class="flex justify-between mt-2">
-          <.button color="light" type="button" phx-click="cancel" phx-target={@myself}>
-            {gettext("Cancel")}
-          </.button>
-          <.button color="primary" size="xs" type="submit">
-            {gettext("Save")}
-          </.button>
-        </div>
       </.form>
     </div>
     """
