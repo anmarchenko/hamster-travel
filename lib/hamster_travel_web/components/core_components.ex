@@ -942,11 +942,11 @@ defmodule HamsterTravelWeb.CoreComponents do
         data-field-name={@field.name}
         data-placeholder={@placeholder}
         class={[
-          "formatted-text-area w-full rounded-lg border border-zinc-300 bg-white dark:bg-zinc-800 dark:border-zinc-600 flex flex-col",
+          "formatted-text-area w-full rounded-lg border border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-600 flex flex-col",
           @class
         ]}
       >
-        <div class="toolbar border-b border-zinc-300 dark:border-zinc-600 px-2 py-1 flex gap-1 flex-wrap">
+        <div class="toolbar border-b border-gray-300 dark:border-gray-600 px-2 py-1 flex gap-1 flex-wrap">
           <button type="button" data-command="bold" class="toolbar-btn" title="Bold">
             <.icon name="hero-bold" class="w-4 h-4" />
           </button>

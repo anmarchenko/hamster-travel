@@ -36,7 +36,7 @@
 
 /* Rich Text Editor Styles */
 .toolbar-btn {
-    @apply p-1.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors duration-200;
+    @apply p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200;
     @apply text-gray-600 dark:text-gray-400;
 }
 
