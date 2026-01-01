@@ -33,10 +33,12 @@ defmodule HamsterTravelWeb.Planning.Activity do
     <div
       class="draggable-activity flex flex-col gap-y-1 py-1 sm:ml-[-1.5rem] sm:pl-[1.5rem] sm:hover:bg-zinc-100 sm:dark:hover:bg-zinc-700 cursor-grab active:cursor-grabbing"
       data-activity-id={@activity.id}
-      x-data="{ showContent: false }"
     >
       <.inline class={"2xl:text-lg #{activity_font(@activity.priority)}"}>
-        <span class="cursor-pointer" @click="showContent = !showContent">
+        <span
+          class="cursor-pointer"
+          phx-click={JS.toggle(to: "#activity-content-#{@activity.id}", in: {"transition-opacity duration-300", "opacity-0", "opacity-100"}, out: {"transition-opacity duration-300", "opacity-100", "opacity-0"})}
+        >
           {"#{@index + 1}."}
           {@activity.name}
         </span>
@@ -56,12 +58,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
           <.icon name="hero-trash" class="h-4 w-4" />
         </.activity_button>
       </.inline>
-      <div
-        class="flex flex-col gap-y-1"
-        x-show="showContent"
-        x-transition.duration.300ms.opacity
-        x-cloak
-      >
+      <div id={"activity-content-#{@activity.id}"} class="hidden flex flex-col gap-y-1">
         <.external_link :if={@activity.link} link={@activity.link} />
         <.activity_feature label={gettext("Address")} value={@activity.address} />
         <.formatted_text :if={@activity.description} text={@activity.description} />
