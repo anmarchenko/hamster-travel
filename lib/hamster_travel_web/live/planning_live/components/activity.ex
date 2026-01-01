@@ -51,7 +51,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
         <.money_display
           money={@activity.expense.price}
           display_currency={@display_currency}
-          class="text-sm font-normal text-zinc-500"
+          class="font-normal"
         />
         <.activity_button phx-click="edit" phx-target={@myself}>
           <.icon name="hero-pencil" class="h-4 w-4" />
