@@ -305,11 +305,7 @@ const FormattedTextArea = {
       return;
     }
 
-    this.editor
-      .chain()
-      .focus()
-      .setYoutubeVideo({ src: embedUrl })
-      .run();
+    this.editor.chain().focus().setYoutubeVideo({ src: embedUrl }).run();
   },
 
   handleFocusEvents() {

@@ -9,32 +9,41 @@ defmodule HamsterTravelWeb.Planning.ActivityNew do
   attr :edit, :boolean, default: false
   attr :class, :string, default: nil
 
+  def render(%{edit: true} = assigns) do
+    ~H"""
+    <div class={@class} id={@id}>
+      <.live_component
+        module={HamsterTravelWeb.Planning.ActivityForm}
+        id={"activity-form-new-#{@id}"}
+        trip={@trip}
+        day_index={@day_index}
+        action={:new}
+        on_finish={fn -> send(self(), {:finish_adding, "activity"}) end}
+      />
+    </div>
+    """
+  end
+
   def render(assigns) do
     ~H"""
     <div class={@class} id={@id}>
-      <div :if={!@edit} class="mt-2">
-        <.icon_button
-          size="sm"
-          phx-click="add_activity"
-          phx-target={@myself}
-          tooltip={gettext("Add activity")}
-        >
-          <.icon name="hero-plus" class="w-4 h-4" />
-        </.icon_button>
-      </div>
-
-      <div :if={@edit} class="mt-2">
-        <.live_component
-          module={HamsterTravelWeb.Planning.ActivityForm}
-          id={"activity-form-new-#{@id}"}
-          trip={@trip}
-          day_index={@day_index}
-          action={:new}
-          on_finish={fn -> send(self(), {:finish_adding, "activity"}) end}
-        />
-      </div>
+      <a
+        href="#"
+        phx-click="add_activity"
+        phx-target={@myself}
+        class="text-sm text-primary-500 hover:text-primary-800 dark:text-primary-500 dark:hover:text-primary-300"
+      >
+        <.inline>
+          <.icon name="hero-plus-solid" class="w-5 h-5" />
+          {gettext("Add activity")}
+        </.inline>
+      </a>
     </div>
     """
+  end
+
+  def update(assigns, socket) do
+    {:ok, assign(socket, assigns)}
   end
 
   def handle_event("add_activity", _, socket) do

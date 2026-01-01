@@ -241,7 +241,7 @@ defmodule HamsterTravelWeb.CoreComponents do
 
     ~H"""
     <div class="overflow-y-auto px-4 sm:overflow-visible sm:px-0">
-      <table class="w-[40rem] mt-11 sm:w-full">
+      <table class="w-160 mt-11 sm:w-full">
         <thead class="text-sm text-left leading-6 text-zinc-500">
           <tr>
             <th :for={col <- @col} class="p-0 pr-6 pb-4 font-normal">{col[:label]}</th>
@@ -890,7 +890,10 @@ defmodule HamsterTravelWeb.CoreComponents do
   end
 
   defp sanitize_formatted_text(nil), do: ""
-  defp sanitize_formatted_text(text) when is_binary(text), do: HtmlSanitizeEx.Scrubber.scrub(text, HamsterTravel.Utilities.HtmlScrubber)
+
+  defp sanitize_formatted_text(text) when is_binary(text),
+    do: HtmlSanitizeEx.Scrubber.scrub(text, HamsterTravel.Utilities.HtmlScrubber)
+
   defp sanitize_formatted_text(_), do: ""
 
   def formatted_text_present?(nil), do: false
@@ -923,17 +926,15 @@ defmodule HamsterTravelWeb.CoreComponents do
   attr :label, :string, default: nil
   attr :placeholder, :string, default: nil
   attr :class, :string, default: nil
+  attr :wrapper_class, :string, default: nil
+  attr :content_class, :string, default: nil
 
   def formatted_text_area(assigns) do
     ~H"""
-    <div class="mb-4">
-      <label
-        :if={@label}
-        for={@field.id}
-        class="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
-      >
+    <div class={[@wrapper_class || "mb-4"]}>
+      <.label :if={@label} for={@field.id}>
         {@label}
-      </label>
+      </.label>
       <div
         id={"#{@field.id}-editor"}
         phx-hook="FormattedTextArea"
@@ -941,7 +942,7 @@ defmodule HamsterTravelWeb.CoreComponents do
         data-field-name={@field.name}
         data-placeholder={@placeholder}
         class={[
-          "formatted-text-area mt-2 block w-full rounded-lg border border-zinc-300 bg-white dark:bg-zinc-800 dark:border-zinc-600",
+          "formatted-text-area w-full rounded-lg border border-zinc-300 bg-white dark:bg-zinc-800 dark:border-zinc-600 flex flex-col",
           @class
         ]}
       >
@@ -977,7 +978,10 @@ defmodule HamsterTravelWeb.CoreComponents do
           </button>
         </div>
         <div
-          class="editor-content px-0.5 py-1 min-h-[120px] text-sm leading-relaxed space-y-1 focus:outline-none"
+          class={[
+            "editor-content px-0.5 py-1 min-h-[120px] flex-1 text-sm leading-relaxed space-y-1 focus:outline-none",
+            @content_class
+          ]}
           data-editor-target
         >
         </div>
@@ -1098,8 +1102,8 @@ defmodule HamsterTravelWeb.CoreComponents do
             name={@icon}
             class={[
               "w-6 h-6 transition-colors duration-200",
-              i <= @value && "text-yellow-400",
-              i > @value && "text-gray-300 dark:text-gray-600 group-hover:text-yellow-200"
+              i <= @value && "text-zinc-500 dark:text-zinc-300",
+              i > @value && "text-zinc-300 dark:text-zinc-600 group-hover:text-zinc-400"
             ]}
           />
         </label>

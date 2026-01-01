@@ -422,8 +422,6 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   attr(:destinations, :list, required: true)
   attr(:destinations_outside, :list, required: true)
   attr(:activities, :list, required: true)
-  attr(:expenses, :list, required: true)
-  attr(:notes, :list, required: true)
 
   def tab_activity(assigns) do
     ~H"""
@@ -464,10 +462,8 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
             />
           </div>
 
-          <.old_note note={HamsterTravel.find_note_by_day(@notes, i)} day_index={i} />
-          <.expenses expenses={HamsterTravel.filter_expenses_by_day(@expenses, i)} day_index={i} />
           <div
-            class="flex flex-col mt-4 gap-y-1 min-h-[2rem]"
+            class="flex flex-col mt-4 gap-y-1 min-h-8"
             data-activity-drop-zone
             data-target-day={i}
           >
@@ -507,34 +503,6 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
       display_currency={@display_currency}
       index={index}
     />
-    """
-  end
-
-  attr(:expenses, :list, required: true)
-  attr(:day_index, :integer, required: true)
-
-  def expenses(assigns) do
-    ~H"""
-    <.live_component
-      :for={expense <- @expenses}
-      module={Expense}
-      id={"expenses-#{expense.id}-day-#{@day_index}"}
-      expense={expense}
-    />
-    """
-  end
-
-  attr(:note, :map, required: true)
-  attr(:day_index, :integer, required: true)
-
-  def old_note(%{note: nil} = assigns) do
-    ~H"""
-    """
-  end
-
-  def old_note(assigns) do
-    ~H"""
-    <.live_component module={Note} id={"notes-#{@note.id}-day-#{@day_index}"} note={@note} />
     """
   end
 end

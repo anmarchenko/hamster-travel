@@ -33,9 +33,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
     <div
       class="draggable-activity flex flex-col gap-y-1 py-1 sm:ml-[-1.5rem] sm:pl-[1.5rem] sm:hover:bg-zinc-100 sm:dark:hover:bg-zinc-700 cursor-grab active:cursor-grabbing"
       data-activity-id={@activity.id}
-      x-data="{ showButtons: false, showContent: false }"
-      @mouseover="showButtons = true"
-      @mouseleave="showButtons = false"
+      x-data="{ showContent: false }"
     >
       <.inline class={"2xl:text-lg #{activity_font(@activity.priority)}"}>
         <span class="cursor-pointer" @click="showContent = !showContent">
@@ -126,8 +124,6 @@ defmodule HamsterTravelWeb.Planning.Activity do
     ~H"""
     <span
       class="cursor-pointer hover:text-zinc-900 hover:dark:text-zinc-100"
-      x-show="showButtons"
-      x-transition
       {@rest}
     >
       {render_slot(@inner_block)}

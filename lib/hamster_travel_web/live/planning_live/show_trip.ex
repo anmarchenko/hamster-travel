@@ -273,7 +273,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
       {:error, reason} ->
         socket =
-          put_flash(socket, :error, gettext("Failed to reorder activity: %{reason}", reason: reason))
+          put_flash(
+            socket,
+            :error,
+            gettext("Failed to reorder activity: %{reason}", reason: reason)
+          )
 
         Logger.error("Failed to reorder activity: #{inspect(reason)}")
 
@@ -308,8 +312,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       destinations={@trip.destinations}
       destinations_outside={destinations_outside(@trip)}
       activities={@trip.activities}
-      notes={[]}
-      expenses={[]}
       budget={@budget}
       display_currency={@display_currency}
     />

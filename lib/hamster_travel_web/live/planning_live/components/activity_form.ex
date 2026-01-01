@@ -25,50 +25,60 @@ defmodule HamsterTravelWeb.Planning.ActivityForm do
         phx-change="form_changed"
         class="space-y-4"
       >
-        <div class="flex flex-col md:flex-row gap-4">
-          <div class="flex-grow">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+          <div class="space-y-4 md:col-span-1">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
+              <div class="grow">
+                <.field
+                  field={@form[:name]}
+                  type="text"
+                  label={gettext("Activity Name")}
+                  wrapper_class="mb-0"
+                  placeholder={gettext("e.g. Visit the Louvre")}
+                  required
+                />
+              </div>
+              <div class="flex flex-col gap-1">
+                <.label>{gettext("Priority")}</.label>
+                <.rating_input field={@form[:priority]} max={3} icon="hero-star-solid" />
+              </div>
+            </div>
+
+            <.inputs_for :let={expense_form} field={@form[:expense]}>
+              <.money_input
+                id={"activity-expense-price-#{@id}"}
+                field={expense_form[:price]}
+                label={gettext("Price")}
+                default_currency={@trip.currency}
+              />
+            </.inputs_for>
+
             <.field
-              field={@form[:name]}
+              field={@form[:link]}
               type="text"
-              label={gettext("Activity Name")}
-              placeholder={gettext("e.g. Visit the Louvre")}
-              required
+              label={gettext("Link")}
+              placeholder="https://..."
+            />
+
+            <.field
+              field={@form[:address]}
+              type="text"
+              label={gettext("Address")}
+              placeholder={gettext("e.g. Rue de Rivoli, 75001 Paris")}
             />
           </div>
-          <div class="flex-shrink-0 pt-2">
-            <.label>{gettext("Priority")}</.label>
-            <.rating_input field={@form[:priority]} max={3} icon="hero-star-solid" />
+
+          <div class="md:col-span-2 flex flex-col h-full">
+            <.formatted_text_area
+              field={@form[:description]}
+              label={gettext("Description")}
+              placeholder={gettext("Details about the activity")}
+              wrapper_class="mb-0 flex-1 flex flex-col h-full"
+              class="mt-0 flex-1 min-h-0"
+              content_class="py-0 min-h-0"
+            />
           </div>
         </div>
-
-        <.field
-          field={@form[:link]}
-          type="text"
-          label={gettext("Link")}
-          placeholder={gettext("https://...")}
-        />
-
-        <.field
-          field={@form[:address]}
-          type="text"
-          label={gettext("Address")}
-          placeholder={gettext("e.g. Rue de Rivoli, 75001 Paris")}
-        />
-
-        <.formatted_text_area
-          field={@form[:description]}
-          label={gettext("Description")}
-          placeholder={gettext("Details about the activity")}
-        />
-
-        <.inputs_for :let={expense_form} field={@form[:expense]}>
-          <.money_input
-            id={"activity-expense-price-#{@id}"}
-            field={expense_form[:price]}
-            label={gettext("Price")}
-            default_currency={@trip.currency}
-          />
-        </.inputs_for>
 
         <.field field={@form[:day_index]} type="hidden" />
 
@@ -109,8 +119,17 @@ defmodule HamsterTravelWeb.Planning.ActivityForm do
     on_submit(socket, socket.assigns.action, activity_params)
   end
 
-  def handle_event("form_changed", %{"activity" => _activity_params}, socket) do
-    {:noreply, socket}
+  def handle_event("form_changed", %{"activity" => activity_params}, socket) do
+    changeset =
+      case socket.assigns.action do
+        :new ->
+          Planning.new_activity(socket.assigns.trip, socket.assigns.day_index, activity_params)
+
+        :edit ->
+          Planning.change_activity(socket.assigns.activity, activity_params)
+      end
+
+    {:noreply, assign_form(socket, changeset)}
   end
 
   def handle_event("cancel", _, socket) do
