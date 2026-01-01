@@ -146,12 +146,11 @@ const FormattedTextArea = {
     // This fixes an issue where clicking a task checkbox in a form with phx-change
     // would cause the change to be reverted due to the form update cycle.
     const stopPropagationForCheckboxes = (e) => {
-      if (e.target.matches('input[type="checkbox"]')) {
+      if (e.target.matches('li input[type="checkbox"]')) {
         e.stopPropagation();
       }
     };
 
-    this.el.addEventListener("change", stopPropagationForCheckboxes);
     this.el.addEventListener("input", stopPropagationForCheckboxes);
   },
 
