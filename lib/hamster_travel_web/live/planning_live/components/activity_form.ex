@@ -22,7 +22,6 @@ defmodule HamsterTravelWeb.Planning.ActivityForm do
         as={:activity}
         phx-target={@myself}
         phx-submit="form_submit"
-        phx-change="form_changed"
         class="space-y-4"
       >
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
@@ -117,19 +116,6 @@ defmodule HamsterTravelWeb.Planning.ActivityForm do
   @impl true
   def handle_event("form_submit", %{"activity" => activity_params}, socket) do
     on_submit(socket, socket.assigns.action, activity_params)
-  end
-
-  def handle_event("form_changed", %{"activity" => activity_params}, socket) do
-    changeset =
-      case socket.assigns.action do
-        :new ->
-          Planning.new_activity(socket.assigns.trip, socket.assigns.day_index, activity_params)
-
-        :edit ->
-          Planning.change_activity(socket.assigns.activity, activity_params)
-      end
-
-    {:noreply, assign_form(socket, changeset)}
   end
 
   def handle_event("cancel", _, socket) do

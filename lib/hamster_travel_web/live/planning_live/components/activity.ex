@@ -37,7 +37,13 @@ defmodule HamsterTravelWeb.Planning.Activity do
       <.inline class={"2xl:text-lg #{activity_font(@activity.priority)}"}>
         <span
           class="cursor-pointer"
-          phx-click={JS.toggle(to: "#activity-content-#{@activity.id}", in: {"transition-opacity duration-300", "opacity-0", "opacity-100"}, out: {"transition-opacity duration-300", "opacity-100", "opacity-0"})}
+          phx-click={
+            JS.toggle(
+              to: "#activity-content-#{@activity.id}",
+              in: {"transition-opacity duration-300", "opacity-0", "opacity-100"},
+              out: {"transition-opacity duration-300", "opacity-100", "opacity-0"}
+            )
+          }
         >
           {"#{@index + 1}."}
           {@activity.name}
@@ -61,7 +67,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
       <div id={"activity-content-#{@activity.id}"} class="hidden flex flex-col gap-y-1">
         <.external_link :if={@activity.link} link={@activity.link} />
         <.activity_feature label={gettext("Address")} value={@activity.address} />
-        <.formatted_text :if={@activity.description} text={@activity.description} />
+        <.formatted_text :if={@activity.description} text={@activity.description} class="mt-3" />
       </div>
     </div>
     """

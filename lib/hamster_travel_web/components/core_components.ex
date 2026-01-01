@@ -1071,40 +1071,28 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   def rating_input(assigns) do
     value =
-      case assigns.field.value do
-        v when is_binary(v) ->
-          case Integer.parse(v) do
-            {i, _} -> i
-            _ -> 0
-          end
-
-        v when is_integer(v) ->
-          v
-
-        _ ->
-          0
+      case Integer.parse("#{assigns.field.value}") do
+        {i, _} -> i
+        _ -> 0
       end
 
     assigns = assign(assigns, :value, value)
 
     ~H"""
-    <div class={["flex items-center gap-0.5", @class]}>
+    <div class={build_class(["flex items-center gap-0.5", @class])} x-data={"{ rating: #{@value} }"}>
       <%= for i <- 1..@max do %>
         <label class="cursor-pointer group">
           <input
             type="radio"
             name={@field.name}
             value={i}
-            checked={@value == i}
+            x-model.number="rating"
             class="sr-only"
           />
           <.icon
             name={@icon}
-            class={[
-              "w-6 h-6 transition-colors duration-200",
-              i <= @value && "text-zinc-500 dark:text-zinc-300",
-              i > @value && "text-zinc-300 dark:text-zinc-600 group-hover:text-zinc-400"
-            ]}
+            class="w-6 h-6 transition-colors duration-200"
+            x-bind:class={"rating >= #{i} ? 'text-zinc-500 dark:text-zinc-300' : 'text-zinc-300 dark:text-zinc-600 group-hover:text-zinc-400'"}
           />
         </label>
       <% end %>
