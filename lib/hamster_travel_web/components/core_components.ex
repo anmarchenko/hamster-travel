@@ -1082,20 +1082,29 @@ defmodule HamsterTravelWeb.CoreComponents do
     assigns = assign(assigns, :value, value)
 
     ~H"""
-    <div class={build_class(["flex items-center gap-0.5", @class])} x-data={"{ rating: #{@value} }"}>
+    <div
+      class={build_class(["flex items-center gap-0.5", @class])}
+      x-data={"{ rating: #{@value}, hoverRating: 0 }"}
+      @mouseleave="hoverRating = 0"
+    >
       <%= for i <- 1..@max do %>
-        <label class="cursor-pointer group">
+        <label class="cursor-pointer group" @mouseenter={"hoverRating = #{i}"}>
           <input
             type="radio"
             name={@field.name}
             value={i}
+            @click={"rating = #{i}"}
             x-model.number="rating"
             class="sr-only"
           />
           <.icon
             name={@icon}
             class="w-6 h-6 transition-colors duration-200"
-            x-bind:class={"rating >= #{i} ? 'text-zinc-500 dark:text-zinc-300' : 'text-zinc-300 dark:text-zinc-600 group-hover:text-zinc-400'"}
+            x-bind:class={
+              "(hoverRating > 0 ? hoverRating : rating) >= #{i}
+                ? 'text-zinc-500 dark:text-zinc-300'
+                : 'text-zinc-300 dark:text-zinc-600'"
+            }
           />
         </label>
       <% end %>
