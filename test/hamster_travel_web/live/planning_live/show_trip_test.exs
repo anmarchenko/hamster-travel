@@ -347,12 +347,11 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert html =~ accommodation.name
 
       # The money display element should have conversion styling (dotted underline and cursor-help)
-      assert has_element?(view, "p.border-b.border-dotted.border-gray-400.cursor-help")
+      assert has_element?(view, "div.border-b.border-dotted.border-gray-400.cursor-help")
 
-      # tooltip contains the original USD amount in title attribute
-      assert html =~ "title="
-      # "$50.00" per night in the title
-      assert html =~ ~r/title="[^"]*\$50\.00/
+      # tooltip contains the original USD amount
+      # It is now rendered in a hidden div that appears on hover
+      assert has_element?(view, "div.hidden.group-hover\\:block", "$50.00")
     end
 
     test "renders trip page with activities", %{conn: conn} do
