@@ -422,6 +422,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   attr(:destinations, :list, required: true)
   attr(:destinations_outside, :list, required: true)
   attr(:activities, :list, required: true)
+  attr(:activities_outside, :list, required: true)
 
   def tab_activity(assigns) do
     ~H"""
@@ -433,11 +434,24 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
       />
 
       <.toggle
-        :if={Enum.any?(@destinations_outside)}
+        :if={Enum.any?(@destinations_outside) || Enum.any?(@activities_outside)}
         label={gettext("Some items are scheduled outside of the trip duration")}
         class="mt-4"
       >
         <.destinations_list trip={@trip} destinations={@destinations_outside} day_index={0} />
+
+        <div
+          class="activities-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-1 sm:gap-y-8"
+          data-activity-drop-zone
+          data-target-day="outside"
+        >
+          <.activities
+            activities={@activities_outside}
+            day_index={-1}
+            trip={@trip}
+            display_currency={@display_currency}
+          />
+        </div>
       </.toggle>
 
       <div class="flex flex-col gap-y-8 mt-8">

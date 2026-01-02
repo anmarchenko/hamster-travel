@@ -640,11 +640,6 @@ msgstr "Вы уверены, что хотите удалить \"%{name}\"?"
 msgid "Description"
 msgstr "Описание"
 
-#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:83
-#, elixir-autogen, elixir-format
-msgid "Details about the activity"
-msgstr "Подробности о месте или событии"
-
 #: lib/hamster_travel_web/live/planning_live/components/activity.ex:100
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Failed to delete activity"

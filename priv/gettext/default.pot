@@ -646,11 +646,6 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:83
-#, elixir-autogen, elixir-format
-msgid "Details about the activity"
-msgstr ""
-
 #: lib/hamster_travel_web/live/planning_live/components/activity.ex:100
 #, elixir-autogen, elixir-format
 msgid "Failed to delete activity"

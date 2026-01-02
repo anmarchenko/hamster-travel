@@ -80,7 +80,6 @@ defmodule HamsterTravelWeb.Planning.ActivityForm do
             <.formatted_text_area
               field={@form[:description]}
               label={gettext("Description")}
-              placeholder={gettext("Details about the activity")}
               wrapper_class="mb-0 flex-1 flex flex-col h-full"
               class="mt-0 flex-1 min-h-0"
               content_class="py-0 min-h-0"

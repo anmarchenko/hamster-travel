@@ -8,9 +8,12 @@ let ActivityDragDrop = {
     );
 
     activityDropZones.forEach((zone) => {
+      const isOutsideZone = zone.dataset.targetDay === "outside";
+
       new Sortable(zone, {
         group: {
           name: "activities",
+          put: !isOutsideZone // Prevent dropping into outside zone
         },
         animation: 150,
         ghostClass: "hamster-drag-ghost",
