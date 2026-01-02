@@ -66,7 +66,7 @@ defmodule HamsterTravelWeb.Planning.ActivityForm do
               placeholder={gettext("e.g. Rue de Rivoli, 75001 Paris")}
             />
 
-            <div class="flex justify-between mt-2">
+            <div class="hidden md:flex justify-between mt-2">
               <.button color="light" type="button" phx-click="cancel" phx-target={@myself}>
                 {gettext("Cancel")}
               </.button>
@@ -85,6 +85,15 @@ defmodule HamsterTravelWeb.Planning.ActivityForm do
               content_class="py-0 min-h-0"
             />
           </div>
+        </div>
+
+        <div class="flex md:hidden justify-between mt-4">
+          <.button color="light" type="button" phx-click="cancel" phx-target={@myself}>
+            {gettext("Cancel")}
+          </.button>
+          <.button color="primary" size="xs" type="submit">
+            {gettext("Save")}
+          </.button>
         </div>
 
         <.field field={@form[:day_index]} type="hidden" />
