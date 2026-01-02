@@ -420,6 +420,19 @@ defmodule HamsterTravel.EctoOrdered do
     |> ranked(options.rank_field)
   end
 
+  defp scope_query(query, %Options{scope_field: scope_fields, module: module}, cs) when is_list(scope_fields) do
+    Enum.reduce(scope_fields, query, fn field_name, query_acc ->
+      scope_val = get_field(cs, field_name)
+
+      if scope_val do
+        type = module.__schema__(:type, field_name)
+        from q in query_acc, where: field(q, ^field_name) == type(^scope_val, ^type)
+      else
+        query_acc
+      end
+    end)
+  end
+
   defp scope_query(query, %Options{scope_field: scope_field}, cs) do
     scope = get_field(cs, scope_field)
 

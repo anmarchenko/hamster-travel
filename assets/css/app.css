@@ -36,7 +36,7 @@
 
 /* Rich Text Editor Styles */
 .toolbar-btn {
-    @apply p-1.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors duration-200;
+    @apply p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200;
     @apply text-gray-600 dark:text-gray-400;
 }
 
@@ -102,7 +102,7 @@ ul[data-task-list="true"] li > div p {
 .formatted-text-area iframe.formatted-video {
     @apply rounded-lg;
     width: 100%;
-    max-width: 100%;
+    max-width: min(100%, 640px);
     height: auto;
     aspect-ratio: 16 / 9;
 }

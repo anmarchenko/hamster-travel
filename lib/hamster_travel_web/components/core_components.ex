@@ -241,7 +241,7 @@ defmodule HamsterTravelWeb.CoreComponents do
 
     ~H"""
     <div class="overflow-y-auto px-4 sm:overflow-visible sm:px-0">
-      <table class="w-[40rem] mt-11 sm:w-full">
+      <table class="w-160 mt-11 sm:w-full">
         <thead class="text-sm text-left leading-6 text-zinc-500">
           <tr>
             <th :for={col <- @col} class="p-0 pr-6 pb-4 font-normal">{col[:label]}</th>
@@ -804,18 +804,21 @@ defmodule HamsterTravelWeb.CoreComponents do
       |> assign(:is_converted, is_converted)
 
     ~H"""
-    <p
+    <div
       class={
         build_class([
-          "whitespace-nowrap",
-          @is_converted && "border-b border-dotted border-gray-400 cursor-help",
+          "whitespace-nowrap relative",
+          @is_converted && "border-b border-dotted border-gray-400 cursor-help group",
           @class
         ])
       }
-      title={@is_converted && Cldr.format_money(@original_money.amount, @original_money.currency)}
     >
       {Cldr.format_money(@display_money.amount, @display_money.currency)}<span :if={@suffix != []}>{render_slot(@suffix)}</span>
-    </p>
+      <div :if={@is_converted} class="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-1 hidden group-hover:block w-max px-2 py-1 bg-gray-900 text-white text-xs rounded shadow-lg z-50">
+        {Cldr.format_money(@original_money.amount, @original_money.currency)}
+        <div class="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-gray-900"></div>
+      </div>
+    </div>
     """
   end
 
@@ -890,7 +893,10 @@ defmodule HamsterTravelWeb.CoreComponents do
   end
 
   defp sanitize_formatted_text(nil), do: ""
-  defp sanitize_formatted_text(text) when is_binary(text), do: HtmlSanitizeEx.Scrubber.scrub(text, HamsterTravel.Utilities.HtmlScrubber)
+
+  defp sanitize_formatted_text(text) when is_binary(text),
+    do: HtmlSanitizeEx.Scrubber.scrub(text, HamsterTravel.Utilities.HtmlScrubber)
+
   defp sanitize_formatted_text(_), do: ""
 
   def formatted_text_present?(nil), do: false
@@ -923,17 +929,15 @@ defmodule HamsterTravelWeb.CoreComponents do
   attr :label, :string, default: nil
   attr :placeholder, :string, default: nil
   attr :class, :string, default: nil
+  attr :wrapper_class, :string, default: nil
+  attr :content_class, :string, default: nil
 
   def formatted_text_area(assigns) do
     ~H"""
-    <div class="mb-4">
-      <label
-        :if={@label}
-        for={@field.id}
-        class="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
-      >
+    <div class={[@wrapper_class || "mb-4"]}>
+      <.label :if={@label} for={@field.id}>
         {@label}
-      </label>
+      </.label>
       <div
         id={"#{@field.id}-editor"}
         phx-hook="FormattedTextArea"
@@ -941,11 +945,11 @@ defmodule HamsterTravelWeb.CoreComponents do
         data-field-name={@field.name}
         data-placeholder={@placeholder}
         class={[
-          "formatted-text-area mt-2 block w-full rounded-lg border border-zinc-300 bg-white dark:bg-zinc-800 dark:border-zinc-600",
+          "formatted-text-area w-full rounded-lg border border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-600 flex flex-col",
           @class
         ]}
       >
-        <div class="toolbar border-b border-zinc-300 dark:border-zinc-600 px-2 py-1 flex gap-1 flex-wrap">
+        <div class="toolbar border-b border-gray-300 dark:border-gray-600 px-2 py-1 flex gap-1 flex-wrap">
           <button type="button" data-command="bold" class="toolbar-btn" title="Bold">
             <.icon name="hero-bold" class="w-4 h-4" />
           </button>
@@ -977,7 +981,10 @@ defmodule HamsterTravelWeb.CoreComponents do
           </button>
         </div>
         <div
-          class="editor-content px-0.5 py-1 min-h-[120px] text-sm leading-relaxed space-y-1 focus:outline-none"
+          class={[
+            "editor-content px-0.5 py-1 min-h-[120px] flex-1 text-sm leading-relaxed space-y-1 focus:outline-none",
+            @content_class
+          ]}
           data-editor-target
         >
         </div>
@@ -1053,6 +1060,54 @@ defmodule HamsterTravelWeb.CoreComponents do
       <.field_error :for={{msg, opts} <- @start_date_field.errors}>
         {translate_error({msg, opts})}
       </.field_error>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a rating input component (stars).
+  """
+  attr :field, Phoenix.HTML.FormField, required: true
+  attr :max, :integer, default: 5
+  attr :icon, :string, default: "hero-star-solid"
+  attr :class, :string, default: nil
+
+  def rating_input(assigns) do
+    value =
+      case Integer.parse("#{assigns.field.value}") do
+        {i, _} -> i
+        _ -> 0
+      end
+
+    assigns = assign(assigns, :value, value)
+
+    ~H"""
+    <div
+      class={build_class(["flex items-center gap-0.5", @class])}
+      x-data={"{ rating: #{@value}, hoverRating: 0 }"}
+      @mouseleave="hoverRating = 0"
+    >
+      <%= for i <- 1..@max do %>
+        <label class="cursor-pointer group" @mouseenter={"hoverRating = #{i}"}>
+          <input
+            type="radio"
+            name={@field.name}
+            value={i}
+            @click={"rating = #{i}"}
+            x-model.number="rating"
+            class="sr-only"
+          />
+          <.icon
+            name={@icon}
+            class="w-6 h-6 transition-colors duration-200"
+            x-bind:class={
+              "(hoverRating > 0 ? hoverRating : rating) >= #{i}
+                ? 'text-zinc-500 dark:text-zinc-300'
+                : 'text-zinc-300 dark:text-zinc-600'"
+            }
+          />
+        </label>
+      <% end %>
     </div>
     """
   end

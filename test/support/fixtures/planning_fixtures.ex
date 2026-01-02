@@ -138,4 +138,32 @@ defmodule HamsterTravel.PlanningFixtures do
 
     transfer
   end
+
+  @doc """
+  Generate an activity.
+  """
+  def activity_fixture(attrs \\ %{}) do
+    trip = trip_fixture()
+
+    attrs =
+      attrs
+      |> Enum.into(%{
+        name: "Visit Museum",
+        day_index: 0,
+        priority: 2,
+        link: "https://example.com/museum",
+        address: "Museum Street 1",
+        description: "A very nice museum",
+        expense: %{
+          price: Money.new(:EUR, 2000),
+          name: "Museum ticket",
+          trip_id: trip.id
+        }
+      })
+
+    {:ok, activity} =
+      HamsterTravel.Planning.create_activity(trip, attrs)
+
+    activity
+  end
 end

@@ -49,6 +49,7 @@ defmodule HamsterTravel.Planning.Trip do
     has_many(:expenses, Expense)
     has_many(:accommodations, Accommodation)
     has_many(:transfers, Transfer)
+    has_many(:activities, HamsterTravel.Planning.Activity)
 
     timestamps()
   end

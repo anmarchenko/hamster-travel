@@ -7,19 +7,32 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   require Logger
 
   import HamsterTravelWeb.Planning.PlanningComponents
+  import HamsterTravelWeb.Icons.Airplane
 
   alias HamsterTravel.Geo
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.Trip
   alias HamsterTravel.Repo
   alias HamsterTravelWeb.Cldr
+  alias HamsterTravelWeb.CoreComponents
+
+  alias HamsterTravelWeb.Planning.{
+    Accommodation,
+    AccommodationNew,
+    Activity,
+    ActivityNew,
+    Destination,
+    DestinationNew,
+    Transfer,
+    TransferNew
+  }
 
   @tabs ["itinerary", "activities"]
 
   @impl true
   def render(assigns) do
     ~H"""
-    <.container full class="!mt-* mt-4">
+    <.container full class="mt-*! mt-4">
       <div class="flex flex-col-reverse sm:flex-row">
         <div class="flex-1 flex flex-col gap-y-4">
           <.header>
@@ -57,7 +70,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
     <.container
       full
-      class="!mt-* !p-* py-4 sm:py-6 px-6 sm:px-10 mb-10 mt-4 bg-white dark:bg-zinc-800 rounded-md"
+      class="mt-*! p-*! py-4 sm:py-6 px-6 sm:px-10 mb-10 mt-4 bg-white dark:bg-zinc-800 rounded-md"
     >
       <.planning_tabs trip={@trip} active_tab={@active_tab} />
       <.render_tab
@@ -69,6 +82,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     </.container>
     """
   end
+
+  # EVENT HANDLERS
 
   @impl true
   def mount(%{"trip_slug" => slug} = params, _session, socket) do
@@ -95,6 +110,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> assign(active_destination_adding_component_id: nil)
       |> assign(active_accommodation_adding_component_id: nil)
       |> assign(active_transfer_adding_component_id: nil)
+      |> assign(active_activity_adding_component_id: nil)
 
     {:ok, socket}
   end
@@ -154,6 +170,21 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   @impl true
+  def handle_info({[:activity, :created], %{value: created_activity}}, socket) do
+    handle_entity_event(:activity, :created, created_activity, socket)
+  end
+
+  @impl true
+  def handle_info({[:activity, :updated], %{value: updated_activity}}, socket) do
+    handle_entity_event(:activity, :updated, updated_activity, socket)
+  end
+
+  @impl true
+  def handle_info({[:activity, :deleted], %{value: deleted_activity}}, socket) do
+    handle_entity_event(:activity, :deleted, deleted_activity, socket)
+  end
+
+  @impl true
   def handle_info({:start_adding, component_type, component_id}, socket) do
     assign_key = get_key_for_component_adding_active_state_assign(component_type)
 
@@ -204,6 +235,73 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     end
   end
 
+  @impl true
+  def handle_event(
+        "move_activity",
+        %{
+          "activity_id" => activity_id,
+          "new_day_index" => new_day_index,
+          "position" => position
+        },
+        socket
+      ) do
+    activity = find_activity_in_trip(activity_id, socket.assigns.trip)
+    new_day_index = ensure_int(new_day_index)
+    position = ensure_int(position)
+
+    case Planning.move_activity_to_day(
+           activity,
+           new_day_index,
+           socket.assigns.trip,
+           socket.assigns.current_user,
+           position
+         ) do
+      {:ok, _updated_activity} ->
+        {:noreply, socket}
+
+      {:error, reason} ->
+        socket =
+          put_flash(socket, :error, gettext("Failed to move activity: %{reason}", reason: reason))
+
+        Logger.error("Failed to move activity: #{inspect(reason)}")
+
+        {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_event(
+        "reorder_activity",
+        %{"activity_id" => activity_id, "position" => position},
+        socket
+      ) do
+    activity = find_activity_in_trip(activity_id, socket.assigns.trip)
+    position = ensure_int(position)
+
+    case Planning.reorder_activity(
+           activity,
+           position,
+           socket.assigns.trip,
+           socket.assigns.current_user
+         ) do
+      {:ok, _updated_activity} ->
+        {:noreply, socket}
+
+      {:error, reason} ->
+        socket =
+          put_flash(
+            socket,
+            :error,
+            gettext("Failed to reorder activity: %{reason}", reason: reason)
+          )
+
+        Logger.error("Failed to reorder activity: #{inspect(reason)}")
+
+        {:noreply, socket}
+    end
+  end
+
+  # COMPONENTS
   def render_tab(%{active_tab: "itinerary"} = assigns) do
     ~H"""
     <.tab_itinerary
@@ -226,14 +324,358 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       trip={@trip}
       destinations={@trip.destinations}
       destinations_outside={destinations_outside(@trip)}
-      activities={[]}
-      notes={[]}
-      expenses={[]}
+      activities={@trip.activities}
+      activities_outside={activities_outside(@trip)}
       budget={@budget}
       display_currency={@display_currency}
     />
     """
   end
+
+  attr(:trip, :map, required: true)
+  attr(:active_tab, :string, required: true)
+  attr(:class, :string, default: nil)
+
+  def planning_tabs(assigns) do
+    ~H"""
+    <.tabs
+      underline
+      class={
+        CoreComponents.build_class([
+          "hidden sm:flex",
+          @class
+        ])
+      }
+    >
+      <.tab
+        underline
+        to={trip_url(@trip.slug, :itinerary)}
+        is_active={@active_tab == "itinerary"}
+        link_type="live_patch"
+      >
+        <.inline>
+          <.airplane />
+          {gettext("Transfers and hotels")}
+        </.inline>
+      </.tab>
+      <.tab
+        underline
+        to={trip_url(@trip.slug, :activities)}
+        is_active={@active_tab == "activities"}
+        link_type="live_patch"
+      >
+        <.inline>
+          <.icon name="hero-clipboard-document-list" class="h-5 w-5" />
+          {gettext("Activities")}
+        </.inline>
+      </.tab>
+    </.tabs>
+    """
+  end
+
+  attr(:trip, Trip, required: true)
+  attr(:budget, Money, required: true)
+  attr(:display_currency, :string, required: true)
+  attr(:destinations, :list, required: true)
+  attr(:destinations_outside, :list, required: true)
+  attr(:transfers, :list, required: true)
+  attr(:transfers_outside, :list, required: true)
+  attr(:accommodations, :list, required: true)
+  attr(:accommodations_outside, :list, required: true)
+
+  def tab_itinerary(assigns) do
+    ~H"""
+    <div phx-hook="TransferDragDrop" id="trip-itinerary">
+      <.budget_display
+        budget={@budget}
+        display_currency={@display_currency}
+        class="mt-4 sm:mt-8 text-xl"
+      />
+
+      <.toggle
+        :if={
+          Enum.any?(@destinations_outside) ||
+            Enum.any?(@accommodations_outside) ||
+            Enum.any?(@transfers_outside)
+        }
+        label={gettext("Some items are scheduled outside of the trip duration")}
+        class="mt-4"
+      >
+        <.destinations_list trip={@trip} destinations={@destinations_outside} day_index={0} />
+        <.accommodations_list
+          trip={@trip}
+          accommodations={@accommodations_outside}
+          display_currency={@display_currency}
+          day_index={0}
+        />
+        <div
+          class="transfers-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-1 sm:gap-y-8"
+          data-transfer-drop-zone
+          data-target-day="outside"
+        >
+          <.transfers_list
+            trip={@trip}
+            transfers={@transfers_outside}
+            display_currency={@display_currency}
+            day_index={-1}
+          />
+        </div>
+      </.toggle>
+
+      <table class="sm:mt-8 sm:table-auto sm:border-collapse sm:border sm:border-slate-500 sm:w-full">
+        <thead>
+          <tr class="hidden sm:table-row">
+            <th class="border border-slate-600 px-2 py-4 text-left w-1/12">{gettext("Day")}</th>
+            <th class="border border-slate-600 px-2 py-4 text-left w-1/6">
+              {gettext("Places")}
+            </th>
+            <th class="border border-slate-600 px-2 py-4 text-left w-1/3">
+              {gettext("Transfers")}
+            </th>
+            <th class="border border-slate-600 px-2 py-4 text-left w-1/3">{gettext("Hotel")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            :for={i <- 0..(@trip.duration - 1)}
+            class="flex flex-col gap-y-1 mt-8 sm:table-row sm:gap-y-0 sm:mt-0"
+          >
+            <td class="text-xl font-bold sm:font-normal sm:text-base sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
+              <.day_label day_index={i} start_date={@trip.start_date} />
+            </td>
+            <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
+              <div class="flex flex-col gap-y-1">
+                <.destinations_list
+                  trip={@trip}
+                  destinations={Planning.destinations_for_day(i, @destinations)}
+                  day_index={i}
+                />
+                <.live_component
+                  module={DestinationNew}
+                  id={"destination-new-#{i}"}
+                  trip={@trip}
+                  day_index={i}
+                />
+              </div>
+            </td>
+            <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
+              <div
+                class="transfers-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-1"
+                data-transfer-drop-zone
+                data-target-day={i}
+              >
+                <.transfers_list
+                  trip={@trip}
+                  transfers={Planning.transfers_for_day(i, @transfers)}
+                  display_currency={@display_currency}
+                  day_index={i}
+                />
+                <.live_component
+                  module={TransferNew}
+                  id={"transfer-new-#{i}"}
+                  trip={@trip}
+                  day_index={i}
+                />
+              </div>
+            </td>
+            <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
+              <div class="flex flex-col gap-y-1">
+                <.accommodations_list
+                  trip={@trip}
+                  accommodations={Planning.accommodations_for_day(i, @accommodations)}
+                  display_currency={@display_currency}
+                  day_index={i}
+                />
+                <.live_component
+                  module={AccommodationNew}
+                  id={"accommodation-new-#{i}"}
+                  trip={@trip}
+                  day_index={i}
+                />
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    """
+  end
+
+  attr(:trip, Trip, required: true)
+  attr(:budget, Money, required: true)
+  attr(:display_currency, :string, required: true)
+  attr(:destinations, :list, required: true)
+  attr(:destinations_outside, :list, required: true)
+  attr(:activities, :list, required: true)
+  attr(:activities_outside, :list, required: true)
+
+  def tab_activity(assigns) do
+    ~H"""
+    <div id={"activities-#{@trip.id}"} phx-hook="ActivityDragDrop">
+      <.budget_display
+        budget={@budget}
+        display_currency={@display_currency}
+        class="mt-4 sm:mt-8 text-xl"
+      />
+
+      <.toggle
+        :if={Enum.any?(@destinations_outside) || Enum.any?(@activities_outside)}
+        label={gettext("Some items are scheduled outside of the trip duration")}
+        class="mt-4"
+      >
+        <.destinations_list trip={@trip} destinations={@destinations_outside} day_index={0} />
+
+        <div
+          class="activities-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-1 sm:gap-y-8"
+          data-activity-drop-zone
+          data-target-day="outside"
+        >
+          <.activities_list
+            activities={@activities_outside}
+            day_index={-1}
+            trip={@trip}
+            display_currency={@display_currency}
+          />
+        </div>
+      </.toggle>
+
+      <div class="flex flex-col gap-y-8 mt-8">
+        <div :for={i <- 0..(@trip.duration - 1)} class="flex flex-col gap-y-2">
+          <div class="text-xl font-semibold">
+            <.day_label day_index={i} start_date={@trip.start_date} />
+          </div>
+          <div class="flex flex-row gap-x-4">
+            <.destinations_list
+              trip={@trip}
+              destinations={Planning.destinations_for_day(i, @destinations)}
+              day_index={i}
+            />
+          </div>
+          <div class="inline-block">
+            <.live_component
+              module={DestinationNew}
+              id={"destination-new-#{i}"}
+              trip={@trip}
+              day_index={i}
+              class="inline-block"
+            />
+          </div>
+
+          <div
+            class="flex flex-col mt-4 gap-y-1 min-h-8"
+            data-activity-drop-zone
+            data-target-day={i}
+          >
+            <.activities_list
+              activities={Planning.activities_for_day(i, @activities)}
+              day_index={i}
+              trip={@trip}
+              display_currency={@display_currency}
+            />
+            <.live_component
+              module={ActivityNew}
+              id={"activity-new-#{i}"}
+              trip={@trip}
+              day_index={i}
+            />
+          </div>
+          <hr />
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  attr(:trip, Trip, required: true)
+  attr(:destinations, :list, required: true)
+  attr(:day_index, :integer, required: true)
+
+  def destinations_list(assigns) do
+    ~H"""
+    <.live_component
+      :for={destination <- @destinations}
+      module={Destination}
+      id={"destination-#{destination.id}-day-#{@day_index}"}
+      trip={@trip}
+      destination={destination}
+      day_index={@day_index}
+    />
+    """
+  end
+
+  attr(:start_date, Date, default: nil)
+  attr(:day_index, :integer, required: true)
+
+  def day_label(%{start_date: nil} = assigns) do
+    ~H"""
+    {gettext("Day")} {@day_index + 1}
+    """
+  end
+
+  def day_label(assigns) do
+    ~H"""
+    {Formatter.date_with_weekday(Date.add(@start_date, @day_index))}
+    """
+  end
+
+  attr(:trip, Trip, required: true)
+  attr(:transfers, :list, required: true)
+  attr(:day_index, :integer, required: true)
+  attr(:display_currency, :string, required: true)
+
+  def transfers_list(assigns) do
+    ~H"""
+    <.live_component
+      :for={transfer <- @transfers}
+      module={Transfer}
+      id={"transfer-#{transfer.id}-day-#{@day_index}"}
+      trip={@trip}
+      transfer={transfer}
+      display_currency={@display_currency}
+      day_index={@day_index}
+    />
+    """
+  end
+
+  attr(:trip, Trip, required: true)
+  attr(:accommodations, :list, required: true)
+  attr(:day_index, :integer, required: true)
+  attr(:display_currency, :string, required: true)
+
+  def accommodations_list(assigns) do
+    ~H"""
+    <.live_component
+      :for={accommodation <- @accommodations}
+      module={Accommodation}
+      id={"accommodation-#{accommodation.id}-day-#{@day_index}"}
+      trip={@trip}
+      accommodation={accommodation}
+      display_currency={@display_currency}
+      day_index={@day_index}
+    />
+    """
+  end
+
+  attr(:activities, :list, required: true)
+  attr(:day_index, :integer, required: true)
+  attr(:trip, Trip, required: true)
+  attr(:display_currency, :string, required: true)
+
+  def activities_list(assigns) do
+    ~H"""
+    <.live_component
+      :for={{activity, index} <- Enum.with_index(@activities)}
+      module={Activity}
+      id={"activities-#{activity.id}-day-#{@day_index}"}
+      activity={activity}
+      trip={@trip}
+      display_currency={@display_currency}
+      index={index}
+    />
+    """
+  end
+
+  # HELPERS
 
   defp active_nav(%{status: "0_draft"}), do: drafts_nav_item()
   defp active_nav(_), do: plans_nav_item()
@@ -262,6 +704,13 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     trip.transfers
     |> Enum.filter(fn transfer ->
       transfer.day_index >= trip.duration
+    end)
+  end
+
+  defp activities_outside(trip) do
+    trip.activities
+    |> Enum.filter(fn activity ->
+      activity.day_index >= trip.duration
     end)
   end
 
@@ -307,6 +756,9 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       "transfer" ->
         {HamsterTravelWeb.Planning.TransferNew, :active_transfer_adding_component_id}
 
+      "activity" ->
+        {HamsterTravelWeb.Planning.ActivityNew, :active_activity_adding_component_id}
+
       _ ->
         nil
     end
@@ -347,6 +799,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   defp preload_entity_associations(:accommodation, entity), do: Repo.preload(entity, [:expense])
 
+  defp preload_entity_associations(:activity, entity), do: Repo.preload(entity, [:expense])
+
   defp preload_entity_associations(:transfer, entity),
     do:
       Repo.preload(entity, [
@@ -357,6 +811,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   defp get_entities_key(:destination), do: :destinations
   defp get_entities_key(:accommodation), do: :accommodations
+  defp get_entities_key(:activity), do: :activities
   defp get_entities_key(:transfer), do: :transfers
 
   defp maybe_preload_countries(trip, :destination), do: Repo.preload(trip, :countries)
@@ -386,9 +841,21 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     assign(socket, budget: Planning.calculate_budget(trip))
   end
 
+  defp maybe_recalculate_budget(socket, :activity, trip) do
+    assign(socket, budget: Planning.calculate_budget(trip))
+  end
+
   defp maybe_recalculate_budget(socket, _entity_type, _trip), do: socket
 
   defp find_transfer_in_trip(transfer_id, %Trip{transfers: transfers}) do
     Enum.find(transfers, &(Integer.to_string(&1.id) == transfer_id))
   end
+
+  defp find_activity_in_trip(activity_id, %Trip{activities: activities}) do
+    Enum.find(activities, &(Integer.to_string(&1.id) == activity_id))
+  end
+
+  defp ensure_int(val) when is_binary(val), do: String.to_integer(val)
+  defp ensure_int(val) when is_integer(val), do: val
+  defp ensure_int(val), do: val
 end
