@@ -1,76 +1,11 @@
 defmodule HamsterTravelWeb.Planning.PlanningComponents do
   use HamsterTravelWeb, :html
 
-  import HamsterTravelWeb.Icons.{Airplane, Budget}
+  import HamsterTravelWeb.Icons.Budget
 
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.Trip
   alias HamsterTravelWeb.CoreComponents
-
-  alias HamsterTravelWeb.Planning.{
-    Accommodation,
-    Activity,
-    Destination,
-    Transfer
-  }
-
-  attr(:trip, :map, required: true)
-  attr(:active_tab, :string, required: true)
-  attr(:class, :string, default: nil)
-
-  def planning_tabs(assigns) do
-    ~H"""
-    <.tabs
-      underline
-      class={
-        CoreComponents.build_class([
-          "hidden sm:flex",
-          @class
-        ])
-      }
-    >
-      <.tab
-        underline
-        to={trip_url(@trip.slug, :itinerary)}
-        is_active={@active_tab == "itinerary"}
-        link_type="live_patch"
-      >
-        <.inline>
-          <.airplane />
-          {gettext("Transfers and hotels")}
-        </.inline>
-      </.tab>
-      <.tab
-        underline
-        to={trip_url(@trip.slug, :activities)}
-        is_active={@active_tab == "activities"}
-        link_type="live_patch"
-      >
-        <.inline>
-          <.icon name="hero-clipboard-document-list" class="h-5 w-5" />
-          {gettext("Activities")}
-        </.inline>
-      </.tab>
-    </.tabs>
-    """
-  end
-
-  attr(:trip, Trip, required: true)
-  attr(:destinations, :list, required: true)
-  attr(:day_index, :integer, required: true)
-
-  def destinations_list(assigns) do
-    ~H"""
-    <.live_component
-      :for={destination <- @destinations}
-      module={Destination}
-      id={"destination-#{destination.id}-day-#{@day_index}"}
-      trip={@trip}
-      destination={destination}
-      day_index={@day_index}
-    />
-    """
-  end
 
   attr(:budget, Money, required: true)
   attr(:display_currency, :string, required: true)
@@ -229,77 +164,5 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
     }
 
     Map.get(colors, status)
-  end
-
-  attr(:start_date, Date, default: nil)
-  attr(:day_index, :integer, required: true)
-
-  def day_label(%{start_date: nil} = assigns) do
-    ~H"""
-    {gettext("Day")} {@day_index + 1}
-    """
-  end
-
-  def day_label(assigns) do
-    ~H"""
-    {Formatter.date_with_weekday(Date.add(@start_date, @day_index))}
-    """
-  end
-
-  attr(:trip, Trip, required: true)
-  attr(:transfers, :list, required: true)
-  attr(:day_index, :integer, required: true)
-  attr(:display_currency, :string, required: true)
-
-  def transfers_list(assigns) do
-    ~H"""
-    <.live_component
-      :for={transfer <- @transfers}
-      module={Transfer}
-      id={"transfer-#{transfer.id}-day-#{@day_index}"}
-      trip={@trip}
-      transfer={transfer}
-      display_currency={@display_currency}
-      day_index={@day_index}
-    />
-    """
-  end
-
-  attr(:trip, Trip, required: true)
-  attr(:accommodations, :list, required: true)
-  attr(:day_index, :integer, required: true)
-  attr(:display_currency, :string, required: true)
-
-  def accommodations_list(assigns) do
-    ~H"""
-    <.live_component
-      :for={accommodation <- @accommodations}
-      module={Accommodation}
-      id={"accommodation-#{accommodation.id}-day-#{@day_index}"}
-      trip={@trip}
-      accommodation={accommodation}
-      display_currency={@display_currency}
-      day_index={@day_index}
-    />
-    """
-  end
-
-  attr(:activities, :list, required: true)
-  attr(:day_index, :integer, required: true)
-  attr(:trip, Trip, required: true)
-  attr(:display_currency, :string, required: true)
-
-  def activities(assigns) do
-    ~H"""
-    <.live_component
-      :for={{activity, index} <- Enum.with_index(@activities)}
-      module={Activity}
-      id={"activities-#{activity.id}-day-#{@day_index}"}
-      activity={activity}
-      trip={@trip}
-      display_currency={@display_currency}
-      index={index}
-    />
-    """
   end
 end
