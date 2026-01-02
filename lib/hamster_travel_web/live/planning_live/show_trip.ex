@@ -110,6 +110,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> assign(active_destination_adding_component_id: nil)
       |> assign(active_accommodation_adding_component_id: nil)
       |> assign(active_transfer_adding_component_id: nil)
+      |> assign(active_activity_adding_component_id: nil)
 
     {:ok, socket}
   end

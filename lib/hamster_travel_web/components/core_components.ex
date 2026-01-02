@@ -804,18 +804,21 @@ defmodule HamsterTravelWeb.CoreComponents do
       |> assign(:is_converted, is_converted)
 
     ~H"""
-    <p
+    <div
       class={
         build_class([
-          "whitespace-nowrap",
-          @is_converted && "border-b border-dotted border-gray-400 cursor-help",
+          "whitespace-nowrap relative",
+          @is_converted && "border-b border-dotted border-gray-400 cursor-help group",
           @class
         ])
       }
-      title={@is_converted && Cldr.format_money(@original_money.amount, @original_money.currency)}
     >
       {Cldr.format_money(@display_money.amount, @display_money.currency)}<span :if={@suffix != []}>{render_slot(@suffix)}</span>
-    </p>
+      <div :if={@is_converted} class="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-1 hidden group-hover:block w-max px-2 py-1 bg-gray-900 text-white text-xs rounded shadow-lg z-50">
+        {Cldr.format_money(@original_money.amount, @original_money.currency)}
+        <div class="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-gray-900"></div>
+      </div>
+    </div>
     """
   end
 
