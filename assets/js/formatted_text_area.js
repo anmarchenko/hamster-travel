@@ -152,6 +152,13 @@ const FormattedTextArea = {
     };
 
     this.el.addEventListener("input", stopPropagationForCheckboxes);
+
+    // Focus editor when clicking anywhere on the component (e.g. padding/empty space)
+    this.el.addEventListener("click", (e) => {
+      if (!e.target.closest(".toolbar") && !this.editor.isFocused) {
+        this.editor.chain().focus().run();
+      }
+    });
   },
 
   setupToolbar() {
