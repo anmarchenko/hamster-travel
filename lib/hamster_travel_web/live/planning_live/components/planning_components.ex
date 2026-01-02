@@ -9,13 +9,9 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
 
   alias HamsterTravelWeb.Planning.{
     Accommodation,
-    AccommodationNew,
-    ActivityNew,
     Activity,
     Destination,
-    DestinationNew,
-    Transfer,
-    TransferNew
+    Transfer
   }
 
   attr(:trip, :map, required: true)
@@ -156,7 +152,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
           />
         </.link>
       </div>
-      <div class="p-4 max-w-[calc(100%_-_theme(width.32))] flex flex-col justify-between">
+      <div class="p-4 max-w-[calc(100%-theme(width.32))] flex flex-col justify-between">
         <p class="text-base font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
           <.link navigate={trip_url(@trip.slug)}>
             {@trip.name}
@@ -203,7 +199,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
         src={@trip.author.avatar_url}
         name={@trip.author.name}
         random_color
-        class="!w-6 !h-6"
+        class="w-6! h-6!"
       />
     </.inline>
     """
@@ -251,134 +247,6 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   end
 
   attr(:trip, Trip, required: true)
-  attr(:budget, Money, required: true)
-  attr(:display_currency, :string, required: true)
-  attr(:destinations, :list, required: true)
-  attr(:destinations_outside, :list, required: true)
-  attr(:transfers, :list, required: true)
-  attr(:transfers_outside, :list, required: true)
-  attr(:accommodations, :list, required: true)
-  attr(:accommodations_outside, :list, required: true)
-
-  def tab_itinerary(assigns) do
-    ~H"""
-    <div phx-hook="TransferDragDrop" id="trip-itinerary">
-      <.budget_display
-        budget={@budget}
-        display_currency={@display_currency}
-        class="mt-4 sm:mt-8 text-xl"
-      />
-
-      <.toggle
-        :if={
-          Enum.any?(@destinations_outside) ||
-            Enum.any?(@accommodations_outside) ||
-            Enum.any?(@transfers_outside)
-        }
-        label={gettext("Some items are scheduled outside of the trip duration")}
-        class="mt-4"
-      >
-        <.destinations_list trip={@trip} destinations={@destinations_outside} day_index={0} />
-        <.accommodations_list
-          trip={@trip}
-          accommodations={@accommodations_outside}
-          display_currency={@display_currency}
-          day_index={0}
-        />
-        <div
-          class="transfers-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-1 sm:gap-y-8"
-          data-transfer-drop-zone
-          data-target-day="outside"
-        >
-          <.transfers_list
-            trip={@trip}
-            transfers={@transfers_outside}
-            display_currency={@display_currency}
-            day_index={-1}
-          />
-        </div>
-      </.toggle>
-
-      <table class="sm:mt-8 sm:table-auto sm:border-collapse sm:border sm:border-slate-500 sm:w-full">
-        <thead>
-          <tr class="hidden sm:table-row">
-            <th class="border border-slate-600 px-2 py-4 text-left w-1/12">{gettext("Day")}</th>
-            <th class="border border-slate-600 px-2 py-4 text-left w-1/6">
-              {gettext("Places")}
-            </th>
-            <th class="border border-slate-600 px-2 py-4 text-left w-1/3">
-              {gettext("Transfers")}
-            </th>
-            <th class="border border-slate-600 px-2 py-4 text-left w-1/3">{gettext("Hotel")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            :for={i <- 0..(@trip.duration - 1)}
-            class="flex flex-col gap-y-1 mt-8 sm:table-row sm:gap-y-0 sm:mt-0"
-          >
-            <td class="text-xl font-bold sm:font-normal sm:text-base sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
-              <.day_label day_index={i} start_date={@trip.start_date} />
-            </td>
-            <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
-              <div class="flex flex-col gap-y-1">
-                <.destinations_list
-                  trip={@trip}
-                  destinations={Planning.destinations_for_day(i, @destinations)}
-                  day_index={i}
-                />
-                <.live_component
-                  module={DestinationNew}
-                  id={"destination-new-#{i}"}
-                  trip={@trip}
-                  day_index={i}
-                />
-              </div>
-            </td>
-            <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
-              <div
-                class="transfers-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-1"
-                data-transfer-drop-zone
-                data-target-day={i}
-              >
-                <.transfers_list
-                  trip={@trip}
-                  transfers={Planning.transfers_for_day(i, @transfers)}
-                  display_currency={@display_currency}
-                  day_index={i}
-                />
-                <.live_component
-                  module={TransferNew}
-                  id={"transfer-new-#{i}"}
-                  trip={@trip}
-                  day_index={i}
-                />
-              </div>
-            </td>
-            <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
-              <div class="flex flex-col gap-y-1">
-                <.accommodations_list
-                  trip={@trip}
-                  accommodations={Planning.accommodations_for_day(i, @accommodations)}
-                  display_currency={@display_currency}
-                  day_index={i}
-                />
-                <.live_component
-                  module={AccommodationNew}
-                  id={"accommodation-new-#{i}"}
-                  trip={@trip}
-                  day_index={i}
-                />
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    """
-  end
-
-  attr(:trip, Trip, required: true)
   attr(:transfers, :list, required: true)
   attr(:day_index, :integer, required: true)
   attr(:display_currency, :string, required: true)
@@ -413,91 +281,6 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
       display_currency={@display_currency}
       day_index={@day_index}
     />
-    """
-  end
-
-  attr(:trip, Trip, required: true)
-  attr(:budget, Money, required: true)
-  attr(:display_currency, :string, required: true)
-  attr(:destinations, :list, required: true)
-  attr(:destinations_outside, :list, required: true)
-  attr(:activities, :list, required: true)
-  attr(:activities_outside, :list, required: true)
-
-  def tab_activity(assigns) do
-    ~H"""
-    <div id={"activities-#{@trip.id}"} phx-hook="ActivityDragDrop">
-      <.budget_display
-        budget={@budget}
-        display_currency={@display_currency}
-        class="mt-4 sm:mt-8 text-xl"
-      />
-
-      <.toggle
-        :if={Enum.any?(@destinations_outside) || Enum.any?(@activities_outside)}
-        label={gettext("Some items are scheduled outside of the trip duration")}
-        class="mt-4"
-      >
-        <.destinations_list trip={@trip} destinations={@destinations_outside} day_index={0} />
-
-        <div
-          class="activities-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-1 sm:gap-y-8"
-          data-activity-drop-zone
-          data-target-day="outside"
-        >
-          <.activities
-            activities={@activities_outside}
-            day_index={-1}
-            trip={@trip}
-            display_currency={@display_currency}
-          />
-        </div>
-      </.toggle>
-
-      <div class="flex flex-col gap-y-8 mt-8">
-        <div :for={i <- 0..(@trip.duration - 1)} class="flex flex-col gap-y-2">
-          <div class="text-xl font-semibold">
-            <.day_label day_index={i} start_date={@trip.start_date} />
-          </div>
-          <div class="flex flex-row gap-x-4">
-            <.destinations_list
-              trip={@trip}
-              destinations={Planning.destinations_for_day(i, @destinations)}
-              day_index={i}
-            />
-          </div>
-          <div class="inline-block">
-            <.live_component
-              module={DestinationNew}
-              id={"destination-new-#{i}"}
-              trip={@trip}
-              day_index={i}
-              class="inline-block"
-            />
-          </div>
-
-          <div
-            class="flex flex-col mt-4 gap-y-1 min-h-8"
-            data-activity-drop-zone
-            data-target-day={i}
-          >
-            <.activities
-              activities={Planning.activities_for_day(i, @activities)}
-              day_index={i}
-              trip={@trip}
-              display_currency={@display_currency}
-            />
-            <.live_component
-              module={ActivityNew}
-              id={"activity-new-#{i}"}
-              trip={@trip}
-              day_index={i}
-            />
-          </div>
-          <hr />
-        </div>
-      </div>
-    </div>
     """
   end
 
