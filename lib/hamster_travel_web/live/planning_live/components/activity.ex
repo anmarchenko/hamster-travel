@@ -59,7 +59,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
         <.activity_button
           phx-click="delete"
           phx-target={@myself}
-          data-confirm={gettext("Are you sure you want to delete this activity?")}
+          data-confirm={gettext("Are you sure you want to delete activity \"%{name}\"?", name: @activity.name)}
         >
           <.icon name="hero-trash" class="h-4 w-4" />
         </.activity_button>
