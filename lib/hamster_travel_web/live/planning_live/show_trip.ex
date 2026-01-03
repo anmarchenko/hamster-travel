@@ -800,6 +800,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   defp preload_entity_associations(:accommodation, entity), do: Repo.preload(entity, [:expense])
 
   defp preload_entity_associations(:activity, entity), do: Repo.preload(entity, [:expense])
+  defp preload_entity_associations(:day_expense, entity), do: Repo.preload(entity, [:expense])
 
   defp preload_entity_associations(:transfer, entity),
     do:
@@ -812,6 +813,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   defp get_entities_key(:destination), do: :destinations
   defp get_entities_key(:accommodation), do: :accommodations
   defp get_entities_key(:activity), do: :activities
+  defp get_entities_key(:day_expense), do: :day_expenses
   defp get_entities_key(:transfer), do: :transfers
 
   defp maybe_preload_countries(trip, :destination), do: Repo.preload(trip, :countries)
@@ -842,6 +844,10 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   defp maybe_recalculate_budget(socket, :activity, trip) do
+    assign(socket, budget: Planning.calculate_budget(trip))
+  end
+
+  defp maybe_recalculate_budget(socket, :day_expense, trip) do
     assign(socket, budget: Planning.calculate_budget(trip))
   end
 

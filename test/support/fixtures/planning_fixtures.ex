@@ -171,24 +171,28 @@ defmodule HamsterTravel.PlanningFixtures do
   Generate a day expense.
   """
   def day_expense_fixture(attrs \\ %{}) do
-    trip = trip_fixture()
+    trip_id =
+      case Map.fetch(attrs, :trip_id) do
+        {:ok, id} -> id
+        :error -> trip_fixture().id
+      end
 
     attrs =
       attrs
       |> Enum.into(%{
         name: "Transport card",
         day_index: 0,
-        trip_id: trip.id,
+        trip_id: trip_id,
         expense: %{
           price: Money.new(:EUR, 1200),
           name: "Metro pass",
-          trip_id: trip.id
+          trip_id: trip_id
         }
       })
 
     changeset =
       HamsterTravel.Planning.DayExpense.changeset(
-        %HamsterTravel.Planning.DayExpense{trip_id: trip.id},
+        %HamsterTravel.Planning.DayExpense{trip_id: trip_id},
         attrs
       )
 
