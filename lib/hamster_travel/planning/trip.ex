@@ -10,6 +10,7 @@ defmodule HamsterTravel.Planning.Trip do
   alias HamsterTravel.Dates
   alias HamsterTravel.Planning.Accommodation
   alias HamsterTravel.Planning.Destination
+  alias HamsterTravel.Planning.DayExpense
   alias HamsterTravel.Planning.Expense
   alias HamsterTravel.Planning.Transfer
   alias HamsterTravel.Planning.Trip.NameSlug
@@ -50,6 +51,7 @@ defmodule HamsterTravel.Planning.Trip do
     has_many(:accommodations, Accommodation)
     has_many(:transfers, Transfer)
     has_many(:activities, HamsterTravel.Planning.Activity)
+    has_many(:day_expenses, DayExpense)
 
     timestamps()
   end

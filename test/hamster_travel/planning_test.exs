@@ -998,6 +998,43 @@ defmodule HamsterTravel.PlanningTest do
     end
   end
 
+  describe "day_expenses schema" do
+    alias HamsterTravel.Planning.DayExpense
+
+    test "changeset requires name, day_index, trip_id" do
+      changeset = DayExpense.changeset(%DayExpense{}, %{})
+      refute changeset.valid?
+
+      assert %{
+               name: ["can't be blank"],
+               day_index: ["can't be blank"],
+               trip_id: ["can't be blank"]
+             } = errors_on(changeset)
+    end
+
+    test "changeset validates non-negative day_index" do
+      trip = trip_fixture()
+      changeset = DayExpense.changeset(%DayExpense{}, %{name: "Transport", day_index: -1, trip_id: trip.id})
+
+      assert %{day_index: ["must be greater than or equal to 0"]} = errors_on(changeset)
+    end
+
+    test "changeset casts expense association" do
+      trip = trip_fixture()
+
+      changeset =
+        DayExpense.changeset(%DayExpense{}, %{
+          name: "Transport",
+          day_index: 0,
+          trip_id: trip.id,
+          expense: %{price: Money.new(:EUR, 1200), trip_id: trip.id}
+        })
+
+      assert changeset.valid?
+      assert %Ecto.Changeset{} = changeset.changes.expense
+    end
+  end
+
   describe "calculate_budget" do
     test "calculates budget for trip with no expenses" do
       trip = trip_fixture()
