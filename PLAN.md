@@ -31,6 +31,7 @@ Use `DayExpense` (schema/table: `day_expenses`). It conveys a day-scoped item wi
   - `changeset/2` using `EctoOrdered.set_order(:position, :rank, [:trip_id, :day_index])`, `cast_assoc(:expense)` and `validate_required([:name, :day_index, :trip_id])`.
 - Update `lib/hamster_travel/planning/expense.ex` with `belongs_to :day_expense` and include `:day_expense_id` in `cast`.
 - Update `lib/hamster_travel/planning/trip.ex` with `has_many :day_expenses, HamsterTravel.Planning.DayExpense`.
+- Add/extend tests in `test/hamster_travel/planning_test.exs` to cover changeset validations, `day_expense` associations, and `day_expense_fixture/1` in `test/support/fixtures/planning_fixtures.ex`.
 
 ### 4) Planning context API
 Mirror activity functions in `lib/hamster_travel/planning.ex`:
@@ -40,6 +41,7 @@ Mirror activity functions in `lib/hamster_travel/planning.ex`:
 - Add preloading helper for day expenses (preload `:expense`).
 - Include `day_expenses: :expense` in `single_trip_preloading/1`.
 - Update `preload_entity_associations/2`, `get_entities_key/1`, and `maybe_recalculate_budget/3` in `show_trip.ex` to handle `:day_expense`.
+- Add context tests in `test/hamster_travel/planning_test.exs` for CRUD, validations, `new_day_expense/2`, `day_expenses_for_day/2`, `move_day_expense_to_day/5`, and `reorder_day_expense/4` (parallel to activity tests).
 
 ### 5) LiveView UI and components
 Add a parallel set of components similar to activities:
@@ -56,6 +58,8 @@ Add a parallel set of components similar to activities:
   - Update budgeting logic to recalc when day expenses change.
 - Ensure displayed money uses `money_display` with `display_currency` like activities.
 - Ensure text uses `gettext/1`.
+- run `mix gettext` if for i18n string updates
+- Add LiveView tests in `test/hamster_travel_web/live/planning_live/show_trip_test.exs` for opening the day-expense form, creating an item, and rendering it in the Activities tab.
 
 ### 6) Drag and drop hook for day expenses
 - Create `assets/js/day_expense_drag_drop.js` modeled on `activity_drag_drop.js`:
@@ -64,20 +68,12 @@ Add a parallel set of components similar to activities:
   - Make sure that expenses drop zone does not conflict with activities drop zone
   - Emit LiveView events `move_day_expense` and `reorder_day_expense` with `day_expense_id`, `new_day_index`, `position`.
 - Register the hook in `assets/js/app.js`.
+- If JS hook behavior is critical, add minimal JS hook integration coverage in LiveView tests by asserting data attributes and event wiring (drag-drop itself remains untested).
 
-### 7) Tests and fixtures
-- Add fixture helper in `test/support/fixtures/planning_fixtures.ex` for `day_expense_fixture/1` (with nested expense).
-- Add/extend context tests in `test/hamster_travel/planning_test.exs`:
-  - CRUD, validations, `new_day_expense/2`, and `day_expenses_for_day/2` ordering.
-  - `move_day_expense_to_day/5` and `reorder_day_expense/4` coverage similar to activities.
-- Add LiveView tests in `test/hamster_travel_web/live/planning_live/show_trip_test.exs`:
-  - Can open form in Activities tab, create day expense, and see it rendered.
-  - Optional drag/drop not testable here; focus on events and rendering.
+### 7) i18n updates
+- Add new strings in the UI (labels, button text, confirmation text) using `gettext/1` and .
 
-### 8) i18n updates
-- Add new strings in the UI (labels, button text, confirmation text) using `gettext/1` and run `mix gettext` if required for catalog updates.
-
-### 9) Manual verification checklist
+### 8) Manual verification checklist
 - In Activities tab:
   - Add day expense, edit, delete; verify expense price saved.
   - Drag within day reorders; drag to another day updates day index.
