@@ -70,10 +70,7 @@ Add a parallel set of components similar to activities:
 - Register the hook in `assets/js/app.js`.
 - If JS hook behavior is critical, add minimal JS hook integration coverage in LiveView tests by asserting data attributes and event wiring (drag-drop itself remains untested).
 
-### 7) i18n updates
-- Add new strings in the UI (labels, button text, confirmation text) using `gettext/1` and .
-
-### 8) Manual verification checklist
+### 7) Manual verification checklist
 - In Activities tab:
   - Add day expense, edit, delete; verify expense price saved.
   - Drag within day reorders; drag to another day updates day index.
