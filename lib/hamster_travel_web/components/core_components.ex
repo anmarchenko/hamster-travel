@@ -823,7 +823,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   end
 
   @doc """
-  Renders a note with consistent styling including an information icon.
+  Renders a note with consistent, secondary styling.
 
   ## Examples
 
@@ -846,15 +846,12 @@ defmodule HamsterTravelWeb.CoreComponents do
     ~H"""
     <div
       :if={@has_note? || @has_inner_block?}
-      class={build_class(["pt-4 border-t border-slate-200 dark:border-slate-700", @class])}
+      class={build_class(["mt-4", @class])}
     >
-      <div class="flex items-start text-sm text-slate-700 dark:text-slate-300 bg-gray-50/70 dark:bg-slate-800/70 p-3.5 rounded-lg gap-2">
-        <.icon name="hero-information-circle" class="w-4 h-4 mt-0.5" />
-        <div class="leading-relaxed space-y-2 w-full">
-          <p :if={@has_note?}>{@note}</p>
-          <div :if={@has_inner_block?}>
-            {render_slot(@inner_block)}
-          </div>
+      <div class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed space-y-2 border-l-2 border-slate-200/70 dark:border-slate-700/70 pl-4">
+        <p :if={@has_note?}>{@note}</p>
+        <div :if={@has_inner_block?}>
+          {render_slot(@inner_block)}
         </div>
       </div>
     </div>
