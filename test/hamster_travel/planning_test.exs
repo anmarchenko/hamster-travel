@@ -998,6 +998,43 @@ defmodule HamsterTravel.PlanningTest do
     end
   end
 
+  describe "day_expenses schema" do
+    alias HamsterTravel.Planning.DayExpense
+
+    test "changeset requires name, day_index, trip_id" do
+      changeset = DayExpense.changeset(%DayExpense{}, %{})
+      refute changeset.valid?
+
+      assert %{
+               name: ["can't be blank"],
+               day_index: ["can't be blank"],
+               trip_id: ["can't be blank"]
+             } = errors_on(changeset)
+    end
+
+    test "changeset validates non-negative day_index" do
+      trip = trip_fixture()
+      changeset = DayExpense.changeset(%DayExpense{}, %{name: "Transport", day_index: -1, trip_id: trip.id})
+
+      assert %{day_index: ["must be greater than or equal to 0"]} = errors_on(changeset)
+    end
+
+    test "changeset casts expense association" do
+      trip = trip_fixture()
+
+      changeset =
+        DayExpense.changeset(%DayExpense{}, %{
+          name: "Transport",
+          day_index: 0,
+          trip_id: trip.id,
+          expense: %{price: Money.new(:EUR, 1200), trip_id: trip.id}
+        })
+
+      assert changeset.valid?
+      assert %Ecto.Changeset{} = changeset.changes.expense
+    end
+  end
+
   describe "calculate_budget" do
     test "calculates budget for trip with no expenses" do
       trip = trip_fixture()
@@ -2527,6 +2564,328 @@ defmodule HamsterTravel.PlanningTest do
       Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
       assert {:ok, _} = Planning.reorder_activity(a1, 1, trip, author)
       assert_receive {[:activity, :updated], %{value: _}}
+    end
+  end
+
+  describe "day_expenses" do
+    alias HamsterTravel.Planning.DayExpense
+
+    @invalid_day_expense_attrs %{name: nil, day_index: nil}
+    @update_day_expense_attrs %{name: "Updated expense"}
+
+    setup do
+      trip = trip_fixture()
+      {:ok, trip: trip}
+    end
+
+    test "list_day_expenses/1 returns all day expenses for a trip", %{trip: trip} do
+      {:ok, day_expense1} =
+        Planning.create_day_expense(trip, %{
+          name: "Transport card",
+          day_index: 0,
+          expense: %{price: Money.new(:EUR, 1200), trip_id: trip.id}
+        })
+
+      {:ok, day_expense2} =
+        Planning.create_day_expense(trip, %{
+          name: "Museum pass",
+          day_index: 1,
+          expense: %{price: Money.new(:EUR, 2000), trip_id: trip.id}
+        })
+
+      other_trip = trip_fixture()
+
+      {:ok, _other_day_expense} =
+        Planning.create_day_expense(other_trip, %{
+          name: "Other",
+          day_index: 0,
+          expense: %{price: Money.new(:EUR, 500), trip_id: other_trip.id}
+        })
+
+      result = Planning.list_day_expenses(trip)
+      ids = Enum.map(result, & &1.id)
+
+      assert length(result) == 2
+      assert day_expense1.id in ids
+      assert day_expense2.id in ids
+    end
+
+    test "get_day_expense!/1 returns the day expense with given id" do
+      day_expense = day_expense_fixture()
+      result = Planning.get_day_expense!(day_expense.id)
+      assert result.id == day_expense.id
+      assert result.name == day_expense.name
+      assert result.trip_id == day_expense.trip_id
+    end
+
+    test "create_day_expense/2 with valid data creates a day expense", %{trip: trip} do
+      valid_attrs = %{
+        name: "Transport card",
+        day_index: 0,
+        expense: %{
+          price: Money.new(:EUR, 1200),
+          name: "Metro pass",
+          trip_id: trip.id
+        }
+      }
+
+      assert {:ok, %DayExpense{} = day_expense} = Planning.create_day_expense(trip, valid_attrs)
+      assert day_expense.name == "Transport card"
+      assert day_expense.day_index == 0
+      assert day_expense.trip_id == trip.id
+      assert day_expense.expense.price == Money.new(:EUR, 1200)
+      assert day_expense.expense.trip_id == trip.id
+    end
+
+    test "create_day_expense/2 broadcasts day expense creation", %{trip: trip} do
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
+      valid_attrs = %{name: "Test", day_index: 0}
+
+      assert {:ok, day_expense} = Planning.create_day_expense(trip, valid_attrs)
+      assert_receive {[:day_expense, :created], %{value: ^day_expense}}
+    end
+
+    test "create_day_expense/2 with invalid data returns error changeset", %{trip: trip} do
+      assert {:error, %Ecto.Changeset{}} = Planning.create_day_expense(trip, @invalid_day_expense_attrs)
+    end
+
+    test "create_day_expense/2 validates day_index non-negative", %{trip: trip} do
+      attrs = %{name: "Test", day_index: -1}
+      assert {:error, changeset} = Planning.create_day_expense(trip, attrs)
+      assert %{day_index: ["must be greater than or equal to 0"]} = errors_on(changeset)
+    end
+
+    test "update_day_expense/2 with valid data updates the day expense" do
+      day_expense = day_expense_fixture()
+      assert {:ok, %DayExpense{} = updated} = Planning.update_day_expense(day_expense, @update_day_expense_attrs)
+      assert updated.name == "Updated expense"
+    end
+
+    test "update_day_expense/2 sends pubsub event", %{trip: trip} do
+      {:ok, day_expense} =
+        Planning.create_day_expense(trip, %{
+          name: "Test",
+          day_index: 0,
+          expense: %{price: Money.new(:EUR, 1200), trip_id: trip.id}
+        })
+
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
+
+      assert {:ok, %DayExpense{} = updated} =
+               Planning.update_day_expense(day_expense, @update_day_expense_attrs)
+
+      assert_receive {[:day_expense, :updated], %{value: ^updated}}
+    end
+
+    test "update_day_expense/2 with invalid data returns error changeset" do
+      day_expense = day_expense_fixture()
+      assert {:error, %Ecto.Changeset{}} = Planning.update_day_expense(day_expense, @invalid_day_expense_attrs)
+      assert day_expense.name == Planning.get_day_expense!(day_expense.id).name
+    end
+
+    test "delete_day_expense/1 deletes the day expense" do
+      day_expense = day_expense_fixture()
+      assert {:ok, %DayExpense{}} = Planning.delete_day_expense(day_expense)
+      assert_raise Ecto.NoResultsError, fn -> Planning.get_day_expense!(day_expense.id) end
+    end
+
+    test "delete_day_expense/1 sends pubsub event", %{trip: trip} do
+      {:ok, day_expense} =
+        Planning.create_day_expense(trip, %{
+          name: "Test",
+          day_index: 0,
+          expense: %{price: Money.new(:EUR, 1200), trip_id: trip.id}
+        })
+
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
+
+      assert {:ok, %DayExpense{} = deleted} = Planning.delete_day_expense(day_expense)
+      assert_receive {[:day_expense, :deleted], %{value: ^deleted}}
+    end
+
+    test "change_day_expense/1 returns a day expense changeset" do
+      day_expense = day_expense_fixture()
+      assert %Ecto.Changeset{} = Planning.change_day_expense(day_expense)
+    end
+
+    test "new_day_expense/2 returns a new day expense changeset with trip_id and day_index" do
+      trip = trip_fixture()
+      changeset = Planning.new_day_expense(trip, 0)
+
+      assert %Ecto.Changeset{data: %{trip_id: trip_id, day_index: 0}} = changeset
+      assert trip_id == trip.id
+    end
+
+    test "day_expenses_for_day/2 returns day expenses for the specified day ordered by rank" do
+      trip = trip_fixture()
+
+      {:ok, day_expense1} = Planning.create_day_expense(trip, %{name: "E1", day_index: 0})
+      {:ok, day_expense2} = Planning.create_day_expense(trip, %{name: "E2", day_index: 0})
+      {:ok, day_expense3} = Planning.create_day_expense(trip, %{name: "E3", day_index: 1})
+
+      day_expenses = [day_expense1, day_expense2, day_expense3]
+
+      day0_expenses = Planning.day_expenses_for_day(0, day_expenses)
+      assert length(day0_expenses) == 2
+      assert Enum.map(day0_expenses, & &1.id) == [day_expense1.id, day_expense2.id]
+
+      assert [^day_expense3] = Planning.day_expenses_for_day(1, day_expenses)
+      assert [] = Planning.day_expenses_for_day(2, day_expenses)
+    end
+  end
+
+  describe "move_day_expense_to_day/5" do
+    setup do
+      author = user_fixture()
+      friend = user_fixture()
+      stranger = user_fixture()
+
+      Social.add_friends(author.id, friend.id)
+
+      trip =
+        trip_fixture(%{
+          author_id: author.id,
+          duration: 5,
+          dates_unknown: true
+        })
+
+      trip = Planning.get_trip!(trip.id)
+
+      {:ok,
+       author: Repo.preload(author, :friendships),
+       friend: Repo.preload(friend, :friendships),
+       stranger: Repo.preload(stranger, :friendships),
+       trip: trip}
+    end
+
+    test "successfully moves day expense to valid day for trip author", %{author: author, trip: trip} do
+      {:ok, day_expense} =
+        Planning.create_day_expense(trip, %{
+          name: "Transport",
+          day_index: 0,
+          expense: %{price: Money.new(:EUR, 1200), trip_id: trip.id}
+        })
+
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:ok, updated} = Planning.move_day_expense_to_day(day_expense, 2, trip, author)
+      assert updated.day_index == 2
+      assert updated.id == day_expense.id
+    end
+
+    test "successfully moves day expense to valid day for friend", %{friend: friend, trip: trip} do
+      {:ok, day_expense} =
+        Planning.create_day_expense(trip, %{
+          name: "Transport",
+          day_index: 1,
+          expense: %{price: Money.new(:EUR, 1200), trip_id: trip.id}
+        })
+
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:ok, updated} = Planning.move_day_expense_to_day(day_expense, 3, trip, friend)
+      assert updated.day_index == 3
+    end
+
+    test "successfully moves day expense to same day (updates rank)", %{author: author, trip: trip} do
+      {:ok, day_expense1} = Planning.create_day_expense(trip, %{name: "E1", day_index: 0})
+      {:ok, day_expense2} = Planning.create_day_expense(trip, %{name: "E2", day_index: 0})
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:ok, updated} = Planning.move_day_expense_to_day(day_expense2, 0, trip, author, 0)
+      assert updated.day_index == 0
+
+      [first, second] = Planning.list_day_expenses(trip)
+      assert first.id == updated.id
+      assert second.id == day_expense1.id
+    end
+
+    test "fails when day expense is nil", %{author: author, trip: trip} do
+      assert {:error, "Day expense not found"} = Planning.move_day_expense_to_day(nil, 2, trip, author)
+    end
+
+    test "fails when user is not authorized", %{stranger: stranger, trip: trip} do
+      {:ok, day_expense} = Planning.create_day_expense(trip, %{name: "Transport", day_index: 0})
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:error, "Unauthorized"} =
+               Planning.move_day_expense_to_day(day_expense, 2, trip, stranger)
+    end
+
+    test "fails when day_index is out of bounds", %{author: author, trip: trip} do
+      {:ok, day_expense} = Planning.create_day_expense(trip, %{name: "Transport", day_index: 0})
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:error, "Day index must be between 0 and 4"} =
+               Planning.move_day_expense_to_day(day_expense, 5, trip, author)
+    end
+
+    test "fails when day expense does not belong to trip", %{author: author, trip: trip} do
+      other_user = user_fixture()
+      other_trip = trip_fixture(%{author_id: other_user.id})
+      {:ok, other_day_expense} = Planning.create_day_expense(other_trip, %{name: "Other", day_index: 0})
+
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:error, "Day expense not found"} =
+               Planning.move_day_expense_to_day(other_day_expense, 2, trip, author)
+    end
+
+    test "sends pubsub event", %{author: author, trip: trip} do
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
+      {:ok, day_expense} = Planning.create_day_expense(trip, %{name: "Transport", day_index: 0})
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:ok, _} = Planning.move_day_expense_to_day(day_expense, 2, trip, author)
+      assert_receive {[:day_expense, :updated], %{value: _}}
+    end
+  end
+
+  describe "reorder_day_expense/4" do
+    setup do
+      author = user_fixture()
+      trip = trip_fixture(%{author_id: author.id})
+
+      {:ok, e1} = Planning.create_day_expense(trip, %{name: "E1", day_index: 0})
+      {:ok, e2} = Planning.create_day_expense(trip, %{name: "E2", day_index: 0})
+      {:ok, e3} = Planning.create_day_expense(trip, %{name: "E3", day_index: 0})
+
+      trip = Planning.get_trip!(trip.id)
+
+      {:ok, author: Repo.preload(author, :friendships), trip: trip, e1: e1, e2: e2, e3: e3}
+    end
+
+    test "reorders day expense within same day", %{author: author, trip: trip, e1: e1, e2: e2, e3: e3} do
+      [first, second, third] = Planning.list_day_expenses(trip)
+      assert first.id == e1.id
+      assert second.id == e2.id
+      assert third.id == e3.id
+
+      assert {:ok, _} = Planning.reorder_day_expense(e3, 0, trip, author)
+
+      [first, second, third] = Planning.list_day_expenses(trip)
+      assert first.id == e3.id
+      assert second.id == e1.id
+      assert third.id == e2.id
+    end
+
+    test "fails when unauthorized", %{trip: trip, e1: e1} do
+      stranger = user_fixture() |> Repo.preload(:friendships)
+      assert {:error, "Unauthorized"} = Planning.reorder_day_expense(e1, 1, trip, stranger)
+    end
+
+    test "fails when day expense not in trip", %{author: author, trip: trip} do
+      other_trip = trip_fixture()
+      {:ok, other_day_expense} = Planning.create_day_expense(other_trip, %{name: "OE", day_index: 0})
+
+      assert {:error, "Day expense not found"} =
+               Planning.reorder_day_expense(other_day_expense, 0, trip, author)
+    end
+
+    test "sends pubsub event", %{author: author, trip: trip, e1: e1} do
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
+      assert {:ok, _} = Planning.reorder_day_expense(e1, 1, trip, author)
+      assert_receive {[:day_expense, :updated], %{value: _}}
     end
   end
 end

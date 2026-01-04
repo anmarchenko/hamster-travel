@@ -10,6 +10,7 @@ defmodule HamsterTravel.Planning.Expense do
     belongs_to(:accommodation, HamsterTravel.Planning.Accommodation)
     belongs_to(:transfer, HamsterTravel.Planning.Transfer)
     belongs_to(:activity, HamsterTravel.Planning.Activity)
+    belongs_to(:day_expense, HamsterTravel.Planning.DayExpense)
 
     timestamps()
   end
@@ -17,7 +18,15 @@ defmodule HamsterTravel.Planning.Expense do
   @doc false
   def changeset(expense, attrs) do
     expense
-    |> cast(attrs, [:price, :name, :trip_id, :accommodation_id, :transfer_id, :activity_id])
+    |> cast(attrs, [
+      :price,
+      :name,
+      :trip_id,
+      :accommodation_id,
+      :transfer_id,
+      :activity_id,
+      :day_expense_id
+    ])
     |> validate_required([:price, :trip_id])
   end
 end

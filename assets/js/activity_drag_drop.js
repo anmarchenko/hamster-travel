@@ -2,46 +2,71 @@ import Sortable from "sortablejs";
 
 let ActivityDragDrop = {
   mounted() {
-    // Get all activity drop zones that can accept drops
-    const activityDropZones = this.el.querySelectorAll(
-      "[data-activity-drop-zone]",
-    );
+    const setupSortable = ({
+      selector,
+      draggable,
+      groupName,
+      idKey,
+      idParam,
+      moveEvent,
+      reorderEvent,
+    }) => {
+      const dropZones = this.el.querySelectorAll(selector);
 
-    activityDropZones.forEach((zone) => {
-      const isOutsideZone = zone.dataset.targetDay === "outside";
+      dropZones.forEach((zone) => {
+        const isOutsideZone = zone.dataset.targetDay === "outside";
 
-      new Sortable(zone, {
-        group: {
-          name: "activities",
-          put: !isOutsideZone // Prevent dropping into outside zone
-        },
-        animation: 150,
-        ghostClass: "hamster-drag-ghost",
-        chosenClass: "hamster-drag-chosen",
-        dragClass: "hamster-drag-item",
-        draggable: ".draggable-activity",
-        onEnd: (evt) => {
-          const activityId = evt.item.dataset.activityId;
-          const newDayIndex = evt.to.dataset.targetDay;
-          const oldDayIndex = evt.from.dataset.targetDay;
-          const newIndex = evt.newIndex;
-          
-          if (newDayIndex !== oldDayIndex) {
-            // Moved to a different day
-            this.pushEvent("move_activity", {
-              activity_id: activityId,
-              new_day_index: parseInt(newDayIndex),
-              position: newIndex
-            });
-          } else if (evt.newIndex !== evt.oldIndex) {
-            // Reordered within the same day
-            this.pushEvent("reorder_activity", {
-              activity_id: activityId,
-              position: newIndex
-            });
-          }
-        },
+        new Sortable(zone, {
+          group: {
+            name: groupName,
+            put: !isOutsideZone,
+          },
+          animation: 150,
+          ghostClass: "hamster-drag-ghost",
+          chosenClass: "hamster-drag-chosen",
+          dragClass: "hamster-drag-item",
+          draggable: draggable,
+          onEnd: (evt) => {
+            const entityId = evt.item.dataset[idKey];
+            const newDayIndex = evt.to.dataset.targetDay;
+            const oldDayIndex = evt.from.dataset.targetDay;
+            const newIndex = evt.newIndex;
+
+            if (newDayIndex !== oldDayIndex) {
+              this.pushEvent(moveEvent, {
+                [idParam]: entityId,
+                new_day_index: parseInt(newDayIndex),
+                position: newIndex,
+              });
+            } else if (evt.newIndex !== evt.oldIndex) {
+              this.pushEvent(reorderEvent, {
+                [idParam]: entityId,
+                position: newIndex,
+              });
+            }
+          },
+        });
       });
+    };
+
+    setupSortable({
+      selector: "[data-activity-drop-zone]",
+      draggable: ".draggable-activity",
+      groupName: "activities",
+      idKey: "activityId",
+      idParam: "activity_id",
+      moveEvent: "move_activity",
+      reorderEvent: "reorder_activity",
+    });
+
+    setupSortable({
+      selector: "[data-day-expense-drop-zone]",
+      draggable: ".draggable-day-expense",
+      groupName: "day-expenses",
+      idKey: "dayExpenseId",
+      idParam: "day_expense_id",
+      moveEvent: "move_day_expense",
+      reorderEvent: "reorder_day_expense",
     });
   },
 };
