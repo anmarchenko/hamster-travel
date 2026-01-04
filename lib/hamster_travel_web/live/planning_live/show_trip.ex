@@ -21,6 +21,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     AccommodationNew,
     Activity,
     ActivityNew,
+    DayExpense,
+    DayExpenseNew,
     Destination,
     DestinationNew,
     Transfer,
@@ -58,7 +60,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           </.inline>
           <.status_row trip={@trip} />
         </div>
-        <div class="">
+        <div>
           <%!-- <img
         :if={@trip.cover}
         class="max-h-52 mb-4 sm:mb-0 sm:h-36 sm:w-auto sm:max-h-full shadow-lg rounded-md"
@@ -111,6 +113,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> assign(active_accommodation_adding_component_id: nil)
       |> assign(active_transfer_adding_component_id: nil)
       |> assign(active_activity_adding_component_id: nil)
+      |> assign(active_day_expense_adding_component_id: nil)
 
     {:ok, socket}
   end
@@ -182,6 +185,21 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   @impl true
   def handle_info({[:activity, :deleted], %{value: deleted_activity}}, socket) do
     handle_entity_event(:activity, :deleted, deleted_activity, socket)
+  end
+
+  @impl true
+  def handle_info({[:day_expense, :created], %{value: created_day_expense}}, socket) do
+    handle_entity_event(:day_expense, :created, created_day_expense, socket)
+  end
+
+  @impl true
+  def handle_info({[:day_expense, :updated], %{value: updated_day_expense}}, socket) do
+    handle_entity_event(:day_expense, :updated, updated_day_expense, socket)
+  end
+
+  @impl true
+  def handle_info({[:day_expense, :deleted], %{value: deleted_day_expense}}, socket) do
+    handle_entity_event(:day_expense, :deleted, deleted_day_expense, socket)
   end
 
   @impl true
@@ -301,6 +319,76 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     end
   end
 
+  @impl true
+  def handle_event(
+        "move_day_expense",
+        %{
+          "day_expense_id" => day_expense_id,
+          "new_day_index" => new_day_index,
+          "position" => position
+        },
+        socket
+      ) do
+    day_expense = find_day_expense_in_trip(day_expense_id, socket.assigns.trip)
+    new_day_index = ensure_int(new_day_index)
+    position = ensure_int(position)
+
+    case Planning.move_day_expense_to_day(
+           day_expense,
+           new_day_index,
+           socket.assigns.trip,
+           socket.assigns.current_user,
+           position
+         ) do
+      {:ok, _updated_day_expense} ->
+        {:noreply, socket}
+
+      {:error, reason} ->
+        socket =
+          put_flash(
+            socket,
+            :error,
+            gettext("Failed to move expense: %{reason}", reason: reason)
+          )
+
+        Logger.error("Failed to move day expense: #{inspect(reason)}")
+
+        {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_event(
+        "reorder_day_expense",
+        %{"day_expense_id" => day_expense_id, "position" => position},
+        socket
+      ) do
+    day_expense = find_day_expense_in_trip(day_expense_id, socket.assigns.trip)
+    position = ensure_int(position)
+
+    case Planning.reorder_day_expense(
+           day_expense,
+           position,
+           socket.assigns.trip,
+           socket.assigns.current_user
+         ) do
+      {:ok, _updated_day_expense} ->
+        {:noreply, socket}
+
+      {:error, reason} ->
+        socket =
+          put_flash(
+            socket,
+            :error,
+            gettext("Failed to reorder expense: %{reason}", reason: reason)
+          )
+
+        Logger.error("Failed to reorder day expense: #{inspect(reason)}")
+
+        {:noreply, socket}
+    end
+  end
+
   # COMPONENTS
   def render_tab(%{active_tab: "itinerary"} = assigns) do
     ~H"""
@@ -326,6 +414,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       destinations_outside={destinations_outside(@trip)}
       activities={@trip.activities}
       activities_outside={activities_outside(@trip)}
+      day_expenses={@trip.day_expenses}
+      day_expenses_outside={day_expenses_outside(@trip)}
       budget={@budget}
       display_currency={@display_currency}
     />
@@ -365,7 +455,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         link_type="live_patch"
       >
         <.inline>
-          <.icon name="hero-clipboard-document-list" class="h-5 w-5" />
+          <.icon name="hero-ticket" class="h-5 w-5" />
           {gettext("Activities")}
         </.inline>
       </.tab>
@@ -508,6 +598,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:destinations_outside, :list, required: true)
   attr(:activities, :list, required: true)
   attr(:activities_outside, :list, required: true)
+  attr(:day_expenses, :list, required: true)
+  attr(:day_expenses_outside, :list, required: true)
 
   def tab_activity(assigns) do
     ~H"""
@@ -519,23 +611,35 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       />
 
       <.toggle
-        :if={Enum.any?(@destinations_outside) || Enum.any?(@activities_outside)}
+        :if={
+          Enum.any?(@destinations_outside) || Enum.any?(@activities_outside) ||
+            Enum.any?(@day_expenses_outside)
+        }
         label={gettext("Some items are scheduled outside of the trip duration")}
         class="mt-4"
       >
+        <.section_header icon="hero-map-pin" label={gettext("Places")} />
         <.destinations_list trip={@trip} destinations={@destinations_outside} day_index={0} />
 
-        <div
-          class="activities-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-1 sm:gap-y-8"
-          data-activity-drop-zone
-          data-target-day="outside"
-        >
-          <.activities_list
-            activities={@activities_outside}
-            day_index={-1}
-            trip={@trip}
-            display_currency={@display_currency}
-          />
+        <div class="activities-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-2 sm:gap-y-8">
+          <.section_header icon="hero-banknotes" label={gettext("Expenses")} />
+          <div class="flex flex-col gap-y-1" data-day-expense-drop-zone data-target-day="outside">
+            <.day_expenses_list
+              day_expenses={@day_expenses_outside}
+              day_index={-1}
+              trip={@trip}
+              display_currency={@display_currency}
+            />
+          </div>
+          <.section_header icon="hero-ticket" label={gettext("Activities")} />
+          <div class="flex flex-col gap-y-1" data-activity-drop-zone data-target-day="outside">
+            <.activities_list
+              activities={@activities_outside}
+              day_index={-1}
+              trip={@trip}
+              display_currency={@display_currency}
+            />
+          </div>
         </div>
       </.toggle>
 
@@ -544,6 +648,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           <div class="text-xl font-semibold">
             <.day_label day_index={i} start_date={@trip.start_date} />
           </div>
+          <.section_header icon="hero-map-pin" label={gettext("Places")} />
           <div class="flex flex-row gap-x-4">
             <.destinations_list
               trip={@trip}
@@ -561,23 +666,37 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             />
           </div>
 
-          <div
-            class="flex flex-col mt-4 gap-y-1 min-h-8"
-            data-activity-drop-zone
-            data-target-day={i}
-          >
-            <.activities_list
-              activities={Planning.activities_for_day(i, @activities)}
-              day_index={i}
-              trip={@trip}
-              display_currency={@display_currency}
-            />
-            <.live_component
-              module={ActivityNew}
-              id={"activity-new-#{i}"}
-              trip={@trip}
-              day_index={i}
-            />
+          <div class="flex flex-col gap-y-2 min-h-8">
+            <.section_header icon="hero-banknotes" label={gettext("Expenses")} />
+            <div class="flex flex-col gap-y-1" data-day-expense-drop-zone data-target-day={i}>
+              <.day_expenses_list
+                day_expenses={Planning.day_expenses_for_day(i, @day_expenses)}
+                day_index={i}
+                trip={@trip}
+                display_currency={@display_currency}
+              />
+              <.live_component
+                module={DayExpenseNew}
+                id={"day-expense-new-#{i}"}
+                trip={@trip}
+                day_index={i}
+              />
+            </div>
+            <.section_header icon="hero-ticket" label={gettext("Activities")} />
+            <div class="flex flex-col gap-y-1" data-activity-drop-zone data-target-day={i}>
+              <.activities_list
+                activities={Planning.activities_for_day(i, @activities)}
+                day_index={i}
+                trip={@trip}
+                display_currency={@display_currency}
+              />
+              <.live_component
+                module={ActivityNew}
+                id={"activity-new-#{i}"}
+                trip={@trip}
+                day_index={i}
+              />
+            </div>
           </div>
           <hr />
         </div>
@@ -675,6 +794,46 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     """
   end
 
+  attr(:icon, :string, required: true)
+  attr(:label, :string, required: true)
+  attr(:class, :string, default: nil)
+
+  def section_header(assigns) do
+    ~H"""
+    <div class={
+      CoreComponents.build_class([
+        "border-t border-zinc-200/70 dark:border-zinc-700/70 pt-2 mt-3",
+        @class
+      ])
+    }>
+      <div class="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+        <.inline class="gap-1">
+          <.icon name={@icon} class="h-4 w-4" />
+          {@label}
+        </.inline>
+      </div>
+    </div>
+    """
+  end
+
+  attr(:day_expenses, :list, required: true)
+  attr(:day_index, :integer, required: true)
+  attr(:trip, Trip, required: true)
+  attr(:display_currency, :string, required: true)
+
+  def day_expenses_list(assigns) do
+    ~H"""
+    <.live_component
+      :for={day_expense <- @day_expenses}
+      module={DayExpense}
+      id={"day-expenses-#{day_expense.id}-day-#{@day_index}"}
+      day_expense={day_expense}
+      trip={@trip}
+      display_currency={@display_currency}
+    />
+    """
+  end
+
   # HELPERS
 
   defp active_nav(%{status: "0_draft"}), do: drafts_nav_item()
@@ -714,12 +873,20 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     end)
   end
 
+  defp day_expenses_outside(trip) do
+    trip.day_expenses
+    |> Enum.filter(fn day_expense ->
+      day_expense.day_index >= trip.duration
+    end)
+  end
+
   defp get_key_for_component_adding_active_state_assign(component_type) do
     case component_type do
       "destination" -> :active_destination_adding_component_id
       "accommodation" -> :active_accommodation_adding_component_id
       "transfer" -> :active_transfer_adding_component_id
       "activity" -> :active_activity_adding_component_id
+      "day-expense" -> :active_day_expense_adding_component_id
       _ -> raise ArgumentError, "Unsupported component type: #{component_type}"
     end
   end
@@ -758,6 +925,9 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
       "activity" ->
         {HamsterTravelWeb.Planning.ActivityNew, :active_activity_adding_component_id}
+
+      "day-expense" ->
+        {HamsterTravelWeb.Planning.DayExpenseNew, :active_day_expense_adding_component_id}
 
       _ ->
         nil
@@ -859,6 +1029,10 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   defp find_activity_in_trip(activity_id, %Trip{activities: activities}) do
     Enum.find(activities, &(Integer.to_string(&1.id) == activity_id))
+  end
+
+  defp find_day_expense_in_trip(day_expense_id, %Trip{day_expenses: day_expenses}) do
+    Enum.find(day_expenses, &(Integer.to_string(&1.id) == day_expense_id))
   end
 
   defp ensure_int(val) when is_binary(val), do: String.to_integer(val)

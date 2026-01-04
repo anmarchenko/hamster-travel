@@ -527,6 +527,124 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
           end
 
+          test "shows day expense form when clicking add expense button", %{conn: conn} do
+
+            # Arrange
+
+            user = user_fixture()
+
+            conn = log_in_user(conn, user)
+
+            trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+
+
+            # Act
+
+            {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+
+
+            # Click the add expense button for day 0
+
+            view
+
+            |> element("#day-expense-new-0 [phx-click='add_day_expense']")
+
+            |> render_click()
+
+
+
+            # Assert
+
+            assert has_element?(view, "form[id*='day-expense-form-new-day-expense-new-0']")
+
+            assert has_element?(view, "label", "Expense name")
+
+            assert has_element?(view, "label", "Price")
+
+          end
+
+
+
+          test "can create day expense via form", %{conn: conn} do
+
+            # Arrange
+
+            user = user_fixture()
+
+            conn = log_in_user(conn, user)
+
+            trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+
+
+            # Act
+
+            {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+
+
+            # Open form
+
+            view
+
+            |> element("#day-expense-new-0 [phx-click='add_day_expense']")
+
+            |> render_click()
+
+
+
+            # Submit form
+
+            view
+
+            |> form("form[id*='day-expense-form-new-day-expense-new-0']", %{
+
+              day_expense: %{
+
+                name: "Metro card",
+
+                day_index: "0",
+
+                expense: %{
+
+                  price: %{
+
+                    amount: "12.00",
+
+                    currency: "EUR"
+
+                  }
+
+                }
+
+              }
+
+            })
+
+            |> render_submit()
+
+
+
+            # Assert
+
+            assert has_element?(view, "div", "Metro card")
+
+
+
+            # Verify DB
+
+            day_expenses = Planning.list_day_expenses(trip)
+
+            assert length(day_expenses) == 1
+
+            day_expense = List.first(day_expenses)
+
+            assert day_expense.name == "Metro card"
+
+          end
+
       
 
           test "can move activity via drag and drop", %{conn: conn} do
