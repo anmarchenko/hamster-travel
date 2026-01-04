@@ -491,12 +491,21 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         label={gettext("Some items are scheduled outside of the trip duration")}
         class="mt-4"
       >
+        <.section_header icon="hero-map-pin" label={gettext("Places")} class="sm:hidden" />
         <.destinations_list trip={@trip} destinations={@destinations_outside} day_index={0} />
+
+        <.section_header icon="hero-home" label={gettext("Hotel")} class="sm:hidden" />
         <.accommodations_list
           trip={@trip}
           accommodations={@accommodations_outside}
           display_currency={@display_currency}
           day_index={0}
+        />
+
+        <.section_header
+          icon="hero-arrows-right-left"
+          label={gettext("Transfers")}
+          class="sm:hidden"
         />
         <div
           class="transfers-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-1 sm:gap-y-8"
@@ -535,6 +544,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             </td>
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
               <div class="flex flex-col gap-y-1">
+                <.section_header icon="hero-map-pin" label={gettext("Places")} class="sm:hidden" />
                 <.destinations_list
                   trip={@trip}
                   destinations={Planning.destinations_for_day(i, @destinations)}
@@ -549,6 +559,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               </div>
             </td>
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
+              <.section_header
+                icon="hero-arrows-right-left"
+                label={gettext("Transfers")}
+                class="sm:hidden"
+              />
               <div
                 class="transfers-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-1"
                 data-transfer-drop-zone
@@ -570,6 +585,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             </td>
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
               <div class="flex flex-col gap-y-1">
+                <.section_header icon="hero-home" label={gettext("Hotel")} class="sm:hidden" />
                 <.accommodations_list
                   trip={@trip}
                   accommodations={Planning.accommodations_for_day(i, @accommodations)}

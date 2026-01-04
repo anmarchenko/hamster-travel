@@ -31,35 +31,36 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
     assigns = assign(assigns, :price, Accommodation.price_per_night(assigns.accommodation))
 
     ~H"""
-    <div class="flex flex-col gap-y-1 p-2">
-      <.inline class="gap-[0px] text-md font-bold">
-        <h2 class="leading-tight pr-3">
-          {@accommodation.name}
-        </h2>
-        <.money_display money={@price} display_currency={@display_currency} class="ml-auto">
+    <div class="flex flex-col gap-y-2 p-2">
+      <div class="flex items-center justify-between gap-3">
+        <div class="min-w-0 flex-1">
+          <h2 class="text-md font-bold leading-tight wrap-break-word">
+            {@accommodation.name}
+          </h2>
+        </div>
+        <.action_buttons accommodation={@accommodation} myself={@myself} />
+      </div>
+
+      <div class="text-left">
+        <.money_display
+          money={@price}
+          display_currency={@display_currency}
+          class="inline-flex text-md font-bold"
+        >
           <:suffix>&nbsp;/&nbsp;{gettext("night")}</:suffix>
         </.money_display>
-      </.inline>
+      </div>
 
-      <div class="flex-grow space-y-3 text-sm text-slate-600 dark:text-slate-400 mb-2 mt-2">
-        <div :if={@accommodation.link} class="flex justify-between items-center">
+      <div class="grow space-y-2 text-sm text-slate-600 dark:text-slate-400">
+        <div :if={@accommodation.link}>
           <.external_link link={@accommodation.link} />
-
-          <.action_buttons accommodation={@accommodation} myself={@myself} />
         </div>
 
-        <div
-          :if={@accommodation.address || !@accommodation.link}
-          class="flex justify-between items-center"
-        >
-          <div :if={@accommodation.address} class="flex items-center flex-grow mr-2">
-            <span class="leading-snug">
-              {@accommodation.address}
-            </span>
-          </div>
-          <div :if={!@accommodation.link}>
-            <.action_buttons accommodation={@accommodation} myself={@myself} />
-          </div>
+        <div :if={@accommodation.address} class="flex items-start gap-2">
+          <.icon name="hero-map-pin" class="w-4 h-4 mt-0.5 text-slate-400" />
+          <span class="leading-snug">
+            {@accommodation.address}
+          </span>
         </div>
       </div>
 
@@ -72,7 +73,7 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
 
   defp action_buttons(assigns) do
     ~H"""
-    <div class="flex items-center space-x-1 flex-shrink-0">
+    <div class="flex items-center space-x-1 shrink-0">
       <.icon_button size="xs" phx-click="edit" phx-target={@myself} class="justify-self-end">
         <.icon name="hero-pencil" class="w-4 h-4" />
       </.icon_button>

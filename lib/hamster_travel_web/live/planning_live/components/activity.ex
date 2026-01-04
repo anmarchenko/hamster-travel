@@ -65,8 +65,16 @@ defmodule HamsterTravelWeb.Planning.Activity do
         </.activity_button>
       </.inline>
       <div id={"activity-content-#{@activity.id}"} class="hidden flex flex-col gap-y-1">
-        <.external_link :if={@activity.link} link={@activity.link} />
-        <.activity_feature label={gettext("Address")} value={@activity.address} />
+        <.secondary
+          :if={@activity.link}
+          tag="div"
+          italic={false}
+          class="flex items-start gap-2 max-w-prose"
+        >
+          <.icon name="hero-link" class="h-4 w-4 mt-1 text-zinc-400" />
+          <.external_link link={@activity.link} />
+        </.secondary>
+        <.activity_feature icon="hero-map-pin" value={@activity.address} />
         <.formatted_text :if={@activity.description} text={@activity.description} class="mt-3" />
       </div>
     </div>
@@ -107,6 +115,9 @@ defmodule HamsterTravelWeb.Planning.Activity do
   defp activity_font(1), do: "italic font-light text-zinc-400"
   defp activity_font(_), do: "font-normal"
 
+  attr(:icon, :string, required: true)
+  attr(:value, :string, required: true)
+
   defp activity_feature(%{value: nil} = assigns) do
     ~H"""
     """
@@ -114,8 +125,9 @@ defmodule HamsterTravelWeb.Planning.Activity do
 
   defp activity_feature(assigns) do
     ~H"""
-    <.secondary class="max-w-prose">
-      {@label}: {@value}
+    <.secondary tag="div" italic={false} class="flex items-start gap-2 max-w-prose">
+      <.icon name={@icon} class="h-4 w-4 mt-1 text-zinc-400" />
+      <span>{@value}</span>
     </.secondary>
     """
   end
