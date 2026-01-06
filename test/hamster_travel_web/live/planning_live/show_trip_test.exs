@@ -530,6 +530,52 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert day_expense.name == "Metro card"
     end
 
+    test "shows food expense summary", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+      trip = Planning.get_trip!(trip.id)
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      assert has_element?(view, "#food-expense-#{trip.food_expense.id}")
+      assert render(view) =~ "Food expenses"
+    end
+
+    test "can edit food expense via form", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+      trip = Planning.get_trip!(trip.id)
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      view
+      |> element("#food-expense-#{trip.food_expense.id} [phx-click='edit']")
+      |> render_click()
+
+      assert has_element?(view, "form#food-expense-form-#{trip.food_expense.id}")
+
+      view
+      |> form("form#food-expense-form-#{trip.food_expense.id}", %{
+        food_expense: %{
+          price_per_day: %{amount: "10.00", currency: "EUR"},
+          days_count: "2",
+          people_count: "3"
+        }
+      })
+      |> render_submit()
+
+      updated = Planning.get_food_expense!(trip.food_expense.id)
+
+      expected =
+        Money.new(:EUR, "10.00")
+        |> Money.mult!(2)
+        |> Money.mult!(3)
+
+      assert updated.expense.price == expected
+    end
+
     test "can move activity via drag and drop", %{conn: conn} do
       # Arrange
 

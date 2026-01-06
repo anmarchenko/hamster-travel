@@ -7,6 +7,7 @@ defmodule HamsterTravel.PlanningTest do
   import HamsterTravel.AccountsFixtures
   import HamsterTravel.PlanningFixtures
   import HamsterTravel.GeoFixtures
+  import Ecto.Query
 
   setup do
     user = user_fixture()
@@ -220,6 +221,33 @@ defmodule HamsterTravel.PlanningTest do
       assert trip.people_count == 2
       assert trip.private == false
       assert trip.author_id == user.id
+
+      trip = Planning.get_trip!(trip.id)
+      assert trip.food_expense.days_count == trip.duration
+      assert trip.food_expense.people_count == trip.people_count
+      assert trip.food_expense.price_per_day == Money.new(trip.currency, 0)
+      assert trip.food_expense.expense.price == Money.new(trip.currency, 0)
+    end
+
+    test "create_trip/2 creates a food expense with trip-based defaults", %{user: user} do
+      valid_attrs = %{
+        name: "Default food expense",
+        dates_unknown: false,
+        start_date: ~D[2024-01-10],
+        end_date: ~D[2024-01-12],
+        currency: "USD",
+        status: "1_planned",
+        private: false,
+        people_count: 3
+      }
+
+      assert {:ok, %Trip{} = trip} = Planning.create_trip(valid_attrs, user)
+      trip = Planning.get_trip!(trip.id)
+
+      assert trip.food_expense.days_count == 3
+      assert trip.food_expense.people_count == 3
+      assert trip.food_expense.price_per_day == Money.new(:USD, 0)
+      assert trip.food_expense.expense.price == Money.new(:USD, 0)
     end
 
     test "create_trip/2 changes slug in case it is occupied", %{user: user} do
@@ -529,6 +557,19 @@ defmodule HamsterTravel.PlanningTest do
       trip = trip_fixture()
       assert {:ok, %Trip{}} = Planning.delete_trip(trip)
       assert_raise Ecto.NoResultsError, fn -> Planning.get_trip!(trip.id) end
+    end
+
+    test "delete_trip/1 removes trip expenses" do
+      trip = trip_fixture()
+      trip = Planning.get_trip!(trip.id)
+      food_expense_id = trip.food_expense.expense.id
+      expense = expense_fixture(%{trip_id: trip.id})
+
+      assert {:ok, %Trip{}} = Planning.delete_trip(trip)
+
+      assert [] == Repo.all(from e in Planning.Expense, where: e.trip_id == ^trip.id)
+      assert_raise Ecto.NoResultsError, fn -> Planning.get_expense!(expense.id) end
+      assert_raise Ecto.NoResultsError, fn -> Planning.get_expense!(food_expense_id) end
     end
 
     test "change_trip/1 returns a trip changeset" do
@@ -897,6 +938,7 @@ defmodule HamsterTravel.PlanningTest do
 
     test "list_expenses/1 returns all expenses for a trip" do
       trip = trip_fixture()
+      trip = Planning.get_trip!(trip.id)
       expense1 = expense_fixture(%{trip_id: trip.id, name: "Hotel"})
       expense2 = expense_fixture(%{trip_id: trip.id, name: "Food"})
       _other_expense = expense_fixture()
@@ -904,9 +946,10 @@ defmodule HamsterTravel.PlanningTest do
       expenses = Planning.list_expenses(trip)
       expense_ids = Enum.map(expenses, & &1.id)
 
-      assert length(expenses) == 2
+      assert length(expenses) == 3
       assert expense1.id in expense_ids
       assert expense2.id in expense_ids
+      assert trip.food_expense.expense.id in expense_ids
     end
 
     test "get_expense!/1 returns the expense with given id" do
@@ -998,6 +1041,107 @@ defmodule HamsterTravel.PlanningTest do
     end
   end
 
+  describe "food_expenses schema" do
+    alias HamsterTravel.Planning.FoodExpense
+
+    test "changeset requires price_per_day, days_count, people_count, trip_id" do
+      changeset = FoodExpense.changeset(%FoodExpense{}, %{})
+      refute changeset.valid?
+
+      assert %{
+               price_per_day: ["can't be blank"],
+               days_count: ["can't be blank"],
+               people_count: ["can't be blank"],
+               trip_id: ["can't be blank"]
+             } = errors_on(changeset)
+    end
+
+    test "changeset validates positive counts" do
+      trip = trip_fixture()
+
+      changeset =
+        FoodExpense.changeset(%FoodExpense{}, %{
+          price_per_day: Money.new(:EUR, 1000),
+          days_count: 0,
+          people_count: -1,
+          trip_id: trip.id
+        })
+
+      assert %{
+               days_count: ["must be greater than 0"],
+               people_count: ["must be greater than 0"]
+             } = errors_on(changeset)
+    end
+  end
+
+  describe "food_expenses" do
+    alias HamsterTravel.Planning.FoodExpense
+
+    test "update_food_expense/2 recalculates total expense" do
+      trip = trip_fixture()
+      trip = Planning.get_trip!(trip.id)
+      food_expense = trip.food_expense
+
+      assert {:ok, updated} =
+               Planning.update_food_expense(food_expense, %{
+                 price_per_day: Money.new(:EUR, 1200),
+                 days_count: 2,
+                 people_count: 3
+               })
+
+      expected =
+        Money.new(:EUR, 1200)
+        |> Money.mult!(2)
+        |> Money.mult!(3)
+
+      assert updated.expense.price == expected
+    end
+
+    test "update_food_expense/2 with invalid data returns error changeset" do
+      trip = trip_fixture()
+      trip = Planning.get_trip!(trip.id)
+      food_expense = trip.food_expense
+
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               Planning.update_food_expense(food_expense, %{days_count: 0})
+
+      assert %{days_count: ["must be greater than 0"]} = errors_on(changeset)
+    end
+
+    test "get_food_expense!/1 returns the food expense with expense preloaded" do
+      trip = trip_fixture()
+      trip = Planning.get_trip!(trip.id)
+
+      food_expense = Planning.get_food_expense!(trip.food_expense.id)
+      assert food_expense.id == trip.food_expense.id
+      assert %HamsterTravel.Planning.Expense{} = food_expense.expense
+    end
+
+    test "change_food_expense/1 returns a changeset" do
+      trip = trip_fixture()
+      trip = Planning.get_trip!(trip.id)
+
+      assert %Ecto.Changeset{} = Planning.change_food_expense(trip.food_expense)
+    end
+
+    test "update_food_expense/2 updates existing expense association" do
+      trip = trip_fixture()
+      trip = Planning.get_trip!(trip.id)
+      food_expense = trip.food_expense
+      expense_id = food_expense.expense.id
+
+      assert {:ok, updated} =
+               Planning.update_food_expense(food_expense, %{
+                 price_per_day: Money.new(:EUR, 250),
+                 days_count: 1,
+                 people_count: 2
+               })
+
+      assert updated.expense.id == expense_id
+      assert updated.expense.price == Money.new(:EUR, 250) |> Money.mult!(2)
+    end
+  end
+
   describe "day_expenses schema" do
     alias HamsterTravel.Planning.DayExpense
 
@@ -1014,7 +1158,9 @@ defmodule HamsterTravel.PlanningTest do
 
     test "changeset validates non-negative day_index" do
       trip = trip_fixture()
-      changeset = DayExpense.changeset(%DayExpense{}, %{name: "Transport", day_index: -1, trip_id: trip.id})
+
+      changeset =
+        DayExpense.changeset(%DayExpense{}, %{name: "Transport", day_index: -1, trip_id: trip.id})
 
       assert %{day_index: ["must be greater than or equal to 0"]} = errors_on(changeset)
     end
@@ -2348,7 +2494,10 @@ defmodule HamsterTravel.PlanningTest do
 
     test "update_activity/2 with valid data updates the activity" do
       activity = activity_fixture()
-      assert {:ok, %Activity{} = updated_activity} = Planning.update_activity(activity, @update_attrs)
+
+      assert {:ok, %Activity{} = updated_activity} =
+               Planning.update_activity(activity, @update_attrs)
+
       assert updated_activity.name == "Updated Activity"
       assert updated_activity.priority == 1
       assert updated_activity.description == "Updated description"
@@ -2358,7 +2507,9 @@ defmodule HamsterTravel.PlanningTest do
       activity = activity_fixture(%{trip_id: trip.id})
       Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
 
-      assert {:ok, %Activity{} = updated_activity} = Planning.update_activity(activity, @update_attrs)
+      assert {:ok, %Activity{} = updated_activity} =
+               Planning.update_activity(activity, @update_attrs)
+
       assert_receive {[:activity, :updated], %{value: ^updated_activity}}
     end
 
@@ -2467,7 +2618,9 @@ defmodule HamsterTravel.PlanningTest do
       trip = Planning.get_trip!(trip.id)
 
       # Move A2 to first position (it was last)
-      assert {:ok, updated_activity2} = Planning.move_activity_to_day(activity2, 0, trip, author, 0)
+      assert {:ok, updated_activity2} =
+               Planning.move_activity_to_day(activity2, 0, trip, author, 0)
+
       assert updated_activity2.day_index == 0
       # Rank should be lower than A1's original rank (or A1 is shifted)
       # We can check order by listing activities
@@ -2492,7 +2645,8 @@ defmodule HamsterTravel.PlanningTest do
       activity = activity_fixture(%{trip_id: trip.id, day_index: 0})
       trip = Planning.get_trip!(trip.id)
 
-      assert {:error, "Day index must be between 0 and 4"} = Planning.move_activity_to_day(activity, 5, trip, author)
+      assert {:error, "Day index must be between 0 and 4"} =
+               Planning.move_activity_to_day(activity, 5, trip, author)
     end
 
     test "fails when activity does not belong to trip", %{author: author, trip: trip} do
@@ -2502,7 +2656,8 @@ defmodule HamsterTravel.PlanningTest do
 
       trip = Planning.get_trip!(trip.id)
 
-      assert {:error, "Activity not found"} = Planning.move_activity_to_day(other_activity, 2, trip, author)
+      assert {:error, "Activity not found"} =
+               Planning.move_activity_to_day(other_activity, 2, trip, author)
     end
 
     test "sends pubsub event", %{author: author, trip: trip} do
@@ -2531,7 +2686,13 @@ defmodule HamsterTravel.PlanningTest do
       {:ok, author: Repo.preload(author, :friendships), trip: trip, a1: a1, a2: a2, a3: a3}
     end
 
-    test "reorders activity within same day", %{author: author, trip: trip, a1: a1, a2: a2, a3: a3} do
+    test "reorders activity within same day", %{
+      author: author,
+      trip: trip,
+      a1: a1,
+      a2: a2,
+      a3: a3
+    } do
       # Initial order: A1, A2, A3
       [first, second, third] = Planning.list_activities(trip)
       assert first.id == a1.id
@@ -2555,9 +2716,12 @@ defmodule HamsterTravel.PlanningTest do
 
     test "fails when activity not in trip", %{author: author, trip: trip} do
       other_trip = trip_fixture()
-      {:ok, other_activity} = Planning.create_activity(other_trip, %{name: "OA", day_index: 0, priority: 2})
 
-      assert {:error, "Activity not found"} = Planning.reorder_activity(other_activity, 0, trip, author)
+      {:ok, other_activity} =
+        Planning.create_activity(other_trip, %{name: "OA", day_index: 0, priority: 2})
+
+      assert {:error, "Activity not found"} =
+               Planning.reorder_activity(other_activity, 0, trip, author)
     end
 
     test "sends pubsub event", %{author: author, trip: trip, a1: a1} do
@@ -2646,7 +2810,8 @@ defmodule HamsterTravel.PlanningTest do
     end
 
     test "create_day_expense/2 with invalid data returns error changeset", %{trip: trip} do
-      assert {:error, %Ecto.Changeset{}} = Planning.create_day_expense(trip, @invalid_day_expense_attrs)
+      assert {:error, %Ecto.Changeset{}} =
+               Planning.create_day_expense(trip, @invalid_day_expense_attrs)
     end
 
     test "create_day_expense/2 validates day_index non-negative", %{trip: trip} do
@@ -2657,7 +2822,10 @@ defmodule HamsterTravel.PlanningTest do
 
     test "update_day_expense/2 with valid data updates the day expense" do
       day_expense = day_expense_fixture()
-      assert {:ok, %DayExpense{} = updated} = Planning.update_day_expense(day_expense, @update_day_expense_attrs)
+
+      assert {:ok, %DayExpense{} = updated} =
+               Planning.update_day_expense(day_expense, @update_day_expense_attrs)
+
       assert updated.name == "Updated expense"
     end
 
@@ -2679,7 +2847,10 @@ defmodule HamsterTravel.PlanningTest do
 
     test "update_day_expense/2 with invalid data returns error changeset" do
       day_expense = day_expense_fixture()
-      assert {:error, %Ecto.Changeset{}} = Planning.update_day_expense(day_expense, @invalid_day_expense_attrs)
+
+      assert {:error, %Ecto.Changeset{}} =
+               Planning.update_day_expense(day_expense, @invalid_day_expense_attrs)
+
       assert day_expense.name == Planning.get_day_expense!(day_expense.id).name
     end
 
@@ -2758,7 +2929,10 @@ defmodule HamsterTravel.PlanningTest do
        trip: trip}
     end
 
-    test "successfully moves day expense to valid day for trip author", %{author: author, trip: trip} do
+    test "successfully moves day expense to valid day for trip author", %{
+      author: author,
+      trip: trip
+    } do
       {:ok, day_expense} =
         Planning.create_day_expense(trip, %{
           name: "Transport",
@@ -2787,7 +2961,10 @@ defmodule HamsterTravel.PlanningTest do
       assert updated.day_index == 3
     end
 
-    test "successfully moves day expense to same day (updates rank)", %{author: author, trip: trip} do
+    test "successfully moves day expense to same day (updates rank)", %{
+      author: author,
+      trip: trip
+    } do
       {:ok, day_expense1} = Planning.create_day_expense(trip, %{name: "E1", day_index: 0})
       {:ok, day_expense2} = Planning.create_day_expense(trip, %{name: "E2", day_index: 0})
       trip = Planning.get_trip!(trip.id)
@@ -2801,7 +2978,8 @@ defmodule HamsterTravel.PlanningTest do
     end
 
     test "fails when day expense is nil", %{author: author, trip: trip} do
-      assert {:error, "Day expense not found"} = Planning.move_day_expense_to_day(nil, 2, trip, author)
+      assert {:error, "Day expense not found"} =
+               Planning.move_day_expense_to_day(nil, 2, trip, author)
     end
 
     test "fails when user is not authorized", %{stranger: stranger, trip: trip} do
@@ -2823,7 +3001,9 @@ defmodule HamsterTravel.PlanningTest do
     test "fails when day expense does not belong to trip", %{author: author, trip: trip} do
       other_user = user_fixture()
       other_trip = trip_fixture(%{author_id: other_user.id})
-      {:ok, other_day_expense} = Planning.create_day_expense(other_trip, %{name: "Other", day_index: 0})
+
+      {:ok, other_day_expense} =
+        Planning.create_day_expense(other_trip, %{name: "Other", day_index: 0})
 
       trip = Planning.get_trip!(trip.id)
 
@@ -2855,7 +3035,13 @@ defmodule HamsterTravel.PlanningTest do
       {:ok, author: Repo.preload(author, :friendships), trip: trip, e1: e1, e2: e2, e3: e3}
     end
 
-    test "reorders day expense within same day", %{author: author, trip: trip, e1: e1, e2: e2, e3: e3} do
+    test "reorders day expense within same day", %{
+      author: author,
+      trip: trip,
+      e1: e1,
+      e2: e2,
+      e3: e3
+    } do
       [first, second, third] = Planning.list_day_expenses(trip)
       assert first.id == e1.id
       assert second.id == e2.id
@@ -2876,7 +3062,9 @@ defmodule HamsterTravel.PlanningTest do
 
     test "fails when day expense not in trip", %{author: author, trip: trip} do
       other_trip = trip_fixture()
-      {:ok, other_day_expense} = Planning.create_day_expense(other_trip, %{name: "OE", day_index: 0})
+
+      {:ok, other_day_expense} =
+        Planning.create_day_expense(other_trip, %{name: "OE", day_index: 0})
 
       assert {:error, "Day expense not found"} =
                Planning.reorder_day_expense(other_day_expense, 0, trip, author)

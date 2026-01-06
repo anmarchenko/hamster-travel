@@ -11,6 +11,7 @@ defmodule HamsterTravel.Planning.Trip do
   alias HamsterTravel.Planning.Accommodation
   alias HamsterTravel.Planning.Destination
   alias HamsterTravel.Planning.DayExpense
+  alias HamsterTravel.Planning.FoodExpense
   alias HamsterTravel.Planning.Expense
   alias HamsterTravel.Planning.Transfer
   alias HamsterTravel.Planning.Trip.NameSlug
@@ -48,6 +49,7 @@ defmodule HamsterTravel.Planning.Trip do
     has_many(:countries, through: [:cities, :country])
 
     has_many(:expenses, Expense)
+    has_one(:food_expense, FoodExpense)
     has_many(:accommodations, Accommodation)
     has_many(:transfers, Transfer)
     has_many(:activities, HamsterTravel.Planning.Activity)

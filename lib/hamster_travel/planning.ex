@@ -7,18 +7,22 @@ defmodule HamsterTravel.Planning do
 
   require Logger
 
+  alias Ecto.Multi
   alias HamsterTravel.Accounts.User
   alias HamsterTravel.Geo
+
   alias HamsterTravel.Planning.{
     Accommodation,
     Activity,
     DayExpense,
     Destination,
+    FoodExpense,
     Expense,
     Policy,
     Transfer,
     Trip
   }
+
   alias HamsterTravel.Repo
 
   # PubSub functions
@@ -120,9 +124,22 @@ defmodule HamsterTravel.Planning do
   end
 
   def create_trip(attrs \\ %{}, user) do
-    %Trip{author_id: user.id}
-    |> Trip.changeset(attrs)
-    |> Repo.insert()
+    Multi.new()
+    |> Multi.insert(:trip, Trip.changeset(%Trip{author_id: user.id}, attrs))
+    |> Multi.run(:food_expense, fn repo, %{trip: trip} ->
+      create_food_expense_with_repo(repo, trip, default_food_expense_attrs(trip))
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{trip: trip}} ->
+        {:ok, trip}
+
+      {:error, :trip, changeset, _} ->
+        {:error, changeset}
+
+      {:error, :food_expense, changeset, _} ->
+        {:error, changeset}
+    end
   end
 
   def update_trip(%Trip{} = trip, attrs) do
@@ -153,7 +170,17 @@ defmodule HamsterTravel.Planning do
   end
 
   def delete_trip(%Trip{} = trip) do
-    Repo.delete(trip)
+    Repo.transaction(fn ->
+      from(e in Expense, where: e.trip_id == ^trip.id)
+      |> Repo.delete_all()
+
+      Repo.delete(trip)
+    end)
+    |> case do
+      {:ok, {:ok, deleted_trip}} -> {:ok, deleted_trip}
+      {:ok, {:error, changeset}} -> {:error, changeset}
+      {:error, reason} -> {:error, reason}
+    end
   end
 
   def change_trip(%Trip{} = trip, attrs \\ %{}) do
@@ -170,6 +197,7 @@ defmodule HamsterTravel.Planning do
     |> Repo.preload([
       :author,
       :countries,
+      food_expense: :expense,
       accommodations: :expense,
       day_expenses: :expense,
       activities: :expense,
@@ -578,7 +606,9 @@ defmodule HamsterTravel.Planning do
   end
 
   def list_activities(trip_id) do
-    Repo.all(from a in Activity, where: a.trip_id == ^trip_id, order_by: [asc: a.day_index, asc: a.rank])
+    Repo.all(
+      from a in Activity, where: a.trip_id == ^trip_id, order_by: [asc: a.day_index, asc: a.rank]
+    )
     |> activities_preloading()
   end
 
@@ -786,5 +816,43 @@ defmodule HamsterTravel.Planning do
 
   defp day_expenses_preloading_query do
     [:expense]
+  end
+
+  # Food expense functions
+  def get_food_expense!(id) do
+    Repo.get!(FoodExpense, id)
+    |> food_expense_preloading()
+  end
+
+  def update_food_expense(%FoodExpense{} = food_expense, attrs) do
+    food_expense = Repo.preload(food_expense, [:trip, :expense])
+
+    food_expense
+    |> FoodExpense.build_food_expense_changeset(food_expense.trip, attrs)
+    |> Repo.update()
+    |> preload_after_db_call(&food_expense_preloading(&1))
+    |> send_pubsub_event([:food_expense, :updated], food_expense.trip_id)
+  end
+
+  def change_food_expense(%FoodExpense{} = food_expense, attrs \\ %{}) do
+    FoodExpense.changeset(food_expense, attrs)
+  end
+
+  defp food_expense_preloading(query) do
+    Repo.preload(query, [:expense])
+  end
+
+  defp default_food_expense_attrs(trip) do
+    %{
+      price_per_day: Money.new(trip.currency, 0),
+      days_count: trip.duration || 1,
+      people_count: trip.people_count || 1
+    }
+  end
+
+  defp create_food_expense_with_repo(repo, trip, attrs) do
+    %FoodExpense{trip_id: trip.id}
+    |> FoodExpense.build_food_expense_changeset(trip, attrs)
+    |> repo.insert()
   end
 end

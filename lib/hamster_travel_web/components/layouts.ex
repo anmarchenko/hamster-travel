@@ -86,7 +86,7 @@ defmodule HamsterTravelWeb.Layouts do
       to="?tab=activities"
       active={@active_tab == "activities"}
     >
-      <.icon name="hero-clipboard-document-list" class="h-6 w-6" />
+      <.icon name="hero-ticket" class="h-6 w-6" />
     </.mobile_nav_link_tab>
     """
   end

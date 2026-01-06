@@ -11,6 +11,7 @@ defmodule HamsterTravel.Planning.Expense do
     belongs_to(:transfer, HamsterTravel.Planning.Transfer)
     belongs_to(:activity, HamsterTravel.Planning.Activity)
     belongs_to(:day_expense, HamsterTravel.Planning.DayExpense)
+    belongs_to(:food_expense, HamsterTravel.Planning.FoodExpense)
 
     timestamps()
   end
@@ -25,7 +26,8 @@ defmodule HamsterTravel.Planning.Expense do
       :accommodation_id,
       :transfer_id,
       :activity_id,
-      :day_expense_id
+      :day_expense_id,
+      :food_expense_id
     ])
     |> validate_required([:price, :trip_id])
   end
