@@ -23,6 +23,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     ActivityNew,
     DayExpense,
     DayExpenseNew,
+    FoodExpense,
     Destination,
     DestinationNew,
     Transfer,
@@ -200,6 +201,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   @impl true
   def handle_info({[:day_expense, :deleted], %{value: deleted_day_expense}}, socket) do
     handle_entity_event(:day_expense, :deleted, deleted_day_expense, socket)
+  end
+
+  @impl true
+  def handle_info({[:food_expense, :updated], %{value: updated_food_expense}}, socket) do
+    handle_food_expense_event(updated_food_expense, socket)
   end
 
   @impl true
@@ -625,6 +631,18 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         display_currency={@display_currency}
         class="mt-4 sm:mt-8 text-xl"
       />
+      <div :if={@trip.food_expense} class="mt-4">
+        <.section_header icon="hero-shopping-cart" label={gettext("Food expenses")} />
+        <div class="mt-3">
+          <.live_component
+            module={FoodExpense}
+            id={"food-expense-#{@trip.food_expense.id}"}
+            trip={@trip}
+            food_expense={@trip.food_expense}
+            display_currency={@display_currency}
+          />
+        </div>
+      </div>
 
       <.toggle
         :if={
@@ -976,6 +994,19 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       socket
       |> assign(trip: trip)
       |> maybe_recalculate_budget(entity_type, trip)
+
+    {:noreply, socket}
+  end
+
+  defp handle_food_expense_event(food_expense, socket) do
+    food_expense = Repo.preload(food_expense, [:expense])
+
+    trip = %{socket.assigns.trip | food_expense: food_expense}
+
+    socket =
+      socket
+      |> assign(trip: trip)
+      |> assign(budget: Planning.calculate_budget(trip))
 
     {:noreply, socket}
   end
