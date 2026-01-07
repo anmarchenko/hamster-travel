@@ -168,6 +168,33 @@ defmodule HamsterTravel.PlanningFixtures do
   end
 
   @doc """
+  Generate a note.
+  """
+  def note_fixture(attrs \\ %{}) do
+    trip_id =
+      case Map.fetch(attrs, :trip_id) do
+        {:ok, id} -> id
+        :error -> trip_fixture().id
+      end
+
+    attrs =
+      attrs
+      |> Enum.into(%{
+        title: "Food ideas",
+        text: "<p>Try local markets and street food.</p>",
+        day_index: 0,
+        trip_id: trip_id
+      })
+
+    trip = HamsterTravel.Planning.get_trip!(trip_id)
+
+    {:ok, note} =
+      HamsterTravel.Planning.create_note(trip, Map.delete(attrs, :trip_id))
+
+    note
+  end
+
+  @doc """
   Generate a day expense.
   """
   def day_expense_fixture(attrs \\ %{}) do

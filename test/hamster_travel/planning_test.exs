@@ -2731,6 +2731,82 @@ defmodule HamsterTravel.PlanningTest do
     end
   end
 
+  describe "notes" do
+    test "list_notes/1 returns notes for trip ordered by day and rank" do
+      trip = trip_fixture()
+
+      note_late = note_fixture(%{trip_id: trip.id, day_index: 1, title: "Later"})
+      note_early = note_fixture(%{trip_id: trip.id, day_index: 0, title: "Early"})
+
+      assert [note_early.id, note_late.id] ==
+               Planning.list_notes(trip.id) |> Enum.map(& &1.id)
+    end
+
+    test "get_note!/1 returns the note" do
+      note = note_fixture()
+      assert Planning.get_note!(note.id).id == note.id
+    end
+
+    test "create_note/2 with valid data creates a note with optional day index" do
+      trip = trip_fixture()
+
+      valid_attrs = %{
+        title: "Trip report",
+        text: "<p>Great memories.</p>",
+        day_index: nil
+      }
+
+      assert {:ok, note} = Planning.create_note(trip, valid_attrs)
+      assert note.title == "Trip report"
+      assert note.text == "<p>Great memories.</p>"
+      assert note.day_index == nil
+      assert note.trip_id == trip.id
+    end
+
+    test "create_note/2 requires a title" do
+      trip = trip_fixture()
+      invalid_attrs = %{text: "Missing title"}
+
+      assert {:error, changeset} = Planning.create_note(trip, invalid_attrs)
+      assert %{title: ["can't be blank"]} = errors_on(changeset)
+    end
+
+    test "update_note/2 updates the note" do
+      note = note_fixture(%{title: "Old title"})
+
+      assert {:ok, note} = Planning.update_note(note, %{title: "New title", day_index: 2})
+      assert note.title == "New title"
+      assert note.day_index == 2
+    end
+
+    test "delete_note/1 deletes the note" do
+      note = note_fixture()
+      assert {:ok, _note} = Planning.delete_note(note)
+      assert_raise Ecto.NoResultsError, fn -> Planning.get_note!(note.id) end
+    end
+
+    test "new_note/2 returns a changeset with defaults" do
+      trip = trip_fixture()
+      changeset = Planning.new_note(trip)
+
+      assert changeset.data.trip_id == trip.id
+      assert changeset.data.day_index == nil
+    end
+
+    test "new_note/2 returns a changeset with day index when provided" do
+      trip = trip_fixture()
+      changeset = Planning.new_note(trip, 2)
+
+      assert changeset.data.trip_id == trip.id
+      assert changeset.data.day_index == 2
+    end
+
+    test "change_note/2 returns a note changeset" do
+      note = note_fixture()
+      assert %Ecto.Changeset{} = Planning.change_note(note, %{title: "Updated"})
+    end
+  end
+
   describe "day_expenses" do
     alias HamsterTravel.Planning.DayExpense
 

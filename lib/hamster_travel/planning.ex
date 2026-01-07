@@ -18,6 +18,7 @@ defmodule HamsterTravel.Planning do
     Destination,
     FoodExpense,
     Expense,
+    Note,
     Policy,
     Transfer,
     Trip
@@ -201,6 +202,7 @@ defmodule HamsterTravel.Planning do
       accommodations: :expense,
       day_expenses: :expense,
       activities: :expense,
+      notes: notes_preloading_query(),
       destinations: destinations_preloading_query(),
       transfers: transfers_preloading_query()
     ])
@@ -704,6 +706,59 @@ defmodule HamsterTravel.Planning do
 
   defp activities_preloading_query do
     [:expense]
+  end
+
+  # Notes functions
+
+  def get_note!(id) do
+    Repo.get!(Note, id)
+  end
+
+  def list_notes(%Trip{id: trip_id}) do
+    list_notes(trip_id)
+  end
+
+  def list_notes(trip_id) do
+    Repo.all(
+      from n in Note,
+        where: n.trip_id == ^trip_id,
+        order_by: [asc_nulls_first: n.day_index, asc: n.rank]
+    )
+  end
+
+  def create_note(trip, attrs \\ %{}) do
+    %Note{trip_id: trip.id}
+    |> Note.changeset(attrs)
+    |> Repo.insert()
+    |> send_pubsub_event([:note, :created], trip.id)
+  end
+
+  def update_note(%Note{} = note, attrs) do
+    note
+    |> Note.changeset(attrs)
+    |> Repo.update()
+    |> send_pubsub_event([:note, :updated], note.trip_id)
+  end
+
+  def new_note(trip, day_index \\ nil, attrs \\ %{}) do
+    %Note{
+      trip_id: trip.id,
+      day_index: day_index
+    }
+    |> Note.changeset(attrs)
+  end
+
+  def change_note(%Note{} = note, attrs \\ %{}) do
+    Note.changeset(note, attrs)
+  end
+
+  def delete_note(%Note{} = note) do
+    Repo.delete(note)
+    |> send_pubsub_event([:note, :deleted], note.trip_id)
+  end
+
+  defp notes_preloading_query do
+    from n in Note, order_by: [asc_nulls_first: n.day_index, asc: n.rank]
   end
 
   # Day expense functions
