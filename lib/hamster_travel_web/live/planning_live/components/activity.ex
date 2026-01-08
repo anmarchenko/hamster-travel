@@ -53,16 +53,12 @@ defmodule HamsterTravelWeb.Planning.Activity do
           display_currency={@display_currency}
           class="font-normal"
         />
-        <.activity_button phx-click="edit" phx-target={@myself}>
-          <.icon name="hero-pencil" class="h-4 w-4" />
-        </.activity_button>
-        <.activity_button
-          phx-click="delete"
-          phx-target={@myself}
-          data-confirm={gettext("Are you sure you want to delete activity \"%{name}\"?", name: @activity.name)}
-        >
-          <.icon name="hero-trash" class="h-4 w-4" />
-        </.activity_button>
+        <.edit_delete_buttons
+          class="ml-1"
+          edit_target={@myself}
+          delete_target={@myself}
+          delete_confirm={gettext("Are you sure you want to delete activity \"%{name}\"?", name: @activity.name)}
+        />
       </.inline>
       <div id={"activity-content-#{@activity.id}"} class="hidden flex flex-col gap-y-1">
         <.secondary
@@ -132,17 +128,4 @@ defmodule HamsterTravelWeb.Planning.Activity do
     """
   end
 
-  attr :rest, :global
-  slot :inner_block, required: true
-
-  defp activity_button(assigns) do
-    ~H"""
-    <span
-      class="cursor-pointer hover:text-zinc-900 hover:dark:text-zinc-100"
-      {@rest}
-    >
-      {render_slot(@inner_block)}
-    </span>
-    """
-  end
 end

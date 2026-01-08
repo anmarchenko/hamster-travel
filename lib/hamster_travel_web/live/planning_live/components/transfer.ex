@@ -41,7 +41,12 @@ defmodule HamsterTravelWeb.Planning.Transfer do
         {@transfer.vessel_number}
         {@transfer.carrier}
         <.money_display money={@transfer.expense.price} display_currency={@display_currency} />
-        <.action_buttons transfer={@transfer} myself={@myself} />
+        <.edit_delete_buttons
+          class="ml-auto"
+          edit_target={@myself}
+          delete_target={@myself}
+          delete_confirm={gettext("Are you sure you want to delete this transfer from your trip?")}
+        />
       </.inline>
       <div class="flex flex-row text-lg mt-2 mb-2">
         <div class="flex flex-col gap-y-2 pr-6 border-r-2 font-medium">
@@ -93,25 +98,6 @@ defmodule HamsterTravelWeb.Planning.Transfer do
          socket
          |> put_flash(:error, gettext("Failed to delete transfer"))}
     end
-  end
-
-  defp action_buttons(assigns) do
-    ~H"""
-    <div class="flex items-center space-x-1 flex-shrink-0 ml-auto">
-      <.icon_button size="xs" phx-click="edit" phx-target={@myself} class="justify-self-end">
-        <.icon name="hero-pencil" class="w-4 h-4" />
-      </.icon_button>
-      <.icon_button
-        class="justify-self-end"
-        size="xs"
-        phx-click="delete"
-        phx-target={@myself}
-        data-confirm={gettext("Are you sure you want to delete this transfer from your trip?")}
-      >
-        <.icon name="hero-trash" class="w-4 h-4" />
-      </.icon_button>
-    </div>
-    """
   end
 
   def transfer_icon(%{type: "flight"} = assigns) do

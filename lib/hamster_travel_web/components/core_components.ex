@@ -20,6 +20,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   import PetalComponents.Icon
   import PetalComponents.Field
   import PetalComponents.Form
+  import PetalComponents.Button
 
   use Gettext, backend: HamsterTravelWeb.Gettext
 
@@ -395,6 +396,45 @@ defmodule HamsterTravelWeb.CoreComponents do
     <span class="hidden sm:inline ml-2">
       {@label}
     </span>
+    """
+  end
+
+  @doc """
+  Renders edit/delete icon buttons with shared styling.
+  """
+  attr :edit_target, :any, required: true
+  attr :delete_target, :any, default: nil
+  attr :edit_event, :string, default: "edit"
+  attr :delete_event, :string, default: "delete"
+  attr :delete_confirm, :string, default: nil
+  attr :show_delete, :boolean, default: true
+  attr :class, :string, default: nil
+
+  def edit_delete_buttons(assigns) do
+    assigns =
+      assign(assigns, :delete_target, assigns.delete_target || assigns.edit_target)
+
+    ~H"""
+    <div class={build_class(["flex items-center gap-0 shrink-0", @class])}>
+      <.icon_button
+        size="xs"
+        phx-click={@edit_event}
+        phx-target={@edit_target}
+        class="p-0 min-h-0 h-auto bg-transparent hover:bg-transparent text-slate-500 dark:text-slate-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+      >
+        <.icon name="hero-pencil" class="w-4 h-4" />
+      </.icon_button>
+      <.icon_button
+        :if={@show_delete}
+        size="xs"
+        phx-click={@delete_event}
+        phx-target={@delete_target}
+        data-confirm={@delete_confirm}
+        class="p-0 min-h-0 h-auto bg-transparent hover:bg-transparent text-slate-500 dark:text-slate-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+      >
+        <.icon name="hero-trash" class="w-4 h-4" />
+      </.icon_button>
+    </div>
     """
   end
 

@@ -144,6 +144,27 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "#activities-#{trip.id}")
     end
 
+    test "renders day-bound notes on activities tab only", %{conn: conn} do
+      # Arrange
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      {:ok, day_note} = Planning.create_note(trip, %{title: "Day note", day_index: 0})
+      {:ok, unassigned_note} = Planning.create_note(trip, %{title: "Trip report", day_index: nil})
+
+      {:ok, outside_note} =
+        Planning.create_note(trip, %{title: "Outside note", day_index: trip.duration + 1})
+
+      # Act
+      {:ok, _view, html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      # Assert
+      assert html =~ day_note.title
+      assert html =~ outside_note.title
+      refute html =~ unassigned_note.title
+    end
+
     test "renders trip page with accommodations", %{conn: conn} do
       # Arrange
       user = user_fixture()

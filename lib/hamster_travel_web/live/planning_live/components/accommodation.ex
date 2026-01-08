@@ -38,7 +38,15 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
             {@accommodation.name}
           </h2>
         </div>
-        <.action_buttons accommodation={@accommodation} myself={@myself} />
+        <.edit_delete_buttons
+          edit_target={@myself}
+          delete_target={@myself}
+          delete_confirm={
+            gettext("Are you sure you want to delete %{accommodation_name} from your trip?",
+              accommodation_name: @accommodation.name
+            )
+          }
+        />
       </div>
 
       <div class="text-left">
@@ -67,29 +75,6 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
       <.note :if={formatted_text_present?(@accommodation.note)}>
         <.formatted_text text={@accommodation.note} />
       </.note>
-    </div>
-    """
-  end
-
-  defp action_buttons(assigns) do
-    ~H"""
-    <div class="flex items-center space-x-1 shrink-0">
-      <.icon_button size="xs" phx-click="edit" phx-target={@myself} class="justify-self-end">
-        <.icon name="hero-pencil" class="w-4 h-4" />
-      </.icon_button>
-      <.icon_button
-        class="justify-self-end"
-        size="xs"
-        phx-click="delete"
-        phx-target={@myself}
-        data-confirm={
-          gettext("Are you sure you want to delete %{accommodation_name} from your trip?",
-            accommodation_name: @accommodation.name
-          )
-        }
-      >
-        <.icon name="hero-trash" class="w-4 h-4" />
-      </.icon_button>
     </div>
     """
   end

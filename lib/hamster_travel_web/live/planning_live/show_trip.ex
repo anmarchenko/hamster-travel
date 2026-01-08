@@ -24,6 +24,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     DayExpense,
     DayExpenseNew,
     FoodExpense,
+    Note,
+    NoteNew,
     Destination,
     DestinationNew,
     Transfer,
@@ -115,6 +117,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> assign(active_transfer_adding_component_id: nil)
       |> assign(active_activity_adding_component_id: nil)
       |> assign(active_day_expense_adding_component_id: nil)
+      |> assign(active_note_adding_component_id: nil)
 
     {:ok, socket}
   end
@@ -201,6 +204,21 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   @impl true
   def handle_info({[:day_expense, :deleted], %{value: deleted_day_expense}}, socket) do
     handle_entity_event(:day_expense, :deleted, deleted_day_expense, socket)
+  end
+
+  @impl true
+  def handle_info({[:note, :created], %{value: created_note}}, socket) do
+    handle_entity_event(:note, :created, created_note, socket)
+  end
+
+  @impl true
+  def handle_info({[:note, :updated], %{value: updated_note}}, socket) do
+    handle_entity_event(:note, :updated, updated_note, socket)
+  end
+
+  @impl true
+  def handle_info({[:note, :deleted], %{value: deleted_note}}, socket) do
+    handle_entity_event(:note, :deleted, deleted_note, socket)
   end
 
   @impl true
@@ -420,6 +438,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       destinations_outside={destinations_outside(@trip)}
       activities={@trip.activities}
       activities_outside={activities_outside(@trip)}
+      notes={@trip.notes}
+      notes_outside={notes_outside(@trip)}
       day_expenses={@trip.day_expenses}
       day_expenses_outside={day_expenses_outside(@trip)}
       budget={@budget}
@@ -620,6 +640,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:destinations_outside, :list, required: true)
   attr(:activities, :list, required: true)
   attr(:activities_outside, :list, required: true)
+  attr(:notes, :list, required: true)
+  attr(:notes_outside, :list, required: true)
   attr(:day_expenses, :list, required: true)
   attr(:day_expenses_outside, :list, required: true)
 
@@ -647,7 +669,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       <.toggle
         :if={
           Enum.any?(@destinations_outside) || Enum.any?(@activities_outside) ||
-            Enum.any?(@day_expenses_outside)
+            Enum.any?(@day_expenses_outside) || Enum.any?(@notes_outside)
         }
         label={gettext("Some items are scheduled outside of the trip duration")}
         class="mt-4"
@@ -672,6 +694,14 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               day_index={-1}
               trip={@trip}
               display_currency={@display_currency}
+            />
+          </div>
+          <.section_header icon="hero-document-text" label={gettext("Notes")} />
+          <div class="flex flex-col gap-y-1">
+            <.notes_list
+              notes={@notes_outside}
+              day_index={-1}
+              trip={@trip}
             />
           </div>
         </div>
@@ -727,6 +757,20 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               <.live_component
                 module={ActivityNew}
                 id={"activity-new-#{i}"}
+                trip={@trip}
+                day_index={i}
+              />
+            </div>
+            <.section_header icon="hero-document-text" label={gettext("Notes")} />
+            <div class="flex flex-col gap-y-1" data-note-drop-zone data-target-day={i}>
+              <.notes_list
+                notes={Planning.notes_for_day(i, @notes)}
+                day_index={i}
+                trip={@trip}
+              />
+              <.live_component
+                module={NoteNew}
+                id={"note-new-#{i}"}
                 trip={@trip}
                 day_index={i}
               />
@@ -868,6 +912,22 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     """
   end
 
+  attr(:trip, Trip, required: true)
+  attr(:notes, :list, required: true)
+  attr(:day_index, :integer, required: true)
+
+  def notes_list(assigns) do
+    ~H"""
+    <.live_component
+      :for={note <- @notes}
+      module={Note}
+      id={"note-#{note.id}-day-#{@day_index}"}
+      trip={@trip}
+      note={note}
+    />
+    """
+  end
+
   # HELPERS
 
   defp active_nav(%{status: "0_draft"}), do: drafts_nav_item()
@@ -914,6 +974,13 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     end)
   end
 
+  defp notes_outside(trip) do
+    trip.notes
+    |> Enum.filter(fn note ->
+      is_integer(note.day_index) && note.day_index >= trip.duration
+    end)
+  end
+
   defp get_key_for_component_adding_active_state_assign(component_type) do
     case component_type do
       "destination" -> :active_destination_adding_component_id
@@ -921,6 +988,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       "transfer" -> :active_transfer_adding_component_id
       "activity" -> :active_activity_adding_component_id
       "day-expense" -> :active_day_expense_adding_component_id
+      "note" -> :active_note_adding_component_id
       _ -> raise ArgumentError, "Unsupported component type: #{component_type}"
     end
   end
@@ -962,6 +1030,9 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
       "day-expense" ->
         {HamsterTravelWeb.Planning.DayExpenseNew, :active_day_expense_adding_component_id}
+
+      "note" ->
+        {HamsterTravelWeb.Planning.NoteNew, :active_note_adding_component_id}
 
       _ ->
         nil
@@ -1018,6 +1089,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   defp preload_entity_associations(:activity, entity), do: Repo.preload(entity, [:expense])
   defp preload_entity_associations(:day_expense, entity), do: Repo.preload(entity, [:expense])
+  defp preload_entity_associations(:note, entity), do: entity
 
   defp preload_entity_associations(:transfer, entity),
     do:
@@ -1031,6 +1103,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   defp get_entities_key(:accommodation), do: :accommodations
   defp get_entities_key(:activity), do: :activities
   defp get_entities_key(:day_expense), do: :day_expenses
+  defp get_entities_key(:note), do: :notes
   defp get_entities_key(:transfer), do: :transfers
 
   defp maybe_preload_countries(trip, :destination), do: Repo.preload(trip, :countries)
@@ -1080,6 +1153,10 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   defp find_day_expense_in_trip(day_expense_id, %Trip{day_expenses: day_expenses}) do
     Enum.find(day_expenses, &(Integer.to_string(&1.id) == day_expense_id))
+  end
+
+  defp find_note_in_trip(note_id, %Trip{notes: notes}) do
+    Enum.find(notes, &(Integer.to_string(&1.id) == note_id))
   end
 
   defp ensure_int(val) when is_binary(val), do: String.to_integer(val)

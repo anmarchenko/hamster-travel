@@ -40,18 +40,14 @@ defmodule HamsterTravelWeb.Planning.DayExpense do
           display_currency={@display_currency}
           class="font-normal"
         />
-        <.day_expense_button phx-click="edit" phx-target={@myself}>
-          <.icon name="hero-pencil" class="h-4 w-4" />
-        </.day_expense_button>
-        <.day_expense_button
-          phx-click="delete"
-          phx-target={@myself}
-          data-confirm={
+        <.edit_delete_buttons
+          class="ml-1"
+          edit_target={@myself}
+          delete_target={@myself}
+          delete_confirm={
             gettext("Are you sure you want to delete expense \"%{name}\"?", name: @day_expense.name)
           }
-        >
-          <.icon name="hero-trash" class="h-4 w-4" />
-        </.day_expense_button>
+        />
       </.inline>
     </div>
     """
@@ -85,17 +81,4 @@ defmodule HamsterTravelWeb.Planning.DayExpense do
     end
   end
 
-  attr :rest, :global
-  slot :inner_block, required: true
-
-  defp day_expense_button(assigns) do
-    ~H"""
-    <span
-      class="cursor-pointer hover:text-zinc-900 hover:dark:text-zinc-100"
-      {@rest}
-    >
-      {render_slot(@inner_block)}
-    </span>
-    """
-  end
 end
