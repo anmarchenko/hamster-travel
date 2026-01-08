@@ -757,6 +757,60 @@ defmodule HamsterTravel.Planning do
     |> send_pubsub_event([:note, :deleted], note.trip_id)
   end
 
+  def notes_for_day(day_index, notes) do
+    singular_items_for_day(day_index, notes)
+    |> Enum.sort_by(& &1.rank)
+  end
+
+  def notes_unassigned(notes) do
+    notes
+    |> Enum.filter(&is_nil(&1.day_index))
+    |> Enum.sort_by(& &1.rank)
+  end
+
+  def move_note_to_day(note, new_day_index, trip, user, position \\ :last)
+
+  def move_note_to_day(nil, _new_day_index, _trip, _user, _position),
+    do: {:error, "Note not found"}
+
+  def move_note_to_day(note, new_day_index, trip, user, position) do
+    with :ok <- validate_user_authorization(trip, user),
+         :ok <- validate_note_belongs_to_trip(note, trip),
+         :ok <- validate_note_day_index_in_trip_duration(new_day_index, trip) do
+      update_note_position(note, %{day_index: new_day_index, position: position})
+    end
+  end
+
+  def reorder_note(nil, _position, _trip, _user), do: {:error, "Note not found"}
+
+  def reorder_note(note, position, trip, user) do
+    with :ok <- validate_user_authorization(trip, user),
+         :ok <- validate_note_belongs_to_trip(note, trip) do
+      update_note_position(note, %{position: position})
+    end
+  end
+
+  defp validate_note_belongs_to_trip(note, %Trip{notes: notes}) do
+    if Enum.any?(notes, &(&1.id == note.id)) do
+      :ok
+    else
+      {:error, "Note not found"}
+    end
+  end
+
+  defp validate_note_day_index_in_trip_duration(nil, _trip), do: :ok
+
+  defp validate_note_day_index_in_trip_duration(day_index, trip) do
+    validate_day_index_in_trip_duration(day_index, trip)
+  end
+
+  defp update_note_position(note, attrs) do
+    note
+    |> Note.changeset(attrs)
+    |> Repo.update(stale_error_field: :id)
+    |> send_pubsub_event([:note, :updated], note.trip_id)
+  end
+
   defp notes_preloading_query do
     from n in Note, order_by: [asc_nulls_first: n.day_index, asc: n.rank]
   end
