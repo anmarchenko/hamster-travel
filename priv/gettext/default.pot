@@ -62,14 +62,14 @@ msgid "Make a copy"
 msgstr ""
 
 #: lib/hamster_travel_web/components/layouts.ex:85
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:495
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:762
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:821
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:547
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:824
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:906
 #, elixir-autogen, elixir-format
 msgid "Activities"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:484
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:536
 #, elixir-autogen, elixir-format
 msgid "Transfers and hotels"
 msgstr ""
@@ -80,32 +80,32 @@ msgid "Back"
 msgstr ""
 
 #: lib/hamster_travel_web/components/layouts.ex:78
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:605
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:630
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:662
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:657
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:682
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:714
 #, elixir-autogen, elixir-format
 msgid "Transfers"
 msgstr ""
 
 #: lib/hamster_travel_web/live/planning_live/components/day_range_select.ex:50
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:625
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:880
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:677
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:965
 #, elixir-autogen, elixir-format
 msgid "Day"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:595
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:632
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:686
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:647
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:684
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:738
 #, elixir-autogen, elixir-format
 msgid "Hotel"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:592
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:627
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:645
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:749
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:787
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:644
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:679
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:697
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:792
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:872
 #, elixir-autogen, elixir-format
 msgid "Places"
 msgstr ""
@@ -428,9 +428,9 @@ msgstr ""
 msgid "Failed to delete destination"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:522
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:589
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:746
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:574
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:641
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:786
 #, elixir-autogen, elixir-format
 msgid "Some items are scheduled outside of the trip duration"
 msgstr ""
@@ -727,8 +727,8 @@ msgstr ""
 msgid "Expense name"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:753
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:806
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:891
 #, elixir-autogen, elixir-format
 msgid "Expenses"
 msgstr ""
@@ -738,12 +738,12 @@ msgstr ""
 msgid "Failed to delete expense"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:375
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:427
 #, elixir-autogen, elixir-format
 msgid "Failed to move expense: %{reason}"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:407
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:459
 #, elixir-autogen, elixir-format
 msgid "Failed to reorder expense: %{reason}"
 msgstr ""
@@ -768,7 +768,7 @@ msgstr ""
 msgid "per day"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:729
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:855
 #, elixir-autogen, elixir-format
 msgid "Food expenses"
 msgstr ""
@@ -806,9 +806,9 @@ msgid "Note title"
 msgstr ""
 
 #: lib/hamster_travel_web/components/layouts.ex:92
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:506
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:771
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:836
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:558
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:842
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:921
 #, elixir-autogen, elixir-format
 msgid "Notes"
 msgstr ""
@@ -823,7 +823,17 @@ msgstr ""
 msgid "e.g. Food ideas"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:532
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:584
 #, elixir-autogen, elixir-format
 msgid "Trip notes"
+msgstr ""
+
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:367
+#, elixir-autogen, elixir-format
+msgid "Failed to move note: %{reason}"
+msgstr ""
+
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:390
+#, elixir-autogen, elixir-format
+msgid "Failed to reorder note: %{reason}"
 msgstr ""

@@ -345,6 +345,59 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   @impl true
   def handle_event(
+        "move_note",
+        %{"note_id" => note_id, "new_day_index" => new_day_index, "position" => position},
+        socket
+      ) do
+    note = find_note_in_trip(note_id, socket.assigns.trip)
+    new_day_index = ensure_int(new_day_index)
+    position = ensure_int(position)
+
+    case Planning.move_note_to_day(
+           note,
+           new_day_index,
+           socket.assigns.trip,
+           socket.assigns.current_user,
+           position
+         ) do
+      {:ok, _updated_note} ->
+        {:noreply, socket}
+
+      {:error, reason} ->
+        socket =
+          put_flash(socket, :error, gettext("Failed to move note: %{reason}", reason: reason))
+
+        Logger.error("Failed to move note: #{inspect(reason)}")
+
+        {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_event(
+        "reorder_note",
+        %{"note_id" => note_id, "position" => position},
+        socket
+      ) do
+    note = find_note_in_trip(note_id, socket.assigns.trip)
+    position = ensure_int(position)
+
+    case Planning.reorder_note(note, position, socket.assigns.trip, socket.assigns.current_user) do
+      {:ok, _updated_note} ->
+        {:noreply, socket}
+
+      {:error, reason} ->
+        socket =
+          put_flash(socket, :error, gettext("Failed to reorder note: %{reason}", reason: reason))
+
+        Logger.error("Failed to reorder note: #{inspect(reason)}")
+
+        {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_event(
         "move_day_expense",
         %{
           "day_expense_id" => day_expense_id,
@@ -1270,6 +1323,5 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   defp ensure_int(val) when is_binary(val), do: String.to_integer(val)
-  defp ensure_int(val) when is_integer(val), do: val
   defp ensure_int(val), do: val
 end

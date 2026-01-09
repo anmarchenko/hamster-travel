@@ -182,6 +182,48 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "form#note-form-new-note-new-unassigned")
     end
 
+    test "moves note to a new day via drag event", %{conn: conn} do
+      # Arrange
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft", duration: 3})
+      {:ok, note} = Planning.create_note(trip, %{title: "Move me", day_index: 0})
+
+      # Act
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=notes")
+
+      render_hook(view, "move_note", %{
+        "note_id" => Integer.to_string(note.id),
+        "new_day_index" => "1",
+        "position" => 0
+      })
+
+      # Assert
+      assert Planning.get_note!(note.id).day_index == 1
+    end
+
+    test "reorders unassigned notes via drag event", %{conn: conn} do
+      # Arrange
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+      {:ok, note1} = Planning.create_note(trip, %{title: "First", day_index: nil})
+      {:ok, note2} = Planning.create_note(trip, %{title: "Second", day_index: nil})
+
+      # Act
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=notes")
+
+      render_hook(view, "reorder_note", %{
+        "note_id" => Integer.to_string(note2.id),
+        "position" => 0
+      })
+
+      # Assert
+      [first | _] = Planning.list_notes(trip)
+      assert first.id == note2.id
+      assert note1.id != note2.id
+    end
+
     test "renders day-bound notes on activities tab only", %{conn: conn} do
       # Arrange
       user = user_fixture()

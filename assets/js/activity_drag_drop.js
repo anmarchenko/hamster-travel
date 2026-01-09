@@ -33,9 +33,15 @@ let ActivityDragDrop = {
             const newIndex = evt.newIndex;
 
             if (newDayIndex !== oldDayIndex) {
+              let parsedDayIndex = null;
+
+              if (newDayIndex !== "unassigned") {
+                parsedDayIndex = parseInt(newDayIndex);
+              }
+
               this.pushEvent(moveEvent, {
                 [idParam]: entityId,
-                new_day_index: parseInt(newDayIndex),
+                new_day_index: parsedDayIndex,
                 position: newIndex,
               });
             } else if (evt.newIndex !== evt.oldIndex) {
@@ -67,6 +73,16 @@ let ActivityDragDrop = {
       idParam: "day_expense_id",
       moveEvent: "move_day_expense",
       reorderEvent: "reorder_day_expense",
+    });
+
+    setupSortable({
+      selector: "[data-note-drop-zone]",
+      draggable: ".draggable-note",
+      groupName: "notes",
+      idKey: "noteId",
+      idParam: "note_id",
+      moveEvent: "move_note",
+      reorderEvent: "reorder_note",
     });
   },
 };
