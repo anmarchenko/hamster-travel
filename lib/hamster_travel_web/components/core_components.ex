@@ -37,6 +37,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   def trip_url(slug, :edit), do: ~p"/trips/#{slug}/edit"
   def trip_url(slug, :itinerary), do: ~p"/trips/#{slug}?tab=itinerary"
   def trip_url(slug, :activities), do: ~p"/trips/#{slug}?tab=activities"
+  def trip_url(slug, :notes), do: ~p"/trips/#{slug}?tab=notes"
   def trip_url(slug, _), do: trip_url(slug)
 
   def plans_url, do: ~p"/plans"

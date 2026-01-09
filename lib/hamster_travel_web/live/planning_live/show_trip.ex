@@ -32,7 +32,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     TransferNew
   }
 
-  @tabs ["itinerary", "activities"]
+  @tabs ["itinerary", "activities", "notes"]
 
   @impl true
   def render(assigns) do
@@ -448,6 +448,16 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     """
   end
 
+  def render_tab(%{active_tab: "notes"} = assigns) do
+    ~H"""
+    <.tab_notes
+      trip={@trip}
+      notes={@trip.notes}
+      notes_outside={notes_outside(@trip)}
+    />
+    """
+  end
+
   attr(:trip, :map, required: true)
   attr(:active_tab, :string, required: true)
   attr(:class, :string, default: nil)
@@ -485,7 +495,69 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           {gettext("Activities")}
         </.inline>
       </.tab>
+      <.tab
+        underline
+        to={trip_url(@trip.slug, :notes)}
+        is_active={@active_tab == "notes"}
+        link_type="live_patch"
+      >
+        <.inline>
+          <.icon name="hero-document-text" class="h-5 w-5" />
+          {gettext("Notes")}
+        </.inline>
+      </.tab>
     </.tabs>
+    """
+  end
+
+  attr(:trip, Trip, required: true)
+  attr(:notes, :list, required: true)
+  attr(:notes_outside, :list, required: true)
+
+  def tab_notes(assigns) do
+    ~H"""
+    <div id={"notes-#{@trip.id}"} phx-hook="ActivityDragDrop">
+      <.toggle
+        :if={Enum.any?(@notes_outside)}
+        label={gettext("Some items are scheduled outside of the trip duration")}
+        class="mt-4"
+      >
+        <div class="flex flex-col gap-y-1" data-note-drop-zone data-target-day="outside">
+          <.notes_list notes={@notes_outside} day_index={-1} trip={@trip} />
+        </div>
+      </.toggle>
+
+      <div class="flex flex-col gap-y-8 mt-8">
+        <div class="flex flex-col gap-y-2">
+          <.section_header icon="hero-document-text" label={gettext("Trip notes")} />
+          <div class="flex flex-col gap-y-1" data-note-drop-zone data-target-day="unassigned">
+            <.notes_list notes={Planning.notes_unassigned(@notes)} day_index={-1} trip={@trip} />
+            <.live_component
+              module={NoteNew}
+              id="note-new-unassigned"
+              trip={@trip}
+              day_index={nil}
+            />
+          </div>
+        </div>
+
+        <div :for={i <- 0..(@trip.duration - 1)} class="flex flex-col gap-y-2">
+          <div class="text-xl font-semibold">
+            <.day_label day_index={i} start_date={@trip.start_date} />
+          </div>
+          <div class="flex flex-col gap-y-1" data-note-drop-zone data-target-day={i}>
+            <.notes_list notes={Planning.notes_for_day(i, @notes)} day_index={i} trip={@trip} />
+            <.live_component
+              module={NoteNew}
+              id={"note-new-#{i}"}
+              trip={@trip}
+              day_index={i}
+            />
+          </div>
+          <hr />
+        </div>
+      </div>
+    </div>
     """
   end
 
@@ -653,6 +725,80 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         display_currency={@display_currency}
         class="mt-4 sm:mt-8 text-xl"
       />
+
+      <.toggle
+        :if={
+          Enum.any?(@destinations_outside) || Enum.any?(@activities_outside) ||
+            Enum.any?(@day_expenses_outside) || Enum.any?(@notes_outside)
+        }
+        label={gettext("Some items are scheduled outside of the trip duration")}
+        class="mt-4"
+      >
+        <.section_header
+          :if={Enum.any?(@destinations_outside)}
+          icon="hero-map-pin"
+          label={gettext("Places")}
+        />
+        <.destinations_list trip={@trip} destinations={@destinations_outside} day_index={0} />
+
+        <div
+          :if={
+            Enum.any?(@activities_outside) ||
+              Enum.any?(@day_expenses_outside) || Enum.any?(@notes_outside)
+          }
+          class="activities-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-2 sm:gap-y-8"
+        >
+          <.section_header
+            :if={Enum.any?(@day_expenses_outside)}
+            icon="hero-banknotes"
+            label={gettext("Expenses")}
+          />
+          <div
+            :if={Enum.any?(@day_expenses_outside)}
+            class="flex flex-col gap-y-1"
+            data-day-expense-drop-zone
+            data-target-day="outside"
+          >
+            <.day_expenses_list
+              day_expenses={@day_expenses_outside}
+              day_index={-1}
+              trip={@trip}
+              display_currency={@display_currency}
+            />
+          </div>
+          <.section_header
+            :if={Enum.any?(@activities_outside)}
+            icon="hero-ticket"
+            label={gettext("Activities")}
+          />
+          <div
+            :if={Enum.any?(@activities_outside)}
+            class="flex flex-col gap-y-1"
+            data-activity-drop-zone
+            data-target-day="outside"
+          >
+            <.activities_list
+              activities={@activities_outside}
+              day_index={-1}
+              trip={@trip}
+              display_currency={@display_currency}
+            />
+          </div>
+          <.section_header
+            :if={Enum.any?(@notes_outside)}
+            icon="hero-document-text"
+            label={gettext("Notes")}
+          />
+          <div :if={Enum.any?(@notes_outside)} class="flex flex-col gap-y-1">
+            <.notes_list
+              notes={@notes_outside}
+              day_index={-1}
+              trip={@trip}
+            />
+          </div>
+        </div>
+      </.toggle>
+
       <div :if={@trip.food_expense} class="mt-4">
         <.section_header icon="hero-shopping-cart" label={gettext("Food expenses")} />
         <div class="mt-3">
@@ -665,47 +811,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           />
         </div>
       </div>
-
-      <.toggle
-        :if={
-          Enum.any?(@destinations_outside) || Enum.any?(@activities_outside) ||
-            Enum.any?(@day_expenses_outside) || Enum.any?(@notes_outside)
-        }
-        label={gettext("Some items are scheduled outside of the trip duration")}
-        class="mt-4"
-      >
-        <.section_header icon="hero-map-pin" label={gettext("Places")} />
-        <.destinations_list trip={@trip} destinations={@destinations_outside} day_index={0} />
-
-        <div class="activities-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-2 sm:gap-y-8">
-          <.section_header icon="hero-banknotes" label={gettext("Expenses")} />
-          <div class="flex flex-col gap-y-1" data-day-expense-drop-zone data-target-day="outside">
-            <.day_expenses_list
-              day_expenses={@day_expenses_outside}
-              day_index={-1}
-              trip={@trip}
-              display_currency={@display_currency}
-            />
-          </div>
-          <.section_header icon="hero-ticket" label={gettext("Activities")} />
-          <div class="flex flex-col gap-y-1" data-activity-drop-zone data-target-day="outside">
-            <.activities_list
-              activities={@activities_outside}
-              day_index={-1}
-              trip={@trip}
-              display_currency={@display_currency}
-            />
-          </div>
-          <.section_header icon="hero-document-text" label={gettext("Notes")} />
-          <div class="flex flex-col gap-y-1">
-            <.notes_list
-              notes={@notes_outside}
-              day_index={-1}
-              trip={@trip}
-            />
-          </div>
-        </div>
-      </.toggle>
 
       <div class="flex flex-col gap-y-8 mt-8">
         <div :for={i <- 0..(@trip.duration - 1)} class="flex flex-col gap-y-2">
@@ -997,15 +1102,14 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     case get_creation_component_info(component_type) do
       {module, active_assign_key} ->
         trip = socket.assigns.trip
+        component_ids = creation_component_ids(component_type, trip.duration)
 
-        for i <- 0..(trip.duration - 1) do
-          component_id = "#{component_type}-new-#{i}"
-
+        Enum.each(component_ids, fn component_id ->
           send_update(module,
             id: component_id,
             edit: Map.get(socket.assigns, active_assign_key) == component_id
           )
-        end
+        end)
 
         socket
 
@@ -1037,6 +1141,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       _ ->
         nil
     end
+  end
+
+  defp creation_component_ids(component_type, duration) do
+    base_ids = for i <- 0..(duration - 1), do: "#{component_type}-new-#{i}"
+
+    base_ids ++ ["#{component_type}-new-unassigned"]
   end
 
   defp handle_entity_event(entity_type, operation, entity, socket) do
