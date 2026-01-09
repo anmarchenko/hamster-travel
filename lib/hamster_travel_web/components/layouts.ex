@@ -88,6 +88,13 @@ defmodule HamsterTravelWeb.Layouts do
     >
       <.icon name="hero-ticket" class="h-6 w-6" />
     </.mobile_nav_link_tab>
+    <.mobile_nav_link_tab
+      label={gettext("Notes")}
+      to="?tab=notes"
+      active={@active_tab == "notes"}
+    >
+      <.icon name="hero-document-text" class="h-6 w-6" />
+    </.mobile_nav_link_tab>
     """
   end
 

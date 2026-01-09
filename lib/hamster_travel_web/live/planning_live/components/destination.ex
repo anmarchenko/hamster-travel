@@ -28,25 +28,19 @@ defmodule HamsterTravelWeb.Planning.Destination do
   def render(%{edit: false} = assigns) do
     ~H"""
     <div>
-      <.inline class="gap-[0px]">
+        <.inline class="gap-[0px]">
         <.flag size={20} country={@destination.city.country_code} class="mr-2" />
         <span class="sm:grow">{Geo.city_name(@destination.city)}</span>
-        <.icon_button size="xs" phx-click="edit" phx-target={@myself} class="justify-self-end ml-2">
-          <.icon name="hero-pencil" class="w-4 h-4" />
-        </.icon_button>
-        <.icon_button
-          class="justify-self-end"
-          size="xs"
-          phx-click="delete"
-          phx-target={@myself}
-          data-confirm={
+        <.edit_delete_buttons
+          class="ml-1"
+          edit_target={@myself}
+          delete_target={@myself}
+          delete_confirm={
             gettext("Are you sure you want to delete %{city_name} from your trip?",
               city_name: Geo.city_name(@destination.city)
             )
           }
-        >
-          <.icon name="hero-trash" class="w-4 h-4" />
-        </.icon_button>
+        />
       </.inline>
     </div>
     """

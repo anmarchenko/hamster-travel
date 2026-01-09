@@ -2731,6 +2731,270 @@ defmodule HamsterTravel.PlanningTest do
     end
   end
 
+  describe "notes" do
+    test "list_notes/1 returns notes for trip ordered by day and rank" do
+      trip = trip_fixture()
+
+      note_late = note_fixture(%{trip_id: trip.id, day_index: 1, title: "Later"})
+      note_early = note_fixture(%{trip_id: trip.id, day_index: 0, title: "Early"})
+
+      assert [note_early.id, note_late.id] ==
+               Planning.list_notes(trip.id) |> Enum.map(& &1.id)
+    end
+
+    test "get_note!/1 returns the note" do
+      note = note_fixture()
+      assert Planning.get_note!(note.id).id == note.id
+    end
+
+    test "create_note/2 with valid data creates a note with optional day index" do
+      trip = trip_fixture()
+
+      valid_attrs = %{
+        title: "Trip report",
+        text: "<p>Great memories.</p>",
+        day_index: nil
+      }
+
+      assert {:ok, note} = Planning.create_note(trip, valid_attrs)
+      assert note.title == "Trip report"
+      assert note.text == "<p>Great memories.</p>"
+      assert note.day_index == nil
+      assert note.trip_id == trip.id
+    end
+
+    test "create_note/2 requires a title" do
+      trip = trip_fixture()
+      invalid_attrs = %{text: "Missing title"}
+
+      assert {:error, changeset} = Planning.create_note(trip, invalid_attrs)
+      assert %{title: ["can't be blank"]} = errors_on(changeset)
+    end
+
+    test "update_note/2 updates the note" do
+      note = note_fixture(%{title: "Old title"})
+
+      assert {:ok, note} = Planning.update_note(note, %{title: "New title", day_index: 2})
+      assert note.title == "New title"
+      assert note.day_index == 2
+    end
+
+    test "delete_note/1 deletes the note" do
+      note = note_fixture()
+      assert {:ok, _note} = Planning.delete_note(note)
+      assert_raise Ecto.NoResultsError, fn -> Planning.get_note!(note.id) end
+    end
+
+    test "new_note/2 returns a changeset with defaults" do
+      trip = trip_fixture()
+      changeset = Planning.new_note(trip)
+
+      assert changeset.data.trip_id == trip.id
+      assert changeset.data.day_index == nil
+    end
+
+    test "new_note/2 returns a changeset with day index when provided" do
+      trip = trip_fixture()
+      changeset = Planning.new_note(trip, 2)
+
+      assert changeset.data.trip_id == trip.id
+      assert changeset.data.day_index == 2
+    end
+
+    test "change_note/2 returns a note changeset" do
+      note = note_fixture()
+      assert %Ecto.Changeset{} = Planning.change_note(note, %{title: "Updated"})
+    end
+
+    test "notes_for_day/2 returns notes for the specified day ordered by rank" do
+      trip = trip_fixture()
+
+      {:ok, note1} = Planning.create_note(trip, %{title: "N1", day_index: 0})
+      {:ok, note2} = Planning.create_note(trip, %{title: "N2", day_index: 0})
+      {:ok, note3} = Planning.create_note(trip, %{title: "N3", day_index: 1})
+
+      notes = [note1, note2, note3]
+
+      day0_notes = Planning.notes_for_day(0, notes)
+      assert Enum.map(day0_notes, & &1.id) == [note1.id, note2.id]
+
+      assert [^note3] = Planning.notes_for_day(1, notes)
+      assert [] = Planning.notes_for_day(2, notes)
+    end
+
+    test "notes_unassigned/1 returns unassigned notes ordered by rank" do
+      trip = trip_fixture()
+
+      {:ok, assigned_note} = Planning.create_note(trip, %{title: "Assigned", day_index: 0})
+      {:ok, unassigned_note} = Planning.create_note(trip, %{title: "Unassigned", day_index: nil})
+
+      notes = [assigned_note, unassigned_note]
+
+      assert [unassigned_note.id] ==
+               Planning.notes_unassigned(notes) |> Enum.map(& &1.id)
+    end
+  end
+
+  describe "move_note_to_day/5" do
+    setup do
+      author = user_fixture()
+      friend = user_fixture()
+      stranger = user_fixture()
+
+      Social.add_friends(author.id, friend.id)
+
+      trip =
+        trip_fixture(%{
+          author_id: author.id,
+          duration: 5,
+          dates_unknown: true
+        })
+
+      trip = Planning.get_trip!(trip.id)
+
+      {:ok,
+       author: Repo.preload(author, :friendships),
+       friend: Repo.preload(friend, :friendships),
+       stranger: Repo.preload(stranger, :friendships),
+       trip: trip}
+    end
+
+    test "successfully moves note to valid day for trip author", %{author: author, trip: trip} do
+      {:ok, note} = Planning.create_note(trip, %{title: "Note", day_index: nil})
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:ok, updated} = Planning.move_note_to_day(note, 2, trip, author)
+      assert updated.day_index == 2
+      assert updated.id == note.id
+    end
+
+    test "successfully moves note to valid day for friend", %{friend: friend, trip: trip} do
+      {:ok, note} = Planning.create_note(trip, %{title: "Note", day_index: 1})
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:ok, updated} = Planning.move_note_to_day(note, 3, trip, friend)
+      assert updated.day_index == 3
+    end
+
+    test "successfully moves note to unassigned", %{author: author, trip: trip} do
+      {:ok, note} = Planning.create_note(trip, %{title: "Note", day_index: 1})
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:ok, updated} = Planning.move_note_to_day(note, nil, trip, author)
+      assert updated.day_index == nil
+    end
+
+    test "successfully moves note to same day (updates rank)", %{author: author, trip: trip} do
+      {:ok, note1} = Planning.create_note(trip, %{title: "N1", day_index: 0})
+      {:ok, note2} = Planning.create_note(trip, %{title: "N2", day_index: 0})
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:ok, updated} = Planning.move_note_to_day(note2, 0, trip, author, 0)
+      assert updated.day_index == 0
+
+      [first, second] = Planning.list_notes(trip)
+      assert first.id == updated.id
+      assert second.id == note1.id
+    end
+
+    test "fails when note is nil", %{author: author, trip: trip} do
+      assert {:error, "Note not found"} =
+               Planning.move_note_to_day(nil, 2, trip, author)
+    end
+
+    test "fails when user is not authorized", %{stranger: stranger, trip: trip} do
+      {:ok, note} = Planning.create_note(trip, %{title: "Note", day_index: 0})
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:error, "Unauthorized"} =
+               Planning.move_note_to_day(note, 2, trip, stranger)
+    end
+
+    test "fails when day_index is out of bounds", %{author: author, trip: trip} do
+      {:ok, note} = Planning.create_note(trip, %{title: "Note", day_index: 0})
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:error, "Day index must be between 0 and 4"} =
+               Planning.move_note_to_day(note, 5, trip, author)
+    end
+
+    test "fails when note does not belong to trip", %{author: author, trip: trip} do
+      other_user = user_fixture()
+      other_trip = trip_fixture(%{author_id: other_user.id})
+
+      {:ok, other_note} = Planning.create_note(other_trip, %{title: "Other", day_index: 0})
+
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:error, "Note not found"} =
+               Planning.move_note_to_day(other_note, 2, trip, author)
+    end
+
+    test "sends pubsub event", %{author: author, trip: trip} do
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
+      {:ok, note} = Planning.create_note(trip, %{title: "Note", day_index: 0})
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:ok, _} = Planning.move_note_to_day(note, 2, trip, author)
+      assert_receive {[:note, :updated], %{value: _}}
+    end
+  end
+
+  describe "reorder_note/4" do
+    setup do
+      author = user_fixture()
+      trip = trip_fixture(%{author_id: author.id})
+
+      {:ok, n1} = Planning.create_note(trip, %{title: "N1", day_index: 0})
+      {:ok, n2} = Planning.create_note(trip, %{title: "N2", day_index: 0})
+      {:ok, n3} = Planning.create_note(trip, %{title: "N3", day_index: 0})
+
+      trip = Planning.get_trip!(trip.id)
+
+      {:ok, author: Repo.preload(author, :friendships), trip: trip, n1: n1, n2: n2, n3: n3}
+    end
+
+    test "reorders note within same day", %{
+      author: author,
+      trip: trip,
+      n1: n1,
+      n2: n2,
+      n3: n3
+    } do
+      [first, second, third] = Planning.list_notes(trip)
+      assert first.id == n1.id
+      assert second.id == n2.id
+      assert third.id == n3.id
+
+      assert {:ok, _} = Planning.reorder_note(n3, 0, trip, author)
+
+      [first, second, third] = Planning.list_notes(trip)
+      assert first.id == n3.id
+      assert second.id == n1.id
+      assert third.id == n2.id
+    end
+
+    test "fails when unauthorized", %{trip: trip, n1: n1} do
+      stranger = user_fixture() |> Repo.preload(:friendships)
+      assert {:error, "Unauthorized"} = Planning.reorder_note(n1, 1, trip, stranger)
+    end
+
+    test "fails when note not in trip", %{author: author, trip: trip} do
+      other_trip = trip_fixture()
+
+      {:ok, other_note} = Planning.create_note(other_trip, %{title: "Other", day_index: 0})
+
+      assert {:error, "Note not found"} =
+               Planning.reorder_note(other_note, 0, trip, author)
+    end
+
+    test "sends pubsub event", %{author: author, trip: trip, n1: n1} do
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
+      assert {:ok, _} = Planning.reorder_note(n1, 1, trip, author)
+      assert_receive {[:note, :updated], %{value: _}}
+    end
+  end
+
   describe "day_expenses" do
     alias HamsterTravel.Planning.DayExpense
 

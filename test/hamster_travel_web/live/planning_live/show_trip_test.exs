@@ -30,6 +30,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       # Verify that the tabs are rendered
       assert has_element?(view, "a", "Transfers and hotels")
       assert has_element?(view, "a", "Activities")
+      assert has_element?(view, "a", "Notes")
 
       # Verify that the itinerary tab is active by default
       assert has_element?(view, "a.pc-tab__underline--is-active", "Transfers and hotels")
@@ -68,6 +69,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       # Verify that the tabs are rendered
       assert has_element?(view, "a", "Transfers and hotels")
       assert has_element?(view, "a", "Activities")
+      assert has_element?(view, "a", "Notes")
 
       # Verify that the itinerary tab is active by default
       assert has_element?(view, "a.pc-tab__underline--is-active", "Transfers and hotels")
@@ -100,6 +102,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       # Verify that the tabs are rendered
       assert has_element?(view, "a", "Transfers and hotels")
       assert has_element?(view, "a", "Activities")
+      assert has_element?(view, "a", "Notes")
 
       # Verify that the itinerary tab is active by default
       assert has_element?(view, "a.pc-tab__underline--is-active", "Transfers and hotels")
@@ -142,6 +145,104 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       # Assert
       assert has_element?(view, "#activities-#{trip.id}")
+    end
+
+    test "renders notes tab when selected", %{conn: conn} do
+      # Arrange
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      {:ok, day_note} = Planning.create_note(trip, %{title: "Day note", day_index: 0})
+      {:ok, unassigned_note} = Planning.create_note(trip, %{title: "Trip report", day_index: nil})
+
+      # Act
+      {:ok, view, html} = live(conn, ~p"/trips/#{trip.slug}?tab=notes")
+
+      # Assert
+      assert has_element?(view, "#notes-#{trip.id}")
+      assert html =~ day_note.title
+      assert html =~ unassigned_note.title
+    end
+
+    test "shows note form when adding an unassigned note", %{conn: conn} do
+      # Arrange
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      # Act
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=notes")
+
+      view
+      |> element("#note-new-unassigned a", "Add note")
+      |> render_click()
+
+      # Assert
+      assert has_element?(view, "form#note-form-new-note-new-unassigned")
+    end
+
+    test "moves note to a new day via drag event", %{conn: conn} do
+      # Arrange
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft", duration: 3})
+      {:ok, note} = Planning.create_note(trip, %{title: "Move me", day_index: 0})
+
+      # Act
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=notes")
+
+      render_hook(view, "move_note", %{
+        "note_id" => Integer.to_string(note.id),
+        "new_day_index" => "1",
+        "position" => 0
+      })
+
+      # Assert
+      assert Planning.get_note!(note.id).day_index == 1
+    end
+
+    test "reorders unassigned notes via drag event", %{conn: conn} do
+      # Arrange
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+      {:ok, note1} = Planning.create_note(trip, %{title: "First", day_index: nil})
+      {:ok, note2} = Planning.create_note(trip, %{title: "Second", day_index: nil})
+
+      # Act
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=notes")
+
+      render_hook(view, "reorder_note", %{
+        "note_id" => Integer.to_string(note2.id),
+        "position" => 0
+      })
+
+      # Assert
+      [first | _] = Planning.list_notes(trip)
+      assert first.id == note2.id
+      assert note1.id != note2.id
+    end
+
+    test "renders day-bound notes on activities tab only", %{conn: conn} do
+      # Arrange
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      {:ok, day_note} = Planning.create_note(trip, %{title: "Day note", day_index: 0})
+      {:ok, unassigned_note} = Planning.create_note(trip, %{title: "Trip report", day_index: nil})
+
+      {:ok, outside_note} =
+        Planning.create_note(trip, %{title: "Outside note", day_index: trip.duration + 1})
+
+      # Act
+      {:ok, _view, html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      # Assert
+      assert html =~ day_note.title
+      assert html =~ outside_note.title
+      refute html =~ unassigned_note.title
     end
 
     test "renders trip page with accommodations", %{conn: conn} do
