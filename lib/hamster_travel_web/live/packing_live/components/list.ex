@@ -127,23 +127,17 @@ defmodule HamsterTravelWeb.Packing.List do
       >
         <.icon name="hero-trash" />
       </.icon_button>
-      <.icon_button
-        size="xs"
-        class={button_color()}
-        x-show="showItems"
-        @click="showItems = !showItems"
-      >
-        <.icon name="hero-chevron-down" />
-      </.icon_button>
+      <span x-show="showItems" @click="showItems = !showItems">
+        <.icon_button size="xs" class={button_color()}>
+          <.icon name="hero-chevron-down" />
+        </.icon_button>
+      </span>
 
-      <.icon_button
-        size="xs"
-        class={button_color()}
-        x-show="!showItems"
-        @click="showItems = !showItems"
-      >
-        <.icon name="hero-chevron-right" />
-      </.icon_button>
+      <span x-show="!showItems" @click="showItems = !showItems">
+        <.icon_button size="xs" class={button_color()}>
+          <.icon name="hero-chevron-right" />
+        </.icon_button>
+      </span>
     </.inline>
     """
   end
@@ -153,7 +147,9 @@ defmodule HamsterTravelWeb.Packing.List do
     <.inline>
       <.form for={@form} phx-submit="update" phx-target={assigns[:"phx-target"]} as={:list}>
         <.inline>
-          <.input id={"update-item-#{@list.id}"} field={@form[:name]} x-init="$el.focus()" />
+          <span class="inline-flex" x-init="$nextTick(() => $el.querySelector('input')?.focus())">
+            <.input id={"update-item-#{@list.id}"} field={@form[:name]} />
+          </span>
           <.icon_button class={button_color()}>
             <.icon name="hero-check" />
           </.icon_button>

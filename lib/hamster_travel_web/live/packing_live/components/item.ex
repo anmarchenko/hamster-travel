@@ -92,14 +92,15 @@ defmodule HamsterTravelWeb.Packing.Item do
       <.inline>
         <.form :let={f} for={%{}} phx-submit="update" phx-target={@myself}>
           <.inline>
-            <.text_input
-              form={f}
-              id={"update-item-#{@item.id}"}
-              field={:name}
-              placeholder={@name}
-              value={@name}
-              x-init="$el.focus()"
-            />
+            <span class="inline-flex" x-init="$nextTick(() => $el.querySelector('input')?.focus())">
+              <.text_input
+                form={f}
+                id={"update-item-#{@item.id}"}
+                field={:name}
+                placeholder={@name}
+                value={@name}
+              />
+            </span>
             <.icon_button>
               <.icon name="hero-check" />
             </.icon_button>

@@ -57,12 +57,13 @@ defmodule HamsterTravelWeb.Packing.ListNew do
       <.inline>
         <.form for={@form} phx-submit="create" phx-target={@myself} as={:list}>
           <.inline>
-            <.input
-              id={"add-list-#{@backpack.id}"}
-              field={@form[:name]}
-              placeholder={gettext("List name")}
-              x-init="$el.focus()"
-            />
+            <span class="inline-flex" x-init="$nextTick(() => $el.querySelector('input')?.focus())">
+              <.input
+                id={"add-list-#{@backpack.id}"}
+                field={@form[:name]}
+                placeholder={gettext("List name")}
+              />
+            </span>
             <.icon_button>
               <.icon name="hero-check" />
             </.icon_button>
