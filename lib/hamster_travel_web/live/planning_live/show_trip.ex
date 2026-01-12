@@ -251,6 +251,57 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   @impl true
+  def handle_event("delete_outside_notes", _params, socket) do
+    socket.assigns.trip
+    |> notes_outside()
+    |> Enum.each(&Planning.delete_note/1)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("delete_outside_itinerary", _params, socket) do
+    trip = socket.assigns.trip
+
+    trip
+    |> destinations_outside()
+    |> Enum.each(&Planning.delete_destination/1)
+
+    trip
+    |> accommodations_outside()
+    |> Enum.each(&Planning.delete_accommodation/1)
+
+    trip
+    |> transfers_outside()
+    |> Enum.each(&Planning.delete_transfer/1)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("delete_outside_activities", _params, socket) do
+    trip = socket.assigns.trip
+
+    trip
+    |> destinations_outside()
+    |> Enum.each(&Planning.delete_destination/1)
+
+    trip
+    |> activities_outside()
+    |> Enum.each(&Planning.delete_activity/1)
+
+    trip
+    |> day_expenses_outside()
+    |> Enum.each(&Planning.delete_day_expense/1)
+
+    trip
+    |> notes_outside()
+    |> Enum.each(&Planning.delete_note/1)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event(
         "move_transfer",
         %{"transfer_id" => transfer_id, "new_day_index" => new_day_index},
@@ -578,6 +629,16 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         <div class="flex flex-col gap-y-1" data-note-drop-zone data-target-day="outside">
           <.notes_list notes={@notes_outside} day_index={-1} trip={@trip} />
         </div>
+        <div class="flex justify-start mt-4">
+          <.button
+            color="danger"
+            size="xs"
+            phx-click="delete_outside_notes"
+            data-confirm={gettext("Delete all notes scheduled outside this trip?")}
+          >
+            <.icon_text icon="hero-trash" label={gettext("Delete all")} />
+          </.button>
+        </div>
       </.toggle>
 
       <div class="flex flex-col gap-y-8 mt-8">
@@ -642,10 +703,20 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         label={gettext("Some items are scheduled outside of the trip duration")}
         class="mt-4"
       >
-        <.section_header icon="hero-map-pin" label={gettext("Places")} class="sm:hidden" />
+        <.section_header
+          :if={Enum.any?(@destinations_outside)}
+          icon="hero-map-pin"
+          label={gettext("Places")}
+          class="mb-2"
+        />
         <.destinations_list trip={@trip} destinations={@destinations_outside} day_index={0} />
 
-        <.section_header icon="hero-home" label={gettext("Hotel")} class="sm:hidden" />
+        <.section_header
+          :if={Enum.any?(@accommodations_outside)}
+          icon="hero-home"
+          label={gettext("Hotel")}
+          class="mb-2"
+        />
         <.accommodations_list
           trip={@trip}
           accommodations={@accommodations_outside}
@@ -654,9 +725,10 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         />
 
         <.section_header
+          :if={Enum.any?(@transfers_outside)}
           icon="hero-arrows-right-left"
           label={gettext("Transfers")}
-          class="sm:hidden"
+          class="mb-2"
         />
         <div
           class="transfers-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-1 sm:gap-y-8"
@@ -669,6 +741,18 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             display_currency={@display_currency}
             day_index={-1}
           />
+        </div>
+        <div class="flex justify-start mt-4">
+          <.button
+            color="danger"
+            size="xs"
+            phx-click="delete_outside_itinerary"
+            data-confirm={
+              gettext("Delete all places, hotels, and transfers scheduled outside this trip?")
+            }
+          >
+            <.icon_text icon="hero-trash" label={gettext("Delete all")} />
+          </.button>
         </div>
       </.toggle>
 
@@ -799,7 +883,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             Enum.any?(@activities_outside) ||
               Enum.any?(@day_expenses_outside) || Enum.any?(@notes_outside)
           }
-          class="activities-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-2 sm:gap-y-8"
+          class="activities-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-2"
         >
           <.section_header
             :if={Enum.any?(@day_expenses_outside)}
@@ -849,6 +933,16 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               trip={@trip}
             />
           </div>
+        </div>
+        <div class="flex justify-start mt-4">
+          <.button
+            color="danger"
+            size="xs"
+            phx-click="delete_outside_activities"
+            data-confirm={gettext("Delete all items scheduled outside this trip on this tab?")}
+          >
+            <.icon_text icon="hero-trash" label={gettext("Delete all")} />
+          </.button>
         </div>
       </.toggle>
 

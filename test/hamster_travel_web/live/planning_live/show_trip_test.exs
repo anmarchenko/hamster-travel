@@ -3,6 +3,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
   import Phoenix.LiveViewTest
   import HamsterTravel.AccountsFixtures
+  import HamsterTravel.GeoFixtures
   import HamsterTravel.PlanningFixtures
 
   alias HamsterTravel.Geo
@@ -243,6 +244,85 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert html =~ day_note.title
       assert html =~ outside_note.title
       refute html =~ unassigned_note.title
+    end
+
+    test "deletes outside items from activities tab", %{conn: conn} do
+      # Arrange
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip =
+        trip_fixture(%{
+          author_id: user.id,
+          status: "0_draft",
+          dates_unknown: true,
+          duration: 1
+        })
+
+      geonames_fixture()
+      city = Geo.find_city_by_geonames_id("2950159")
+
+      {:ok, inside_destination} =
+        Planning.create_destination(trip, %{city_id: city.id, start_day: 0, end_day: 0})
+
+      {:ok, outside_destination} =
+        Planning.create_destination(trip, %{city_id: city.id, start_day: 2, end_day: 2})
+
+      {:ok, inside_activity} =
+        Planning.create_activity(trip, %{
+          name: "Inside activity",
+          day_index: 0,
+          priority: 2,
+          expense: %{price: Money.new(:EUR, 1000), name: "Inside activity", trip_id: trip.id}
+        })
+
+      {:ok, outside_activity} =
+        Planning.create_activity(trip, %{
+          name: "Outside activity",
+          day_index: 2,
+          priority: 2,
+          expense: %{price: Money.new(:EUR, 1000), name: "Outside activity", trip_id: trip.id}
+        })
+
+      {:ok, inside_day_expense} =
+        Planning.create_day_expense(trip, %{
+          name: "Inside expense",
+          day_index: 0,
+          expense: %{price: Money.new(:EUR, 1200), name: "Inside expense", trip_id: trip.id}
+        })
+
+      {:ok, outside_day_expense} =
+        Planning.create_day_expense(trip, %{
+          name: "Outside expense",
+          day_index: 2,
+          expense: %{price: Money.new(:EUR, 1200), name: "Outside expense", trip_id: trip.id}
+        })
+
+      {:ok, inside_note} = Planning.create_note(trip, %{title: "Inside note", day_index: 0})
+      {:ok, outside_note} = Planning.create_note(trip, %{title: "Outside note", day_index: 2})
+
+      # Act
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      view
+      |> element("[phx-click='delete_outside_activities']")
+      |> render_click()
+
+      # Assert
+      destinations = Planning.list_destinations(trip)
+      refute Enum.any?(destinations, &(&1.id == outside_destination.id))
+      assert Enum.any?(destinations, &(&1.id == inside_destination.id))
+
+      activities = Planning.list_activities(trip)
+      refute Enum.any?(activities, &(&1.id == outside_activity.id))
+      assert Enum.any?(activities, &(&1.id == inside_activity.id))
+
+      day_expenses = Planning.list_day_expenses(trip)
+      refute Enum.any?(day_expenses, &(&1.id == outside_day_expense.id))
+      assert Enum.any?(day_expenses, &(&1.id == inside_day_expense.id))
+
+      notes = Planning.list_notes(trip)
+      refute Enum.any?(notes, &(&1.id == outside_note.id))
+      assert Enum.any?(notes, &(&1.id == inside_note.id))
     end
 
     test "renders trip page with accommodations", %{conn: conn} do
