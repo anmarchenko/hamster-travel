@@ -11,6 +11,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   alias HamsterTravel.Geo
   alias HamsterTravel.Planning
+  alias HamsterTravel.Planning.Policy
   alias HamsterTravel.Planning.Trip
   alias HamsterTravel.Repo
   alias HamsterTravelWeb.Cldr
@@ -51,15 +52,20 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             <.button link_type="live_redirect" to={trip_url(@trip.slug, :edit)} color="secondary">
               <.icon_text icon="hero-pencil" label={gettext("Edit")} />
             </.button>
+            <.button
+              :if={Policy.authorized?(:delete, @trip, @current_user)}
+              phx-click="delete_trip"
+              data-confirm={gettext("Are you sure you want to delete this trip?")}
+              color="danger"
+            >
+              <.icon_text icon="hero-trash" label={gettext("Delete")} />
+            </.button>
             <%!-- <.link href={trip_url(@trip.slug, :copy)}>
           <%= gettext("Make a copy") %>
         </.link>
         <.link href={trip_url(@trip.slug, :pdf)}>
           <%= gettext("Export as PDF") %>
-        </.link>
-        <.link href={trip_url(@trip.slug, :delete)}>
-          <%= gettext("Delete") %>
-        </.link> --%>
+        </.link>--%>
           </.inline>
           <.status_row trip={@trip} />
         </div>
@@ -297,6 +303,28 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     trip
     |> notes_outside()
     |> Enum.each(&Planning.delete_note/1)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("delete_trip", _params, socket) do
+    %{trip: trip, current_user: user} = socket.assigns
+
+    socket =
+      if Policy.authorized?(:delete, trip, user) do
+        case Planning.delete_trip(trip) do
+          {:ok, _trip} ->
+            socket
+            |> put_flash(:info, gettext("Trip deleted."))
+            |> push_navigate(to: ~p"/plans")
+
+          {:error, _reason} ->
+            put_flash(socket, :error, gettext("Failed to delete trip."))
+        end
+      else
+        socket
+      end
 
     {:noreply, socket}
   end

@@ -175,6 +175,27 @@ defmodule HamsterTravel.Planning do
       from(e in Expense, where: e.trip_id == ^trip.id)
       |> Repo.delete_all()
 
+      from(d in Destination, where: d.trip_id == ^trip.id)
+      |> Repo.delete_all()
+
+      from(a in Accommodation, where: a.trip_id == ^trip.id)
+      |> Repo.delete_all()
+
+      from(t in Transfer, where: t.trip_id == ^trip.id)
+      |> Repo.delete_all()
+
+      from(a in Activity, where: a.trip_id == ^trip.id)
+      |> Repo.delete_all()
+
+      from(de in DayExpense, where: de.trip_id == ^trip.id)
+      |> Repo.delete_all()
+
+      from(n in Note, where: n.trip_id == ^trip.id)
+      |> Repo.delete_all()
+
+      from(fe in FoodExpense, where: fe.trip_id == ^trip.id)
+      |> Repo.delete_all()
+
       Repo.delete(trip)
     end)
     |> case do

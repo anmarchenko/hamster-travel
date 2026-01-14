@@ -572,6 +572,56 @@ defmodule HamsterTravel.PlanningTest do
       assert_raise Ecto.NoResultsError, fn -> Planning.get_expense!(food_expense_id) end
     end
 
+    test "delete_trip/1 removes activities, transfers, day expenses, destinations, and notes", %{
+      city: city
+    } do
+      trip = trip_fixture()
+      hamburg = HamsterTravel.Geo.find_city_by_geonames_id("2911298")
+
+      {:ok, destination} =
+        Planning.create_destination(trip, %{
+          city_id: city.id,
+          start_day: 0,
+          end_day: 1
+        })
+
+      {:ok, transfer} =
+        Planning.create_transfer(trip, %{
+          transport_mode: "train",
+          departure_city_id: city.id,
+          arrival_city_id: hamburg.id,
+          departure_time: "08:00",
+          arrival_time: "10:00",
+          day_index: 0,
+          expense: %{price: Money.new(:EUR, 1000), name: "Transfer", trip_id: trip.id}
+        })
+
+      {:ok, activity} =
+        Planning.create_activity(trip, %{
+          name: "Museum visit",
+          day_index: 0,
+          priority: 2,
+          expense: %{price: Money.new(:EUR, 2000), name: "Activity", trip_id: trip.id}
+        })
+
+      {:ok, day_expense} =
+        Planning.create_day_expense(trip, %{
+          name: "Lunch",
+          day_index: 0,
+          expense: %{price: Money.new(:EUR, 1500), name: "Lunch", trip_id: trip.id}
+        })
+
+      {:ok, note} = Planning.create_note(trip, %{title: "Remember tickets", day_index: 0})
+
+      assert {:ok, %Trip{}} = Planning.delete_trip(trip)
+
+      assert_raise Ecto.NoResultsError, fn -> Planning.get_transfer!(transfer.id) end
+      assert_raise Ecto.NoResultsError, fn -> Planning.get_activity!(activity.id) end
+      assert_raise Ecto.NoResultsError, fn -> Planning.get_day_expense!(day_expense.id) end
+      assert_raise Ecto.NoResultsError, fn -> Planning.get_destination!(destination.id) end
+      assert_raise Ecto.NoResultsError, fn -> Planning.get_note!(note.id) end
+    end
+
     test "change_trip/1 returns a trip changeset" do
       trip = trip_fixture()
       assert %Ecto.Changeset{} = Planning.change_trip(trip)

@@ -104,6 +104,16 @@ defmodule HamsterTravel.Packing.Template do
   defp calculate_count(count, _) when is_integer(count), do: {:ok, count}
 
   defp calculate_count(expression, vars) when is_binary(expression) do
+    case unknown_identifiers(expression, vars) do
+      [] ->
+        evaluate_expression(expression, vars)
+
+      unknown ->
+        {:error, %{description: "unknown variables: #{Enum.join(unknown, ", ")}"}}
+    end
+  end
+
+  defp evaluate_expression(expression, vars) do
     expression =
       Enum.reduce(
         vars,
@@ -120,6 +130,32 @@ defmodule HamsterTravel.Packing.Template do
       rest ->
         rest
     end
+  end
+
+  defp unknown_identifiers(expression, vars) do
+    expression
+    |> extract_identifiers()
+    |> Enum.reject(&(&1 in allowed_identifiers(vars)))
+    |> Enum.uniq()
+  end
+
+  defp extract_identifiers(expression) do
+    Regex.scan(~r/\b[a-zA-Z_][a-zA-Z0-9_]*\b/, expression)
+    |> Enum.flat_map(& &1)
+  end
+
+  defp allowed_identifiers(vars) do
+    vars =
+      vars
+      |> Map.keys()
+      |> Enum.map(&to_string/1)
+
+    defaults =
+      Abacus.Runtime.Scope.default_scope()
+      |> Map.keys()
+      |> Enum.map(&Atom.to_string/1)
+
+    vars ++ defaults ++ ["true", "false", "null"]
   end
 
   defp fill_ranks({:ok, list}) do

@@ -41,6 +41,66 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert html =~ Cldr.date_with_weekday(trip.end_date)
     end
 
+    test "deletes trip from the trip page", %{conn: conn} do
+      # Arrange
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      {:ok, trip} =
+        Planning.create_trip(
+          %{
+            name: "Delete me",
+            dates_unknown: false,
+            start_date: ~D[2023-06-12],
+            end_date: ~D[2023-06-14],
+            currency: "EUR",
+            status: "1_planned",
+            private: false,
+            people_count: 2
+          },
+          user
+        )
+
+      # Act
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      view
+      |> element("[phx-click='delete_trip']")
+      |> render_click()
+
+      # Assert
+      assert_redirect(view, ~p"/plans")
+      assert Planning.get_trip(trip.id) == nil
+    end
+
+    test "hides delete button for non-authors", %{conn: conn} do
+      # Arrange
+      author = user_fixture()
+      other_user = user_fixture()
+      conn = log_in_user(conn, other_user)
+
+      {:ok, trip} =
+        Planning.create_trip(
+          %{
+            name: "Shared trip",
+            dates_unknown: false,
+            start_date: ~D[2023-06-12],
+            end_date: ~D[2023-06-14],
+            currency: "EUR",
+            status: "1_planned",
+            private: false,
+            people_count: 2
+          },
+          author
+        )
+
+      # Act
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      # Assert
+      refute has_element?(view, "[phx-click='delete_trip']")
+    end
+
     test "renders trip page with empty trip and unknown dates", %{conn: conn} do
       # Arrange
       # Create a user and log them in
