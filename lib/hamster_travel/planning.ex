@@ -18,10 +18,12 @@ defmodule HamsterTravel.Planning do
     Destination,
     FoodExpense,
     Expense,
+    Graveyard,
     Note,
     Policy,
     Transfer,
-    Trip
+    Trip,
+    TripTombstone
   }
 
   alias HamsterTravel.Repo
@@ -172,6 +174,9 @@ defmodule HamsterTravel.Planning do
 
   def delete_trip(%Trip{} = trip) do
     Repo.transaction(fn ->
+      trip = single_trip_preloading(trip)
+      Graveyard.create_trip_tombstone!(trip)
+
       from(e in Expense, where: e.trip_id == ^trip.id)
       |> Repo.delete_all()
 
@@ -205,6 +210,14 @@ defmodule HamsterTravel.Planning do
     end
   end
 
+  def restore_trip_from_tombstone(%TripTombstone{} = tombstone) do
+    Graveyard.restore_trip_from_tombstone(tombstone)
+  end
+
+  def restore_trip_from_tombstone(tombstone_id) when is_binary(tombstone_id) do
+    Graveyard.restore_trip_from_tombstone(tombstone_id)
+  end
+
   def change_trip(%Trip{} = trip, attrs \\ %{}) do
     Trip.changeset(trip, attrs)
   end
@@ -219,6 +232,7 @@ defmodule HamsterTravel.Planning do
     |> Repo.preload([
       :author,
       :countries,
+      :expenses,
       food_expense: :expense,
       accommodations: :expense,
       day_expenses: :expense,

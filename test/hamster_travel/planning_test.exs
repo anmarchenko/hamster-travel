@@ -622,6 +622,151 @@ defmodule HamsterTravel.PlanningTest do
       assert_raise Ecto.NoResultsError, fn -> Planning.get_note!(note.id) end
     end
 
+    test "delete_trip/1 creates a tombstone with payload", %{city: city} do
+      trip = trip_fixture()
+
+      {:ok, destination} =
+        Planning.create_destination(trip, %{
+          city_id: city.id,
+          start_day: 0,
+          end_day: 1
+        })
+
+      Planning.create_note(trip, %{title: "Keep this", day_index: 0})
+
+      assert {:ok, %Trip{}} = Planning.delete_trip(trip)
+
+      tombstone =
+        Repo.get_by!(
+          HamsterTravel.Planning.TripTombstone,
+          original_slug: to_string(trip.slug)
+        )
+
+      assert tombstone.author_id == trip.author_id
+      assert tombstone.payload["trip"]["name"] == trip.name
+      assert [%{"city_id" => city_id}] = tombstone.payload["destinations"]
+      assert city_id == destination.city_id
+      assert [%{"title" => "Keep this"}] = tombstone.payload["notes"]
+    end
+
+    test "restore_trip_from_tombstone/1 restores trip and associations with new ids", %{
+      city: city
+    } do
+      trip = trip_fixture()
+      hamburg = HamsterTravel.Geo.find_city_by_geonames_id("2911298")
+
+      {:ok, _destination} =
+        Planning.create_destination(trip, %{
+          city_id: city.id,
+          start_day: 0,
+          end_day: 1
+        })
+
+      {:ok, _accommodation} =
+        Planning.create_accommodation(trip, %{
+          name: "Grand Hotel",
+          start_day: 0,
+          end_day: 1,
+          expense: %{price: Money.new(:EUR, 15_000), name: "Hotel", trip_id: trip.id}
+        })
+
+      {:ok, _transfer} =
+        Planning.create_transfer(trip, %{
+          transport_mode: "train",
+          departure_city_id: city.id,
+          arrival_city_id: hamburg.id,
+          departure_time: "08:00",
+          arrival_time: "10:00",
+          day_index: 0,
+          expense: %{price: Money.new(:EUR, 1000), name: "Transfer", trip_id: trip.id}
+        })
+
+      {:ok, _activity} =
+        Planning.create_activity(trip, %{
+          name: "Museum visit",
+          day_index: 0,
+          priority: 2,
+          expense: %{price: Money.new(:EUR, 2000), name: "Activity", trip_id: trip.id}
+        })
+
+      {:ok, _day_expense} =
+        Planning.create_day_expense(trip, %{
+          name: "Lunch",
+          day_index: 0,
+          expense: %{price: Money.new(:EUR, 1500), name: "Lunch", trip_id: trip.id}
+        })
+
+      {:ok, _note} = Planning.create_note(trip, %{title: "Remember tickets", day_index: 0})
+
+      {:ok, _expense} =
+        Planning.create_expense(trip, %{price: Money.new(:EUR, 5000), name: "Souvenirs"})
+
+      assert {:ok, %Trip{}} = Planning.delete_trip(trip)
+
+      tombstone =
+        Repo.get_by!(
+          HamsterTravel.Planning.TripTombstone,
+          original_slug: to_string(trip.slug)
+        )
+
+      assert {:ok, %Trip{} = restored} = Planning.restore_trip_from_tombstone(tombstone)
+      assert restored.id != trip.id
+      assert restored.name == trip.name
+      refute Repo.get(HamsterTravel.Planning.TripTombstone, tombstone.id)
+
+      restored = Planning.get_trip!(restored.id)
+      assert length(restored.destinations) == 1
+      assert length(restored.accommodations) == 1
+      assert length(restored.transfers) == 1
+      assert length(restored.activities) == 1
+      assert length(restored.day_expenses) == 1
+      assert length(restored.notes) == 1
+
+      standalone_expenses =
+        Enum.filter(restored.expenses, fn expense ->
+          is_nil(expense.accommodation_id) and is_nil(expense.transfer_id) and
+            is_nil(expense.activity_id) and is_nil(expense.day_expense_id) and
+            is_nil(expense.food_expense_id)
+        end)
+
+      assert [standalone] = standalone_expenses
+      assert standalone.name == "Souvenirs"
+    end
+
+    test "restore_trip_from_tombstone/1 generates new slug when name is taken", %{
+      user: user
+    } do
+      trip = trip_fixture(%{name: "Same Name"})
+
+      assert {:ok, %Trip{}} = Planning.delete_trip(trip)
+
+      {:ok, %Trip{} = new_trip} =
+        Planning.create_trip(
+          %{
+            name: "Same Name",
+            dates_unknown: false,
+            start_date: ~D[2023-06-12],
+            end_date: ~D[2023-06-14],
+            currency: "EUR",
+            status: "1_planned",
+            private: false,
+            people_count: 2
+          },
+          user
+        )
+
+      tombstone =
+        Repo.get_by!(
+          HamsterTravel.Planning.TripTombstone,
+          original_slug: to_string(trip.slug)
+        )
+
+      assert {:ok, %Trip{} = restored} = Planning.restore_trip_from_tombstone(tombstone)
+      assert restored.id != trip.id
+      assert restored.slug != new_trip.slug
+      assert restored.name == "Same Name"
+    end
+
     test "change_trip/1 returns a trip changeset" do
       trip = trip_fixture()
       assert %Ecto.Changeset{} = Planning.change_trip(trip)
