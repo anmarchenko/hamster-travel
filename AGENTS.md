@@ -144,6 +144,7 @@ Follow this pattern for LiveComponents:
 - **Mox for Dependencies**: Use Mox for mocking external dependencies
 - **Arrange-Act-Assert**: Structure tests with clear setup, action, and verification phases
 - Use fixtures for test data from `test/support/fixtures/`
+- Always rerun all tests after every code change with `mix test`
 - After any change to a test file run it with `mix test <file_path>`
 - After several changes run all tests with `mix test`
 

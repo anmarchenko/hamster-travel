@@ -1,367 +1,441 @@
 defmodule HamsterTravel.Planning do
   @moduledoc """
-  The Planning context.
+  The Planning context public API for trips, itineraries, and related records.
+
+  Use these functions to manage trips and their associations.
   """
 
-  import Ecto.Query, warn: false
-
-  require Logger
-
-  alias Ecto.Multi
-  alias HamsterTravel.Accounts.User
-  alias HamsterTravel.Geo
-
   alias HamsterTravel.Planning.{
+    Accommodations,
     Accommodation,
+    Activities,
     Activity,
+    Common,
+    DayExpenses,
     DayExpense,
     Destination,
+    Destinations,
     FoodExpense,
+    FoodExpenses,
     Expense,
-    Graveyard,
+    Expenses,
     Note,
-    Policy,
+    Notes,
     Transfer,
+    Transfers,
     Trip,
-    TripTombstone
+    Trips
   }
-
-  alias HamsterTravel.Repo
-
-  # PubSub functions
-  @topic "planning"
-
-  defp send_pubsub_event({:ok, result} = return_tuple, event, trip_id) do
-    Phoenix.PubSub.broadcast(
-      HamsterTravel.PubSub,
-      @topic <> ":#{trip_id}",
-      {event, %{value: result}}
-    )
-
-    return_tuple
-  end
-
-  defp send_pubsub_event({:error, _reason} = result, _, _), do: result
 
   # Trip functions
 
+  @doc """
+  Lists planned and finished trips visible to a user.
+
+  Pass `nil` to include only public trips or a `%User{}` to include private trips
+  visible by the given user.
+  Returns a list of `%Trip{}` structs with associations preloaded.
+
+  ## Examples
+
+      iex> list_plans(user)
+      [%Trip{}, ...]
+  """
   def list_plans(user \\ nil) do
-    query =
-      from t in Trip,
-        where: t.status in [^Trip.planned(), ^Trip.finished()],
-        order_by: [
-          asc: t.status,
-          desc: t.start_date
-        ]
-
-    query
-    |> Policy.user_plans_scope(user)
-    |> Repo.all()
-    |> trip_preloading()
-  end
-
-  def list_drafts(user) do
-    query =
-      from t in Trip,
-        where: t.status == ^Trip.draft(),
-        order_by: [
-          asc: t.name
-        ]
-
-    query
-    |> Policy.user_drafts_scope(user)
-    |> Repo.all()
-    |> trip_preloading()
-  end
-
-  def get_trip(id) do
-    Trip
-    |> Repo.get(id)
-    |> single_trip_preloading()
-  end
-
-  def get_trip!(id) do
-    Trip
-    |> Repo.get!(id)
-    |> single_trip_preloading()
-  end
-
-  # when there is no current user then we show only public trips
-  def fetch_trip!(slug, nil) do
-    query =
-      from t in Trip,
-        where: t.slug == ^slug and t.private == false
-
-    query
-    |> Repo.one!()
-    |> single_trip_preloading()
-  end
-
-  # when current user is present then we show public trips and user's private trips
-  def fetch_trip!(slug, user) do
-    query =
-      from t in Trip,
-        where: t.slug == ^slug
-
-    query
-    |> Policy.user_trip_visibility_scope(user)
-    |> Repo.one!()
-    |> single_trip_preloading()
-  end
-
-  def trip_changeset(params) do
-    Trip.changeset(%Trip{}, params)
-  end
-
-  def new_trip(params \\ %{}) do
-    params =
-      Map.merge(
-        %{status: Trip.planned(), people_count: 2, private: false, currency: "EUR"},
-        params
-      )
-
-    Trip.changeset(
-      struct(Trip, params),
-      %{}
-    )
-  end
-
-  def create_trip(attrs \\ %{}, user) do
-    Multi.new()
-    |> Multi.insert(:trip, Trip.changeset(%Trip{author_id: user.id}, attrs))
-    |> Multi.run(:food_expense, fn repo, %{trip: trip} ->
-      create_food_expense_with_repo(repo, trip, default_food_expense_attrs(trip))
-    end)
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{trip: trip}} ->
-        {:ok, trip}
-
-      {:error, :trip, changeset, _} ->
-        {:error, changeset}
-
-      {:error, :food_expense, changeset, _} ->
-        {:error, changeset}
-    end
-  end
-
-  def update_trip(%Trip{} = trip, attrs) do
-    Repo.transaction(fn ->
-      case Repo.update(Trip.changeset(trip, attrs)) do
-        {:ok, updated_trip} ->
-          maybe_adjust_destinations(updated_trip, trip)
-
-        {:error, changeset} ->
-          Repo.rollback(changeset)
-      end
-    end)
-  end
-
-  defp maybe_adjust_destinations(updated_trip, original_trip) do
-    if updated_trip.duration != original_trip.duration do
-      adjust_destinations_for_duration(updated_trip)
-    end
-
-    updated_trip
-  end
-
-  defp adjust_destinations_for_duration(%Trip{id: trip_id, duration: new_duration}) do
-    from(d in Destination,
-      where: d.trip_id == ^trip_id and d.start_day < ^new_duration and d.end_day >= ^new_duration
-    )
-    |> Repo.update_all(set: [end_day: new_duration - 1])
-  end
-
-  def delete_trip(%Trip{} = trip) do
-    Repo.transaction(fn ->
-      trip = single_trip_preloading(trip)
-      Graveyard.create_trip_tombstone!(trip)
-
-      from(e in Expense, where: e.trip_id == ^trip.id)
-      |> Repo.delete_all()
-
-      from(d in Destination, where: d.trip_id == ^trip.id)
-      |> Repo.delete_all()
-
-      from(a in Accommodation, where: a.trip_id == ^trip.id)
-      |> Repo.delete_all()
-
-      from(t in Transfer, where: t.trip_id == ^trip.id)
-      |> Repo.delete_all()
-
-      from(a in Activity, where: a.trip_id == ^trip.id)
-      |> Repo.delete_all()
-
-      from(de in DayExpense, where: de.trip_id == ^trip.id)
-      |> Repo.delete_all()
-
-      from(n in Note, where: n.trip_id == ^trip.id)
-      |> Repo.delete_all()
-
-      from(fe in FoodExpense, where: fe.trip_id == ^trip.id)
-      |> Repo.delete_all()
-
-      Repo.delete(trip)
-    end)
-    |> case do
-      {:ok, {:ok, deleted_trip}} -> {:ok, deleted_trip}
-      {:ok, {:error, changeset}} -> {:error, changeset}
-      {:error, reason} -> {:error, reason}
-    end
-  end
-
-  def restore_trip_from_tombstone(%TripTombstone{} = tombstone) do
-    Graveyard.restore_trip_from_tombstone(tombstone)
-  end
-
-  def restore_trip_from_tombstone(tombstone_id) when is_binary(tombstone_id) do
-    Graveyard.restore_trip_from_tombstone(tombstone_id)
-  end
-
-  def change_trip(%Trip{} = trip, attrs \\ %{}) do
-    Trip.changeset(trip, attrs)
-  end
-
-  defp trip_preloading(query) do
-    query
-    |> Repo.preload([:author, :countries, :expenses])
-  end
-
-  defp single_trip_preloading(query) do
-    query
-    |> Repo.preload([
-      :author,
-      :countries,
-      :expenses,
-      food_expense: :expense,
-      accommodations: :expense,
-      day_expenses: :expense,
-      activities: :expense,
-      notes: notes_preloading_query(),
-      destinations: destinations_preloading_query(),
-      transfers: transfers_preloading_query()
-    ])
-  end
-
-  # Destinations functions
-  def get_destination!(id) do
-    Repo.get!(Destination, id)
-    |> destinations_preloading()
-  end
-
-  def list_destinations(%Trip{id: trip_id}) do
-    list_destinations(trip_id)
-  end
-
-  def list_destinations(trip_id) do
-    Repo.all(from d in Destination, where: d.trip_id == ^trip_id)
-    |> destinations_preloading()
-  end
-
-  def create_destination(trip, attrs \\ %{}) do
-    %Destination{trip_id: trip.id}
-    |> Destination.changeset(attrs)
-    |> Repo.insert()
-    |> preload_after_db_call(&Repo.preload(&1, city: Geo.city_preloading_query()))
-    |> send_pubsub_event([:destination, :created], trip.id)
-  end
-
-  def update_destination(%Destination{} = destination, attrs) do
-    destination
-    |> Destination.changeset(attrs)
-    |> Repo.update()
-    |> preload_after_db_call(&Repo.preload(&1, city: Geo.city_preloading_query()))
-    |> send_pubsub_event([:destination, :updated], destination.trip_id)
-  end
-
-  def new_destination(trip, day_index, attrs \\ %{}) do
-    default_days =
-      if Ecto.assoc_loaded?(trip.destinations) && Enum.empty?(trip.destinations) do
-        %{start_day: 0, end_day: trip.duration - 1}
-      else
-        %{start_day: day_index, end_day: day_index}
-      end
-
-    %Destination{
-      start_day: default_days.start_day,
-      end_day: default_days.end_day,
-      trip_id: trip.id,
-      city: nil
-    }
-    |> Destination.changeset(attrs)
-  end
-
-  def change_destination(%Destination{} = destination, attrs \\ %{}) do
-    Destination.changeset(destination, attrs)
-  end
-
-  def delete_destination(%Destination{} = destination) do
-    Repo.delete(destination)
-    |> send_pubsub_event([:destination, :deleted], destination.trip_id)
+    Trips.list_plans(user)
   end
 
   @doc """
-  Returns a list of destinations that are active on a given day index.
-  A destination is considered active if its start_day is less than or equal to
-  the day index and its end_day is greater than or equal to the day index.
+  Lists draft trips visible to the given user.
+
+  Pass the author `%User{}` to fetch their drafts.
+  Returns a list of `%Trip{}` structs with associations preloaded.
+
+  ## Examples
+
+      iex> list_drafts(user)
+      [%Trip{}, ...]
   """
-  def destinations_for_day(day_index, destinations) do
-    items_for_day(day_index, destinations)
+  def list_drafts(user) do
+    Trips.list_drafts(user)
   end
 
-  defp destinations_preloading(query) do
-    query
-    |> Repo.preload(destinations_preloading_query())
+  @doc """
+  Fetches a trip by id without raising.
+
+  Pass the trip id as a binary.
+  Returns `%Trip{}` with preloaded associations or `nil`.
+
+  ## Examples
+
+      iex> get_trip(trip.id)
+      %Trip{}
+  """
+  def get_trip(id) do
+    Trips.get_trip(id)
   end
 
-  defp destinations_preloading_query do
-    [
-      city: Geo.city_preloading_query()
-    ]
+  @doc """
+  Fetches a trip by id and raises if it does not exist.
+
+  Pass the trip id as a binary.
+  Returns `%Trip{}` with preloaded associations or raises `Ecto.NoResultsError`.
+
+  ## Examples
+
+      iex> get_trip!(trip.id)
+      %Trip{}
+  """
+  def get_trip!(id) do
+    Trips.get_trip!(id)
+  end
+
+  @doc """
+  Fetches a trip by slug with visibility rules.
+
+  Pass the slug and the current user, or `nil` for public-only access.
+  Returns `%Trip{}` with preloaded associations or raises `Ecto.NoResultsError`.
+
+  ## Examples
+
+      iex> fetch_trip!(trip.slug, user)
+      %Trip{}
+  """
+  def fetch_trip!(slug, user) do
+    Trips.fetch_trip!(slug, user)
+  end
+
+  @doc """
+  Builds a changeset for validating a new trip.
+
+  Pass a map of attributes; no defaults are applied.
+  Returns `%Ecto.Changeset{}`.
+
+  ## Examples
+
+      iex> trip_changeset(%{"name" => "Rome"})
+      %Ecto.Changeset{}
+  """
+  def trip_changeset(params) do
+    Trips.trip_changeset(params)
+  end
+
+  @doc """
+  Builds a changeset for a new trip with defaults merged in.
+
+  Pass optional attributes to override defaults such as `currency` or `people_count`.
+  Returns `%Ecto.Changeset{}`.
+
+  ## Examples
+
+      iex> new_trip(%{"name" => "Rome"})
+      %Ecto.Changeset{}
+  """
+  def new_trip(params \\ %{}) do
+    Trips.new_trip(params)
+  end
+
+  @doc """
+  Creates a trip for the given author and initializes a default food expense.
+
+  Pass a map of trip attributes and a `%User{}` author.
+  Returns `{:ok, %Trip{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> create_trip(%{"name" => "Rome"}, user)
+      {:ok, %Trip{}}
+  """
+  def create_trip(attrs \\ %{}, user) do
+    Trips.create_trip(attrs, user)
+  end
+
+  @doc """
+  Updates a trip and clamps destinations/accommodations when duration changes.
+
+  Pass the existing `%Trip{}` and a map of changes.
+  Returns `{:ok, %Trip{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> update_trip(trip, %{"name" => "New"})
+      {:ok, %Trip{}}
+  """
+  def update_trip(%Trip{} = trip, attrs) do
+    Trips.update_trip(trip, attrs)
+  end
+
+  @doc """
+  Creates a tombstone snapshot and hard-deletes the trip and its associations.
+
+  Pass the `%Trip{}` to remove.
+  Returns `{:ok, %Trip{}}` or `{:error, reason}`.
+
+  ## Examples
+
+      iex> delete_trip(trip)
+      {:ok, %Trip{}}
+  """
+  def delete_trip(%Trip{} = trip) do
+    Trips.delete_trip(trip)
+  end
+
+  @doc """
+  Restores a trip and its associations from a tombstone.
+
+  Pass a `%TripTombstone{}` or tombstone id.
+  Returns `{:ok, %Trip{}}` or `{:error, reason}` and generates a unique slug if needed.
+
+  ## Examples
+
+      iex> restore_trip_from_tombstone(tombstone)
+      {:ok, %Trip{}}
+  """
+  def restore_trip_from_tombstone(tombstone_or_id) do
+    Trips.restore_trip_from_tombstone(tombstone_or_id)
+  end
+
+  @doc """
+  Builds a changeset for editing an existing trip.
+
+  Pass the `%Trip{}` and optional attribute changes.
+  Returns `%Ecto.Changeset{}`.
+
+  ## Examples
+
+      iex> change_trip(trip, %{"name" => "New"})
+      %Ecto.Changeset{}
+  """
+  def change_trip(%Trip{} = trip, attrs \\ %{}) do
+    Trips.change_trip(trip, attrs)
+  end
+
+  # Destinations functions
+  @doc """
+  Fetches a destination by id and raises if missing.
+
+  Pass the destination id.
+  Returns `%Destination{}` with its city preloaded.
+
+  ## Examples
+
+      iex> get_destination!(destination.id)
+      %Destination{}
+  """
+  def get_destination!(id) do
+    Destinations.get_destination!(id)
+  end
+
+  @doc """
+  Lists destinations for a trip.
+
+  Pass a `%Trip{}` or trip id.
+  Returns a list of `%Destination{}` structs with cities preloaded.
+
+  ## Examples
+
+      iex> list_destinations(trip)
+      [%Destination{}, ...]
+  """
+  def list_destinations(trip_or_id) do
+    Destinations.list_destinations(trip_or_id)
+  end
+
+  @doc """
+  Creates a destination for a trip.
+
+  Pass the `%Trip{}` and destination attributes.
+  Returns `{:ok, %Destination{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> create_destination(trip, %{"city_id" => city.id})
+      {:ok, %Destination{}}
+  """
+  def create_destination(trip, attrs \\ %{}) do
+    Destinations.create_destination(trip, attrs)
+  end
+
+  @doc """
+  Updates a destination.
+
+  Pass the `%Destination{}` and attribute changes.
+  Returns `{:ok, %Destination{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> update_destination(destination, %{"end_day" => 2})
+      {:ok, %Destination{}}
+  """
+  def update_destination(%Destination{} = destination, attrs) do
+    Destinations.update_destination(destination, attrs)
+  end
+
+  @doc """
+  Builds a changeset for a new destination with default day bounds.
+
+  Pass the trip, the day index to anchor, and optional attributes.
+  Returns `%Ecto.Changeset{}`.
+
+  ## Examples
+
+      iex> new_destination(trip, 0)
+      %Ecto.Changeset{}
+  """
+  def new_destination(trip, day_index, attrs \\ %{}) do
+    Destinations.new_destination(trip, day_index, attrs)
+  end
+
+  @doc """
+  Builds a changeset for editing a destination.
+
+  Pass the `%Destination{}` and optional changes.
+  Returns `%Ecto.Changeset{}`.
+
+  ## Examples
+
+      iex> change_destination(destination, %{"end_day" => 2})
+      %Ecto.Changeset{}
+  """
+  def change_destination(%Destination{} = destination, attrs \\ %{}) do
+    Destinations.change_destination(destination, attrs)
+  end
+
+  @doc """
+  Deletes a destination.
+
+  Pass the `%Destination{}` to remove.
+  Returns `{:ok, %Destination{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> delete_destination(destination)
+      {:ok, %Destination{}}
+  """
+  def delete_destination(%Destination{} = destination) do
+    Destinations.delete_destination(destination)
+  end
+
+  @doc """
+  Filters items that span the given day index.
+
+  Pass the day index and a list of items with `start_day` and `end_day` fields.
+  Returns the items whose range includes the given day.
+
+  ## Examples
+
+      iex> items_for_day(0, destinations)
+      [%Destination{}, ...]
+  """
+  def items_for_day(day_index, items) do
+    Common.items_for_day(day_index, items)
   end
 
   # Expense functions
 
+  @doc """
+  Fetches an expense by id and raises if missing.
+
+  Pass the expense id.
+  Returns `%Expense{}`.
+
+  ## Examples
+
+      iex> get_expense!(expense.id)
+      %Expense{}
+  """
   def get_expense!(id) do
-    Repo.get!(Expense, id)
+    Expenses.get_expense!(id)
   end
 
-  def list_expenses(%Trip{id: trip_id}) do
-    list_expenses(trip_id)
+  @doc """
+  Lists expenses for a trip.
+
+  Pass a `%Trip{}` or trip id.
+  Returns a list of `%Expense{}` structs ordered by newest first.
+
+  ## Examples
+
+      iex> list_expenses(trip)
+      [%Expense{}, ...]
+  """
+  def list_expenses(trip_or_id) do
+    Expenses.list_expenses(trip_or_id)
   end
 
-  def list_expenses(trip_id) do
-    Repo.all(from e in Expense, where: e.trip_id == ^trip_id, order_by: [desc: e.inserted_at])
-  end
+  @doc """
+  Creates a standalone expense for a trip.
 
+  Pass the `%Trip{}` and expense attributes.
+  Returns `{:ok, %Expense{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> create_expense(trip, %{"name" => "Taxi"})
+      {:ok, %Expense{}}
+  """
   def create_expense(trip, attrs \\ %{}) do
-    %Expense{trip_id: trip.id}
-    |> Expense.changeset(attrs)
-    |> Repo.insert()
-    |> send_pubsub_event([:expense, :created], trip.id)
+    Expenses.create_expense(trip, attrs)
   end
 
+  @doc """
+  Updates an expense.
+
+  Pass the `%Expense{}` and attribute changes.
+  Returns `{:ok, %Expense{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> update_expense(expense, %{"name" => "Taxi"})
+      {:ok, %Expense{}}
+  """
   def update_expense(%Expense{} = expense, attrs) do
-    expense
-    |> Expense.changeset(attrs)
-    |> Repo.update()
-    |> send_pubsub_event([:expense, :updated], expense.trip_id)
+    Expenses.update_expense(expense, attrs)
   end
 
+  @doc """
+  Builds a changeset for a new expense.
+
+  Pass the `%Trip{}` and optional attributes.
+  Returns `%Ecto.Changeset{}`.
+
+  ## Examples
+
+      iex> new_expense(trip)
+      %Ecto.Changeset{}
+  """
   def new_expense(trip, attrs \\ %{}) do
-    %Expense{
-      trip_id: trip.id
-    }
-    |> Expense.changeset(attrs)
+    Expenses.new_expense(trip, attrs)
   end
 
+  @doc """
+  Builds a changeset for editing an expense.
+
+  Pass the `%Expense{}` and optional changes.
+  Returns `%Ecto.Changeset{}`.
+
+  ## Examples
+
+      iex> change_expense(expense, %{"name" => "Taxi"})
+      %Ecto.Changeset{}
+  """
   def change_expense(%Expense{} = expense, attrs \\ %{}) do
-    Expense.changeset(expense, attrs)
+    Expenses.change_expense(expense, attrs)
   end
 
+  @doc """
+  Deletes an expense.
+
+  Pass the `%Expense{}` to remove.
+  Returns `{:ok, %Expense{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> delete_expense(expense)
+      {:ok, %Expense{}}
+  """
   def delete_expense(%Expense{} = expense) do
-    Repo.delete(expense)
-    |> send_pubsub_event([:expense, :deleted], expense.trip_id)
+    Expenses.delete_expense(expense)
   end
 
   @doc """
@@ -376,627 +450,769 @@ defmodule HamsterTravel.Planning do
       iex> trip = %Trip{currency: "EUR", expenses: [%Expense{price: Money.new(:EUR, 1000)}]}
       iex> calculate_budget(trip)
       %Money{amount: 1000, currency: :EUR}
-
   """
   def calculate_budget(%Trip{} = trip) do
-    trip
-    |> get_trip_expenses()
-    |> Enum.map(&convert_expense_to_currency(&1, trip.currency))
-    |> Enum.reduce(Money.new(trip.currency, 0), fn converted_price, acc ->
-      case Money.add(acc, converted_price) do
-        {:ok, result} -> result
-        {:error, _} -> acc
-      end
-    end)
-  end
-
-  defp get_trip_expenses(%Trip{expenses: %Ecto.Association.NotLoaded{}} = trip) do
-    list_expenses(trip.id)
-  end
-
-  defp get_trip_expenses(%Trip{expenses: expenses}), do: expenses
-
-  defp convert_expense_to_currency(%Expense{price: price}, target_currency)
-       when price.currency == target_currency,
-       do: price
-
-  defp convert_expense_to_currency(%Expense{price: price}, target_currency) do
-    case Money.to_currency(price, target_currency) do
-      {:ok, converted_money} ->
-        converted_money
-
-      {:error, _} ->
-        Logger.error("Failed to convert expense to currency: #{inspect(price)}")
-
-        Money.new(target_currency, 0)
-    end
+    Expenses.calculate_budget(trip)
   end
 
   # Accommodation functions
 
+  @doc """
+  Fetches an accommodation by id and raises if missing.
+
+  Pass the accommodation id.
+  Returns `%Accommodation{}` with its expense preloaded.
+
+  ## Examples
+
+      iex> get_accommodation!(accommodation.id)
+      %Accommodation{}
+  """
   def get_accommodation!(id) do
-    Repo.get!(Accommodation, id)
-    |> accommodations_preloading()
-  end
-
-  def list_accommodations(%Trip{id: trip_id}) do
-    list_accommodations(trip_id)
-  end
-
-  def list_accommodations(trip_id) do
-    Repo.all(from a in Accommodation, where: a.trip_id == ^trip_id, order_by: [asc: a.start_day])
-    |> accommodations_preloading()
-  end
-
-  def create_accommodation(trip, attrs \\ %{}) do
-    # Ensure the expense has trip_id if it exists in attrs
-    attrs =
-      case Map.get(attrs, "expense") do
-        nil -> attrs
-        expense_attrs -> Map.put(attrs, "expense", Map.put(expense_attrs, "trip_id", trip.id))
-      end
-
-    %Accommodation{trip_id: trip.id}
-    |> Accommodation.changeset(attrs)
-    |> Repo.insert()
-    |> preload_after_db_call(&Repo.preload(&1, [:expense]))
-    |> send_pubsub_event([:accommodation, :created], trip.id)
-  end
-
-  def update_accommodation(%Accommodation{} = accommodation, attrs) do
-    accommodation
-    |> Accommodation.changeset(attrs)
-    |> Repo.update()
-    |> preload_after_db_call(&Repo.preload(&1, [:expense]))
-    |> send_pubsub_event([:accommodation, :updated], accommodation.trip_id)
-  end
-
-  def new_accommodation(trip, day_index, attrs \\ %{}) do
-    default_days =
-      if Ecto.assoc_loaded?(trip.accommodations) && Enum.empty?(trip.accommodations) do
-        %{start_day: 0, end_day: trip.duration - 1}
-      else
-        %{start_day: day_index, end_day: day_index}
-      end
-
-    %Accommodation{
-      start_day: default_days.start_day,
-      end_day: default_days.end_day,
-      trip_id: trip.id,
-      expense: %Expense{price: Money.new(trip.currency, 0)}
-    }
-    |> Accommodation.changeset(attrs)
-  end
-
-  def change_accommodation(%Accommodation{} = accommodation, attrs \\ %{}) do
-    Accommodation.changeset(accommodation, attrs)
-  end
-
-  def delete_accommodation(%Accommodation{} = accommodation) do
-    Repo.delete(accommodation)
-    |> send_pubsub_event([:accommodation, :deleted], accommodation.trip_id)
+    Accommodations.get_accommodation!(id)
   end
 
   @doc """
-  Returns a list of accommodations that are active on a given day index.
-  An accommodation is considered active if its start_day is less than or equal to
-  the day index and its end_day is greater than or equal to the day index.
+  Lists accommodations for a trip.
+
+  Pass a `%Trip{}` or trip id.
+  Returns a list of `%Accommodation{}` structs ordered by start day with expenses preloaded.
+
+  ## Examples
+
+      iex> list_accommodations(trip)
+      [%Accommodation{}, ...]
   """
-  def accommodations_for_day(day_index, accommodations) do
-    items_for_day(day_index, accommodations)
+  def list_accommodations(trip_or_id) do
+    Accommodations.list_accommodations(trip_or_id)
   end
 
-  defp accommodations_preloading(query) do
-    query
-    |> Repo.preload([:expense])
+  @doc """
+  Creates an accommodation for a trip.
+
+  Pass the `%Trip{}` and accommodation attributes, including nested expense attrs if present.
+  Returns `{:ok, %Accommodation{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> create_accommodation(trip, %{"name" => "Hotel"})
+      {:ok, %Accommodation{}}
+  """
+  def create_accommodation(trip, attrs \\ %{}) do
+    Accommodations.create_accommodation(trip, attrs)
   end
 
-  # utils
-  defp items_for_day(day_index, items) do
-    Enum.filter(items, fn item ->
-      item.start_day <= day_index && item.end_day >= day_index
-    end)
+  @doc """
+  Updates an accommodation.
+
+  Pass the `%Accommodation{}` and attribute changes.
+  Returns `{:ok, %Accommodation{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> update_accommodation(accommodation, %{"name" => "Hotel"})
+      {:ok, %Accommodation{}}
+  """
+  def update_accommodation(%Accommodation{} = accommodation, attrs) do
+    Accommodations.update_accommodation(accommodation, attrs)
   end
 
-  defp singular_items_for_day(day_index, items) do
-    Enum.filter(items, fn item ->
-      item.day_index == day_index
-    end)
+  @doc """
+  Builds a changeset for a new accommodation with default day bounds.
+
+  Pass the trip, the day index to anchor, and optional attributes.
+  Returns `%Ecto.Changeset{}`.
+
+  ## Examples
+
+      iex> new_accommodation(trip, 0)
+      %Ecto.Changeset{}
+  """
+  def new_accommodation(trip, day_index, attrs \\ %{}) do
+    Accommodations.new_accommodation(trip, day_index, attrs)
   end
 
-  defp preload_after_db_call({:error, _} = res, _preload_fun), do: res
+  @doc """
+  Builds a changeset for editing an accommodation.
 
-  defp preload_after_db_call({:ok, record}, preload_fun) do
-    record = preload_fun.(record)
-    {:ok, record}
+  Pass the `%Accommodation{}` and optional changes.
+  Returns `%Ecto.Changeset{}`.
+
+  ## Examples
+
+      iex> change_accommodation(accommodation, %{"name" => "Hotel"})
+      %Ecto.Changeset{}
+  """
+  def change_accommodation(%Accommodation{} = accommodation, attrs \\ %{}) do
+    Accommodations.change_accommodation(accommodation, attrs)
+  end
+
+  @doc """
+  Deletes an accommodation.
+
+  Pass the `%Accommodation{}` to remove.
+  Returns `{:ok, %Accommodation{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> delete_accommodation(accommodation)
+      {:ok, %Accommodation{}}
+  """
+  def delete_accommodation(%Accommodation{} = accommodation) do
+    Accommodations.delete_accommodation(accommodation)
   end
 
   # Transfer functions
 
+  @doc """
+  Fetches a transfer by id and raises if missing.
+
+  Pass the transfer id.
+  Returns `%Transfer{}` with expense and cities preloaded.
+
+  ## Examples
+
+      iex> get_transfer!(transfer.id)
+      %Transfer{}
+  """
   def get_transfer!(id) do
-    Repo.get!(Transfer, id)
-    |> transfers_preloading()
+    Transfers.get_transfer!(id)
   end
 
-  def list_transfers(%Trip{id: trip_id}) do
-    list_transfers(trip_id)
+  @doc """
+  Lists transfers for a trip.
+
+  Pass a `%Trip{}` or trip id.
+  Returns a list of `%Transfer{}` structs ordered by departure time with preloads.
+
+  ## Examples
+
+      iex> list_transfers(trip)
+      [%Transfer{}, ...]
+  """
+  def list_transfers(trip_or_id) do
+    Transfers.list_transfers(trip_or_id)
   end
 
-  def list_transfers(trip_id) do
-    Repo.all(from t in Transfer, where: t.trip_id == ^trip_id, order_by: [asc: t.departure_time])
-    |> transfers_preloading()
-  end
+  @doc """
+  Creates a transfer for a trip.
 
+  Pass the `%Trip{}` and transfer attributes, including nested expense attrs if present.
+  Returns `{:ok, %Transfer{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> create_transfer(trip, %{"transport_mode" => "flight"})
+      {:ok, %Transfer{}}
+  """
   def create_transfer(trip, attrs \\ %{}) do
-    # Ensure the expense has trip_id if it exists in attrs
-    attrs =
-      case Map.get(attrs, "expense") do
-        nil -> attrs
-        expense_attrs -> Map.put(attrs, "expense", Map.put(expense_attrs, "trip_id", trip.id))
-      end
-
-    %Transfer{trip_id: trip.id}
-    |> Transfer.changeset(attrs)
-    |> Repo.insert()
-    |> preload_after_db_call(&transfers_preloading(&1))
-    |> send_pubsub_event([:transfer, :created], trip.id)
+    Transfers.create_transfer(trip, attrs)
   end
 
+  @doc """
+  Updates a transfer.
+
+  Pass the `%Transfer{}` and attribute changes.
+  Returns `{:ok, %Transfer{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> update_transfer(transfer, %{"transport_mode" => "train"})
+      {:ok, %Transfer{}}
+  """
   def update_transfer(%Transfer{} = transfer, attrs) do
-    transfer
-    |> Transfer.changeset(attrs)
-    |> Repo.update()
-    |> preload_after_db_call(&transfers_preloading(&1))
-    |> send_pubsub_event([:transfer, :updated], transfer.trip_id)
+    Transfers.update_transfer(transfer, attrs)
   end
 
+  @doc """
+  Builds a changeset for a new transfer with defaults.
+
+  Pass the trip, the day index, and optional attributes.
+  Returns `%Ecto.Changeset{}`.
+
+  ## Examples
+
+      iex> new_transfer(trip, 0)
+      %Ecto.Changeset{}
+  """
   def new_transfer(trip, day_index, attrs \\ %{}) do
-    %Transfer{
-      transport_mode: "flight",
-      trip_id: trip.id,
-      departure_city: nil,
-      arrival_city: nil,
-      day_index: day_index,
-      expense: %Expense{price: Money.new(trip.currency, 0)}
-    }
-    |> Transfer.changeset(attrs)
+    Transfers.new_transfer(trip, day_index, attrs)
   end
 
+  @doc """
+  Builds a changeset for editing a transfer.
+
+  Pass the `%Transfer{}` and optional changes.
+  Returns `%Ecto.Changeset{}`.
+
+  ## Examples
+
+      iex> change_transfer(transfer, %{"note" => "Terminal 1"})
+      %Ecto.Changeset{}
+  """
   def change_transfer(%Transfer{} = transfer, attrs \\ %{}) do
-    Transfer.changeset(transfer, attrs)
+    Transfers.change_transfer(transfer, attrs)
   end
 
+  @doc """
+  Deletes a transfer.
+
+  Pass the `%Transfer{}` to remove.
+  Returns `{:ok, %Transfer{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> delete_transfer(transfer)
+      {:ok, %Transfer{}}
+  """
   def delete_transfer(%Transfer{} = transfer) do
-    Repo.delete(transfer)
-    |> send_pubsub_event([:transfer, :deleted], transfer.trip_id)
+    Transfers.delete_transfer(transfer)
   end
 
-  def move_transfer_to_day(nil, _new_day_index, _trip, _user), do: {:error, "Transfer not found"}
+  @doc """
+  Moves a transfer to a new day after authorization and validation.
 
+  Pass the `%Transfer{}`, new day index, trip, and current user.
+  Returns `{:ok, %Transfer{}}` or `{:error, reason}`.
+
+  ## Examples
+
+      iex> move_transfer_to_day(transfer, 1, trip, user)
+      {:ok, %Transfer{}}
+  """
   def move_transfer_to_day(transfer, new_day_index, trip, user) do
-    with :ok <- validate_user_authorization(trip, user),
-         :ok <- validate_transfer_belongs_to_trip(transfer, trip),
-         :ok <- validate_day_index_in_trip_duration(new_day_index, trip) do
-      update_transfer_day_index(transfer, new_day_index)
-    end
+    Transfers.move_transfer_to_day(transfer, new_day_index, trip, user)
   end
 
-  defp validate_user_authorization(%Trip{} = trip, %User{} = user) do
-    if Policy.authorized?(:edit, trip, user) do
-      :ok
-    else
-      {:error, "Unauthorized"}
-    end
-  end
+  @doc """
+  Filters transfers for a day and sorts by departure time.
 
-  defp validate_transfer_belongs_to_trip(transfer, %Trip{transfers: transfers}) do
-    if Enum.any?(transfers, &(&1.id == transfer.id)) do
-      :ok
-    else
-      {:error, "Transfer not found"}
-    end
-  end
+  Pass the day index and a list of transfers.
+  Returns a list of `%Transfer{}`.
 
-  defp validate_day_index_in_trip_duration(day_index, %Trip{duration: duration}) do
-    if day_index >= 0 and day_index < duration do
-      :ok
-    else
-      {:error, "Day index must be between 0 and #{duration - 1}"}
-    end
-  end
+  ## Examples
 
-  defp update_transfer_day_index(transfer, new_day_index) do
-    transfer
-    |> Transfer.changeset(%{day_index: new_day_index})
-    |> Repo.update(stale_error_field: :id)
-    |> preload_after_db_call(&transfers_preloading(&1))
-    |> send_pubsub_event([:transfer, :updated], transfer.trip_id)
-  end
-
+      iex> transfers_for_day(0, transfers)
+      [%Transfer{}, ...]
+  """
   def transfers_for_day(day_index, transfers) do
-    singular_items_for_day(day_index, transfers)
-    |> Enum.sort_by(& &1.departure_time)
-  end
-
-  defp transfers_preloading(query) do
-    query
-    |> Repo.preload(transfers_preloading_query())
-  end
-
-  defp transfers_preloading_query do
-    [
-      :expense,
-      departure_city: Geo.city_preloading_query(),
-      arrival_city: Geo.city_preloading_query()
-    ]
+    Transfers.transfers_for_day(day_index, transfers)
   end
 
   # Activity functions
 
+  @doc """
+  Fetches an activity by id and raises if missing.
+
+  Pass the activity id.
+  Returns `%Activity{}` with its expense preloaded.
+
+  ## Examples
+
+      iex> get_activity!(activity.id)
+      %Activity{}
+  """
   def get_activity!(id) do
-    Repo.get!(Activity, id)
-    |> activities_preloading()
+    Activities.get_activity!(id)
   end
 
-  def list_activities(%Trip{id: trip_id}) do
-    list_activities(trip_id)
+  @doc """
+  Lists activities for a trip.
+
+  Pass a `%Trip{}` or trip id.
+  Returns a list of `%Activity{}` structs ordered by day and rank with expenses preloaded.
+
+  ## Examples
+
+      iex> list_activities(trip)
+      [%Activity{}, ...]
+  """
+  def list_activities(trip_or_id) do
+    Activities.list_activities(trip_or_id)
   end
 
-  def list_activities(trip_id) do
-    Repo.all(
-      from a in Activity, where: a.trip_id == ^trip_id, order_by: [asc: a.day_index, asc: a.rank]
-    )
-    |> activities_preloading()
-  end
+  @doc """
+  Creates an activity for a trip.
 
+  Pass the `%Trip{}` and activity attributes, including nested expense attrs if present.
+  Returns `{:ok, %Activity{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> create_activity(trip, %{"name" => "Museum"})
+      {:ok, %Activity{}}
+  """
   def create_activity(trip, attrs \\ %{}) do
-    # Ensure the expense has trip_id if it exists in attrs
-    attrs =
-      case Map.get(attrs, "expense") do
-        nil -> attrs
-        expense_attrs -> Map.put(attrs, "expense", Map.put(expense_attrs, "trip_id", trip.id))
-      end
-
-    %Activity{trip_id: trip.id}
-    |> Activity.changeset(attrs)
-    |> Repo.insert()
-    |> preload_after_db_call(&activities_preloading(&1))
-    |> send_pubsub_event([:activity, :created], trip.id)
+    Activities.create_activity(trip, attrs)
   end
 
+  @doc """
+  Updates an activity.
+
+  Pass the `%Activity{}` and attribute changes.
+  Returns `{:ok, %Activity{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> update_activity(activity, %{"name" => "Museum"})
+      {:ok, %Activity{}}
+  """
   def update_activity(%Activity{} = activity, attrs) do
-    activity
-    |> Activity.changeset(attrs)
-    |> Repo.update()
-    |> preload_after_db_call(&activities_preloading(&1))
-    |> send_pubsub_event([:activity, :updated], activity.trip_id)
+    Activities.update_activity(activity, attrs)
   end
 
+  @doc """
+  Builds a changeset for a new activity with defaults.
+
+  Pass the trip, the day index, and optional attributes.
+  Returns `%Ecto.Changeset{}`.
+
+  ## Examples
+
+      iex> new_activity(trip, 0)
+      %Ecto.Changeset{}
+  """
   def new_activity(trip, day_index, attrs \\ %{}) do
-    %Activity{
-      trip_id: trip.id,
-      day_index: day_index,
-      priority: 2,
-      expense: %Expense{price: Money.new(trip.currency, 0)}
-    }
-    |> Activity.changeset(attrs)
+    Activities.new_activity(trip, day_index, attrs)
   end
 
+  @doc """
+  Builds a changeset for editing an activity.
+
+  Pass the `%Activity{}` and optional changes.
+  Returns `%Ecto.Changeset{}`.
+
+  ## Examples
+
+      iex> change_activity(activity, %{"name" => "Museum"})
+      %Ecto.Changeset{}
+  """
   def change_activity(%Activity{} = activity, attrs \\ %{}) do
-    Activity.changeset(activity, attrs)
+    Activities.change_activity(activity, attrs)
   end
 
+  @doc """
+  Deletes an activity.
+
+  Pass the `%Activity{}` to remove.
+  Returns `{:ok, %Activity{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> delete_activity(activity)
+      {:ok, %Activity{}}
+  """
   def delete_activity(%Activity{} = activity) do
-    Repo.delete(activity)
-    |> send_pubsub_event([:activity, :deleted], activity.trip_id)
+    Activities.delete_activity(activity)
   end
 
-  def move_activity_to_day(activity, new_day_index, trip, user, position \\ :last)
+  @doc """
+  Moves an activity to a new day after authorization and validation.
 
-  def move_activity_to_day(nil, _new_day_index, _trip, _user, _position),
-    do: {:error, "Activity not found"}
+  Pass the `%Activity{}`, new day index, trip, user, and optional position.
+  Returns `{:ok, %Activity{}}` or `{:error, reason}`.
 
-  def move_activity_to_day(activity, new_day_index, trip, user, position) do
-    with :ok <- validate_user_authorization(trip, user),
-         :ok <- validate_activity_belongs_to_trip(activity, trip),
-         :ok <- validate_day_index_in_trip_duration(new_day_index, trip) do
-      update_activity_position(activity, %{day_index: new_day_index, position: position})
-    end
+  ## Examples
+
+      iex> move_activity_to_day(activity, 1, trip, user)
+      {:ok, %Activity{}}
+  """
+  def move_activity_to_day(activity, new_day_index, trip, user, position \\ :last) do
+    Activities.move_activity_to_day(activity, new_day_index, trip, user, position)
   end
 
-  def reorder_activity(nil, _position, _trip, _user), do: {:error, "Activity not found"}
+  @doc """
+  Reorders an activity within its day after authorization and validation.
 
+  Pass the `%Activity{}`, the new position, trip, and user.
+  Returns `{:ok, %Activity{}}` or `{:error, reason}`.
+
+  ## Examples
+
+      iex> reorder_activity(activity, :first, trip, user)
+      {:ok, %Activity{}}
+  """
   def reorder_activity(activity, position, trip, user) do
-    with :ok <- validate_user_authorization(trip, user),
-         :ok <- validate_activity_belongs_to_trip(activity, trip) do
-      update_activity_position(activity, %{position: position})
-    end
+    Activities.reorder_activity(activity, position, trip, user)
   end
 
-  defp validate_activity_belongs_to_trip(activity, %Trip{activities: activities}) do
-    if Enum.any?(activities, &(&1.id == activity.id)) do
-      :ok
-    else
-      {:error, "Activity not found"}
-    end
-  end
+  @doc """
+  Filters activities for a day and sorts by rank.
 
-  defp update_activity_position(activity, attrs) do
-    activity
-    |> Activity.changeset(attrs)
-    |> Repo.update(stale_error_field: :id)
-    |> preload_after_db_call(&activities_preloading(&1))
-    |> send_pubsub_event([:activity, :updated], activity.trip_id)
-  end
+  Pass the day index and a list of activities.
+  Returns a list of `%Activity{}`.
 
+  ## Examples
+
+      iex> activities_for_day(0, activities)
+      [%Activity{}, ...]
+  """
   def activities_for_day(day_index, activities) do
-    singular_items_for_day(day_index, activities)
-    |> Enum.sort_by(& &1.rank)
-  end
-
-  defp activities_preloading(query) do
-    query
-    |> Repo.preload(activities_preloading_query())
-  end
-
-  defp activities_preloading_query do
-    [:expense]
+    Activities.activities_for_day(day_index, activities)
   end
 
   # Notes functions
 
+  @doc """
+  Fetches a note by id and raises if missing.
+
+  Pass the note id.
+  Returns `%Note{}`.
+
+  ## Examples
+
+      iex> get_note!(note.id)
+      %Note{}
+  """
   def get_note!(id) do
-    Repo.get!(Note, id)
+    Notes.get_note!(id)
   end
 
-  def list_notes(%Trip{id: trip_id}) do
-    list_notes(trip_id)
+  @doc """
+  Lists notes for a trip.
+
+  Pass a `%Trip{}` or trip id.
+  Returns a list of `%Note{}` structs ordered by day index and rank.
+
+  ## Examples
+
+      iex> list_notes(trip)
+      [%Note{}, ...]
+  """
+  def list_notes(trip_or_id) do
+    Notes.list_notes(trip_or_id)
   end
 
-  def list_notes(trip_id) do
-    Repo.all(
-      from n in Note,
-        where: n.trip_id == ^trip_id,
-        order_by: [asc_nulls_first: n.day_index, asc: n.rank]
-    )
-  end
+  @doc """
+  Creates a note for a trip.
 
+  Pass the `%Trip{}` and note attributes.
+  Returns `{:ok, %Note{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> create_note(trip, %{"title" => "Ideas"})
+      {:ok, %Note{}}
+  """
   def create_note(trip, attrs \\ %{}) do
-    %Note{trip_id: trip.id}
-    |> Note.changeset(attrs)
-    |> Repo.insert()
-    |> send_pubsub_event([:note, :created], trip.id)
+    Notes.create_note(trip, attrs)
   end
 
+  @doc """
+  Updates a note.
+
+  Pass the `%Note{}` and attribute changes.
+  Returns `{:ok, %Note{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> update_note(note, %{"title" => "Ideas"})
+      {:ok, %Note{}}
+  """
   def update_note(%Note{} = note, attrs) do
-    note
-    |> Note.changeset(attrs)
-    |> Repo.update()
-    |> send_pubsub_event([:note, :updated], note.trip_id)
+    Notes.update_note(note, attrs)
   end
 
+  @doc """
+  Builds a changeset for a new note.
+
+  Pass the trip, an optional day index, and optional attributes.
+  Returns `%Ecto.Changeset{}`.
+
+  ## Examples
+
+      iex> new_note(trip, 0)
+      %Ecto.Changeset{}
+  """
   def new_note(trip, day_index \\ nil, attrs \\ %{}) do
-    %Note{
-      trip_id: trip.id,
-      day_index: day_index
-    }
-    |> Note.changeset(attrs)
+    Notes.new_note(trip, day_index, attrs)
   end
 
+  @doc """
+  Builds a changeset for editing a note.
+
+  Pass the `%Note{}` and optional changes.
+  Returns `%Ecto.Changeset{}`.
+
+  ## Examples
+
+      iex> change_note(note, %{"title" => "Ideas"})
+      %Ecto.Changeset{}
+  """
   def change_note(%Note{} = note, attrs \\ %{}) do
-    Note.changeset(note, attrs)
+    Notes.change_note(note, attrs)
   end
 
+  @doc """
+  Deletes a note.
+
+  Pass the `%Note{}` to remove.
+  Returns `{:ok, %Note{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> delete_note(note)
+      {:ok, %Note{}}
+  """
   def delete_note(%Note{} = note) do
-    Repo.delete(note)
-    |> send_pubsub_event([:note, :deleted], note.trip_id)
+    Notes.delete_note(note)
   end
 
+  @doc """
+  Filters notes for a day and sorts by rank.
+
+  Pass the day index and a list of notes.
+  Returns a list of `%Note{}`.
+
+  ## Examples
+
+      iex> notes_for_day(0, notes)
+      [%Note{}, ...]
+  """
   def notes_for_day(day_index, notes) do
-    singular_items_for_day(day_index, notes)
-    |> Enum.sort_by(& &1.rank)
+    Notes.notes_for_day(day_index, notes)
   end
 
+  @doc """
+  Filters notes without a day assignment and sorts by rank.
+
+  Pass a list of notes.
+  Returns a list of `%Note{}` with `day_index` set to `nil`.
+
+  ## Examples
+
+      iex> notes_unassigned(notes)
+      [%Note{}, ...]
+  """
   def notes_unassigned(notes) do
-    notes
-    |> Enum.filter(&is_nil(&1.day_index))
-    |> Enum.sort_by(& &1.rank)
+    Notes.notes_unassigned(notes)
   end
 
-  def move_note_to_day(note, new_day_index, trip, user, position \\ :last)
+  @doc """
+  Moves a note to a new day after authorization and validation.
 
-  def move_note_to_day(nil, _new_day_index, _trip, _user, _position),
-    do: {:error, "Note not found"}
+  Pass the `%Note{}`, new day index, trip, user, and optional position.
+  Returns `{:ok, %Note{}}` or `{:error, reason}`.
 
-  def move_note_to_day(note, new_day_index, trip, user, position) do
-    with :ok <- validate_user_authorization(trip, user),
-         :ok <- validate_note_belongs_to_trip(note, trip),
-         :ok <- validate_note_day_index_in_trip_duration(new_day_index, trip) do
-      update_note_position(note, %{day_index: new_day_index, position: position})
-    end
+  ## Examples
+
+      iex> move_note_to_day(note, 1, trip, user)
+      {:ok, %Note{}}
+  """
+  def move_note_to_day(note, new_day_index, trip, user, position \\ :last) do
+    Notes.move_note_to_day(note, new_day_index, trip, user, position)
   end
 
-  def reorder_note(nil, _position, _trip, _user), do: {:error, "Note not found"}
+  @doc """
+  Reorders a note within its day after authorization and validation.
 
+  Pass the `%Note{}`, the new position, trip, and user.
+  Returns `{:ok, %Note{}}` or `{:error, reason}`.
+
+  ## Examples
+
+      iex> reorder_note(note, :first, trip, user)
+      {:ok, %Note{}}
+  """
   def reorder_note(note, position, trip, user) do
-    with :ok <- validate_user_authorization(trip, user),
-         :ok <- validate_note_belongs_to_trip(note, trip) do
-      update_note_position(note, %{position: position})
-    end
-  end
-
-  defp validate_note_belongs_to_trip(note, %Trip{notes: notes}) do
-    if Enum.any?(notes, &(&1.id == note.id)) do
-      :ok
-    else
-      {:error, "Note not found"}
-    end
-  end
-
-  defp validate_note_day_index_in_trip_duration(nil, _trip), do: :ok
-
-  defp validate_note_day_index_in_trip_duration(day_index, trip) do
-    validate_day_index_in_trip_duration(day_index, trip)
-  end
-
-  defp update_note_position(note, attrs) do
-    note
-    |> Note.changeset(attrs)
-    |> Repo.update(stale_error_field: :id)
-    |> send_pubsub_event([:note, :updated], note.trip_id)
-  end
-
-  defp notes_preloading_query do
-    from n in Note, order_by: [asc_nulls_first: n.day_index, asc: n.rank]
+    Notes.reorder_note(note, position, trip, user)
   end
 
   # Day expense functions
 
+  @doc """
+  Fetches a day expense by id and raises if missing.
+
+  Pass the day expense id.
+  Returns `%DayExpense{}` with its expense preloaded.
+
+  ## Examples
+
+      iex> get_day_expense!(day_expense.id)
+      %DayExpense{}
+  """
   def get_day_expense!(id) do
-    Repo.get!(DayExpense, id)
-    |> day_expenses_preloading()
+    DayExpenses.get_day_expense!(id)
   end
 
-  def list_day_expenses(%Trip{id: trip_id}) do
-    list_day_expenses(trip_id)
+  @doc """
+  Lists day expenses for a trip.
+
+  Pass a `%Trip{}` or trip id.
+  Returns a list of `%DayExpense{}` structs ordered by day and rank with expenses preloaded.
+
+  ## Examples
+
+      iex> list_day_expenses(trip)
+      [%DayExpense{}, ...]
+  """
+  def list_day_expenses(trip_or_id) do
+    DayExpenses.list_day_expenses(trip_or_id)
   end
 
-  def list_day_expenses(trip_id) do
-    Repo.all(
-      from de in DayExpense,
-        where: de.trip_id == ^trip_id,
-        order_by: [asc: de.day_index, asc: de.rank]
-    )
-    |> day_expenses_preloading()
-  end
+  @doc """
+  Creates a day expense for a trip.
 
+  Pass the `%Trip{}` and day expense attributes, including nested expense attrs if present.
+  Returns `{:ok, %DayExpense{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> create_day_expense(trip, %{"name" => "Snacks"})
+      {:ok, %DayExpense{}}
+  """
   def create_day_expense(trip, attrs \\ %{}) do
-    attrs =
-      case Map.get(attrs, "expense") do
-        nil -> attrs
-        expense_attrs -> Map.put(attrs, "expense", Map.put(expense_attrs, "trip_id", trip.id))
-      end
-
-    %DayExpense{trip_id: trip.id}
-    |> DayExpense.changeset(attrs)
-    |> Repo.insert()
-    |> preload_after_db_call(&day_expenses_preloading(&1))
-    |> send_pubsub_event([:day_expense, :created], trip.id)
+    DayExpenses.create_day_expense(trip, attrs)
   end
 
+  @doc """
+  Updates a day expense.
+
+  Pass the `%DayExpense{}` and attribute changes.
+  Returns `{:ok, %DayExpense{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> update_day_expense(day_expense, %{"name" => "Snacks"})
+      {:ok, %DayExpense{}}
+  """
   def update_day_expense(%DayExpense{} = day_expense, attrs) do
-    day_expense
-    |> DayExpense.changeset(attrs)
-    |> Repo.update()
-    |> preload_after_db_call(&day_expenses_preloading(&1))
-    |> send_pubsub_event([:day_expense, :updated], day_expense.trip_id)
+    DayExpenses.update_day_expense(day_expense, attrs)
   end
 
+  @doc """
+  Builds a changeset for a new day expense with defaults.
+
+  Pass the trip, the day index, and optional attributes.
+  Returns `%Ecto.Changeset{}`.
+
+  ## Examples
+
+      iex> new_day_expense(trip, 0)
+      %Ecto.Changeset{}
+  """
   def new_day_expense(trip, day_index, attrs \\ %{}) do
-    %DayExpense{
-      trip_id: trip.id,
-      day_index: day_index,
-      expense: %Expense{price: Money.new(trip.currency, 0)}
-    }
-    |> DayExpense.changeset(attrs)
+    DayExpenses.new_day_expense(trip, day_index, attrs)
   end
 
+  @doc """
+  Builds a changeset for editing a day expense.
+
+  Pass the `%DayExpense{}` and optional changes.
+  Returns `%Ecto.Changeset{}`.
+
+  ## Examples
+
+      iex> change_day_expense(day_expense, %{"name" => "Snacks"})
+      %Ecto.Changeset{}
+  """
   def change_day_expense(%DayExpense{} = day_expense, attrs \\ %{}) do
-    DayExpense.changeset(day_expense, attrs)
+    DayExpenses.change_day_expense(day_expense, attrs)
   end
 
+  @doc """
+  Deletes a day expense.
+
+  Pass the `%DayExpense{}` to remove.
+  Returns `{:ok, %DayExpense{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> delete_day_expense(day_expense)
+      {:ok, %DayExpense{}}
+  """
   def delete_day_expense(%DayExpense{} = day_expense) do
-    Repo.delete(day_expense)
-    |> send_pubsub_event([:day_expense, :deleted], day_expense.trip_id)
+    DayExpenses.delete_day_expense(day_expense)
   end
 
-  def move_day_expense_to_day(day_expense, new_day_index, trip, user, position \\ :last)
+  @doc """
+  Moves a day expense to a new day after authorization and validation.
 
-  def move_day_expense_to_day(nil, _new_day_index, _trip, _user, _position),
-    do: {:error, "Day expense not found"}
+  Pass the `%DayExpense{}`, new day index, trip, user, and optional position.
+  Returns `{:ok, %DayExpense{}}` or `{:error, reason}`.
 
-  def move_day_expense_to_day(day_expense, new_day_index, trip, user, position) do
-    with :ok <- validate_user_authorization(trip, user),
-         :ok <- validate_day_expense_belongs_to_trip(day_expense, trip),
-         :ok <- validate_day_index_in_trip_duration(new_day_index, trip) do
-      update_day_expense_position(day_expense, %{day_index: new_day_index, position: position})
-    end
+  ## Examples
+
+      iex> move_day_expense_to_day(day_expense, 1, trip, user)
+      {:ok, %DayExpense{}}
+  """
+  def move_day_expense_to_day(day_expense, new_day_index, trip, user, position \\ :last) do
+    DayExpenses.move_day_expense_to_day(day_expense, new_day_index, trip, user, position)
   end
 
-  def reorder_day_expense(nil, _position, _trip, _user), do: {:error, "Day expense not found"}
+  @doc """
+  Reorders a day expense within its day after authorization and validation.
 
+  Pass the `%DayExpense{}`, the new position, trip, and user.
+  Returns `{:ok, %DayExpense{}}` or `{:error, reason}`.
+
+  ## Examples
+
+      iex> reorder_day_expense(day_expense, :first, trip, user)
+      {:ok, %DayExpense{}}
+  """
   def reorder_day_expense(day_expense, position, trip, user) do
-    with :ok <- validate_user_authorization(trip, user),
-         :ok <- validate_day_expense_belongs_to_trip(day_expense, trip) do
-      update_day_expense_position(day_expense, %{position: position})
-    end
+    DayExpenses.reorder_day_expense(day_expense, position, trip, user)
   end
 
-  defp validate_day_expense_belongs_to_trip(day_expense, %Trip{day_expenses: day_expenses}) do
-    if Enum.any?(day_expenses, &(&1.id == day_expense.id)) do
-      :ok
-    else
-      {:error, "Day expense not found"}
-    end
-  end
+  @doc """
+  Filters day expenses for a day and sorts by rank.
 
-  defp update_day_expense_position(day_expense, attrs) do
-    day_expense
-    |> DayExpense.changeset(attrs)
-    |> Repo.update(stale_error_field: :id)
-    |> preload_after_db_call(&day_expenses_preloading(&1))
-    |> send_pubsub_event([:day_expense, :updated], day_expense.trip_id)
-  end
+  Pass the day index and a list of day expenses.
+  Returns a list of `%DayExpense{}`.
 
+  ## Examples
+
+      iex> day_expenses_for_day(0, day_expenses)
+      [%DayExpense{}, ...]
+  """
   def day_expenses_for_day(day_index, day_expenses) do
-    singular_items_for_day(day_index, day_expenses)
-    |> Enum.sort_by(& &1.rank)
-  end
-
-  defp day_expenses_preloading(query) do
-    query
-    |> Repo.preload(day_expenses_preloading_query())
-  end
-
-  defp day_expenses_preloading_query do
-    [:expense]
+    DayExpenses.day_expenses_for_day(day_index, day_expenses)
   end
 
   # Food expense functions
+  @doc """
+  Fetches a food expense by id and raises if missing.
+
+  Pass the food expense id.
+  Returns `%FoodExpense{}` with its expense preloaded.
+
+  ## Examples
+
+      iex> get_food_expense!(food_expense.id)
+      %FoodExpense{}
+  """
   def get_food_expense!(id) do
-    Repo.get!(FoodExpense, id)
-    |> food_expense_preloading()
+    FoodExpenses.get_food_expense!(id)
   end
 
+  @doc """
+  Updates a food expense and its underlying expense record.
+
+  Pass the `%FoodExpense{}` and attribute changes.
+  Returns `{:ok, %FoodExpense{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> update_food_expense(food_expense, %{"people_count" => 2})
+      {:ok, %FoodExpense{}}
+  """
   def update_food_expense(%FoodExpense{} = food_expense, attrs) do
-    food_expense = Repo.preload(food_expense, [:trip, :expense])
-
-    food_expense
-    |> FoodExpense.build_food_expense_changeset(food_expense.trip, attrs)
-    |> Repo.update()
-    |> preload_after_db_call(&food_expense_preloading(&1))
-    |> send_pubsub_event([:food_expense, :updated], food_expense.trip_id)
+    FoodExpenses.update_food_expense(food_expense, attrs)
   end
 
+  @doc """
+  Builds a changeset for editing a food expense.
+
+  Pass the `%FoodExpense{}` and optional changes.
+  Returns `%Ecto.Changeset{}`.
+
+  ## Examples
+
+      iex> change_food_expense(food_expense, %{"people_count" => 2})
+      %Ecto.Changeset{}
+  """
   def change_food_expense(%FoodExpense{} = food_expense, attrs \\ %{}) do
-    FoodExpense.changeset(food_expense, attrs)
-  end
-
-  defp food_expense_preloading(query) do
-    Repo.preload(query, [:expense])
-  end
-
-  defp default_food_expense_attrs(trip) do
-    %{
-      price_per_day: Money.new(trip.currency, 0),
-      days_count: trip.duration || 1,
-      people_count: trip.people_count || 1
-    }
-  end
-
-  defp create_food_expense_with_repo(repo, trip, attrs) do
-    %FoodExpense{trip_id: trip.id}
-    |> FoodExpense.build_food_expense_changeset(trip, attrs)
-    |> repo.insert()
+    FoodExpenses.change_food_expense(food_expense, attrs)
   end
 end

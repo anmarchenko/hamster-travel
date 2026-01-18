@@ -810,7 +810,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                 <.section_header icon="hero-map-pin" label={gettext("Places")} class="sm:hidden" />
                 <.destinations_list
                   trip={@trip}
-                  destinations={Planning.destinations_for_day(i, @destinations)}
+                  destinations={Planning.items_for_day(i, @destinations)}
                   day_index={i}
                 />
                 <.live_component
@@ -851,7 +851,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                 <.section_header icon="hero-home" label={gettext("Hotel")} class="sm:hidden" />
                 <.accommodations_list
                   trip={@trip}
-                  accommodations={Planning.accommodations_for_day(i, @accommodations)}
+                  accommodations={Planning.items_for_day(i, @accommodations)}
                   display_currency={@display_currency}
                   day_index={i}
                 />
@@ -996,7 +996,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           <div class="flex flex-row gap-x-4">
             <.destinations_list
               trip={@trip}
-              destinations={Planning.destinations_for_day(i, @destinations)}
+              destinations={Planning.items_for_day(i, @destinations)}
               day_index={i}
             />
           </div>

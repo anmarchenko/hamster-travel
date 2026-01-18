@@ -17,6 +17,14 @@ defmodule HamsterTravel.Planning.Policy do
     true
   end
 
+  def authorize_edit(%Trip{} = trip, %User{} = user) do
+    if authorized?(:edit, trip, user) do
+      :ok
+    else
+      {:error, "Unauthorized"}
+    end
+  end
+
   def user_trip_visibility_scope(query, nil) do
     from(t in query, where: t.private == false)
   end

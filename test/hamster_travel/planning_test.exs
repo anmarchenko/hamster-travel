@@ -2,6 +2,7 @@ defmodule HamsterTravel.PlanningTest do
   use HamsterTravel.DataCase
 
   alias HamsterTravel.Planning
+  alias HamsterTravel.Planning.Common
   alias HamsterTravel.Social
 
   import HamsterTravel.AccountsFixtures
@@ -453,6 +454,39 @@ defmodule HamsterTravel.PlanningTest do
       assert updated_dest1.end_day == 2
       assert updated_dest2.start_day == 3
       assert updated_dest2.end_day == 4
+    end
+
+    test "update_trip/2 adjusts accommodations when trip duration is reduced" do
+      trip =
+        trip_fixture(%{
+          dates_unknown: true,
+          duration: 5
+        })
+
+      {:ok, _} =
+        Planning.create_accommodation(trip, %{
+          name: "Hotel One",
+          start_day: 0,
+          end_day: 2
+        })
+
+      {:ok, _} =
+        Planning.create_accommodation(trip, %{
+          name: "Hotel Two",
+          start_day: 2,
+          end_day: 4
+        })
+
+      assert {:ok, updated_trip} = Planning.update_trip(trip, %{duration: 3})
+      assert updated_trip.duration == 3
+
+      [updated_acc1, updated_acc2] =
+        Planning.list_accommodations(updated_trip) |> Enum.sort_by(& &1.start_day)
+
+      assert updated_acc1.start_day == 0
+      assert updated_acc1.end_day == 2
+      assert updated_acc2.start_day == 2
+      assert updated_acc2.end_day == 2
     end
 
     test "update_trip/2 does not adjust destinations when trip duration is increased", %{
@@ -1002,28 +1036,28 @@ defmodule HamsterTravel.PlanningTest do
       destinations = [destination1, destination2, destination3]
 
       # Test day 2 (should include destination1 and destination2)
-      assert [^destination1, ^destination2] = Planning.destinations_for_day(2, destinations)
+      assert [^destination1, ^destination2] = Common.items_for_day(2, destinations)
 
       # Test day 4 (should include destination2 and destination3)
-      assert [^destination2, ^destination3] = Planning.destinations_for_day(4, destinations)
+      assert [^destination2, ^destination3] = Common.items_for_day(4, destinations)
 
       # Test day 5 (should only include destination3)
-      assert [^destination3] = Planning.destinations_for_day(5, destinations)
+      assert [^destination3] = Common.items_for_day(5, destinations)
 
       # Test day 0 (should return empty list as no destinations start on day 0)
-      assert [] = Planning.destinations_for_day(0, destinations)
+      assert [] = Common.items_for_day(0, destinations)
     end
 
     test "destinations_for_day/2 handles single-day destinations" do
       destination = destination_fixture(%{start_day: 2, end_day: 2})
 
-      assert [^destination] = Planning.destinations_for_day(2, [destination])
-      assert [] = Planning.destinations_for_day(1, [destination])
-      assert [] = Planning.destinations_for_day(3, [destination])
+      assert [^destination] = Common.items_for_day(2, [destination])
+      assert [] = Common.items_for_day(1, [destination])
+      assert [] = Common.items_for_day(3, [destination])
     end
 
     test "destinations_for_day/2 handles empty list of destinations" do
-      assert [] = Planning.destinations_for_day(1, [])
+      assert [] = Common.items_for_day(1, [])
     end
   end
 
@@ -1803,29 +1837,29 @@ defmodule HamsterTravel.PlanningTest do
 
       # Test day 2 (should include accommodation1 and accommodation2)
       assert [^accommodation1, ^accommodation2] =
-               Planning.accommodations_for_day(2, accommodations)
+               Common.items_for_day(2, accommodations)
 
       # Test day 4 (should include accommodation2 and accommodation3)
       assert [^accommodation2, ^accommodation3] =
-               Planning.accommodations_for_day(4, accommodations)
+               Common.items_for_day(4, accommodations)
 
       # Test day 5 (should only include accommodation3)
-      assert [^accommodation3] = Planning.accommodations_for_day(5, accommodations)
+      assert [^accommodation3] = Common.items_for_day(5, accommodations)
 
       # Test day 0 (should return empty list as no accommodations start on day 0)
-      assert [] = Planning.accommodations_for_day(0, accommodations)
+      assert [] = Common.items_for_day(0, accommodations)
     end
 
     test "accommodations_for_day/2 handles single-day accommodations" do
       accommodation = accommodation_fixture(%{start_day: 2, end_day: 2})
 
-      assert [^accommodation] = Planning.accommodations_for_day(2, [accommodation])
-      assert [] = Planning.accommodations_for_day(1, [accommodation])
-      assert [] = Planning.accommodations_for_day(3, [accommodation])
+      assert [^accommodation] = Common.items_for_day(2, [accommodation])
+      assert [] = Common.items_for_day(1, [accommodation])
+      assert [] = Common.items_for_day(3, [accommodation])
     end
 
     test "accommodations_for_day/2 handles empty list of accommodations" do
-      assert [] = Planning.accommodations_for_day(1, [])
+      assert [] = Common.items_for_day(1, [])
     end
   end
 
