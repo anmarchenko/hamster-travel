@@ -28,6 +28,9 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       # Assert the page renders successfully and displays the trip name
       assert html =~ trip.name
 
+      # Verify copy button is displayed
+      assert html =~ "Make a copy"
+
       # Verify that the tabs are rendered
       assert has_element?(view, "a", "Transfers and hotels")
       assert has_element?(view, "a", "Activities")

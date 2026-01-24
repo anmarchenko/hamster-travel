@@ -151,6 +151,21 @@ defmodule HamsterTravel.Planning do
   end
 
   @doc """
+  Creates a trip by copying associations from another trip.
+
+  Pass a map of trip attributes, a `%User{}` author, and a source `%Trip{}` to copy.
+  Returns `{:ok, %Trip{}}` or `{:error, %Ecto.Changeset{}}`.
+
+  ## Examples
+
+      iex> create_trip(%{"name" => "Rome"}, user, trip)
+      {:ok, %Trip{}}
+  """
+  def create_trip(attrs, user, %Trip{} = source_trip) do
+    Trips.create_trip(attrs, user, source_trip)
+  end
+
+  @doc """
   Updates a trip and clamps destinations/accommodations when duration changes.
 
   Pass the existing `%Trip{}` and a map of changes.

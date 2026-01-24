@@ -18,14 +18,16 @@ defmodule HamsterTravelWeb.Planning.TripForm do
     changeset =
       case assigns.action do
         :new ->
-          new_trip_attrs =
-            if assigns[:is_draft] do
-              %{status: Trip.draft(), dates_unknown: true, duration: 1}
-            else
-              %{status: Trip.planned()}
-            end
+          cond do
+            assigns[:copy_from] ->
+              Planning.new_trip(assigns.copy_from)
 
-          Planning.new_trip(new_trip_attrs)
+            assigns[:is_draft] ->
+              Planning.new_trip(%{status: Trip.draft(), dates_unknown: true, duration: 1})
+
+            true ->
+              Planning.new_trip(%{status: Trip.planned()})
+          end
 
         :edit ->
           Planning.change_trip(assigns.trip)
@@ -237,6 +239,12 @@ defmodule HamsterTravelWeb.Planning.TripForm do
   @impl true
   def handle_event("form_submit", %{"trip" => trip_params}, socket) do
     on_submit(socket, socket.assigns.action, trip_params)
+  end
+
+  def on_submit(%{assigns: %{copy_from: trip}} = socket, :new, trip_params) when trip != nil do
+    trip_params
+    |> Planning.create_trip(socket.assigns.current_user, trip)
+    |> result(socket)
   end
 
   def on_submit(socket, :new, trip_params) do

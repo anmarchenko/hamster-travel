@@ -230,6 +230,214 @@ defmodule HamsterTravel.PlanningTest do
       assert trip.food_expense.expense.price == Money.new(trip.currency, 0)
     end
 
+    test "create_trip/3 with valid data copies associations from existing trip", %{
+      user: user,
+      city: city
+    } do
+      hamburg = HamsterTravel.Geo.find_city_by_geonames_id("2911298")
+
+      {:ok, trip} =
+        Planning.create_trip(
+          %{
+            name: "Original trip",
+            dates_unknown: false,
+            start_date: ~D[2024-02-01],
+            end_date: ~D[2024-02-03],
+            currency: "EUR",
+            status: Trip.planned(),
+            private: false,
+            people_count: 2
+          },
+          user
+        )
+
+      trip = Planning.get_trip!(trip.id)
+
+      {:ok, destination} =
+        Planning.create_destination(trip, %{city_id: city.id, start_day: 0, end_day: 1})
+
+      {:ok, accommodation} =
+        Planning.create_accommodation(trip, %{
+          name: "City Hotel",
+          link: "https://example.com/hotel",
+          address: "Main Street 1",
+          note: "Near center",
+          start_day: 0,
+          end_day: 1,
+          expense: %{
+            price: Money.new(:EUR, 15_000),
+            name: "Hotel booking",
+            trip_id: trip.id
+          }
+        })
+
+      {:ok, transfer} =
+        Planning.create_transfer(trip, %{
+          transport_mode: "train",
+          departure_city_id: city.id,
+          arrival_city_id: hamburg.id,
+          departure_time: "08:00",
+          arrival_time: "12:00",
+          note: "Fast train",
+          vessel_number: "ICE 123",
+          carrier: "DB",
+          departure_station: "Berlin Hauptbahnhof",
+          arrival_station: "Hamburg Hauptbahnhof",
+          day_index: 0,
+          expense: %{
+            price: Money.new(:EUR, 8_900),
+            name: "Train ticket",
+            trip_id: trip.id
+          }
+        })
+
+      {:ok, activity} =
+        Planning.create_activity(trip, %{
+          name: "Museum visit",
+          day_index: 0,
+          priority: 2,
+          link: "https://example.com/museum",
+          address: "Museum Street 1",
+          description: "Nice museum",
+          expense: %{
+            price: Money.new(:EUR, 2_000),
+            name: "Museum ticket",
+            trip_id: trip.id
+          }
+        })
+
+      {:ok, day_expense} =
+        Planning.create_day_expense(trip, %{
+          name: "Metro pass",
+          day_index: 0,
+          expense: %{
+            price: Money.new(:EUR, 1_200),
+            name: "Transport card",
+            trip_id: trip.id
+          }
+        })
+
+      {:ok, note} =
+        Planning.create_note(trip, %{
+          title: "Packing",
+          text: "<p>Bring layers</p>",
+          day_index: 0
+        })
+
+      {:ok, standalone_expense} =
+        Planning.create_expense(trip, %{price: Money.new(:EUR, 500), name: "Snacks"})
+
+      {:ok, _food_expense} =
+        Planning.update_food_expense(trip.food_expense, %{
+          price_per_day: Money.new(:EUR, 25),
+          days_count: 2,
+          people_count: 3
+        })
+
+      source_trip = Planning.get_trip!(trip.id)
+
+      copy_attrs = %{
+        name: "Copied trip",
+        dates_unknown: source_trip.dates_unknown,
+        start_date: source_trip.start_date,
+        end_date: source_trip.end_date,
+        duration: source_trip.duration,
+        currency: source_trip.currency,
+        status: source_trip.status,
+        private: source_trip.private,
+        people_count: source_trip.people_count
+      }
+
+      assert {:ok, %Trip{} = new_trip} = Planning.create_trip(copy_attrs, user, source_trip)
+
+      new_trip = Planning.get_trip!(new_trip.id)
+
+      assert new_trip.name == "Copied trip"
+      assert new_trip.author_id == user.id
+      refute new_trip.id == source_trip.id
+
+      assert [new_destination] = new_trip.destinations
+      assert new_destination.city_id == destination.city_id
+      assert new_destination.start_day == destination.start_day
+      assert new_destination.end_day == destination.end_day
+      refute new_destination.id == destination.id
+
+      assert [new_accommodation] = new_trip.accommodations
+      assert new_accommodation.name == accommodation.name
+      assert new_accommodation.link == accommodation.link
+      assert new_accommodation.address == accommodation.address
+      assert new_accommodation.note == accommodation.note
+      assert new_accommodation.start_day == accommodation.start_day
+      assert new_accommodation.end_day == accommodation.end_day
+      assert new_accommodation.expense.price == accommodation.expense.price
+      assert new_accommodation.expense.trip_id == new_trip.id
+      refute new_accommodation.expense.id == accommodation.expense.id
+
+      assert [new_transfer] = new_trip.transfers
+      assert new_transfer.transport_mode == transfer.transport_mode
+      assert new_transfer.departure_city_id == transfer.departure_city_id
+      assert new_transfer.arrival_city_id == transfer.arrival_city_id
+      assert new_transfer.departure_time == transfer.departure_time
+      assert new_transfer.arrival_time == transfer.arrival_time
+      assert new_transfer.note == transfer.note
+      assert new_transfer.vessel_number == transfer.vessel_number
+      assert new_transfer.carrier == transfer.carrier
+      assert new_transfer.departure_station == transfer.departure_station
+      assert new_transfer.arrival_station == transfer.arrival_station
+      assert new_transfer.expense.price == transfer.expense.price
+      assert new_transfer.expense.trip_id == new_trip.id
+      refute new_transfer.expense.id == transfer.expense.id
+
+      assert [new_activity] = new_trip.activities
+      assert new_activity.name == activity.name
+      assert new_activity.day_index == activity.day_index
+      assert new_activity.priority == activity.priority
+      assert new_activity.link == activity.link
+      assert new_activity.address == activity.address
+      assert new_activity.description == activity.description
+      assert new_activity.rank == activity.rank
+      assert new_activity.expense.price == activity.expense.price
+      assert new_activity.expense.trip_id == new_trip.id
+      refute new_activity.expense.id == activity.expense.id
+
+      assert [new_day_expense] = new_trip.day_expenses
+      assert new_day_expense.name == day_expense.name
+      assert new_day_expense.day_index == day_expense.day_index
+      assert new_day_expense.rank == day_expense.rank
+      assert new_day_expense.expense.price == day_expense.expense.price
+      assert new_day_expense.expense.trip_id == new_trip.id
+      refute new_day_expense.expense.id == day_expense.expense.id
+
+      assert [new_note] = new_trip.notes
+      assert new_note.title == note.title
+      assert new_note.text == note.text
+      assert new_note.day_index == note.day_index
+      assert new_note.rank == note.rank
+      refute new_note.id == note.id
+
+      assert new_trip.food_expense.price_per_day == source_trip.food_expense.price_per_day
+      assert new_trip.food_expense.days_count == source_trip.food_expense.days_count
+      assert new_trip.food_expense.people_count == source_trip.food_expense.people_count
+      assert new_trip.food_expense.expense.price == source_trip.food_expense.expense.price
+      assert new_trip.food_expense.expense.trip_id == new_trip.id
+      refute new_trip.food_expense.expense.id == source_trip.food_expense.expense.id
+
+      new_standalone_expense =
+        Enum.find(new_trip.expenses, fn expense ->
+          expense.name == standalone_expense.name
+        end)
+
+      assert new_standalone_expense
+      assert new_standalone_expense.price == standalone_expense.price
+      assert new_standalone_expense.trip_id == new_trip.id
+      assert is_nil(new_standalone_expense.accommodation_id)
+      assert is_nil(new_standalone_expense.transfer_id)
+      assert is_nil(new_standalone_expense.activity_id)
+      assert is_nil(new_standalone_expense.day_expense_id)
+      assert is_nil(new_standalone_expense.food_expense_id)
+      refute new_standalone_expense.id == standalone_expense.id
+    end
+
     test "create_trip/2 creates a food expense with trip-based defaults", %{user: user} do
       valid_attrs = %{
         name: "Default food expense",

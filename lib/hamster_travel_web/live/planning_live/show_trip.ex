@@ -53,6 +53,14 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               <.icon_text icon="hero-pencil" label={gettext("Edit")} />
             </.button>
             <.button
+              :if={Policy.authorized?(:copy, @trip, @current_user)}
+              link_type="live_redirect"
+              to={trip_url(@trip.id, :copy)}
+              color="secondary"
+            >
+              <.icon_text icon="hero-document-duplicate" label={gettext("Make a copy")} />
+            </.button>
+            <.button
               :if={Policy.authorized?(:delete, @trip, @current_user)}
               phx-click="delete_trip"
               data-confirm={gettext("Are you sure you want to delete this trip?")}
@@ -60,12 +68,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             >
               <.icon_text icon="hero-trash" label={gettext("Delete")} />
             </.button>
-            <%!-- <.link href={trip_url(@trip.slug, :copy)}>
-          <%= gettext("Make a copy") %>
-        </.link>
-        <.link href={trip_url(@trip.slug, :pdf)}>
-          <%= gettext("Export as PDF") %>
-        </.link>--%>
           </.inline>
           <.status_row trip={@trip} />
         </div>
