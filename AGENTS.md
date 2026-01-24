@@ -1,25 +1,40 @@
 # AGENTS.md
 
-This file provides guidance to coding agents when working with code in this repository.
+Guidance for coding agents working in this repository.
+
+## Project Overview
+- Phoenix LiveView app for family travel planning.
+- Context-driven design with domain boundaries for accounts, planning, packing, geo, social.
+- Frontend uses Tailwind CSS, Alpine.js, Petal Components, Heroicons, and Live Select.
+- Internationalization via gettext (English and Russian).
 
 ## Commands
 
-### Development Setup
+### Setup
 ```bash
-# Full project setup (dependencies, database, assets)
+# Full project setup (deps, DB, assets)
 mix setup
 
-# Basic setup for development
+# Basic setup
 mix deps.get
 mix ecto.setup
 ```
 
 ### Development Server
 ```bash
-# Start Phoenix server (runs on http://localhost:4000)
+# Start Phoenix server (http://localhost:4000)
 mix phx.server
 
 # Test credentials: bunny@hamsters.test / test1234
+```
+
+### Formatting
+```bash
+# Format all files
+mix format
+
+# Check formatting only
+mix format --check-formatted
 ```
 
 ### Testing
@@ -27,39 +42,20 @@ mix phx.server
 # Run all tests
 mix test
 
-# Run specific test file
+# Run a single test file
 mix test test/hamster_travel/accounts_test.exs
+
+# Run a single test by line number
+mix test test/hamster_travel/accounts_test.exs:123
 
 # Run with coverage
 mix test --cover
 ```
 
-### Code Quality
+### Lint
 ```bash
-# Lint code with strict rules
+# Lint code (strict)
 mix credo --strict
-```
-
-### Ecto database schema
-```bash
-# Reset database (drop, create, migrate, seed)
-mix ecto.reset
-
-# Run migrations
-mix ecto.migrate
-
-# Rollback migration
-mix ecto.rollback
-```
-
-### Query the database
-
-```bash
-# psql alias to connect to local database
-psqlhtl
-
-# execute a query
-psqlhtl -c "SELECT * FROM users;"
 ```
 
 ### Assets
@@ -67,114 +63,96 @@ psqlhtl -c "SELECT * FROM users;"
 # Build assets for development
 mix assets.build
 
-# Deploy assets for production
+# Build assets for production
 mix assets.deploy
+```
+
+### Database
+```bash
+# Run migrations
+mix ecto.migrate
+
+# Roll back last migration
+mix ecto.rollback
+
+# Reset DB (drop, create, migrate, seed)
+mix ecto.reset
+
+# psql alias
+psqlhtl
+psqlhtl -c "SELECT * FROM users;"
 ```
 
 ### Internationalization
 ```bash
-# Extract and update translations
+# Extract and merge translations
 mix gettext
 ```
 
-## Architecture
+### After Code Changes
+- Run `mix format`, `mix test`, and `mix credo --strict` after code changes.
 
-### Phoenix LiveView Application
-This is a **Phoenix LiveView** application - server-side rendered with real-time updates. The frontend uses **Tailwind CSS** and **Alpine.js** for styling and client-side interactions.
+## Architecture and Structure
+- Context APIs live in `lib/hamster_travel/*.ex`, internal modules in `lib/hamster_travel/<context>/`.
+- LiveViews and components live in `lib/hamster_travel_web/live/`.
+- LiveComponents for stateful UI; function components in `*_components.ex`.
+- Keep controllers thin and delegate business logic to contexts.
+- Use `Req` for HTTP clients; define behaviours for API clients to enable mocking.
 
-### Context-Driven Design
-The application follows Phoenix's context pattern with clear domain boundaries:
+## Code Style Guidelines
 
-- **Accounts** (`lib/hamster_travel/accounts.ex`) - User management and authentication
-- **Planning** (`lib/hamster_travel/planning.ex`) - Trip planning with destinations, accommodations, transfers, expenses
-- **Packing** (`lib/hamster_travel/packing.ex`) - Backpack management with lists and items
-- **Geo** (`lib/hamster_travel/geo.ex`) - Geographic data (countries, regions, cities)
-- **Social** (`lib/hamster_travel/social.ex`) - Friend relationships
+### Formatting and Layout
+- Use `mix format` for all changes; formatter inputs include `*.{ex,exs,heex}`.
+- HEEx formatting uses `Phoenix.LiveView.HTMLFormatter`.
+- Keep lines within 120 characters (Credo max line length).
 
-### File Organization Patterns
+### Module Organization
+- Order sections: `defmodule`, `@moduledoc` (optional), `use`, `require`, `import`, `alias`.
+- Group aliases by namespace with `{}` and keep them alphabetical within the block.
+- Use `@impl true` for LiveView/LiveComponent callbacks.
 
-#### Context Structure
-Each context follows this pattern:
-```
-lib/hamster_travel/
-  accounts/           # Domain modules
-  accounts.ex         # Public context API
-```
+### Imports and Aliases
+- Prefer `alias` over `import` for regular modules.
+- Use `import` only for macros/helpers that are used heavily (e.g., `Ecto.Query`).
+- Use fully-qualified names when it improves clarity.
 
-#### LiveView Organization
-LiveViews are organized by domain with components co-located:
-```
-lib/hamster_travel_web/live/
-  planning_live/
-    show_trip.ex
-    create_trip.ex
-    components/
-      destination_form.ex
-      trip_form.ex
-      planning_components.ex
-```
+### Naming
+- Modules are `HamsterTravel.*` or `HamsterTravelWeb.*` with PascalCase.
+- File names and function names are `snake_case`.
+- Predicate functions end in `?` and raising variants end in `!`.
+- Component modules use clear suffixes: `FooForm`, `FooNew`, `Foo`.
+- Event names in `handle_event/3` are snake_case strings.
 
-### Component Patterns
-- **LiveComponents**: Use for stateful, reusable UI components (e.g., form components)
-- **Function Components**: Use for simple, stateless UI elements in `*_components.ex` files
-- **Component Collections**: Group related function components in files like `planning_components.ex`
+### Types and Specs
+- Add `@spec` for public context APIs or non-trivial functions.
+- Define struct types (`@type t`) when referenced across contexts or in specs.
 
-## Development Best Practices
+### Changesets and Data Access
+- Use `Ecto.Changeset` pipelines with validations near the schema.
+- Return `{:ok, struct}` or `{:error, %Ecto.Changeset{}}` for CRUD operations.
+- Use `get!/1` only when callers expect a raise; otherwise return `nil` or error tuples.
+- Use `Ecto.Multi` for multi-step writes when consistency matters.
 
-### Phoenix/LiveView Patterns
-- **LiveView-First**: Use LiveView as the primary UI technology
-- **Function Components**: Use function components for reusable UI elements
-- **Context Boundaries**: Respect context boundaries in controllers and LiveViews
-- **Thin Controllers**: Keep controllers thin, delegating business logic to contexts
+### Error Handling
+- Use `{:error, reason}` or tagged tuples for domain errors.
+- Use `with` for sequential operations; avoid `rescue` unless necessary.
+- Handle external HTTP failures and timeouts explicitly.
 
-### LiveComponent Structure
-Follow this pattern for LiveComponents:
-1. Use `attr` declarations for required properties
-2. Implement `update/2` for initial state setup
-3. Handle events with `handle_event/3`
-4. Use callback functions (like `on_finish`) for parent communication
+### LiveView and Components
+- Use `attr` declarations for LiveComponent assigns.
+- Use `to_form/1` for changesets in components.
+- Process special inputs (like live select values) before submission.
+- Use `gettext/1` for all user-facing strings.
 
-### Form Handling
-- Use `to_form/1` for changeset-to-form conversion
-- Process special inputs (like city selection) before submission
-- Always handle both `:new` and `:edit` actions in the same form component
+### Testing
+- Use `HamsterTravel.DataCase` or `HamsterTravelWeb.ConnCase`.
+- Prefer fixtures from `test/support/fixtures/`.
+- Follow Arrange/Act/Assert and use `async: true` when no DB access is needed.
 
-### Testing Guidelines
-- **Test Public APIs**: Focus on testing public context APIs
-- **Mox for Dependencies**: Use Mox for mocking external dependencies
-- **Arrange-Act-Assert**: Structure tests with clear setup, action, and verification phases
-- Use fixtures for test data from `test/support/fixtures/`
-- Always rerun all tests after every code change with `mix test`
-- After any change to a test file run it with `mix test <file_path>`
-- After several changes run all tests with `mix test`
+## Project Rules
+- Check if port 4000 is already in use before running `mix phx.server`.
+- Never commit changes; the user will review before committing.
 
-### HTTP and API Integration
-- **Req for HTTP Clients**: Use Req instead of HTTPoison or Tesla
-- **Behaviours for API Clients**: Define behaviours for API clients to allow easy mocking
-- **Error Handling**: Handle network failures and unexpected responses gracefully
-- **Timeouts**: Always set appropriate timeouts for external calls
-
-### UI and Styling
-- Use Phoenix LiveView for dynamic, real-time interactions
-- Implement responsive design with Tailwind CSS
-- **Petal Components**: Primary UI component library
-- **Heroicons**: Icon library from Tailwind
-- **Live Select**: Enhanced select components
-
-### Internationalization
-- Use `gettext/1` for all user-facing strings
-- Supported locales: English (en) and Russian (ru)
-- Run `mix gettext` to extract and merge translations
-
-## Contexts
-- **Accounts** - Authentication with locale and avatar support
-- **Planning** - Travel plans with destinations, accommodations, transfers, expenses
-- **Packing** - Packing lists with categorized items and templates
-- **Geo** - Countries, regions, cities from GeoNames
-- **Social** - Social connections between users
-
-## Deployment
-Configured for Fly.io deployment with Docker. Configuration in `fly.toml`.
-
-- always check if app is already running on port 4000 before using phx.server command - most likely it is running already
-- **CRITICAL**: Never commit changes. All changes must be reviewed by the user before committing.
+## Editor Rules
+- No Cursor rules found in `.cursor/rules/` or `.cursorrules`.
+- No Copilot instructions found in `.github/copilot-instructions.md`.
