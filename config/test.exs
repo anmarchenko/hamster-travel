@@ -39,3 +39,9 @@ config :hamster_travel, :geonames_req_options, plug: {Req.Test, HamsterTravel.Ge
 config :ex_money,
   auto_start_exchange_rate_service: true,
   api_module: HamsterTravel.TestExchangeRates
+
+config :waffle,
+  storage: Waffle.Storage.Local,
+  asset_host: "http://localhost"
+
+config :hamster_travel, :waffle_skip_processing, true

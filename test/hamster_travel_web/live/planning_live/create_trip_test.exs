@@ -31,7 +31,9 @@ defmodule HamsterTravelWeb.Planning.CreateTripTest do
 
       geonames_fixture()
       city = HamsterTravel.Geo.find_city_by_geonames_id("2950159")
-      {:ok, destination} = Planning.create_destination(trip, %{city_id: city.id, start_day: 0, end_day: 1})
+
+      {:ok, destination} =
+        Planning.create_destination(trip, %{city_id: city.id, start_day: 0, end_day: 1})
 
       {:ok, view, html} = live(conn, ~p"/trips/new?copy=#{trip.id}")
 

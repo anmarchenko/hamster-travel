@@ -35,9 +35,11 @@ defmodule HamsterTravelWeb.Planning.FoodExpense do
             display_currency={@display_currency}
             class="inline-flex"
           />
-          {gettext("per day")}
-          x {@food_expense.days_count} {ngettext("day", "days", @food_expense.days_count)}
-          x {@food_expense.people_count} {ngettext("person", "people", @food_expense.people_count)}
+          {gettext("per day")} x {@food_expense.days_count} {ngettext(
+            "day",
+            "days",
+            @food_expense.days_count
+          )} x {@food_expense.people_count} {ngettext("person", "people", @food_expense.people_count)}
         </span>
         <span class="whitespace-nowrap">
           =
@@ -64,5 +66,4 @@ defmodule HamsterTravelWeb.Planning.FoodExpense do
   def handle_event("edit", _, socket) do
     {:noreply, assign(socket, :edit, true)}
   end
-
 end

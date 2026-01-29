@@ -33,3 +33,9 @@ npm-debug.log
 /assets/node_modules/
 
 .elixir_ls
+
+# local uploads
+uploads
+
+# local environment
+.envrc

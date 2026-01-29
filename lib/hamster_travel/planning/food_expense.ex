@@ -30,6 +30,7 @@ defmodule HamsterTravel.Planning.FoodExpense do
   def build_food_expense_changeset(%__MODULE__{} = food_expense, %Trip{} = trip, attrs) do
     changeset = changeset(food_expense, attrs)
     total = food_expense_total(changeset, trip.currency)
+
     expense =
       case food_expense.expense do
         %Ecto.Association.NotLoaded{} -> %Expense{}

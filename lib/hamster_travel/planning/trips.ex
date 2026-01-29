@@ -32,6 +32,8 @@ defmodule HamsterTravel.Planning.Trips do
     Expense
   }
 
+  alias HamsterTravel.Planning.TripCover
+
   alias HamsterTravel.Repo
 
   def list_plans(user \\ nil) do
@@ -193,6 +195,17 @@ defmodule HamsterTravel.Planning.Trips do
           Repo.rollback(changeset)
       end
     end)
+  end
+
+  def update_trip_cover(%Trip{} = trip, %Plug.Upload{} = upload) do
+    with {:ok, file_name} <- TripCover.store({upload, trip}) do
+      cover = %{
+        file_name: file_name,
+        updated_at: NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+      }
+
+      Repo.update(Ecto.Changeset.change(trip, cover: cover))
+    end
   end
 
   def delete_trip(%Trip{} = trip) do

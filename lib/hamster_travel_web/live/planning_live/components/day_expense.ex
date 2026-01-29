@@ -80,5 +80,4 @@ defmodule HamsterTravelWeb.Planning.DayExpense do
          |> put_flash(:error, gettext("Failed to delete expense"))}
     end
   end
-
 end

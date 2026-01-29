@@ -49,7 +49,9 @@ defmodule HamsterTravelWeb.Planning.Note do
           class="ml-1"
           edit_target={@myself}
           delete_target={@myself}
-          delete_confirm={gettext("Are you sure you want to delete note \"%{title}\"?", title: @note.title)}
+          delete_confirm={
+            gettext("Are you sure you want to delete note \"%{title}\"?", title: @note.title)
+          }
         />
       </.inline>
       <div id={"note-content-#{@note.id}"} class="hidden flex flex-col gap-y-1">
@@ -80,5 +82,4 @@ defmodule HamsterTravelWeb.Planning.Note do
         {:noreply, put_flash(socket, :error, gettext("Failed to delete note"))}
     end
   end
-
 end

@@ -6,6 +6,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.Trip
   alias HamsterTravelWeb.CoreComponents
+  alias HamsterTravel.Planning.TripCover
 
   attr(:budget, Money, required: true)
   attr(:display_currency, :string, required: true)
@@ -74,15 +75,21 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   def trip_card(assigns) do
     budget = Planning.calculate_budget(assigns.trip)
 
-    assigns = assign(assigns, budget: budget)
+    cover_url =
+      if assigns.trip.cover do
+        TripCover.url({assigns.trip.cover, assigns.trip}, :card)
+      else
+        placeholder_image(assigns.trip.id)
+      end
+
+    assigns = assign(assigns, budget: budget, cover_url: cover_url)
 
     ~H"""
     <.card id={@id}>
       <div class="shrink-0">
         <.link navigate={trip_url(@trip.slug)}>
-          <%!-- # @trip.cover ||  --%>
           <img
-            src={placeholder_image(@trip.id)}
+            src={@cover_url}
             class="w-32 h-32 object-cover object-center rounded-l-lg"
           />
         </.link>

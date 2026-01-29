@@ -24,7 +24,16 @@ defmodule HamsterTravel.Planning.Activity do
   @doc false
   def changeset(activity, attrs) do
     activity
-    |> cast(attrs, [:name, :day_index, :priority, :link, :address, :description, :trip_id, :position])
+    |> cast(attrs, [
+      :name,
+      :day_index,
+      :priority,
+      :link,
+      :address,
+      :description,
+      :trip_id,
+      :position
+    ])
     |> cast_assoc(:expense, with: &Expense.changeset/2)
     |> validate_required([:name, :day_index, :priority, :trip_id])
     |> validate_number(:day_index, greater_than_or_equal_to: 0)

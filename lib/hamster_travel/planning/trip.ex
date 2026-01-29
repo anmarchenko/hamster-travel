@@ -4,6 +4,7 @@ end
 
 defmodule HamsterTravel.Planning.Trip do
   use Ecto.Schema
+  use Waffle.Ecto.Schema
   import Ecto.Changeset
 
   alias HamsterTravel.Accounts.User
@@ -16,6 +17,7 @@ defmodule HamsterTravel.Planning.Trip do
   alias HamsterTravel.Planning.Transfer
   alias HamsterTravel.Planning.Note
   alias HamsterTravel.Planning.Trip.NameSlug
+  alias HamsterTravel.Planning.TripCover
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -42,6 +44,7 @@ defmodule HamsterTravel.Planning.Trip do
     field :currency, :string
     field :people_count, :integer
     field :private, :boolean, default: false
+    field :cover, TripCover.Type
 
     belongs_to(:author, User)
 
@@ -75,6 +78,7 @@ defmodule HamsterTravel.Planning.Trip do
       :people_count,
       :author_id
     ])
+    |> cast_attachments(params, [:cover])
     |> validate_required([
       :name,
       :currency,
@@ -86,7 +90,7 @@ defmodule HamsterTravel.Planning.Trip do
     |> validate_number(:people_count, greater_than: 0)
     |> validate_finished_trip_has_known_dates()
     |> validate_dates_and_duration()
-    |> NameSlug.maybe_generate_slug()
+    |> maybe_update_slug()
     |> NameSlug.unique_constraint()
   end
 
@@ -161,5 +165,13 @@ defmodule HamsterTravel.Planning.Trip do
     end_date = get_field(changeset, :end_date)
 
     Dates.duration(start_date, end_date)
+  end
+
+  defp maybe_update_slug(changeset) do
+    if get_change(changeset, :name) do
+      NameSlug.force_generate_slug(changeset)
+    else
+      NameSlug.maybe_generate_slug(changeset)
+    end
   end
 end

@@ -28,7 +28,7 @@ defmodule HamsterTravelWeb.Planning.Destination do
   def render(%{edit: false} = assigns) do
     ~H"""
     <div>
-        <.inline class="gap-[0px]">
+      <.inline class="gap-0">
         <.flag size={20} country={@destination.city.country_code} class="mr-2" />
         <span class="sm:grow">{Geo.city_name(@destination.city)}</span>
         <.edit_delete_buttons

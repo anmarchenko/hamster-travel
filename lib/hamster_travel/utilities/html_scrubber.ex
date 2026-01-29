@@ -14,7 +14,14 @@ defmodule HamsterTravel.Utilities.HtmlScrubber do
 
   # YouTube embeds
   Meta.allow_tag_with_uri_attributes("iframe", ["src"], ["http", "https"])
-  Meta.allow_tag_with_these_attributes("iframe", ["class", "width", "height", "frameborder", "allowfullscreen"])
+
+  Meta.allow_tag_with_these_attributes("iframe", [
+    "class",
+    "width",
+    "height",
+    "frameborder",
+    "allowfullscreen"
+  ])
 
   # Text formatting
   Meta.allow_tag_with_these_attributes("p", ["class"])

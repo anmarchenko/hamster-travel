@@ -31,7 +31,7 @@ defmodule HamsterTravel.Packing.Backpack do
     |> validate_required([:name, :days, :nights, :user_id])
     |> validate_number(:days, greater_than: 0)
     |> validate_number(:nights, greater_than_or_equal_to: 0)
-    |> NameSlug.maybe_generate_slug()
+    |> maybe_update_slug()
     |> NameSlug.unique_constraint()
   end
 
@@ -41,7 +41,15 @@ defmodule HamsterTravel.Packing.Backpack do
     |> validate_required([:name, :days, :nights])
     |> validate_number(:days, greater_than: 0)
     |> validate_number(:nights, greater_than_or_equal_to: 0)
-    |> NameSlug.maybe_generate_slug()
+    |> maybe_update_slug()
     |> NameSlug.unique_constraint()
+  end
+
+  defp maybe_update_slug(changeset) do
+    if get_change(changeset, :name) do
+      NameSlug.force_generate_slug(changeset)
+    else
+      NameSlug.maybe_generate_slug(changeset)
+    end
   end
 end

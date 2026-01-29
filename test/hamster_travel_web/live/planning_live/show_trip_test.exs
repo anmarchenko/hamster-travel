@@ -8,7 +8,9 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
   alias HamsterTravel.Geo
   alias HamsterTravel.Planning
+  alias HamsterTravel.Repo
   alias HamsterTravelWeb.Cldr
+  alias HamsterTravel.Planning.TripCover
 
   describe "Show trip page" do
     test "renders trip page with empty trip and known dates", %{conn: conn} do
@@ -42,6 +44,36 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       # Verify that dates are displayed
       assert html =~ Cldr.date_with_weekday(trip.start_date)
       assert html =~ Cldr.date_with_weekday(trip.end_date)
+    end
+
+    test "shows cover upload dropzone for editors", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      assert has_element?(view, "form#cover-upload-form")
+      assert has_element?(view, "[data-cover-dropzone]")
+    end
+
+    test "renders cover image when trip has a cover", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      trip =
+        trip
+        |> Ecto.Changeset.change(%{
+          cover: %{file_name: "cover.jpg", updated_at: DateTime.utc_now()}
+        })
+        |> Repo.update!()
+
+      {:ok, _view, html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      assert html =~ TripCover.url({trip.cover, trip}, :hero)
     end
 
     test "deletes trip from the trip page", %{conn: conn} do
@@ -313,6 +345,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       # Arrange
       user = user_fixture()
       conn = log_in_user(conn, user)
+
       trip =
         trip_fixture(%{
           author_id: user.id,

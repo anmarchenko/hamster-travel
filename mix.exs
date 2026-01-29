@@ -82,6 +82,14 @@ defmodule HamsterTravel.MixProject do
       {:jason, "~> 1.2"},
       {:yaml_elixir, "~> 2.9"},
 
+      # file uploads
+      {:waffle, "~> 1.1"},
+      {:waffle_ecto, "~> 0.0.12"},
+      {:ex_aws, "~> 2.6"},
+      {:ex_aws_s3, "~> 2.5"},
+      {:hackney, "~> 1.20"},
+      {:sweet_xml, "~> 0.7"},
+
       # math formulas - used for backpack packing templates
       {:abacus, "~> 2.0"},
 

@@ -16,6 +16,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   alias HamsterTravel.Repo
   alias HamsterTravelWeb.Cldr
   alias HamsterTravelWeb.CoreComponents
+  alias HamsterTravel.Planning.TripCover
 
   alias HamsterTravelWeb.Planning.{
     Accommodation,
@@ -49,7 +50,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           </.header>
           <.shorts trip={@trip} budget={@budget} display_currency={@display_currency} />
           <.inline :if={@current_user} class="gap-3 text-xs sm:text-base">
-            <.button link_type="live_redirect" to={trip_url(@trip.slug, :edit)} color="secondary">
+            <.button
+              :if={@can_edit}
+              link_type="live_redirect"
+              to={trip_url(@trip.slug, :edit)}
+              color="secondary"
+            >
               <.icon_text icon="hero-pencil" label={gettext("Edit")} />
             </.button>
             <.button
@@ -71,12 +77,21 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           </.inline>
           <.status_row trip={@trip} />
         </div>
-        <div>
-          <%!-- <img
-        :if={@trip.cover}
-        class="max-h-52 mb-4 sm:mb-0 sm:h-36 sm:w-auto sm:max-h-full shadow-lg rounded-md"
-        src={@trip.cover}
-      /> --%>
+        <div class="sm:pl-6">
+          <div class="flex flex-col items-end gap-3">
+            <label
+              :if={@trip.cover}
+              for={@can_edit && @uploads.cover.ref}
+              class={["cursor-pointer", !@can_edit && "pointer-events-none"]}
+            >
+              <img
+                class="max-h-80 mb-4 sm:mb-0 sm:h-56 sm:w-auto sm:max-h-full shadow-lg rounded-md"
+                src={TripCover.url({@trip.cover, @trip}, :hero)}
+                data-cover-image
+              />
+            </label>
+            <.cover_upload :if={@can_edit} trip={@trip} uploads={@uploads} />
+          </div>
         </div>
       </div>
     </.container>
@@ -110,6 +125,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         socket
       end
 
+    can_edit = can_edit?(trip, socket.assigns.current_user)
+
     socket =
       socket
       |> assign(mobile_menu: :plan_tabs)
@@ -126,6 +143,16 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> assign(active_activity_adding_component_id: nil)
       |> assign(active_day_expense_adding_component_id: nil)
       |> assign(active_note_adding_component_id: nil)
+      |> assign(can_edit: can_edit)
+
+    socket =
+      allow_upload(socket, :cover,
+        accept: ~w(.jpg .jpeg .png .webp),
+        max_entries: 1,
+        max_file_size: 5_000_000,
+        auto_upload: true,
+        progress: &handle_progress/3
+      )
 
     {:ok, socket}
   end
@@ -258,6 +285,39 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     {:noreply, socket}
   end
 
+  def handle_progress(:cover, entry, socket) do
+    %{trip: trip, can_edit: can_edit} = socket.assigns
+
+    if can_edit && entry.done? do
+      {temp_path, entry} =
+        consume_uploaded_entry(socket, entry, fn %{path: path} ->
+          {:ok, copy_upload_to_tmp(path, entry)}
+        end)
+
+      upload = %Plug.Upload{
+        path: temp_path,
+        filename: entry.client_name,
+        content_type: entry.client_type
+      }
+
+      socket =
+        case Planning.update_trip_cover(trip, upload) do
+          {:ok, updated_trip} ->
+            File.rm(temp_path)
+
+            assign(socket, trip: updated_trip)
+
+          {:error, _error} ->
+            File.rm(temp_path)
+            put_flash(socket, :error, gettext("Failed to update cover."))
+        end
+
+      {:noreply, socket}
+    else
+      {:noreply, socket}
+    end
+  end
+
   @impl true
   def handle_event("delete_outside_notes", _params, socket) do
     socket.assigns.trip
@@ -329,6 +389,33 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       end
 
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("validate_cover", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("remove_cover", _params, socket) do
+    %{trip: trip, can_edit: can_edit} = socket.assigns
+
+    if can_edit do
+      socket =
+        case Planning.update_trip(trip, %{cover: nil}) do
+          {:ok, updated_trip} ->
+            socket
+            |> assign(trip: updated_trip)
+            |> put_flash(:info, gettext("Cover removed."))
+
+          {:error, _changeset} ->
+            put_flash(socket, :error, gettext("Failed to remove cover."))
+        end
+
+      {:noreply, socket}
+    else
+      {:noreply, socket}
+    end
   end
 
   @impl true
@@ -1210,10 +1297,88 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     """
   end
 
+  attr(:trip, Trip, required: true)
+  attr(:uploads, :map, required: true)
+
+  def cover_upload(assigns) do
+    ~H"""
+    <form id="cover-upload-form" phx-change="validate_cover" class="w-full sm:w-72">
+      <div
+        :if={is_nil(@trip.cover)}
+        class="w-full rounded-xl border border-dashed border-zinc-200/80 bg-white/80 px-4 py-5 text-sm text-zinc-600 shadow-sm dark:border-zinc-700 dark:bg-zinc-900/40 dark:text-zinc-300"
+        phx-drop-target={@uploads.cover.ref}
+        data-cover-dropzone
+      >
+        <div class="flex flex-col gap-2">
+          <span class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            {gettext("Add cover")}
+          </span>
+          <span class="text-xs text-zinc-500 dark:text-zinc-400">
+            {gettext("Drag and drop or choose a file.")}
+          </span>
+          <label
+            for={@uploads.cover.ref}
+            class="pc-button pc-button--secondary-light pc-button--xs pc-button--radius-md pc-button--with-icon w-fit cursor-pointer"
+          >
+            <.icon name="hero-arrow-up-tray" class="pc-button__spinner-icon--sm" />
+            {gettext("Choose image")}
+          </label>
+        </div>
+      </div>
+
+      <div :if={@trip.cover} class="flex flex-wrap items-center gap-2 justify-end">
+        <button
+          type="button"
+          class="group inline-flex items-center gap-1"
+          phx-click="remove_cover"
+          data-confirm={gettext("Remove the cover image?")}
+        >
+          <span class="inline-flex h-6 w-6 shrink-0 items-center justify-center text-zinc-500 transition-colors group-hover:text-zinc-700 dark:text-zinc-400 dark:group-hover:text-zinc-200">
+            <.icon name="hero-trash" class="h-4 w-4" />
+          </span>
+          <span class="text-xs font-semibold text-zinc-500 dark:text-zinc-400 leading-4 transition-colors group-hover:text-zinc-700 dark:group-hover:text-zinc-200">
+            {gettext("Remove cover")}
+          </span>
+        </button>
+      </div>
+
+      <.live_file_input upload={@uploads.cover} class="sr-only" />
+
+      <div
+        :for={entry <- @uploads.cover.entries}
+        class="mt-3 text-xs text-zinc-500 dark:text-zinc-400"
+      >
+        <div class="flex items-center gap-2">
+          <span class="font-semibold">{entry.client_name}</span>
+          <progress value={entry.progress} max="100" class="h-1 w-32 accent-secondary-500" />
+          <span>{entry.progress}%</span>
+        </div>
+      </div>
+
+      <p
+        :for={err <- upload_errors(@uploads.cover)}
+        class="mt-2 text-xs font-semibold text-rose-600"
+      >
+        {cover_error(err)}
+      </p>
+
+      <p
+        :if={Enum.any?(@uploads.cover.entries)}
+        class="mt-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400"
+      >
+        {gettext("Uploading...")}
+      </p>
+    </form>
+    """
+  end
+
   # HELPERS
 
   defp active_nav(%{status: "0_draft"}), do: drafts_nav_item()
   defp active_nav(_), do: plans_nav_item()
+
+  defp can_edit?(_trip, nil), do: false
+  defp can_edit?(trip, user), do: Policy.authorized?(:edit, trip, user)
 
   defp fetch_tab(%{"tab" => tab})
        when tab in @tabs,
@@ -1448,4 +1613,19 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   defp ensure_int(val) when is_binary(val), do: String.to_integer(val)
   defp ensure_int(val), do: val
+
+  defp cover_error(:too_large), do: gettext("File is too large.")
+  defp cover_error(:too_many_files), do: gettext("Only one file is allowed.")
+  defp cover_error(:not_accepted), do: gettext("Unsupported file type.")
+  defp cover_error(_), do: gettext("Upload failed.")
+
+  defp copy_upload_to_tmp(path, entry) do
+    extension = Path.extname(entry.client_name)
+    filename = "trip-cover-#{entry.uuid}#{extension}"
+    temp_path = Path.join(System.tmp_dir!(), filename)
+
+    File.cp!(path, temp_path)
+
+    {temp_path, entry}
+  end
 end

@@ -568,6 +568,33 @@ defmodule HamsterTravel.PlanningTest do
       assert trip.end_date == ~D[2023-06-13]
     end
 
+    test "update_trip/2 stores a cover image" do
+      trip = trip_fixture()
+
+      upload = %Plug.Upload{
+        path: Path.expand("../support/fixtures/files/cover.jpg", __DIR__),
+        filename: "cover.jpg",
+        content_type: "image/jpeg"
+      }
+
+      assert {:ok, %Trip{} = updated_trip} = Planning.update_trip(trip, %{cover: upload})
+      assert updated_trip.cover != nil
+    end
+
+    test "update_trip/2 keeps the slug unchanged when updating the cover" do
+      trip = trip_fixture()
+      original_slug = trip.slug
+
+      upload = %Plug.Upload{
+        path: Path.expand("../support/fixtures/files/cover.jpg", __DIR__),
+        filename: "cover.jpg",
+        content_type: "image/jpeg"
+      }
+
+      assert {:ok, %Trip{} = updated_trip} = Planning.update_trip(trip, %{cover: upload})
+      assert updated_trip.slug == original_slug
+    end
+
     test "update_trip/2 with valid data updates the trip start_date" do
       trip = trip_fixture()
 

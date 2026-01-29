@@ -181,6 +181,15 @@ defmodule HamsterTravel.Planning do
   end
 
   @doc """
+  Stores a trip cover and updates the trip with the stored file metadata.
+
+  Returns `{:ok, %Trip{}}` or `{:error, reason}`.
+  """
+  def update_trip_cover(%Trip{} = trip, %Plug.Upload{} = upload) do
+    Trips.update_trip_cover(trip, upload)
+  end
+
+  @doc """
   Creates a tombstone snapshot and hard-deletes the trip and its associations.
 
   Pass the `%Trip{}` to remove.

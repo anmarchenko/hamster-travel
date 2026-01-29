@@ -56,6 +56,17 @@ config :ex_money,
   json_library: Jason,
   default_cldr_backend: HamsterTravelWeb.Cldr
 
+config :waffle,
+  storage: Waffle.Storage.S3,
+  bucket: {:system, "AWS_S3_BUCKET"},
+  asset_host: {:system, "S3_ASSET_HOST"}
+
+config :ex_aws,
+  json_codec: Jason,
+  access_key_id: [{:system, "AWS_ACCESS_KEY_ID"}, :instance_role],
+  secret_access_key: [{:system, "AWS_SECRET_ACCESS_KEY"}, :instance_role],
+  region: {:system, "AWS_REGION"}
+
 config :petal_components,
        :error_translator_function,
        {HamsterTravelWeb.CoreComponents, :translate_error}

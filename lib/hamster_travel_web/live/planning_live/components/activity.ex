@@ -57,7 +57,9 @@ defmodule HamsterTravelWeb.Planning.Activity do
           class="ml-1"
           edit_target={@myself}
           delete_target={@myself}
-          delete_confirm={gettext("Are you sure you want to delete activity \"%{name}\"?", name: @activity.name)}
+          delete_confirm={
+            gettext("Are you sure you want to delete activity \"%{name}\"?", name: @activity.name)
+          }
         />
       </.inline>
       <div id={"activity-content-#{@activity.id}"} class="hidden flex flex-col gap-y-1">
@@ -127,5 +129,4 @@ defmodule HamsterTravelWeb.Planning.Activity do
     </.secondary>
     """
   end
-
 end

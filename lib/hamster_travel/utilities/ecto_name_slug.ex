@@ -3,7 +3,7 @@ defmodule HamsterTravel.EctoNameSlug do
     quote location: :keep, bind_quoted: [opts: opts] do
       module = Keyword.get(opts, :module)
 
-      use EctoAutoslugField.Slug, from: :name, to: :slug, always_change: true
+      use EctoAutoslugField.Slug, from: :name, to: :slug
 
       import Ecto.Query
 
