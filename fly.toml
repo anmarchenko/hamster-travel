@@ -13,6 +13,10 @@ processes = []
   AWS_REGION = "eu-central-1"
   AWS_S3_BUCKET = "hamster-travel-prod-images"
   S3_ASSET_HOST = "https://hamster-travel-prod-images.s3.eu-central-1.amazonaws.com"
+  MAGICK_MEMORY_LIMIT = "128MiB"
+  MAGICK_MAP_LIMIT = "128MiB"
+  MAGICK_DISK_LIMIT = "1GiB"
+  MAGICK_TEMPORARY_PATH = "/tmp"
 
 [experimental]
   auto_rollback = true

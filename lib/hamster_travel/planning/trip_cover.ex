@@ -2,7 +2,8 @@ defmodule HamsterTravel.Planning.TripCover do
   use Waffle.Definition
   use Waffle.Ecto.Definition
 
-  @versions [:original, :hero, :card, :thumb]
+  @async false
+  @versions [:original, :hero, :card]
   @extension_whitelist ~w(.jpg .jpeg .png .webp)
 
   def validate({file, _scope}) do
@@ -27,9 +28,6 @@ defmodule HamsterTravel.Planning.TripCover do
 
         :card ->
           {:convert, "-strip -thumbnail 256x256 -format jpg", :jpg}
-
-        :thumb ->
-          {:convert, "-strip -thumbnail 128x128 -format jpg", :jpg}
 
         :original ->
           :noaction
