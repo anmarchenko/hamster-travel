@@ -10,12 +10,12 @@ defmodule HamsterTravel.Planning.Trip do
   alias HamsterTravel.Accounts.User
   alias HamsterTravel.Dates
   alias HamsterTravel.Planning.Accommodation
-  alias HamsterTravel.Planning.Destination
   alias HamsterTravel.Planning.DayExpense
-  alias HamsterTravel.Planning.FoodExpense
+  alias HamsterTravel.Planning.Destination
   alias HamsterTravel.Planning.Expense
-  alias HamsterTravel.Planning.Transfer
+  alias HamsterTravel.Planning.FoodExpense
   alias HamsterTravel.Planning.Note
+  alias HamsterTravel.Planning.Transfer
   alias HamsterTravel.Planning.Trip.NameSlug
   alias HamsterTravel.Planning.TripCover
 

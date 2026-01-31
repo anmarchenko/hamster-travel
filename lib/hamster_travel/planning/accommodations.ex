@@ -4,10 +4,10 @@ defmodule HamsterTravel.Planning.Accommodations do
   import Ecto.Query, warn: false
 
   alias HamsterTravel.Planning.Accommodation
+  alias HamsterTravel.Planning.Common
   alias HamsterTravel.Planning.Expense
   alias HamsterTravel.Planning.PubSub
   alias HamsterTravel.Planning.Trip
-  alias HamsterTravel.Planning.Common
   alias HamsterTravel.Repo
 
   def get_accommodation!(id) do

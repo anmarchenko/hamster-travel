@@ -5,8 +5,8 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
 
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.Trip
-  alias HamsterTravelWeb.CoreComponents
   alias HamsterTravel.Planning.TripCover
+  alias HamsterTravelWeb.CoreComponents
 
   attr(:budget, Money, required: true)
   attr(:display_currency, :string, required: true)

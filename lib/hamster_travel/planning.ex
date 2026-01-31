@@ -6,19 +6,19 @@ defmodule HamsterTravel.Planning do
   """
 
   alias HamsterTravel.Planning.{
-    Accommodations,
     Accommodation,
+    Accommodations,
     Activities,
     Activity,
     Common,
-    DayExpenses,
     DayExpense,
+    DayExpenses,
     Destination,
     Destinations,
-    FoodExpense,
-    FoodExpenses,
     Expense,
     Expenses,
+    FoodExpense,
+    FoodExpenses,
     Note,
     Notes,
     Transfer,

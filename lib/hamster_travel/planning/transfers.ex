@@ -4,12 +4,12 @@ defmodule HamsterTravel.Planning.Transfers do
   import Ecto.Query, warn: false
 
   alias HamsterTravel.Geo
+  alias HamsterTravel.Planning.Common
   alias HamsterTravel.Planning.Expense
   alias HamsterTravel.Planning.Policy
   alias HamsterTravel.Planning.PubSub
   alias HamsterTravel.Planning.Transfer
   alias HamsterTravel.Planning.Trip
-  alias HamsterTravel.Planning.Common
   alias HamsterTravel.Repo
 
   def get_transfer!(id) do

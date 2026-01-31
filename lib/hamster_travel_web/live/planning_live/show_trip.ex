@@ -13,10 +13,10 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.Policy
   alias HamsterTravel.Planning.Trip
+  alias HamsterTravel.Planning.TripCover
   alias HamsterTravel.Repo
   alias HamsterTravelWeb.Cldr
   alias HamsterTravelWeb.CoreComponents
-  alias HamsterTravel.Planning.TripCover
 
   alias HamsterTravelWeb.Planning.{
     Accommodation,
@@ -25,16 +25,19 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     ActivityNew,
     DayExpense,
     DayExpenseNew,
+    Destination,
+    DestinationNew,
     FoodExpense,
     Note,
     NoteNew,
-    Destination,
-    DestinationNew,
     Transfer,
     TransferNew
   }
 
   @tabs ["itinerary", "activities", "notes"]
+  @cover_upload_max_mb 8
+  @cover_upload_max_file_size @cover_upload_max_mb * 1_000_000
+  @cover_upload_accept ~w(.jpg .jpeg .png .webp)
 
   @impl true
   def render(assigns) do
@@ -90,7 +93,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                 data-cover-image
               />
             </label>
-            <.cover_upload :if={@can_edit} trip={@trip} uploads={@uploads} />
+            <.cover_upload
+              :if={@can_edit}
+              trip={@trip}
+              uploads={@uploads}
+              cover_upload_errors={@cover_upload_errors}
+            />
           </div>
         </div>
       </div>
@@ -144,12 +152,13 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> assign(active_day_expense_adding_component_id: nil)
       |> assign(active_note_adding_component_id: nil)
       |> assign(can_edit: can_edit)
+      |> assign(cover_upload_errors: [])
 
     socket =
       allow_upload(socket, :cover,
-        accept: ~w(.jpg .jpeg .png .webp),
+        accept: @cover_upload_accept,
         max_entries: 1,
-        max_file_size: 5_000_000,
+        max_file_size: @cover_upload_max_file_size,
         auto_upload: true,
         progress: &handle_progress/3
       )
@@ -286,35 +295,50 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   def handle_progress(:cover, entry, socket) do
-    %{trip: trip, can_edit: can_edit} = socket.assigns
+    %{trip: trip, can_edit: can_edit, uploads: uploads} = socket.assigns
+    entry_errors = upload_errors(uploads.cover, entry)
 
-    if can_edit && entry.done? do
-      {temp_path, entry} =
-        consume_uploaded_entry(socket, entry, fn %{path: path} ->
-          {:ok, copy_upload_to_tmp(path, entry)}
-        end)
-
-      upload = %Plug.Upload{
-        path: temp_path,
-        filename: entry.client_name,
-        content_type: entry.client_type
-      }
-
+    if entry_errors != [] do
       socket =
-        case Planning.update_trip_cover(trip, upload) do
-          {:ok, updated_trip} ->
-            File.rm(temp_path)
-
-            assign(socket, trip: updated_trip)
-
-          {:error, _error} ->
-            File.rm(temp_path)
-            put_flash(socket, :error, gettext("Failed to update cover."))
-        end
+        socket
+        |> cancel_upload(:cover, entry.ref)
+        |> assign(cover_upload_errors: Enum.uniq(entry_errors))
 
       {:noreply, socket}
     else
-      {:noreply, socket}
+      if can_edit && entry.done? do
+        {temp_path, entry} =
+          consume_uploaded_entry(socket, entry, fn %{path: path} ->
+            {:ok, copy_upload_to_tmp(path, entry)}
+          end)
+
+        upload = %Plug.Upload{
+          path: temp_path,
+          filename: entry.client_name,
+          content_type: entry.client_type
+        }
+
+        socket =
+          case Planning.update_trip_cover(trip, upload) do
+            {:ok, updated_trip} ->
+              File.rm(temp_path)
+
+              socket
+              |> assign(trip: updated_trip)
+              |> assign(cover_upload_errors: [])
+
+            {:error, _error} ->
+              File.rm(temp_path)
+
+              socket
+              |> assign(cover_upload_errors: [:upload_failed])
+              |> put_flash(:error, gettext("Failed to update cover."))
+          end
+
+        {:noreply, socket}
+      else
+        {:noreply, socket}
+      end
     end
   end
 
@@ -393,7 +417,23 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   @impl true
   def handle_event("validate_cover", _params, socket) do
-    {:noreply, socket}
+    upload = socket.assigns.uploads.cover
+    config_errors = upload_errors(upload)
+
+    {socket, entry_errors} =
+      Enum.reduce(upload.entries, {socket, []}, fn entry, {socket, errors} ->
+        entry_errors = upload_errors(upload, entry)
+
+        if entry_errors == [] do
+          {socket, errors}
+        else
+          {cancel_upload(socket, :cover, entry.ref), errors ++ entry_errors}
+        end
+      end)
+
+    errors = Enum.uniq(config_errors ++ entry_errors)
+
+    {:noreply, assign(socket, cover_upload_errors: errors)}
   end
 
   @impl true
@@ -1299,6 +1339,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   attr(:trip, Trip, required: true)
   attr(:uploads, :map, required: true)
+  attr(:cover_upload_errors, :list, default: [])
 
   def cover_upload(assigns) do
     ~H"""
@@ -1353,17 +1394,23 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           <progress value={entry.progress} max="100" class="h-1 w-32 accent-secondary-500" />
           <span>{entry.progress}%</span>
         </div>
+        <p
+          :for={err <- upload_errors(@uploads.cover, entry)}
+          class="mt-1 text-xs font-semibold text-rose-600"
+        >
+          {cover_error(err)}
+        </p>
       </div>
 
       <p
-        :for={err <- upload_errors(@uploads.cover)}
+        :for={err <- @cover_upload_errors}
         class="mt-2 text-xs font-semibold text-rose-600"
       >
         {cover_error(err)}
       </p>
 
       <p
-        :if={Enum.any?(@uploads.cover.entries)}
+        :if={cover_uploading?(@uploads.cover)}
         class="mt-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400"
       >
         {gettext("Uploading...")}
@@ -1614,10 +1661,19 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   defp ensure_int(val) when is_binary(val), do: String.to_integer(val)
   defp ensure_int(val), do: val
 
-  defp cover_error(:too_large), do: gettext("File is too large.")
-  defp cover_error(:too_many_files), do: gettext("Only one file is allowed.")
-  defp cover_error(:not_accepted), do: gettext("Unsupported file type.")
-  defp cover_error(_), do: gettext("Upload failed.")
+  defp cover_error(:too_large),
+    do: gettext("File is too large. Maximum size is %{size} MB.", size: @cover_upload_max_mb)
+
+  defp cover_error(:too_many_files), do: gettext("Only one image can be uploaded at a time.")
+  defp cover_error(:not_accepted), do: gettext("Unsupported file type. Use JPG, PNG, or WebP.")
+  defp cover_error(:upload_failed), do: gettext("Upload failed. Please try again.")
+  defp cover_error(_), do: gettext("Upload failed. Please try again.")
+
+  defp cover_uploading?(upload) do
+    Enum.any?(upload.entries, fn entry ->
+      not entry.done? and upload_errors(upload, entry) == []
+    end)
+  end
 
   defp copy_upload_to_tmp(path, entry) do
     extension = Path.extname(entry.client_name)

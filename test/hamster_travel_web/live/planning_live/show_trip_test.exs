@@ -8,9 +8,9 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
   alias HamsterTravel.Geo
   alias HamsterTravel.Planning
+  alias HamsterTravel.Planning.TripCover
   alias HamsterTravel.Repo
   alias HamsterTravelWeb.Cldr
-  alias HamsterTravel.Planning.TripCover
 
   describe "Show trip page" do
     test "renders trip page with empty trip and known dates", %{conn: conn} do
