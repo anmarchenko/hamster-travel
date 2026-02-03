@@ -145,29 +145,14 @@ msgstr ""
 msgid "Password"
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:29
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:46
 #, elixir-autogen, elixir-format
 msgid "Log out"
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:11
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:16
 #, elixir-autogen, elixir-format
 msgid "My profile"
-msgstr ""
-
-#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:45
-#, elixir-autogen, elixir-format
-msgid "Of cities"
-msgstr ""
-
-#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:39
-#, elixir-autogen, elixir-format
-msgid "Of countries"
-msgstr ""
-
-#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:51
-#, elixir-autogen, elixir-format
-msgid "Of travels"
 msgstr ""
 
 #: lib/hamster_travel_web/live/packing_live/components/backpack_form.ex:54
@@ -241,7 +226,7 @@ msgid "Sign in to your account"
 msgstr ""
 
 #: lib/hamster_travel/packing.ex:64
-#: lib/hamster_travel/planning/trips.ex:108
+#: lib/hamster_travel/planning/trips.ex:120
 #, elixir-autogen, elixir-format
 msgid "Copy"
 msgstr ""
@@ -942,4 +927,34 @@ msgstr ""
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1670
 #, elixir-autogen, elixir-format
 msgid "Upload failed. Please try again."
+msgstr ""
+
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:61
+#, elixir-autogen, elixir-format
+msgid "Countries"
+msgstr ""
+
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:68
+#, elixir-autogen, elixir-format
+msgid "Days on the road"
+msgstr ""
+
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:37
+#, elixir-autogen, elixir-format
+msgid "Settings"
+msgstr ""
+
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:54
+#, elixir-autogen, elixir-format
+msgid "Total trips"
+msgstr ""
+
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:7
+#, elixir-autogen, elixir-format
+msgid "User profile cover"
+msgstr ""
+
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:100
+#, elixir-autogen, elixir-format
+msgid "Visited countries"
 msgstr ""

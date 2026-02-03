@@ -12,6 +12,10 @@ defmodule HamsterTravel.PlanningFixtures do
   def trip_fixture(attrs \\ %{}) do
     user = HamsterTravel.AccountsFixtures.user_fixture()
 
+    trip_fixture(user, attrs)
+  end
+
+  def trip_fixture(%HamsterTravel.Accounts.User{} = user, attrs) do
     {:ok, trip} =
       attrs
       |> Enum.into(%{

@@ -4,7 +4,6 @@ defmodule HamsterTravel.PlanningTest do
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.Common
   alias HamsterTravel.Social
-
   import HamsterTravel.AccountsFixtures
   import HamsterTravel.PlanningFixtures
   import HamsterTravel.GeoFixtures
@@ -114,6 +113,90 @@ defmodule HamsterTravel.PlanningTest do
                %Trip{id: ^second_id}
              ] =
                Planning.list_drafts(user)
+    end
+
+    test "profile_stats/1 returns totals and unique countries from finished trips for user", %{
+      user: user,
+      friend: friend,
+      city: city
+    } do
+      france = country_fixture()
+      region = region_fixture(france)
+      paris = city_fixture(france, region)
+
+      finished_trip = trip_fixture(user, %{status: Trip.finished()})
+
+      {:ok, _} =
+        Planning.create_destination(finished_trip, %{city_id: city.id, start_day: 0, end_day: 1})
+
+      finished_trip_two = trip_fixture(user, %{status: Trip.finished()})
+
+      {:ok, _} =
+        Planning.create_destination(finished_trip_two, %{
+          city_id: city.id,
+          start_day: 0,
+          end_day: 1
+        })
+
+      finished_trip_fr = trip_fixture(user, %{status: Trip.finished()})
+
+      {:ok, _} =
+        Planning.create_destination(finished_trip_fr, %{
+          city_id: paris.id,
+          start_day: 0,
+          end_day: 1
+        })
+
+      planned_trip = trip_fixture(user, %{status: Trip.planned()})
+
+      {:ok, _} =
+        Planning.create_destination(planned_trip, %{city_id: paris.id, start_day: 0, end_day: 1})
+
+      friend_trip = trip_fixture(friend, %{status: Trip.finished()})
+
+      {:ok, _} =
+        Planning.create_destination(friend_trip, %{city_id: city.id, start_day: 0, end_day: 1})
+
+      france_iso = france.iso
+      france_name = france.name
+      germany_iso = city.country.iso
+      germany_name = city.country.name
+
+      expected_days =
+        [finished_trip, finished_trip_two, finished_trip_fr]
+        |> Enum.map(& &1.duration)
+        |> Enum.sum()
+
+      assert %{
+               total_trips: 3,
+               countries: 2,
+               days_on_the_road: ^expected_days,
+               visited_countries: [
+                 %{iso: ^france_iso, name: ^france_name},
+                 %{iso: ^germany_iso, name: ^germany_name}
+               ]
+             } = Planning.profile_stats(user)
+    end
+
+    test "profile_stats/1 localizes country names" do
+      ru_user = user_fixture(%{locale: "ru"})
+      france = country_fixture(%{name_ru: "Франция"})
+      region = region_fixture(france)
+      paris = city_fixture(france, region)
+      france_iso = france.iso
+
+      finished_trip = trip_fixture(ru_user, %{status: Trip.finished()})
+
+      {:ok, _} =
+        Planning.create_destination(finished_trip, %{city_id: paris.id, start_day: 0, end_day: 1})
+
+      assert %{visited_countries: [%{iso: ^france_iso, name: "Франция"}]} =
+               Planning.profile_stats(ru_user)
+    end
+
+    test "profile_stats/1 returns empty stats for nil user" do
+      assert %{total_trips: 0, countries: 0, days_on_the_road: 0, visited_countries: []} =
+               Planning.profile_stats(nil)
     end
 
     test "get_trip/1 returns the trip with given id" do

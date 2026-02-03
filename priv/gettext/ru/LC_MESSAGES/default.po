@@ -134,30 +134,15 @@ msgstr "Email"
 msgid "Password"
 msgstr "Пароль"
 
-#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:29
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:46
 #, elixir-autogen, elixir-format
 msgid "Log out"
 msgstr "Выйти"
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:11
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:16
 #, elixir-autogen, elixir-format
 msgid "My profile"
 msgstr "Мой профиль"
-
-#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:45
-#, elixir-autogen, elixir-format
-msgid "Of cities"
-msgstr "Городов"
-
-#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:39
-#, elixir-autogen, elixir-format
-msgid "Of countries"
-msgstr "Стран"
-
-#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:51
-#, elixir-autogen, elixir-format
-msgid "Of travels"
-msgstr "Путешествий"
 
 #: lib/hamster_travel_web/live/packing_live/components/backpack_form.ex:54
 #, elixir-autogen, elixir-format, fuzzy
@@ -231,7 +216,7 @@ msgid "Sign in to your account"
 msgstr ""
 
 #: lib/hamster_travel/packing.ex:64
-#: lib/hamster_travel/planning/trips.ex:108
+#: lib/hamster_travel/planning/trips.ex:120
 #, elixir-autogen, elixir-format
 msgid "Copy"
 msgstr "Копия"
@@ -938,3 +923,33 @@ msgstr "Неподдерживаемый тип файла. Используйт
 #, elixir-autogen, elixir-format
 msgid "Upload failed. Please try again."
 msgstr "Загрузка не удалась. Попробуйте еще раз."
+
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:61
+#, elixir-autogen, elixir-format
+msgid "Countries"
+msgstr "Страны"
+
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:68
+#, elixir-autogen, elixir-format
+msgid "Days on the road"
+msgstr "Дней в пути"
+
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:37
+#, elixir-autogen, elixir-format
+msgid "Settings"
+msgstr "Настройки"
+
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:54
+#, elixir-autogen, elixir-format
+msgid "Total trips"
+msgstr "Всего поездок"
+
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:7
+#, elixir-autogen, elixir-format
+msgid "User profile cover"
+msgstr "Обложка профиля"
+
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:100
+#, elixir-autogen, elixir-format
+msgid "Visited countries"
+msgstr "Посещенные страны"

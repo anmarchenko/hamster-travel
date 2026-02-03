@@ -7,6 +7,8 @@ defmodule HamsterTravel.Planning.Trips do
 
   alias Ecto.Multi
 
+  alias HamsterTravel.Accounts.User
+
   alias HamsterTravel.Planning.{
     Accommodations,
     Activities,
@@ -63,6 +65,14 @@ defmodule HamsterTravel.Planning.Trips do
     |> Policy.user_drafts_scope(user)
     |> Repo.all()
     |> trip_preloading()
+  end
+
+  def list_profile_trips(%User{} = user) do
+    from(t in Trip,
+      where: t.author_id == ^user.id
+    )
+    |> Repo.all()
+    |> Repo.preload(:countries)
   end
 
   def get_trip(id) do

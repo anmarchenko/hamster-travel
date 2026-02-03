@@ -143,6 +143,7 @@ mix gettext
 - Use `to_form/1` for changesets in components.
 - Process special inputs (like live select values) before submission.
 - Use `gettext/1` for all user-facing strings.
+- View layer must not know persistence details; fetch data via context functions.
 
 ### Testing
 - Use `HamsterTravel.DataCase` or `HamsterTravelWeb.ConnCase`.

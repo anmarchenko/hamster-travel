@@ -5,6 +5,8 @@ defmodule HamsterTravel.Planning do
   Use these functions to manage trips and their associations.
   """
 
+  alias HamsterTravel.Accounts.User
+
   alias HamsterTravel.Planning.{
     Accommodation,
     Accommodations,
@@ -58,6 +60,58 @@ defmodule HamsterTravel.Planning do
   """
   def list_drafts(user) do
     Trips.list_drafts(user)
+  end
+
+  @type profile_stats :: %{
+          total_trips: non_neg_integer(),
+          countries: non_neg_integer(),
+          days_on_the_road: non_neg_integer(),
+          visited_countries: list(%{iso: String.t(), name: String.t()})
+        }
+
+  @doc """
+  Returns profile stats and visited countries for the given user.
+
+  Fetches the user's trips once and derives totals from that data.
+  """
+  @spec profile_stats(User.t() | nil) :: profile_stats()
+  def profile_stats(nil) do
+    %{total_trips: 0, countries: 0, days_on_the_road: 0, visited_countries: []}
+  end
+
+  def profile_stats(%User{} = user) do
+    trips = Trips.list_profile_trips(user)
+    finished_trips = Enum.filter(trips, &(&1.status == Trip.finished()))
+
+    visited_countries =
+      finished_trips
+      |> Enum.flat_map(& &1.countries)
+      |> Enum.uniq_by(& &1.iso)
+      |> Enum.map(fn country ->
+        %{
+          iso: country.iso,
+          name: country_name(country, user.locale)
+        }
+      end)
+      |> Enum.sort_by(&String.downcase(&1.name))
+
+    %{
+      total_trips: length(finished_trips),
+      countries: length(visited_countries),
+      days_on_the_road:
+        Enum.reduce(finished_trips, 0, fn trip, acc ->
+          acc + (trip.duration || 0)
+        end),
+      visited_countries: visited_countries
+    }
+  end
+
+  defp country_name(country, "ru") do
+    country.name_ru || country.name
+  end
+
+  defp country_name(country, _locale) do
+    country.name
   end
 
   @doc """
