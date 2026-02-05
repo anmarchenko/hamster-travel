@@ -125,6 +125,7 @@ msgid "Log in"
 msgstr "Войти"
 
 #: lib/hamster_travel_web/live/user_login_live.ex:28
+#: lib/hamster_travel_web/live/user_settings_live.ex:25
 #, elixir-autogen, elixir-format
 msgid "Email"
 msgstr "Email"
@@ -213,10 +214,10 @@ msgstr "Название списка"
 #: lib/hamster_travel_web/live/user_login_live.ex:9
 #, elixir-autogen, elixir-format
 msgid "Sign in to your account"
-msgstr ""
+msgstr "Войдите в свой аккаунт"
 
 #: lib/hamster_travel/packing.ex:64
-#: lib/hamster_travel/planning/trips.ex:120
+#: lib/hamster_travel/planning/trips.ex:118
 #, elixir-autogen, elixir-format
 msgid "Copy"
 msgstr "Копия"
@@ -624,7 +625,7 @@ msgstr "Ошибка при перемещении трансфера: %{reason}
 msgid "Trip dates"
 msgstr "Даты"
 
-#: lib/hamster_travel_web/components/core_components.ex:1081
+#: lib/hamster_travel_web/components/core_components.ex:1103
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Select date range"
 msgstr "Выберите день"
@@ -858,17 +859,17 @@ msgstr "Какая-то ошибка при удалении путешеств�
 msgid "Trip deleted."
 msgstr "Путешествие удалено."
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1355
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1333
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Add cover"
 msgstr "Добавить обложку"
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1365
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1343
 #, elixir-autogen, elixir-format
 msgid "Choose image"
 msgstr "Выбрать фото"
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1358
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1336
 #, elixir-autogen, elixir-format
 msgid "Drag and drop or choose a file."
 msgstr "Перетащи фотку или выбери файл"
@@ -888,38 +889,38 @@ msgstr "Обложка удалена"
 msgid "Failed to remove cover."
 msgstr "Не удалось удалить обложку."
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1381
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1359
 #, elixir-autogen, elixir-format
 msgid "Remove cover"
 msgstr "Удалить обложку"
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1375
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1353
 #, elixir-autogen, elixir-format
 msgid "Remove the cover image?"
 msgstr "Точно удалить обложку?"
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1416
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1394
 #, elixir-autogen, elixir-format
 msgid "Uploading..."
 msgstr "Грузим..."
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1665
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1643
 #, elixir-autogen, elixir-format
 msgid "File is too large. Maximum size is %{size} MB."
 msgstr "Файл слишком большой. Максимальный размер — %{size} МБ."
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1667
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1645
 #, elixir-autogen, elixir-format
 msgid "Only one image can be uploaded at a time."
 msgstr "Можно загрузить только одно изображение за раз."
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1668
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1646
 #, elixir-autogen, elixir-format
 msgid "Unsupported file type. Use JPG, PNG, or WebP."
 msgstr "Неподдерживаемый тип файла. Используйте JPG, PNG или WebP."
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1669
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1670
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1647
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1648
 #, elixir-autogen, elixir-format
 msgid "Upload failed. Please try again."
 msgstr "Загрузка не удалась. Попробуйте еще раз."
@@ -949,7 +950,88 @@ msgstr "Всего поездок"
 msgid "User profile cover"
 msgstr "Обложка профиля"
 
-#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:100
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:96
 #, elixir-autogen, elixir-format
 msgid "Visited countries"
-msgstr "Посещенные страны"
+msgstr "Посещённые страны"
+
+#: lib/hamster_travel_web/live/user_settings_live.ex:36
+#, elixir-autogen, elixir-format
+msgid "Change Email"
+msgstr "Изменить Email"
+
+#: lib/hamster_travel_web/live/user_settings_live.ex:80
+#, elixir-autogen, elixir-format
+msgid "Change Password"
+msgstr "Изменить пароль"
+
+#: lib/hamster_travel_web/live/user_settings_live.ex:68
+#, elixir-autogen, elixir-format
+msgid "Confirm new password"
+msgstr "Подтвердите новый пароль"
+
+#: lib/hamster_travel_web/live/user_settings_live.ex:31
+#: lib/hamster_travel_web/live/user_settings_live.ex:74
+#, elixir-autogen, elixir-format
+msgid "Current password"
+msgstr "Текущий пароль"
+
+#: lib/hamster_travel_web/live/user_settings_live.ex:15
+#, elixir-autogen, elixir-format
+msgid "Email settings"
+msgstr "Настройки Email"
+
+#: lib/hamster_travel_web/live/user_settings_live.ex:62
+#, elixir-autogen, elixir-format
+msgid "New password"
+msgstr "Новый пароль"
+
+#: lib/hamster_travel_web/live/user_settings_live.ex:42
+#, elixir-autogen, elixir-format
+msgid "Password settings"
+msgstr "Настройки пароля"
+
+#: lib/hamster_travel_web/live/user_settings_live.ex:166
+#, elixir-autogen, elixir-format
+msgid "Email changed successfully."
+msgstr "Email успешно изменён"
+
+#: lib/hamster_travel_web/live/user_settings_live.ex:103
+#, elixir-autogen, elixir-format
+msgid "Default currency"
+msgstr "Валюта по умолчанию"
+
+#: lib/hamster_travel_web/live/user_settings_live.ex:93
+#, elixir-autogen, elixir-format
+msgid "English"
+msgstr "Английский"
+
+#: lib/hamster_travel_web/live/user_settings_live.ex:86
+#, elixir-autogen, elixir-format
+msgid "General settings"
+msgstr "Общие настройки"
+
+#: lib/hamster_travel_web/live/user_settings_live.ex:112
+#, elixir-autogen, elixir-format
+msgid "Home city"
+msgstr "Домашний город"
+
+#: lib/hamster_travel_web/live/user_settings_live.ex:91
+#, elixir-autogen, elixir-format
+msgid "Language"
+msgstr "Язык"
+
+#: lib/hamster_travel_web/live/user_settings_live.ex:94
+#, elixir-autogen, elixir-format
+msgid "Russian"
+msgstr "Русский"
+
+#: lib/hamster_travel_web/live/user_settings_live.ex:116
+#, elixir-autogen, elixir-format
+msgid "Save settings"
+msgstr "Сохранить настройки"
+
+#: lib/hamster_travel_web/live/user_settings_live.ex:217
+#, elixir-autogen, elixir-format
+msgid "Settings updated successfully."
+msgstr "Настройки успешно обновлены."

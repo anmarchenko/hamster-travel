@@ -11,6 +11,7 @@ defmodule HamsterTravel.Accounts.User do
     field :name, :string
     field :email, :string
     field :locale, :string, default: "en"
+    field :default_currency, :string
     field :avatar_url, :string
 
     field :password, :string, virtual: true, redact: true
@@ -20,6 +21,7 @@ defmodule HamsterTravel.Accounts.User do
     field :confirmed_at, :naive_datetime
 
     has_many :friendships, HamsterTravel.Social.Friendship, foreign_key: :user_id
+    belongs_to :home_city, HamsterTravel.Geo.City, type: :id
 
     timestamps()
   end
@@ -43,7 +45,7 @@ defmodule HamsterTravel.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password, :name, :locale])
+    |> cast(attrs, [:email, :password, :name, :locale, :default_currency, :home_city_id])
     |> validate_email()
     |> validate_password(opts)
     |> validate_required([:name])
@@ -96,6 +98,18 @@ defmodule HamsterTravel.Accounts.User do
   end
 
   @doc """
+  A user changeset for changing general settings.
+  """
+  def settings_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:locale, :default_currency, :home_city_id])
+    |> validate_required([:locale, :default_currency])
+    |> validate_inclusion(:locale, ["en", "ru"])
+    |> validate_format(:default_currency, ~r/^[A-Z]{3}$/)
+    |> foreign_key_constraint(:home_city_id)
+  end
+
+  @doc """
   A user changeset for changing the password.
 
   ## Options
@@ -112,14 +126,6 @@ defmodule HamsterTravel.Accounts.User do
     |> cast(attrs, [:password])
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
-  end
-
-  @doc """
-  Confirms the account by setting `confirmed_at`.
-  """
-  def confirm_changeset(user) do
-    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
-    change(user, confirmed_at: now)
   end
 
   @doc """

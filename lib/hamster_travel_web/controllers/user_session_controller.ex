@@ -12,7 +12,7 @@ defmodule HamsterTravelWeb.UserSessionController do
 
   def create(conn, %{"_action" => "password_updated"} = params) do
     conn
-    |> put_session(:user_return_to, ~p"/users/settings")
+    |> put_session(:user_return_to, ~p"/profile")
     |> create(params, gettext("Password updated successfully!"))
   end
 

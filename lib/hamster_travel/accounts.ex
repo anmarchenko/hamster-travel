@@ -7,6 +7,7 @@ defmodule HamsterTravel.Accounts do
   alias HamsterTravel.Repo
 
   alias HamsterTravel.Accounts.{User, UserToken}
+  alias HamsterTravel.Geo
 
   ## Database getters
 
@@ -109,52 +110,53 @@ defmodule HamsterTravel.Accounts do
   end
 
   @doc """
-  Emulates that the email will change without actually changing
-  it in the database.
+  Updates the user email.
 
   ## Examples
 
-      iex> apply_user_email(user, "valid password", %{email: ...})
+      iex> update_user_email(user, "valid password", %{email: ...})
       {:ok, %User{}}
 
-      iex> apply_user_email(user, "invalid password", %{email: ...})
+      iex> update_user_email(user, "invalid password", %{email: ...})
       {:error, %Ecto.Changeset{}}
 
   """
-  def apply_user_email(user, password, attrs) do
-    user
-    |> User.email_changeset(attrs)
-    |> User.validate_current_password(password)
-    |> Ecto.Changeset.apply_action(:update)
+  def update_user_email(user, password, attrs) do
+    changeset =
+      user
+      |> User.email_changeset(attrs)
+      |> User.validate_current_password(password)
+
+    Repo.update(changeset)
   end
 
   @doc """
-  Updates the user email using the given token.
+  Returns an `%Ecto.Changeset{}` for changing general user settings.
 
-  If the token matches, the user email is updated and the token is deleted.
-  The confirmed_at date is also updated to the current time.
+  ## Examples
+
+      iex> change_user_settings(user)
+      %Ecto.Changeset{data: %User{}}
+
   """
-  def update_user_email(user, token) do
-    context = "change:#{user.email}"
-
-    with {:ok, query} <- UserToken.verify_change_email_token_query(token, context),
-         %UserToken{sent_to: email} <- Repo.one(query),
-         {:ok, _} <- Repo.transaction(user_email_multi(user, email, context)) do
-      :ok
-    else
-      _ -> :error
-    end
+  def change_user_settings(user, attrs \\ %{}) do
+    User.settings_changeset(user, attrs)
   end
 
-  defp user_email_multi(user, email, context) do
-    changeset =
-      user
-      |> User.email_changeset(%{email: email})
-      |> User.confirm_changeset()
+  @doc """
+  Updates user general settings.
+  """
+  def update_user_settings(user, attrs) do
+    user
+    |> User.settings_changeset(attrs)
+    |> Repo.update()
+    |> case do
+      {:ok, updated_user} ->
+        {:ok, Repo.preload(updated_user, home_city: Geo.city_preloading_query())}
 
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, changeset)
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, [context]))
+      {:error, changeset} ->
+        {:error, changeset}
+    end
   end
 
   @doc """
@@ -228,30 +230,6 @@ defmodule HamsterTravel.Accounts do
     :ok
   end
 
-  ## Confirmation
-
-  @doc """
-  Confirms a user by the given token.
-
-  If the token matches, the user account is marked as confirmed
-  and the token is deleted.
-  """
-  def confirm_user(token) do
-    with {:ok, query} <- UserToken.verify_email_token_query(token, "confirm"),
-         %User{} = user <- Repo.one(query),
-         {:ok, %{user: user}} <- Repo.transaction(confirm_user_multi(user)) do
-      {:ok, user}
-    else
-      _ -> :error
-    end
-  end
-
-  defp confirm_user_multi(user) do
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, User.confirm_changeset(user))
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, ["confirm"]))
-  end
-
   @doc """
   Gets the user by reset password token.
 
@@ -303,6 +281,6 @@ defmodule HamsterTravel.Accounts do
   end
 
   defp user_preloading(user) do
-    Repo.preload(user, :friendships)
+    Repo.preload(user, friendships: [], home_city: Geo.city_preloading_query())
   end
 end

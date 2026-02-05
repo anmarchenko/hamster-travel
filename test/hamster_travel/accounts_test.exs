@@ -6,21 +6,28 @@ defmodule HamsterTravel.AccountsTest do
   alias HamsterTravel.Social.Friendship
 
   import HamsterTravel.AccountsFixtures
+  import HamsterTravel.GeoFixtures
   alias HamsterTravel.Accounts.{User, UserToken}
 
   describe "get_user_by_session_token/1" do
     setup do
-      user = user_fixture()
+      geonames_fixture()
+      france = country_fixture()
+      region = region_fixture(france)
+      city = city_fixture(france, region)
+
+      user = user_fixture(%{home_city_id: city.id})
       friend = user_fixture()
       Social.add_friends(user.id, friend.id)
       token = Accounts.generate_user_session_token(user)
-      %{user: user, token: token}
+      %{user: user, token: token, city: city}
     end
 
-    test "returns user by token and preload friendships", %{user: user, token: token} do
+    test "returns user by token and preload friendships", %{user: user, token: token, city: city} do
       assert session_user = Accounts.get_user_by_session_token(token)
       assert session_user.id == user.id
       assert [%Friendship{}] = session_user.friendships
+      assert session_user.home_city.id == city.id
     end
 
     test "does not return user for invalid token" do
@@ -119,6 +126,21 @@ defmodule HamsterTravel.AccountsTest do
       assert is_nil(user.confirmed_at)
       assert is_nil(user.password)
     end
+
+    test "registers optional settings fields" do
+      geonames_fixture()
+      france = country_fixture()
+      region = region_fixture(france)
+      city = city_fixture(france, region)
+
+      {:ok, user} =
+        Accounts.register_user(
+          valid_user_attributes(default_currency: "USD", home_city_id: city.id)
+        )
+
+      assert user.default_currency == "USD"
+      assert user.home_city_id == city.id
+    end
   end
 
   describe "change_user_registration/2" do
@@ -151,19 +173,65 @@ defmodule HamsterTravel.AccountsTest do
     end
   end
 
-  describe "apply_user_email/3" do
+  describe "change_user_settings/2" do
+    test "returns a user settings changeset" do
+      assert %Ecto.Changeset{} = changeset = Accounts.change_user_settings(%User{})
+      assert changeset.required == [:locale, :default_currency]
+    end
+  end
+
+  describe "update_user_settings/2" do
+    setup do
+      geonames_fixture()
+      country = country_fixture()
+      region = region_fixture(country)
+      city = city_fixture(country, region)
+
+      %{user: user_fixture(), city: city}
+    end
+
+    test "updates locale, currency and home city", %{user: user, city: city} do
+      {:ok, updated_user} =
+        Accounts.update_user_settings(user, %{
+          locale: "ru",
+          default_currency: "USD",
+          home_city_id: city.id
+        })
+
+      assert updated_user.locale == "ru"
+      assert updated_user.default_currency == "USD"
+      assert updated_user.home_city_id == city.id
+      assert updated_user.home_city.id == city.id
+    end
+
+    test "validates locale", %{user: user} do
+      {:error, changeset} =
+        Accounts.update_user_settings(user, %{locale: "de", default_currency: "EUR"})
+
+      assert %{locale: ["is invalid"]} = errors_on(changeset)
+    end
+
+    test "validates currency format", %{user: user} do
+      {:error, changeset} =
+        Accounts.update_user_settings(user, %{locale: "en", default_currency: "EURO"})
+
+      assert %{default_currency: ["has invalid format"]} = errors_on(changeset)
+    end
+  end
+
+  describe "update_user_email/3" do
     setup do
       %{user: user_fixture()}
     end
 
     test "requires email to change", %{user: user} do
-      {:error, changeset} = Accounts.apply_user_email(user, valid_user_password(), %{})
+      {:error, changeset} = Accounts.update_user_email(user, valid_user_password(), %{})
       assert %{email: ["did not change"]} = errors_on(changeset)
     end
 
     test "validates email", %{user: user} do
       {:error, changeset} =
-        Accounts.apply_user_email(user, valid_user_password(), %{email: "not valid"})
+        Accounts.update_user_email(user, valid_user_password(), %{email: "not valid"})
 
       assert %{email: ["must have the @ sign and no spaces"]} = errors_on(changeset)
     end
@@ -172,7 +240,7 @@ defmodule HamsterTravel.AccountsTest do
       too_long = String.duplicate("db", 100)
 
       {:error, changeset} =
-        Accounts.apply_user_email(user, valid_user_password(), %{email: too_long})
+        Accounts.update_user_email(user, valid_user_password(), %{email: too_long})
 
       assert "should be at most 160 character(s)" in errors_on(changeset).email
     end
@@ -181,63 +249,23 @@ defmodule HamsterTravel.AccountsTest do
       %{email: email} = user_fixture()
       password = valid_user_password()
 
-      {:error, changeset} = Accounts.apply_user_email(user, password, %{email: email})
+      {:error, changeset} = Accounts.update_user_email(user, password, %{email: email})
 
       assert "has already been taken" in errors_on(changeset).email
     end
 
     test "validates current password", %{user: user} do
       {:error, changeset} =
-        Accounts.apply_user_email(user, "invalid", %{email: unique_user_email()})
+        Accounts.update_user_email(user, "invalid", %{email: unique_user_email()})
 
       assert %{current_password: ["is not valid"]} = errors_on(changeset)
     end
 
-    test "applies the email without persisting it", %{user: user} do
+    test "updates the email", %{user: user} do
       email = unique_user_email()
-      {:ok, user} = Accounts.apply_user_email(user, valid_user_password(), %{email: email})
+      {:ok, user} = Accounts.update_user_email(user, valid_user_password(), %{email: email})
       assert user.email == email
-      assert Accounts.get_user!(user.id).email != email
-    end
-  end
-
-  describe "update_user_email/2" do
-    setup do
-      user = user_fixture()
-      email = unique_user_email()
-
-      token = user_token_fixture(user, "change:#{user.email}", email)
-
-      %{user: user, token: token, email: email}
-    end
-
-    test "updates the email with a valid token", %{user: user, token: token, email: email} do
-      assert Accounts.update_user_email(user, token) == :ok
-      changed_user = Repo.get!(User, user.id)
-      assert changed_user.email != user.email
-      assert changed_user.email == email
-      assert changed_user.confirmed_at
-      assert changed_user.confirmed_at != user.confirmed_at
-      refute Repo.get_by(UserToken, user_id: user.id)
-    end
-
-    test "does not update email with invalid token", %{user: user} do
-      assert Accounts.update_user_email(user, "oops") == :error
-      assert Repo.get!(User, user.id).email == user.email
-      assert Repo.get_by(UserToken, user_id: user.id)
-    end
-
-    test "does not update email if user email changed", %{user: user, token: token} do
-      assert Accounts.update_user_email(%{user | email: "current@example.com"}, token) == :error
-      assert Repo.get!(User, user.id).email == user.email
-      assert Repo.get_by(UserToken, user_id: user.id)
-    end
-
-    test "does not update email if token expired", %{user: user, token: token} do
-      {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
-      assert Accounts.update_user_email(user, token) == :error
-      assert Repo.get!(User, user.id).email == user.email
-      assert Repo.get_by(UserToken, user_id: user.id)
+      assert Accounts.get_user!(user.id).email == email
     end
   end
 
@@ -342,37 +370,6 @@ defmodule HamsterTravel.AccountsTest do
       token = Accounts.generate_user_session_token(user)
       assert Accounts.delete_user_session_token(token) == :ok
       refute Accounts.get_user_by_session_token(token)
-    end
-  end
-
-  describe "confirm_user/1" do
-    setup do
-      user = user_fixture()
-
-      token = user_token_fixture(user)
-
-      %{user: user, token: token}
-    end
-
-    test "confirms the email with a valid token", %{user: user, token: token} do
-      assert {:ok, confirmed_user} = Accounts.confirm_user(token)
-      assert confirmed_user.confirmed_at
-      assert confirmed_user.confirmed_at != user.confirmed_at
-      assert Repo.get!(User, user.id).confirmed_at
-      refute Repo.get_by(UserToken, user_id: user.id)
-    end
-
-    test "does not confirm with invalid token", %{user: user} do
-      assert Accounts.confirm_user("oops") == :error
-      refute Repo.get!(User, user.id).confirmed_at
-      assert Repo.get_by(UserToken, user_id: user.id)
-    end
-
-    test "does not confirm email if token expired", %{user: user, token: token} do
-      {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
-      assert Accounts.confirm_user(token) == :error
-      refute Repo.get!(User, user.id).confirmed_at
-      assert Repo.get_by(UserToken, user_id: user.id)
     end
   end
 

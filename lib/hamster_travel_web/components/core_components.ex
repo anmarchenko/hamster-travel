@@ -355,6 +355,28 @@ defmodule HamsterTravelWeb.CoreComponents do
     """
   end
 
+  attr(:icon, :string, required: true)
+  attr(:label, :string, required: true)
+  attr(:class, :string, default: nil)
+
+  def section_header(assigns) do
+    ~H"""
+    <div class={
+      build_class([
+        "border-t border-zinc-200/70 dark:border-zinc-700/70 pt-2 mt-3",
+        @class
+      ])
+    }>
+      <div class="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+        <.inline class="gap-1">
+          <.icon name={@icon} class="h-4 w-4" />
+          {@label}
+        </.inline>
+      </div>
+    </div>
+    """
+  end
+
   attr(:id, :string, default: nil)
   attr(:class, :string, default: nil)
   attr(:hover, :boolean, default: true)

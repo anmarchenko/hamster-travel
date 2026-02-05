@@ -4,6 +4,7 @@ defmodule HamsterTravelWeb.UserSettingsLiveTest do
   alias HamsterTravel.Accounts
   import Phoenix.LiveViewTest
   import HamsterTravel.AccountsFixtures
+  import HamsterTravel.GeoFixtures
 
   describe "Settings page" do
     test "renders settings page", %{conn: conn} do
@@ -12,8 +13,12 @@ defmodule HamsterTravelWeb.UserSettingsLiveTest do
         |> log_in_user(user_fixture())
         |> live(~p"/users/settings")
 
+      assert html =~ "Email settings"
+      assert html =~ "Password settings"
+      assert html =~ "General settings"
       assert html =~ "Change Email"
       assert html =~ "Change Password"
+      assert html =~ "Save settings"
     end
 
     test "redirects if user is not logged in", %{conn: conn} do
@@ -44,7 +49,9 @@ defmodule HamsterTravelWeb.UserSettingsLiveTest do
       })
       |> render_submit()
 
-      assert Accounts.get_user_by_email(user.email)
+      assert_redirect(lv, ~p"/profile")
+      assert Accounts.get_user_by_email(new_email)
+      refute Accounts.get_user_by_email(user.email)
     end
 
     test "renders errors with invalid data (phx-change)", %{conn: conn} do
@@ -80,6 +87,41 @@ defmodule HamsterTravelWeb.UserSettingsLiveTest do
     end
   end
 
+  describe "update general settings form" do
+    setup %{conn: conn} do
+      geonames_fixture()
+      country = country_fixture()
+      region = region_fixture(country)
+      city = city_fixture(country, region)
+
+      user = user_fixture(%{default_currency: "EUR", locale: "en"})
+
+      %{conn: log_in_user(conn, user), user: user, city: city}
+    end
+
+    test "updates locale, currency and home city", %{conn: conn, user: user, city: city} do
+      home_city_value = Jason.encode!(%{id: city.id})
+
+      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+
+      lv
+      |> element("#general_form")
+      |> render_submit(%{
+        "user" => %{
+          "locale" => "ru",
+          "default_currency" => "USD",
+          "home_city" => home_city_value
+        }
+      })
+
+      assert_redirect(lv, ~p"/profile")
+      updated_user = Accounts.get_user!(user.id)
+      assert updated_user.locale == "ru"
+      assert updated_user.default_currency == "USD"
+      assert updated_user.home_city_id == city.id
+    end
+  end
+
   describe "update password form" do
     setup %{conn: conn} do
       password = valid_user_password()
@@ -106,7 +148,7 @@ defmodule HamsterTravelWeb.UserSettingsLiveTest do
 
       new_password_conn = follow_trigger_action(form, conn)
 
-      assert redirected_to(new_password_conn) == ~p"/users/settings"
+      assert redirected_to(new_password_conn) == ~p"/profile"
 
       assert get_session(new_password_conn, :user_token) != get_session(conn, :user_token)
 
