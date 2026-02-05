@@ -52,6 +52,39 @@ mix test test/hamster_travel/accounts_test.exs:123
 mix test --cover
 ```
 
+### Browser Testing (Playwright)
+```bash
+# Prerequisites
+command -v npx
+npx -y playwright install chromium
+
+# Playwright wrapper from Codex skill
+export CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
+export PWCLI="$CODEX_HOME/skills/playwright/scripts/playwright_cli.sh"
+"$PWCLI" --help
+
+# Open login page and take snapshot to get stable refs
+"$PWCLI" open http://localhost:4000/users/log_in
+"$PWCLI" snapshot
+
+# Fill login form using refs from latest snapshot
+"$PWCLI" fill e20 bunny@hamsters.test
+"$PWCLI" fill e25 test1234
+"$PWCLI" click e27
+"$PWCLI" snapshot
+
+# Trips list is shown on /plans (not /trips)
+"$PWCLI" open http://localhost:4000/plans
+"$PWCLI" snapshot
+
+# Cleanup browser session when done
+"$PWCLI" session-stop
+"$PWCLI" session-delete
+```
+- Always run `snapshot` before using `eXX` refs in commands.
+- If Playwright commands hang in sandbox, rerun them outside sandbox.
+- Playwright CLI artifacts are stored in `.playwright-cli/`.
+
 ### Lint
 ```bash
 # Lint code (strict)

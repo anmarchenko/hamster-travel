@@ -39,3 +39,6 @@ uploads
 
 # local environment
 .envrc
+
+# page snapshots
+.playwright-cli/
