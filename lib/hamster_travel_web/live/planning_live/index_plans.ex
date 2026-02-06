@@ -25,12 +25,13 @@ defmodule HamsterTravelWeb.Planning.IndexPlans do
 
   @impl true
   def mount(_params, _session, socket) do
+    display_currency = socket.assigns.current_user.default_currency || "EUR"
+
     socket =
       socket
       |> assign(active_nav: plans_nav_item())
       |> assign(page_title: gettext("Plans"))
-      # get the display currency from the user
-      |> assign(display_currency: "EUR")
+      |> assign(display_currency: display_currency)
       |> stream(:plans, Planning.list_plans(socket.assigns.current_user))
 
     {:ok, socket}

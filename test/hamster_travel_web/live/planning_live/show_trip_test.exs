@@ -631,6 +631,21 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "div.hidden.group-hover\\:block", "$50.00")
     end
 
+    test "uses current user default currency for trip budget display", %{conn: conn} do
+      user = user_fixture(%{default_currency: "USD"})
+      conn = log_in_user(conn, user)
+
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft", currency: "EUR"})
+
+      {:ok, _expense} =
+        Planning.create_expense(trip, %{price: Money.new(:EUR, 100), name: "Budget item"})
+
+      {:ok, view, html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      assert html =~ "$110.00"
+      assert has_element?(view, "div.hidden.group-hover\\:block", "€100.00")
+    end
+
     test "renders trip page with activities", %{conn: conn} do
       # Arrange
       user = user_fixture()

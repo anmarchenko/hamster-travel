@@ -5,6 +5,7 @@ defmodule HamsterTravelWeb.Planning.IndexDraftsTest do
   import HamsterTravel.AccountsFixtures
   import HamsterTravel.PlanningFixtures
 
+  alias HamsterTravel.Planning
   alias HamsterTravel.Planning.Trip
 
   describe "Index drafts page" do
@@ -54,6 +55,21 @@ defmodule HamsterTravelWeb.Planning.IndexDraftsTest do
 
       # Assert that we are redirected to the login page
       assert {:error, {:redirect, %{to: "/users/log_in"}}} = result
+    end
+
+    test "uses current user default currency for displayed budget", %{conn: conn} do
+      user = user_fixture(%{default_currency: "USD"})
+      conn = log_in_user(conn, user)
+
+      trip = trip_fixture(%{author_id: user.id, status: Trip.draft(), currency: "EUR"})
+
+      {:ok, _expense} =
+        Planning.create_expense(trip, %{price: Money.new(:EUR, 100), name: "Budget item"})
+
+      {:ok, _view, html} = live(conn, ~p"/drafts")
+
+      assert html =~ "$110.00"
+      assert html =~ "€100.00"
     end
   end
 end

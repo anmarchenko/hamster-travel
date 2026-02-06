@@ -124,6 +124,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   @impl true
   def mount(%{"trip_slug" => slug} = params, _session, socket) do
     trip = Planning.fetch_trip!(slug, socket.assigns.current_user)
+    display_currency = socket.assigns.current_user.default_currency || "EUR"
 
     socket =
       if connected?(socket) do
@@ -143,8 +144,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> assign(page_title: trip.name)
       |> assign(trip: trip)
       |> assign(budget: Planning.calculate_budget(trip))
-      # get from user settings
-      |> assign(display_currency: "EUR")
+      |> assign(display_currency: display_currency)
       |> assign(active_destination_adding_component_id: nil)
       |> assign(active_accommodation_adding_component_id: nil)
       |> assign(active_transfer_adding_component_id: nil)
