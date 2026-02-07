@@ -548,6 +548,28 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "button", "Cancel")
     end
 
+    test "shows user's home city in transfer city default options", %{conn: conn} do
+      geonames_fixture()
+      home_city = Geo.find_city_by_geonames_id("2950159")
+      home_city_name = home_city.name
+
+      user = user_fixture(%{home_city_id: home_city.id})
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(user, %{status: "0_draft"})
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      view
+      |> element("tr:first-child td a", "Add transfer")
+      |> render_click()
+
+      view
+      |> element("input[name='transfer[departure_city_text_input]']")
+      |> render_click()
+
+      assert render(view) =~ home_city_name
+    end
+
     test "shows accommodation form when clicking add accommodation link", %{conn: conn} do
       # Arrange
       user = user_fixture()

@@ -114,6 +114,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         active_tab={@active_tab}
         budget={@budget}
         display_currency={@display_currency}
+        current_user={@current_user}
       />
     </.container>
     """
@@ -687,6 +688,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       transfers_outside={transfers_outside(@trip)}
       budget={@budget}
       display_currency={@display_currency}
+      current_user={@current_user}
     />
     """
   end
@@ -841,6 +843,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:transfers_outside, :list, required: true)
   attr(:accommodations, :list, required: true)
   attr(:accommodations_outside, :list, required: true)
+  attr(:current_user, HamsterTravel.Accounts.User, default: nil)
 
   def tab_itinerary(assigns) do
     ~H"""
@@ -895,6 +898,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           <.transfers_list
             trip={@trip}
             transfers={@transfers_outside}
+            current_user={@current_user}
             display_currency={@display_currency}
             day_index={-1}
           />
@@ -964,6 +968,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                 <.transfers_list
                   trip={@trip}
                   transfers={Planning.transfers_for_day(i, @transfers)}
+                  current_user={@current_user}
                   display_currency={@display_currency}
                   day_index={i}
                 />
@@ -971,6 +976,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                   module={TransferNew}
                   id={"transfer-new-#{i}"}
                   trip={@trip}
+                  current_user={@current_user}
                   day_index={i}
                 />
               </div>
@@ -1226,6 +1232,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   attr(:trip, Trip, required: true)
   attr(:transfers, :list, required: true)
+  attr(:current_user, HamsterTravel.Accounts.User, default: nil)
   attr(:day_index, :integer, required: true)
   attr(:display_currency, :string, required: true)
 
@@ -1237,6 +1244,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       id={"transfer-#{transfer.id}-day-#{@day_index}"}
       trip={@trip}
       transfer={transfer}
+      current_user={@current_user}
       display_currency={@display_currency}
       day_index={@day_index}
     />

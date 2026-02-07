@@ -13,6 +13,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
 
   attr(:transfer, Transfer, required: true)
   attr(:trip, Trip, required: true)
+  attr(:current_user, HamsterTravel.Accounts.User, default: nil)
   attr(:display_currency, :string, required: true)
 
   def render(%{edit: true} = assigns) do
@@ -23,6 +24,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
         id={"transfer-form-#{@transfer.id}"}
         transfer={@transfer}
         trip={@trip}
+        current_user={@current_user}
         action={:edit}
         on_finish={fn -> send_update(@myself, edit: false) end}
       />

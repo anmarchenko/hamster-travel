@@ -7,6 +7,7 @@ defmodule HamsterTravelWeb.Planning.TransferNew do
 
   attr :id, :string, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true
+  attr :current_user, HamsterTravel.Accounts.User, default: nil
   attr :day_index, :integer, required: true
   attr :class, :string, default: nil
   attr :edit, :boolean, default: false
@@ -18,6 +19,7 @@ defmodule HamsterTravelWeb.Planning.TransferNew do
         module={HamsterTravelWeb.Planning.TransferForm}
         id={"new-#{@id}"}
         trip={@trip}
+        current_user={@current_user}
         day_index={@day_index}
         action={:new}
         on_finish={fn -> send(self(), {:finish_adding, "transfer"}) end}

@@ -11,6 +11,7 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
 
   attr :action, :atom, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true
+  attr :current_user, HamsterTravel.Accounts.User, default: nil
   attr :day_index, :integer, required: true
   attr :on_finish, :fun, required: true
 
@@ -320,20 +321,23 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
   defp arrival_station_label("train"), do: gettext("Arrival station")
   defp arrival_station_label(_), do: gettext("Arrival station")
 
-  defp get_destination_cities(trip, %{action: :edit, transfer: transfer}) do
+  defp get_destination_cities(trip, %{action: :edit, transfer: transfer} = assigns) do
     destination_cities = extract_destination_cities(trip)
 
     transfer_cities =
       [transfer.departure_city, transfer.arrival_city]
       |> Enum.reject(&is_nil/1)
 
-    (transfer_cities ++ destination_cities)
+    [home_city(assigns[:current_user]) | transfer_cities ++ destination_cities]
+    |> Enum.reject(&is_nil/1)
     |> Enum.uniq_by(& &1.id)
   end
 
-  defp get_destination_cities(trip, _assigns) do
+  defp get_destination_cities(trip, assigns) do
     trip
     |> extract_destination_cities()
+    |> then(fn destination_cities -> [home_city(assigns[:current_user]) | destination_cities] end)
+    |> Enum.reject(&is_nil/1)
     |> Enum.uniq_by(& &1.id)
   end
 
@@ -342,4 +346,7 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
     |> Enum.map(& &1.city)
     |> Enum.reject(&is_nil/1)
   end
+
+  defp home_city(nil), do: nil
+  defp home_city(%{home_city: home_city}), do: home_city
 end
