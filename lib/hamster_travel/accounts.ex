@@ -4,9 +4,11 @@ defmodule HamsterTravel.Accounts do
   """
 
   import Ecto.Query, warn: false
+  require Logger
+
   alias HamsterTravel.Repo
 
-  alias HamsterTravel.Accounts.{User, UserToken}
+  alias HamsterTravel.Accounts.{User, UserAvatar, UserToken}
   alias HamsterTravel.Geo
 
   ## Database getters
@@ -153,6 +155,56 @@ defmodule HamsterTravel.Accounts do
     |> case do
       {:ok, updated_user} ->
         {:ok, Repo.preload(updated_user, home_city: Geo.city_preloading_query())}
+
+      {:error, changeset} ->
+        {:error, changeset}
+    end
+  end
+
+  @doc """
+  Stores a user avatar and updates user avatar URL.
+
+  Returns `{:ok, %User{}}` or `{:error, reason}`.
+  """
+  def update_user_avatar(%User{} = user, %Plug.Upload{} = upload) do
+    case UserAvatar.store({upload, user}) do
+      {:ok, file_name} ->
+        avatar_url = UserAvatar.url({file_name, user}, :thumb)
+
+        user
+        |> Ecto.Changeset.change(avatar_url: "#{avatar_url}?v=#{System.system_time(:second)}")
+        |> Repo.update()
+        |> case do
+          {:ok, updated_user} ->
+            {:ok, user_preloading(updated_user)}
+
+          {:error, changeset} = error ->
+            Logger.error(
+              "Failed to persist avatar URL: user_id=#{user.id} file=#{upload.filename} errors=#{inspect(changeset.errors)}"
+            )
+
+            error
+        end
+
+      {:error, reason} = error ->
+        Logger.error(
+          "Failed to store avatar in Waffle: user_id=#{user.id} file=#{upload.filename} content_type=#{upload.content_type} reason=#{inspect(reason)}"
+        )
+
+        error
+    end
+  end
+
+  @doc """
+  Removes a user avatar URL.
+  """
+  def remove_user_avatar(%User{} = user) do
+    user
+    |> Ecto.Changeset.change(avatar_url: nil)
+    |> Repo.update()
+    |> case do
+      {:ok, updated_user} ->
+        {:ok, user_preloading(updated_user)}
 
       {:error, changeset} ->
         {:error, changeset}

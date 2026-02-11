@@ -7,7 +7,8 @@ defmodule HamsterTravel.AccountsTest do
 
   import HamsterTravel.AccountsFixtures
   import HamsterTravel.GeoFixtures
-  alias HamsterTravel.Accounts.{User, UserToken}
+  import ExUnit.CaptureLog
+  alias HamsterTravel.Accounts.{User, UserAvatar, UserToken}
 
   describe "get_user_by_session_token/1" do
     setup do
@@ -216,6 +217,58 @@ defmodule HamsterTravel.AccountsTest do
         Accounts.update_user_settings(user, %{locale: "en", default_currency: "EURO"})
 
       assert %{default_currency: ["has invalid format"]} = errors_on(changeset)
+    end
+  end
+
+  describe "update_user_avatar/2" do
+    setup do
+      %{user: user_fixture()}
+    end
+
+    test "stores avatar and updates avatar_url", %{user: user} do
+      upload = %Plug.Upload{
+        path: Path.expand("../support/fixtures/files/cover.jpg", __DIR__),
+        filename: "avatar.jpg",
+        content_type: "image/jpeg"
+      }
+
+      assert {:ok, %User{} = updated_user} = Accounts.update_user_avatar(user, upload)
+
+      assert updated_user.avatar_url =~
+               "/uploads/trips/users/#{user.id}/avatar/avatar_thumb.jpg?v="
+
+      assert updated_user.avatar_url == Accounts.get_user!(user.id).avatar_url
+    end
+
+    test "returns error for unsupported extension", %{user: user} do
+      upload = %Plug.Upload{
+        path: Path.expand("../support/fixtures/files/cover.jpg", __DIR__),
+        filename: "avatar.txt",
+        content_type: "text/plain"
+      }
+
+      capture_log(fn ->
+        assert {:error, _reason} = Accounts.update_user_avatar(user, upload)
+      end)
+    end
+  end
+
+  describe "remove_user_avatar/1" do
+    setup do
+      %{user: user_fixture()}
+    end
+
+    test "clears avatar_url", %{user: user} do
+      avatar_url = UserAvatar.url({"avatar.jpg", user}, :thumb)
+
+      user =
+        user
+        |> Ecto.Changeset.change(avatar_url: avatar_url)
+        |> Repo.update!()
+
+      assert {:ok, %User{} = updated_user} = Accounts.remove_user_avatar(user)
+      assert is_nil(updated_user.avatar_url)
+      assert is_nil(Accounts.get_user!(user.id).avatar_url)
     end
   end
 

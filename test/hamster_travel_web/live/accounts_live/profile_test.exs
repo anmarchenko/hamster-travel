@@ -6,9 +6,11 @@ defmodule HamsterTravelWeb.Accounts.ProfileLiveTest do
   import HamsterTravel.PlanningFixtures
   import HamsterTravel.GeoFixtures
 
+  alias HamsterTravel.Accounts
   alias HamsterTravel.Geo
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.Trip
+  alias HamsterTravel.Repo
 
   describe "Profile page" do
     test "renders profile stats and visited countries", %{conn: conn} do
@@ -65,6 +67,49 @@ defmodule HamsterTravelWeb.Accounts.ProfileLiveTest do
       assert {:redirect, %{to: path, flash: flash}} = redirect
       assert path == ~p"/users/log_in"
       assert %{"error" => "Please sign in"} = flash
+    end
+
+    test "does not show add-avatar form controls", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      {:ok, view, html} = live(conn, ~p"/profile")
+
+      assert has_element?(view, "form#avatar-upload-form")
+      refute has_element?(view, "[data-avatar-dropzone]")
+      refute html =~ "Add avatar"
+      refute html =~ "Choose image"
+    end
+
+    test "shows remove avatar action when user has avatar", %{conn: conn} do
+      user =
+        user_fixture()
+        |> Ecto.Changeset.change(avatar_url: "http://localhost/uploads/users/avatar_thumb.jpg")
+        |> Repo.update!()
+
+      conn = log_in_user(conn, user)
+
+      {:ok, view, _html} = live(conn, ~p"/profile")
+
+      assert has_element?(view, "button[phx-click='remove_avatar']")
+      refute has_element?(view, "[data-avatar-dropzone]")
+    end
+
+    test "removes avatar from profile page", %{conn: conn} do
+      user =
+        user_fixture()
+        |> Ecto.Changeset.change(avatar_url: "http://localhost/uploads/users/avatar_thumb.jpg")
+        |> Repo.update!()
+
+      conn = log_in_user(conn, user)
+
+      {:ok, view, _html} = live(conn, ~p"/profile")
+
+      view
+      |> element("button[phx-click='remove_avatar']")
+      |> render_click()
+
+      assert is_nil(Accounts.get_user!(user.id).avatar_url)
     end
   end
 
