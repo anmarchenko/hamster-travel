@@ -146,12 +146,12 @@ msgstr ""
 msgid "Password"
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:102
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:139
 #, elixir-autogen, elixir-format
 msgid "Log out"
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:21
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:26
 #, elixir-autogen, elixir-format
 msgid "My profile"
 msgstr ""
@@ -879,89 +879,101 @@ msgstr ""
 msgid "Drag and drop or choose a file."
 msgstr ""
 
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:73
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:336
 #, elixir-autogen, elixir-format
 msgid "Failed to update cover."
 msgstr ""
 
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:121
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:450
 #, elixir-autogen, elixir-format
 msgid "Cover removed."
 msgstr ""
 
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:128
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:453
 #, elixir-autogen, elixir-format
 msgid "Failed to remove cover."
 msgstr ""
 
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:41
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:44
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1367
 #, elixir-autogen, elixir-format
 msgid "Remove cover"
 msgstr ""
 
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:40
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1361
 #, elixir-autogen, elixir-format
 msgid "Remove the cover image?"
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:77
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:83
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:175
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1402
 #, elixir-autogen, elixir-format
 msgid "Uploading..."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:128
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:135
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:143
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1651
 #, elixir-autogen, elixir-format
 msgid "File is too large. Maximum size is %{size} MB."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:130
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:137
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:145
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1653
 #, elixir-autogen, elixir-format
 msgid "Only one image can be uploaded at a time."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:131
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:138
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:146
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1654
 #, elixir-autogen, elixir-format
 msgid "Unsupported file type. Use JPG, PNG, or WebP."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:132
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:133
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:139
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:140
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:147
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:148
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1655
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1656
 #, elixir-autogen, elixir-format
 msgid "Upload failed. Please try again."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:117
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:191
 #, elixir-autogen, elixir-format
 msgid "Countries"
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:124
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:198
 #, elixir-autogen, elixir-format
 msgid "Days on the road"
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:93
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:130
 #, elixir-autogen, elixir-format
 msgid "Settings"
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:110
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:184
 #, elixir-autogen, elixir-format
 msgid "Total trips"
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:7
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:11
 #, elixir-autogen, elixir-format
 msgid "User profile cover"
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:152
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:226
 #, elixir-autogen, elixir-format
 msgid "Visited countries"
 msgstr ""
@@ -1048,27 +1060,37 @@ msgstr ""
 msgid "Settings updated successfully."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:118
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:98
 #, elixir-autogen, elixir-format
 msgid "Avatar removed."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:121
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:105
 #, elixir-autogen, elixir-format
 msgid "Failed to remove avatar."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:77
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:60
 #, elixir-autogen, elixir-format
 msgid "Failed to update avatar."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:38
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:108
 #, elixir-autogen, elixir-format
 msgid "Remove avatar"
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:32
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:107
 #, elixir-autogen, elixir-format
 msgid "Remove the avatar image?"
+msgstr ""
+
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:30
+#, elixir-autogen, elixir-format
+msgid "Change cover"
+msgstr ""
+
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:31
+#, elixir-autogen, elixir-format
+msgid "Upload cover"
 msgstr ""

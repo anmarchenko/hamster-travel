@@ -8,7 +8,7 @@ defmodule HamsterTravel.AccountsTest do
   import HamsterTravel.AccountsFixtures
   import HamsterTravel.GeoFixtures
   import ExUnit.CaptureLog
-  alias HamsterTravel.Accounts.{User, UserAvatar, UserToken}
+  alias HamsterTravel.Accounts.{User, UserAvatar, UserCover, UserToken}
 
   describe "get_user_by_session_token/1" do
     setup do
@@ -269,6 +269,58 @@ defmodule HamsterTravel.AccountsTest do
       assert {:ok, %User{} = updated_user} = Accounts.remove_user_avatar(user)
       assert is_nil(updated_user.avatar_url)
       assert is_nil(Accounts.get_user!(user.id).avatar_url)
+    end
+  end
+
+  describe "update_user_cover/2" do
+    setup do
+      %{user: user_fixture()}
+    end
+
+    test "stores cover and updates cover_url", %{user: user} do
+      upload = %Plug.Upload{
+        path: Path.expand("../support/fixtures/files/cover.jpg", __DIR__),
+        filename: "cover.jpg",
+        content_type: "image/jpeg"
+      }
+
+      assert {:ok, %User{} = updated_user} = Accounts.update_user_cover(user, upload)
+
+      assert updated_user.cover_url =~
+               "/uploads/trips/users/#{user.id}/cover/cover_hero.jpg?v="
+
+      assert updated_user.cover_url == Accounts.get_user!(user.id).cover_url
+    end
+
+    test "returns error for unsupported extension", %{user: user} do
+      upload = %Plug.Upload{
+        path: Path.expand("../support/fixtures/files/cover.jpg", __DIR__),
+        filename: "cover.txt",
+        content_type: "text/plain"
+      }
+
+      capture_log(fn ->
+        assert {:error, _reason} = Accounts.update_user_cover(user, upload)
+      end)
+    end
+  end
+
+  describe "remove_user_cover/1" do
+    setup do
+      %{user: user_fixture()}
+    end
+
+    test "clears cover_url", %{user: user} do
+      cover_url = UserCover.url({"cover.jpg", user}, :hero)
+
+      user =
+        user
+        |> Ecto.Changeset.change(cover_url: cover_url)
+        |> Repo.update!()
+
+      assert {:ok, %User{} = updated_user} = Accounts.remove_user_cover(user)
+      assert is_nil(updated_user.cover_url)
+      assert is_nil(Accounts.get_user!(user.id).cover_url)
     end
   end
 

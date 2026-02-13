@@ -8,7 +8,7 @@ defmodule HamsterTravel.Accounts do
 
   alias HamsterTravel.Repo
 
-  alias HamsterTravel.Accounts.{User, UserAvatar, UserToken}
+  alias HamsterTravel.Accounts.{User, UserAvatar, UserCover, UserToken}
   alias HamsterTravel.Geo
 
   ## Database getters
@@ -201,6 +201,56 @@ defmodule HamsterTravel.Accounts do
   def remove_user_avatar(%User{} = user) do
     user
     |> Ecto.Changeset.change(avatar_url: nil)
+    |> Repo.update()
+    |> case do
+      {:ok, updated_user} ->
+        {:ok, user_preloading(updated_user)}
+
+      {:error, changeset} ->
+        {:error, changeset}
+    end
+  end
+
+  @doc """
+  Stores a user cover and updates user cover URL.
+
+  Returns `{:ok, %User{}}` or `{:error, reason}`.
+  """
+  def update_user_cover(%User{} = user, %Plug.Upload{} = upload) do
+    case UserCover.store({upload, user}) do
+      {:ok, file_name} ->
+        cover_url = UserCover.url({file_name, user}, :hero)
+
+        user
+        |> Ecto.Changeset.change(cover_url: "#{cover_url}?v=#{System.system_time(:second)}")
+        |> Repo.update()
+        |> case do
+          {:ok, updated_user} ->
+            {:ok, user_preloading(updated_user)}
+
+          {:error, changeset} = error ->
+            Logger.error(
+              "Failed to persist cover URL: user_id=#{user.id} file=#{upload.filename} errors=#{inspect(changeset.errors)}"
+            )
+
+            error
+        end
+
+      {:error, reason} = error ->
+        Logger.error(
+          "Failed to store cover in Waffle: user_id=#{user.id} file=#{upload.filename} content_type=#{upload.content_type} reason=#{inspect(reason)}"
+        )
+
+        error
+    end
+  end
+
+  @doc """
+  Removes a user cover URL.
+  """
+  def remove_user_cover(%User{} = user) do
+    user
+    |> Ecto.Changeset.change(cover_url: nil)
     |> Repo.update()
     |> case do
       {:ok, updated_user} ->

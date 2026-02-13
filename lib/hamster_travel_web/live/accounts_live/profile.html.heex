@@ -1,13 +1,87 @@
 <section class="min-h-screen bg-orange-50/60 dark:bg-zinc-950">
   <div class="mx-auto max-w-6xl px-4 pb-12 pt-8">
     <div class="rounded-3xl bg-white shadow-sm dark:bg-zinc-900">
-      <div class="relative h-48 overflow-hidden rounded-t-3xl md:h-64">
+      <div
+        class="group relative h-48 overflow-hidden rounded-t-3xl md:h-64"
+        phx-drop-target={@uploads.cover.ref}
+        data-cover-dropzone
+      >
         <img
-          src={~p"/images/user-profile-background.jpeg"}
+          src={profile_cover_url(@current_user)}
           alt={gettext("User profile cover")}
-          class="h-full w-full object-cover"
+          class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
         />
-        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent">
+        <div class="absolute inset-0 bg-gradient-to-br from-zinc-900/30 via-zinc-900/10 to-zinc-900/45">
+        </div>
+
+        <form
+          id="cover-upload-form"
+          phx-change="validate_cover"
+          class="absolute right-4 top-4 z-20"
+        >
+          <div class="flex items-center gap-2">
+            <label
+              for={@uploads.cover.ref}
+              class="inline-flex cursor-pointer items-center gap-2 rounded-full border border-white/30 bg-black/35 px-3 py-1.5 text-xs font-semibold text-white shadow-lg backdrop-blur-md transition hover:bg-black/50"
+            >
+              <.icon name="hero-arrow-up-tray" class="h-4 w-4" />
+              <span>
+                {if @current_user.cover_url,
+                  do: gettext("Change cover"),
+                  else: gettext("Upload cover")}
+              </span>
+            </label>
+
+            <button
+              :if={@current_user.cover_url}
+              type="button"
+              class="inline-flex items-center gap-2 rounded-full border border-rose-300/50 bg-rose-500/25 px-3 py-1.5 text-xs font-semibold text-rose-50 shadow-lg backdrop-blur-md transition hover:bg-rose-500/40"
+              phx-click="remove_cover"
+              data-confirm={gettext("Remove the cover image?")}
+              aria-label={gettext("Remove cover")}
+            >
+              <.icon name="hero-trash" class="h-4 w-4" />
+              <span class="hidden sm:inline">{gettext("Remove cover")}</span>
+            </button>
+          </div>
+
+          <.live_file_input upload={@uploads.cover} class="sr-only" />
+        </form>
+
+        <div
+          :if={
+            @uploads.cover.entries != [] or @cover_upload_errors != [] or
+              cover_uploading?(@uploads.cover)
+          }
+          class="absolute bottom-4 right-4 z-20 w-[calc(100%-2rem)] max-w-md rounded-xl bg-black/45 px-3 py-2 text-xs text-white/90 backdrop-blur-sm"
+        >
+          <div :for={entry <- @uploads.cover.entries} class="mt-1 first:mt-0">
+            <div class="flex items-center gap-2">
+              <span class="truncate font-semibold">{entry.client_name}</span>
+              <progress value={entry.progress} max="100" class="h-1 w-24 accent-secondary-500" />
+              <span>{entry.progress}%</span>
+            </div>
+            <p
+              :for={err <- upload_errors(@uploads.cover, entry)}
+              class="mt-1 text-xs font-semibold text-rose-200"
+            >
+              {cover_error(err)}
+            </p>
+          </div>
+
+          <p
+            :for={err <- @cover_upload_errors}
+            class="mt-1 text-xs font-semibold text-rose-200"
+          >
+            {cover_error(err)}
+          </p>
+
+          <p
+            :if={cover_uploading?(@uploads.cover)}
+            class="mt-1 text-xs font-semibold text-white/90"
+          >
+            {gettext("Uploading...")}
+          </p>
         </div>
       </div>
 

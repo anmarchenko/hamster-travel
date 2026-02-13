@@ -13,6 +13,7 @@ defmodule HamsterTravel.Accounts.User do
     field :locale, :string, default: "en"
     field :default_currency, :string
     field :avatar_url, :string
+    field :cover_url, :string
 
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true

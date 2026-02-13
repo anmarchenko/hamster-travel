@@ -7,6 +7,7 @@ defmodule HamsterTravelWeb.Accounts.ProfileLiveTest do
   import HamsterTravel.GeoFixtures
 
   alias HamsterTravel.Accounts
+  alias HamsterTravel.Accounts.UserCover
   alias HamsterTravel.Geo
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.Trip
@@ -79,6 +80,52 @@ defmodule HamsterTravelWeb.Accounts.ProfileLiveTest do
       refute has_element?(view, "[data-avatar-dropzone]")
       refute html =~ "Add avatar"
       refute html =~ "Choose image"
+    end
+
+    test "shows cover upload controls", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      {:ok, view, _html} = live(conn, ~p"/profile")
+
+      assert has_element?(view, "form#cover-upload-form")
+      assert has_element?(view, "[data-cover-dropzone]")
+    end
+
+    test "shows remove cover action when user has cover", %{conn: conn} do
+      user = user_fixture()
+      cover_url = UserCover.url({"cover.jpg", user}, :hero)
+
+      user =
+        user
+        |> Ecto.Changeset.change(cover_url: cover_url)
+        |> Repo.update!()
+
+      conn = log_in_user(conn, user)
+
+      {:ok, view, _html} = live(conn, ~p"/profile")
+
+      assert has_element?(view, "button[phx-click='remove_cover']")
+    end
+
+    test "removes cover from profile page", %{conn: conn} do
+      user = user_fixture()
+      cover_url = UserCover.url({"cover.jpg", user}, :hero)
+
+      user =
+        user
+        |> Ecto.Changeset.change(cover_url: cover_url)
+        |> Repo.update!()
+
+      conn = log_in_user(conn, user)
+
+      {:ok, view, _html} = live(conn, ~p"/profile")
+
+      view
+      |> element("button[phx-click='remove_cover']")
+      |> render_click()
+
+      assert is_nil(Accounts.get_user!(user.id).cover_url)
     end
 
     test "shows remove avatar action when user has avatar", %{conn: conn} do
