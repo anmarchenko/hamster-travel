@@ -83,7 +83,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         <div class="sm:pl-6">
           <div class="flex flex-col items-end gap-3">
             <label
-              :if={@trip.cover}
+              :if={TripCover.present?(@trip.cover)}
               for={@can_edit && @uploads.cover.ref}
               class={["cursor-pointer", !@can_edit && "pointer-events-none"]}
             >
@@ -1331,7 +1331,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     ~H"""
     <form id="cover-upload-form" phx-change="validate_cover" class="w-full sm:w-72">
       <div
-        :if={is_nil(@trip.cover)}
+        :if={!TripCover.present?(@trip.cover)}
         class="w-full rounded-xl border border-dashed border-zinc-200/80 bg-white/80 px-4 py-5 text-sm text-zinc-600 shadow-sm dark:border-zinc-700 dark:bg-zinc-900/40 dark:text-zinc-300"
         phx-drop-target={@uploads.cover.ref}
         data-cover-dropzone
@@ -1353,7 +1353,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         </div>
       </div>
 
-      <div :if={@trip.cover} class="flex flex-wrap items-center gap-2 justify-end">
+      <div :if={TripCover.present?(@trip.cover)} class="flex flex-wrap items-center gap-2 justify-end">
         <button
           type="button"
           class="group inline-flex items-center gap-1"

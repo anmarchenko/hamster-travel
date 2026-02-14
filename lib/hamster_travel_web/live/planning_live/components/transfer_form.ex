@@ -7,7 +7,7 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
 
   alias HamsterTravel.Planning
 
-  alias HamsterTravelWeb.Planning.CityInput
+  alias HamsterTravelWeb.CityInput
 
   attr :action, :atom, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true

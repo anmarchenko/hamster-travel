@@ -2,8 +2,8 @@ defmodule HamsterTravelWeb.UserSettingsLive do
   use HamsterTravelWeb, :live_view
 
   alias HamsterTravel.Accounts
+  alias HamsterTravelWeb.CityInput
   alias HamsterTravelWeb.Cldr
-  alias HamsterTravelWeb.Planning.CityInput
 
   def render(assigns) do
     ~H"""

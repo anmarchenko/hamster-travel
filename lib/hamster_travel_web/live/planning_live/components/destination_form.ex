@@ -7,7 +7,7 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
 
   alias HamsterTravel.Planning
 
-  alias HamsterTravelWeb.Planning.CityInput
+  alias HamsterTravelWeb.CityInput
   alias HamsterTravelWeb.Planning.DayRangeSelect
 
   attr :action, :atom, required: true

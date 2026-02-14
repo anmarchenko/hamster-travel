@@ -100,6 +100,7 @@ msgstr "Жильё"
 msgid "Places"
 msgstr "Города"
 
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:322
 #: lib/hamster_travel_web/live/packing_live/show_backpack.ex:58
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:78
 #, elixir-autogen, elixir-format
@@ -140,7 +141,7 @@ msgstr "Пароль"
 msgid "Log out"
 msgstr "Выйти"
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:33
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:31
 #, elixir-autogen, elixir-format
 msgid "My profile"
 msgstr "Мой профиль"
@@ -379,6 +380,7 @@ msgstr "Потерялся интернет"
 msgid "Welcome back!"
 msgstr "Добро пожаловать!"
 
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:293
 #: lib/hamster_travel_web/live/planning_live/components/destination_form.ex:35
 #, elixir-autogen, elixir-format
 msgid "City"
@@ -874,19 +876,19 @@ msgstr "Выбрать фото"
 msgid "Drag and drop or choose a file."
 msgstr "Перетащите изображение или выберите файл."
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:84
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:174
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:336
 #, elixir-autogen, elixir-format
 msgid "Failed to update cover."
 msgstr "Не удалось обновить обложку."
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:132
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:140
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:450
 #, elixir-autogen, elixir-format
 msgid "Cover removed."
 msgstr "Обложка удалена"
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:139
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:147
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:453
 #, elixir-autogen, elixir-format
 msgid "Failed to remove cover."
@@ -912,31 +914,31 @@ msgstr "Точно удалить обложку?"
 msgid "Uploading..."
 msgstr "Загрузка..."
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:146
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:154
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:180
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:188
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1651
 #, elixir-autogen, elixir-format
 msgid "File is too large. Maximum size is %{size} MB."
 msgstr "Файл слишком большой. Максимальный размер — %{size} МБ."
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:148
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:156
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:182
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:190
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1653
 #, elixir-autogen, elixir-format
 msgid "Only one image can be uploaded at a time."
 msgstr "Можно загрузить только одно изображение за раз."
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:149
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:157
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:183
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:191
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1654
 #, elixir-autogen, elixir-format
 msgid "Unsupported file type. Use JPG, PNG, or WebP."
 msgstr "Неподдерживаемый тип файла. Используйте JPG, PNG или WebP."
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:150
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:151
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:158
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:159
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:184
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:185
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:192
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:193
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1655
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1656
 #, elixir-autogen, elixir-format
@@ -968,7 +970,7 @@ msgstr "Всего поездок"
 msgid "User profile cover"
 msgstr "Обложка профиля"
 
-#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:226
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:227
 #, elixir-autogen, elixir-format
 msgid "Visited countries"
 msgstr "Посещённые страны"
@@ -1055,17 +1057,17 @@ msgstr "Сохранить настройки"
 msgid "Settings updated successfully."
 msgstr "Настройки успешно обновлены."
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:109
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:117
 #, elixir-autogen, elixir-format
 msgid "Avatar removed."
 msgstr "Аватар удалён"
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:116
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:124
 #, elixir-autogen, elixir-format
 msgid "Failed to remove avatar."
 msgstr "Не удалось удалить аватар."
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:71
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:161
 #, elixir-autogen, elixir-format
 msgid "Failed to update avatar."
 msgstr "Не удалось обновить аватар."
@@ -1089,3 +1091,44 @@ msgstr "Изменить обложку"
 #, elixir-autogen, elixir-format
 msgid "Upload cover"
 msgstr "Загрузить обложку"
+
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:297
+#, elixir-autogen, elixir-format
+msgid "Add city"
+msgstr "Добавить город"
+
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:234
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:279
+#, elixir-autogen, elixir-format
+msgid "Add more visited cities"
+msgstr "Добавить посещенные города"
+
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:305
+#, elixir-autogen, elixir-format
+msgid "Added cities"
+msgstr "Добавленные города"
+
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:93
+#, elixir-autogen, elixir-format
+msgid "Failed to delete visited city."
+msgstr "Не удалось удалить посещенный город."
+
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:331
+#, elixir-autogen, elixir-format
+msgid "No extra visited cities yet."
+msgstr "Пока нет дополнительных посещенных городов."
+
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:242
+#, elixir-autogen, elixir-format
+msgid "No visited countries yet."
+msgstr "Пока нет посещенных стран."
+
+#: lib/hamster_travel_web/live/accounts_live/profile.html.heex:282
+#, elixir-autogen, elixir-format
+msgid "Track places you visited outside your saved trips."
+msgstr "Отмечайте места, которые вы посетили вне сохраненных поездок."
+
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:90
+#, elixir-autogen, elixir-format
+msgid "Visited city not found."
+msgstr "Посещенный город не найден."

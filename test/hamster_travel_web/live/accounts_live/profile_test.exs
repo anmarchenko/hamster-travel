@@ -65,6 +65,45 @@ defmodule HamsterTravelWeb.Accounts.ProfileLiveTest do
       assert stats["Days on the road"] == Integer.to_string(expected_days)
     end
 
+    test "adds and removes manually visited cities from profile", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      geonames_fixture()
+      berlin = Geo.find_city_by_geonames_id("2950159")
+      city_payload = Jason.encode!(%{id: berlin.id, country: berlin.country.iso})
+
+      {:ok, view, html} = live(conn, ~p"/profile")
+
+      assert html =~ "Add more visited cities"
+      assert html =~ "No visited countries yet."
+      refute has_element?(view, "#profile-visited-countries-map")
+      refute has_element?(view, "#profile-visited-cities-modal")
+
+      view
+      |> element("button[phx-click='open_visited_cities_modal']", "Add more visited cities")
+      |> render_click()
+
+      assert has_element?(view, "#profile-visited-cities-modal")
+
+      render_submit(view, "save_visited_city", %{"visited_city" => %{"city" => city_payload}})
+
+      assert has_element?(view, "#profile-visited-countries-map")
+      assert render(view) =~ berlin.country.name
+
+      [visited_city] = Accounts.list_visited_cities(user)
+
+      view
+      |> element(
+        "#profile-visited-city-#{visited_city.id} button[phx-click='delete_visited_city']"
+      )
+      |> render_click()
+
+      assert Accounts.list_visited_cities(user) == []
+      assert render(view) =~ "No visited countries yet."
+      refute has_element?(view, "#profile-visited-countries-map")
+    end
+
     test "redirects if user is not logged in", %{conn: conn} do
       assert {:error, redirect} = live(conn, ~p"/profile")
 

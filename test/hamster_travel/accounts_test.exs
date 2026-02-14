@@ -2,6 +2,7 @@ defmodule HamsterTravel.AccountsTest do
   use HamsterTravel.DataCase, async: true
 
   alias HamsterTravel.Accounts
+  alias HamsterTravel.Geo
   alias HamsterTravel.Social
   alias HamsterTravel.Social.Friendship
 
@@ -217,6 +218,72 @@ defmodule HamsterTravel.AccountsTest do
         Accounts.update_user_settings(user, %{locale: "en", default_currency: "EURO"})
 
       assert %{default_currency: ["has invalid format"]} = errors_on(changeset)
+    end
+  end
+
+  describe "visited cities" do
+    setup do
+      geonames_fixture()
+      france = country_fixture()
+      region = region_fixture(france)
+      paris = city_fixture(france, region)
+
+      %{
+        user: user_fixture(),
+        other_user: user_fixture(),
+        berlin: Geo.find_city_by_geonames_id("2950159"),
+        paris: paris
+      }
+    end
+
+    test "create_visited_city/2 and list_visited_cities/1 return preloaded city", %{
+      user: user,
+      berlin: berlin
+    } do
+      assert {:ok, visited_city} = Accounts.create_visited_city(user, %{city_id: berlin.id})
+
+      assert [%{id: id, city: %{id: city_id}}] = Accounts.list_visited_cities(user)
+      assert id == visited_city.id
+      assert city_id == berlin.id
+    end
+
+    test "create_visited_city/2 enforces uniqueness per user", %{user: user, berlin: berlin} do
+      assert {:ok, _visited_city} = Accounts.create_visited_city(user, %{city_id: berlin.id})
+      assert {:error, changeset} = Accounts.create_visited_city(user, %{city_id: berlin.id})
+
+      errors =
+        changeset
+        |> errors_on()
+        |> Map.values()
+        |> List.flatten()
+
+      assert "has already been added" in errors
+    end
+
+    test "update_visited_city/2 changes the city", %{user: user, berlin: berlin, paris: paris} do
+      assert {:ok, visited_city} = Accounts.create_visited_city(user, %{city_id: berlin.id})
+
+      assert {:ok, updated_visited_city} =
+               Accounts.update_visited_city(visited_city, %{city_id: paris.id})
+
+      assert updated_visited_city.city_id == paris.id
+    end
+
+    test "delete_visited_city/2 deletes only owned records", %{
+      user: user,
+      other_user: other_user,
+      berlin: berlin
+    } do
+      assert {:ok, visited_city} = Accounts.create_visited_city(user, %{city_id: berlin.id})
+
+      assert {:error, :not_found} = Accounts.delete_visited_city(other_user, visited_city.id)
+      assert {:ok, _deleted} = Accounts.delete_visited_city(user, visited_city.id)
+      assert Accounts.list_visited_cities(user) == []
+    end
+
+    test "change_visited_city/2 returns a changeset", %{user: user} do
+      changeset = Accounts.change_visited_city(%Accounts.VisitedCity{user_id: user.id})
+      assert changeset.required == [:user_id, :city_id]
     end
   end
 

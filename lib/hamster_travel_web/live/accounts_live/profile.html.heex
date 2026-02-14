@@ -221,15 +221,28 @@
       </div>
     </div>
 
-    <div
-      :if={@visited_countries != []}
-      class="mt-8 rounded-3xl bg-white p-6 shadow-sm md:p-8 dark:bg-zinc-900"
-    >
-      <h2 class="text-xl font-semibold text-zinc-900 md:text-2xl dark:text-white">
-        {gettext("Visited countries")}
-      </h2>
+    <div class="mt-8 rounded-3xl bg-white p-6 shadow-sm md:p-8 dark:bg-zinc-900">
+      <div class="flex items-center justify-between gap-4">
+        <h2 class="text-xl font-semibold text-zinc-900 md:text-2xl dark:text-white">
+          {gettext("Visited countries")}
+        </h2>
+        <button
+          type="button"
+          phx-click="open_visited_cities_modal"
+          class="text-sm font-medium text-zinc-500 underline decoration-zinc-300 underline-offset-4 transition hover:text-zinc-700 hover:decoration-zinc-500 dark:text-zinc-400 dark:decoration-zinc-600 dark:hover:text-zinc-200"
+        >
+          {gettext("Add more visited cities")}
+        </button>
+      </div>
 
-      <div class="mt-6 flex flex-wrap gap-3">
+      <p
+        :if={@visited_countries == []}
+        class="mt-4 text-sm text-zinc-500 dark:text-zinc-400"
+      >
+        {gettext("No visited countries yet.")}
+      </p>
+
+      <div :if={@visited_countries != []} class="mt-6 flex flex-wrap gap-3">
         <div
           :for={country <- @visited_countries}
           class="flex items-center gap-2 rounded-full border border-zinc-100 bg-zinc-50 px-4 py-2 shadow-sm transition-shadow hover:shadow-md dark:border-zinc-700 dark:bg-zinc-800/60"
@@ -242,6 +255,7 @@
       </div>
 
       <div
+        :if={@visited_countries != []}
         id="profile-visited-countries-map"
         class="mt-6 h-[30rem] w-full overflow-hidden rounded-2xl border border-zinc-100 dark:border-zinc-700"
         phx-hook="UserMap"
@@ -253,5 +267,73 @@
       >
       </div>
     </div>
+
+    <.modal
+      :if={@show_visited_cities_modal}
+      id="profile-visited-cities-modal"
+      show
+      on_cancel={JS.push("close_visited_cities_modal")}
+    >
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-lg font-semibold text-zinc-900 dark:text-white">
+            {gettext("Add more visited cities")}
+          </h3>
+          <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            {gettext("Track places you visited outside your saved trips.")}
+          </p>
+        </div>
+
+        <.form id="visited-city-form" for={@visited_city_form} phx-submit="save_visited_city">
+          <div class="space-y-4">
+            <.live_component
+              module={HamsterTravelWeb.CityInput}
+              id="profile-visited-city-input"
+              field={@visited_city_form[:city]}
+              validated_field={@visited_city_form[:city_id]}
+              label={gettext("City")}
+            />
+            <div class="flex justify-end">
+              <.button color="primary" size="xs" type="submit">
+                {gettext("Add city")}
+              </.button>
+            </div>
+          </div>
+        </.form>
+
+        <div class="border-t border-zinc-100 pt-4 dark:border-zinc-800">
+          <p class="text-sm font-medium text-zinc-700 dark:text-zinc-200">
+            {gettext("Added cities")}
+          </p>
+          <div class="mt-3 space-y-2">
+            <div
+              :for={visited_city <- @extra_visited_cities}
+              id={"profile-visited-city-#{visited_city.id}"}
+              class="flex items-center gap-2 rounded-xl border border-zinc-100 bg-zinc-50 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-800/60"
+            >
+              <.flag size={20} country={visited_city.city.country_code} class="rounded-sm" />
+              <span class="grow text-sm text-zinc-700 dark:text-zinc-200">
+                {Geo.city_name(visited_city.city, @current_user.locale)}
+              </span>
+              <button
+                type="button"
+                phx-click="delete_visited_city"
+                phx-value-id={visited_city.id}
+                class="inline-flex h-7 w-7 items-center justify-center rounded-full text-zinc-500 transition hover:bg-zinc-200 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-zinc-200"
+                aria-label={gettext("Delete")}
+              >
+                <.icon name="hero-trash" class="h-4 w-4" />
+              </button>
+            </div>
+            <p
+              :if={@extra_visited_cities == []}
+              class="text-sm text-zinc-500 dark:text-zinc-400"
+            >
+              {gettext("No extra visited cities yet.")}
+            </p>
+          </div>
+        </div>
+      </div>
+    </.modal>
   </div>
 </section>

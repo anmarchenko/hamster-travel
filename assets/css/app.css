@@ -120,6 +120,6 @@ ul[data-task-list="true"] li > div p {
     margin-right: 0.35rem;
 }
 
-.profile-city-popup .mapboxgl-popup-content {
+.mapboxgl-popup-content {
     color: #1f2937;
 }

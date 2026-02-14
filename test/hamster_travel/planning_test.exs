@@ -1,6 +1,7 @@
 defmodule HamsterTravel.PlanningTest do
   use HamsterTravel.DataCase
 
+  alias HamsterTravel.Accounts
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.Common
   alias HamsterTravel.Social
@@ -115,11 +116,12 @@ defmodule HamsterTravel.PlanningTest do
                Planning.list_drafts(user)
     end
 
-    test "profile_stats/1 returns totals and unique countries from finished trips for user", %{
-      user: user,
-      friend: friend,
-      city: city
-    } do
+    test "profile_stats/1 returns totals and unique countries from finished trips and manually added cities",
+         %{
+           user: user,
+           friend: friend,
+           city: city
+         } do
       france = country_fixture()
       region = region_fixture(france)
       paris = city_fixture(france, region)
@@ -138,14 +140,8 @@ defmodule HamsterTravel.PlanningTest do
           end_day: 1
         })
 
-      finished_trip_fr = trip_fixture(user, %{status: Trip.finished()})
-
-      {:ok, _} =
-        Planning.create_destination(finished_trip_fr, %{
-          city_id: paris.id,
-          start_day: 0,
-          end_day: 1
-        })
+      assert {:ok, _visited_city} = Accounts.create_visited_city(user, %{city_id: city.id})
+      assert {:ok, _visited_city} = Accounts.create_visited_city(user, %{city_id: paris.id})
 
       planned_trip = trip_fixture(user, %{status: Trip.planned()})
 
@@ -165,12 +161,12 @@ defmodule HamsterTravel.PlanningTest do
       germany_name = city.country.name
 
       expected_days =
-        [finished_trip, finished_trip_two, finished_trip_fr]
+        [finished_trip, finished_trip_two]
         |> Enum.map(& &1.duration)
         |> Enum.sum()
 
       assert %{
-               total_trips: 3,
+               total_trips: 2,
                countries: 2,
                days_on_the_road: ^expected_days,
                visited_countries: [

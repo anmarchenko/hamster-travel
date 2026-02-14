@@ -7,7 +7,10 @@ defmodule HamsterTravelWeb.Accounts.Profile do
   require Logger
 
   alias HamsterTravel.Accounts
+  alias HamsterTravel.Accounts.VisitedCity
+  alias HamsterTravel.Geo
   alias HamsterTravel.Planning
+  alias HamsterTravelWeb.CityInput
 
   @avatar_upload_max_mb 8
   @avatar_upload_max_file_size @avatar_upload_max_mb * 1_000_000
@@ -19,30 +22,20 @@ defmodule HamsterTravelWeb.Accounts.Profile do
 
   @impl true
   def mount(_params, _session, socket) do
-    profile_stats = Planning.profile_stats(socket.assigns.current_user)
     mapbox_options = Application.get_env(:hamster_travel, :mapbox, [])
     mapbox_style_url = Keyword.get(mapbox_options, :style_url) || @mapbox_style
-
-    visited_country_iso3_codes =
-      profile_stats.visited_countries
-      |> Enum.map(& &1.iso3)
-      |> Enum.reject(&is_nil/1)
 
     socket =
       socket
       |> assign(
         page_title: gettext("My profile"),
-        visited_countries: profile_stats.visited_countries,
-        total_trips: profile_stats.total_trips,
-        countries_count: profile_stats.countries,
-        days_on_the_road: profile_stats.days_on_the_road,
-        visited_country_iso3_codes_json: Jason.encode!(visited_country_iso3_codes),
-        visited_cities_json: Jason.encode!(profile_stats.visited_cities),
         mapbox_access_token: Keyword.get(mapbox_options, :access_token),
         mapbox_style_url: mapbox_style_url,
         avatar_upload_errors: [],
-        cover_upload_errors: []
+        cover_upload_errors: [],
+        show_visited_cities_modal: false
       )
+      |> assign_profile_data()
       |> allow_upload(:avatar,
         accept: @avatar_upload_accept,
         max_entries: 1,
@@ -61,30 +54,44 @@ defmodule HamsterTravelWeb.Accounts.Profile do
     {:ok, socket}
   end
 
-  def handle_progress(:avatar, entry, socket) do
-    handle_user_upload_progress(
-      entry,
-      socket,
-      :avatar,
-      :avatar_upload_errors,
-      "user-avatar",
-      &Accounts.update_user_avatar/2,
-      gettext("Failed to update avatar."),
-      "Avatar"
-    )
+  @impl true
+  def handle_event("open_visited_cities_modal", _params, socket) do
+    {:noreply, assign(socket, :show_visited_cities_modal, true)}
   end
 
-  def handle_progress(:cover, entry, socket) do
-    handle_user_upload_progress(
-      entry,
-      socket,
-      :cover,
-      :cover_upload_errors,
-      "user-cover",
-      &Accounts.update_user_cover/2,
-      gettext("Failed to update cover."),
-      "Cover"
-    )
+  @impl true
+  def handle_event("close_visited_cities_modal", _params, socket) do
+    {:noreply, assign(socket, :show_visited_cities_modal, false)}
+  end
+
+  @impl true
+  def handle_event("save_visited_city", %{"visited_city" => visited_city_params}, socket) do
+    visited_city_params = CityInput.process_selected_value_on_submit(visited_city_params, "city")
+
+    case Accounts.create_visited_city(socket.assigns.current_user, visited_city_params) do
+      {:ok, _visited_city} ->
+        {:noreply,
+         socket
+         |> assign_profile_data()
+         |> assign(:show_visited_cities_modal, true)}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, :visited_city_form, visited_city_form(changeset))}
+    end
+  end
+
+  @impl true
+  def handle_event("delete_visited_city", %{"id" => id}, socket) do
+    case Accounts.delete_visited_city(socket.assigns.current_user, id) do
+      {:ok, _visited_city} ->
+        {:noreply, assign_profile_data(socket)}
+
+      {:error, :not_found} ->
+        {:noreply, put_flash(socket, :error, gettext("Visited city not found."))}
+
+      {:error, _reason} ->
+        {:noreply, put_flash(socket, :error, gettext("Failed to delete visited city."))}
+    end
   end
 
   @impl true
@@ -141,6 +148,32 @@ defmodule HamsterTravelWeb.Accounts.Profile do
       end
 
     {:noreply, socket}
+  end
+
+  def handle_progress(:avatar, entry, socket) do
+    handle_user_upload_progress(
+      entry,
+      socket,
+      :avatar,
+      :avatar_upload_errors,
+      "user-avatar",
+      &Accounts.update_user_avatar/2,
+      gettext("Failed to update avatar."),
+      "Avatar"
+    )
+  end
+
+  def handle_progress(:cover, entry, socket) do
+    handle_user_upload_progress(
+      entry,
+      socket,
+      :cover,
+      :cover_upload_errors,
+      "user-cover",
+      &Accounts.update_user_cover/2,
+      gettext("Failed to update cover."),
+      "Cover"
+    )
   end
 
   defp avatar_error(:too_large),
@@ -268,4 +301,41 @@ defmodule HamsterTravelWeb.Accounts.Profile do
     do: cover_url
 
   defp profile_cover_url(_), do: ~p"/images/user-profile-background.jpeg"
+
+  defp assign_profile_data(socket) do
+    user = socket.assigns.current_user
+    profile_stats = Planning.profile_stats(user)
+
+    visited_country_iso3_codes =
+      profile_stats.visited_countries
+      |> Enum.map(& &1.iso3)
+      |> Enum.reject(&is_nil/1)
+
+    assign(socket,
+      visited_countries: profile_stats.visited_countries,
+      total_trips: profile_stats.total_trips,
+      countries_count: profile_stats.countries,
+      days_on_the_road: profile_stats.days_on_the_road,
+      visited_country_iso3_codes_json: Jason.encode!(visited_country_iso3_codes),
+      visited_cities_json: Jason.encode!(profile_stats.visited_cities),
+      extra_visited_cities: Accounts.list_visited_cities(user),
+      visited_city_form: new_visited_city_form(user)
+    )
+  end
+
+  defp new_visited_city_form(user) do
+    %VisitedCity{user_id: user.id, city: nil}
+    |> Accounts.change_visited_city()
+    |> visited_city_form()
+  end
+
+  defp visited_city_form(changeset) do
+    changeset =
+      case changeset.data do
+        %VisitedCity{} = visited_city -> %{changeset | data: %{visited_city | city: nil}}
+        _ -> changeset
+      end
+
+    to_form(changeset, as: :visited_city)
+  end
 end

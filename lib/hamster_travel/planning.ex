@@ -5,6 +5,7 @@ defmodule HamsterTravel.Planning do
   Use these functions to manage trips and their associations.
   """
 
+  alias HamsterTravel.Accounts
   alias HamsterTravel.Accounts.User
   alias HamsterTravel.Geo
 
@@ -91,9 +92,15 @@ defmodule HamsterTravel.Planning do
   def profile_stats(%User{} = user) do
     finished_trips = Trips.list_profile_finished_trips(user)
 
+    manually_added_cities =
+      user
+      |> Accounts.list_visited_cities()
+      |> Enum.map(& &1.city)
+
     visited_countries =
       finished_trips
       |> Enum.flat_map(& &1.countries)
+      |> Kernel.++(Enum.map(manually_added_cities, & &1.country))
       |> Enum.uniq_by(& &1.iso)
       |> Enum.map(fn country ->
         %{
@@ -107,6 +114,7 @@ defmodule HamsterTravel.Planning do
     visited_cities =
       finished_trips
       |> Enum.flat_map(& &1.cities)
+      |> Kernel.++(manually_added_cities)
       |> Enum.uniq_by(& &1.id)
       |> Enum.map(fn city ->
         %{

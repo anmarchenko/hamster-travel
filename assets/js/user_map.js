@@ -56,7 +56,7 @@ function iso2ToEmoji(isoCode) {
 
 function cityPopupHtml(cityName, countryIso) {
   const flagEmoji = iso2ToEmoji(countryIso);
-  return `<span class="map-city-popup-flag">${flagEmoji}</span>${escapeHtml(cityName)}`;
+  return `<span class="map-city-popup-text"><span class="map-city-popup-flag">${flagEmoji}</span>${escapeHtml(cityName)}</span>`;
 }
 
 function addCitiesLayer(map) {

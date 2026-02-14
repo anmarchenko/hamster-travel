@@ -1,9 +1,9 @@
-defmodule HamsterTravelWeb.Planning.CityInputTest do
+defmodule HamsterTravelWeb.CityInputTest do
   use HamsterTravelWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
 
-  alias HamsterTravelWeb.Planning.CityInput
+  alias HamsterTravelWeb.CityInput
 
   describe "CityInput component" do
     test "renders city input field correctly" do

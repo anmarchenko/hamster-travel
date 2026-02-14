@@ -6,6 +6,7 @@ defmodule HamsterTravelWeb.Planning.IndexPlansTest do
   import HamsterTravel.PlanningFixtures
 
   alias HamsterTravel.Planning
+  alias HamsterTravel.Repo
 
   describe "Index plans page" do
     test "renders plans page for authenticated user", %{conn: conn} do
@@ -64,6 +65,21 @@ defmodule HamsterTravelWeb.Planning.IndexPlansTest do
 
       assert html =~ "$110.00"
       assert html =~ "€100.00"
+    end
+
+    test "renders plans page when a trip has malformed cover data", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      trip =
+        trip_fixture(%{author_id: user.id, status: "1_planned"})
+        |> Ecto.Changeset.change(cover: %{file_name: nil, updated_at: DateTime.utc_now()})
+        |> Repo.update!()
+
+      {:ok, _view, html} = live(conn, ~p"/plans")
+
+      assert html =~ trip.name
+      assert html =~ "Travels"
     end
   end
 end

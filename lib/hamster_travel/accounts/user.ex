@@ -22,6 +22,7 @@ defmodule HamsterTravel.Accounts.User do
     field :confirmed_at, :naive_datetime
 
     has_many :friendships, HamsterTravel.Social.Friendship, foreign_key: :user_id
+    has_many :visited_cities, HamsterTravel.Accounts.VisitedCity, foreign_key: :user_id
     belongs_to :home_city, HamsterTravel.Geo.City, type: :id
 
     timestamps()

@@ -8,7 +8,7 @@ defmodule HamsterTravel.Accounts do
 
   alias HamsterTravel.Repo
 
-  alias HamsterTravel.Accounts.{User, UserAvatar, UserCover, UserToken}
+  alias HamsterTravel.Accounts.{User, UserAvatar, UserCover, UserToken, VisitedCity}
   alias HamsterTravel.Geo
 
   ## Database getters
@@ -262,6 +262,87 @@ defmodule HamsterTravel.Accounts do
   end
 
   @doc """
+  Returns manually added visited cities for a user.
+  """
+  @spec list_visited_cities(User.t()) :: [VisitedCity.t()]
+  def list_visited_cities(%User{} = user) do
+    Repo.all(
+      from vc in VisitedCity, where: vc.user_id == ^user.id, order_by: [asc: vc.inserted_at]
+    )
+    |> visited_city_preloading()
+  end
+
+  @doc """
+  Gets a single manually added visited city.
+  """
+  @spec get_visited_city(User.t(), pos_integer() | String.t()) :: VisitedCity.t() | nil
+  def get_visited_city(%User{} = user, id) when is_binary(id) do
+    case Integer.parse(id) do
+      {int_id, ""} -> get_visited_city(user, int_id)
+      _ -> nil
+    end
+  end
+
+  def get_visited_city(%User{} = user, id) when is_integer(id) do
+    from(vc in VisitedCity, where: vc.user_id == ^user.id and vc.id == ^id)
+    |> Repo.one()
+    |> visited_city_preloading()
+  end
+
+  @doc """
+  Creates a manually added visited city for a user.
+  """
+  @spec create_visited_city(User.t(), map()) ::
+          {:ok, VisitedCity.t()} | {:error, Ecto.Changeset.t()}
+  def create_visited_city(%User{} = user, attrs \\ %{}) do
+    %VisitedCity{user_id: user.id}
+    |> VisitedCity.changeset(attrs)
+    |> Repo.insert()
+    |> preload_visited_city_after_db_call()
+  end
+
+  @doc """
+  Updates a manually added visited city.
+  """
+  @spec update_visited_city(VisitedCity.t(), map()) ::
+          {:ok, VisitedCity.t()} | {:error, Ecto.Changeset.t()}
+  def update_visited_city(%VisitedCity{} = visited_city, attrs) do
+    visited_city
+    |> VisitedCity.changeset(attrs)
+    |> Repo.update()
+    |> preload_visited_city_after_db_call()
+  end
+
+  @doc """
+  Returns a changeset for a manually added visited city.
+  """
+  @spec change_visited_city(VisitedCity.t(), map()) :: Ecto.Changeset.t()
+  def change_visited_city(%VisitedCity{} = visited_city, attrs \\ %{}) do
+    VisitedCity.changeset(visited_city, attrs)
+  end
+
+  @doc """
+  Deletes a manually added visited city.
+  """
+  @spec delete_visited_city(VisitedCity.t()) ::
+          {:ok, VisitedCity.t()} | {:error, Ecto.Changeset.t()}
+  def delete_visited_city(%VisitedCity{} = visited_city) do
+    Repo.delete(visited_city)
+  end
+
+  @doc """
+  Deletes a manually added visited city owned by a user.
+  """
+  @spec delete_visited_city(User.t(), pos_integer() | String.t()) ::
+          {:ok, VisitedCity.t()} | {:error, :not_found}
+  def delete_visited_city(%User{} = user, id) do
+    case get_visited_city(user, id) do
+      %VisitedCity{} = visited_city -> delete_visited_city(visited_city)
+      nil -> {:error, :not_found}
+    end
+  end
+
+  @doc """
   Returns an `%Ecto.Changeset{}` for changing the user password.
 
   ## Examples
@@ -381,6 +462,17 @@ defmodule HamsterTravel.Accounts do
     :telemetry.execute([:hamster_travel, :accounts, :users], %{count: users_count})
     users_count
   end
+
+  defp preload_visited_city_after_db_call({:ok, %VisitedCity{} = visited_city}) do
+    {:ok, visited_city_preloading(visited_city)}
+  end
+
+  defp preload_visited_city_after_db_call(error), do: error
+
+  defp visited_city_preloading(nil), do: nil
+
+  defp visited_city_preloading(records),
+    do: Repo.preload(records, city: Geo.city_preloading_query())
 
   defp user_preloading(user) do
     Repo.preload(user, friendships: [], home_city: Geo.city_preloading_query())

@@ -55,6 +55,15 @@ defmodule HamsterTravel.Planning.TripCover do
     ]
   end
 
+  @doc """
+  Returns true when cover value contains a usable file name.
+  """
+  @spec present?(any()) :: boolean()
+  def present?(%{file_name: name}) when is_binary(name), do: name != ""
+  def present?(%{"file_name" => name}) when is_binary(name), do: name != ""
+  def present?(name) when is_binary(name), do: name != ""
+  def present?(_), do: false
+
   defp file_name(%{file_name: name}) when is_binary(name), do: name
   defp file_name(%{filename: name}) when is_binary(name), do: name
   defp file_name(_file), do: ""

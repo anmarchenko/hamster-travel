@@ -1,4 +1,4 @@
-defmodule HamsterTravelWeb.Planning.CityInput do
+defmodule HamsterTravelWeb.CityInput do
   use HamsterTravelWeb, :live_component
 
   import LiveSelect

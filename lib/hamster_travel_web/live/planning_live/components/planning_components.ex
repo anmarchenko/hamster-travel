@@ -76,7 +76,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
     budget = Planning.calculate_budget(assigns.trip)
 
     cover_url =
-      if assigns.trip.cover do
+      if TripCover.present?(assigns.trip.cover) do
         TripCover.url({assigns.trip.cover, assigns.trip}, :card)
       else
         placeholder_image(assigns.trip.id)
