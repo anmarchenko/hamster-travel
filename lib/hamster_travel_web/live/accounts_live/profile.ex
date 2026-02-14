@@ -15,10 +15,17 @@ defmodule HamsterTravelWeb.Accounts.Profile do
   @cover_upload_max_mb 8
   @cover_upload_max_file_size @cover_upload_max_mb * 1_000_000
   @cover_upload_accept ~w(.jpg .jpeg .png .webp)
+  @mapbox_style "mapbox://styles/altmer/cj11tgfi0005s2so7k1yl6w81"
 
   @impl true
   def mount(_params, _session, socket) do
     profile_stats = Planning.profile_stats(socket.assigns.current_user)
+    mapbox_options = Application.get_env(:hamster_travel, :mapbox, [])
+
+    visited_country_iso3_codes =
+      profile_stats.visited_countries
+      |> Enum.map(& &1.iso3)
+      |> Enum.reject(&is_nil/1)
 
     socket =
       socket
@@ -28,6 +35,10 @@ defmodule HamsterTravelWeb.Accounts.Profile do
         total_trips: profile_stats.total_trips,
         countries_count: profile_stats.countries,
         days_on_the_road: profile_stats.days_on_the_road,
+        visited_country_iso3_codes_json: Jason.encode!(visited_country_iso3_codes),
+        visited_cities_json: Jason.encode!(profile_stats.visited_cities),
+        mapbox_access_token: Keyword.get(mapbox_options, :access_token),
+        mapbox_style_url: Keyword.get(mapbox_options, :style_url, @mapbox_style),
         avatar_upload_errors: [],
         cover_upload_errors: []
       )

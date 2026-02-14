@@ -6,6 +6,7 @@ defmodule HamsterTravel.Planning do
   """
 
   alias HamsterTravel.Accounts.User
+  alias HamsterTravel.Geo
 
   alias HamsterTravel.Planning.{
     Accommodation,
@@ -66,7 +67,9 @@ defmodule HamsterTravel.Planning do
           total_trips: non_neg_integer(),
           countries: non_neg_integer(),
           days_on_the_road: non_neg_integer(),
-          visited_countries: list(%{iso: String.t(), name: String.t()})
+          visited_countries: list(%{iso: String.t(), iso3: String.t(), name: String.t()}),
+          visited_cities:
+            list(%{name: String.t(), lat: float(), lon: float(), country_iso: String.t()})
         }
 
   @doc """
@@ -76,12 +79,17 @@ defmodule HamsterTravel.Planning do
   """
   @spec profile_stats(User.t() | nil) :: profile_stats()
   def profile_stats(nil) do
-    %{total_trips: 0, countries: 0, days_on_the_road: 0, visited_countries: []}
+    %{
+      total_trips: 0,
+      countries: 0,
+      days_on_the_road: 0,
+      visited_countries: [],
+      visited_cities: []
+    }
   end
 
   def profile_stats(%User{} = user) do
-    trips = Trips.list_profile_trips(user)
-    finished_trips = Enum.filter(trips, &(&1.status == Trip.finished()))
+    finished_trips = Trips.list_profile_finished_trips(user)
 
     visited_countries =
       finished_trips
@@ -90,7 +98,22 @@ defmodule HamsterTravel.Planning do
       |> Enum.map(fn country ->
         %{
           iso: country.iso,
-          name: country_name(country, user.locale)
+          iso3: country.iso3,
+          name: Geo.country_name(country, user.locale)
+        }
+      end)
+      |> Enum.sort_by(&String.downcase(&1.name))
+
+    visited_cities =
+      finished_trips
+      |> Enum.flat_map(& &1.cities)
+      |> Enum.uniq_by(& &1.id)
+      |> Enum.map(fn city ->
+        %{
+          name: Geo.city_name(city, user.locale),
+          lat: city.lat,
+          lon: city.lon,
+          country_iso: city.country_code
         }
       end)
       |> Enum.sort_by(&String.downcase(&1.name))
@@ -102,16 +125,9 @@ defmodule HamsterTravel.Planning do
         Enum.reduce(finished_trips, 0, fn trip, acc ->
           acc + (trip.duration || 0)
         end),
-      visited_countries: visited_countries
+      visited_countries: visited_countries,
+      visited_cities: visited_cities
     }
-  end
-
-  defp country_name(country, "ru") do
-    country.name_ru || country.name
-  end
-
-  defp country_name(country, _locale) do
-    country.name
   end
 
   @doc """

@@ -67,12 +67,12 @@ defmodule HamsterTravel.Planning.Trips do
     |> trip_preloading()
   end
 
-  def list_profile_trips(%User{} = user) do
+  def list_profile_finished_trips(%User{} = user) do
     from(t in Trip,
-      where: t.author_id == ^user.id
+      where: t.author_id == ^user.id and t.status == ^Trip.finished()
     )
     |> Repo.all()
-    |> Repo.preload(:countries)
+    |> Repo.preload([:countries, :cities])
   end
 
   def get_trip(id) do

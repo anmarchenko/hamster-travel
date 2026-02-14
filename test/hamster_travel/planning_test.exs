@@ -158,8 +158,10 @@ defmodule HamsterTravel.PlanningTest do
         Planning.create_destination(friend_trip, %{city_id: city.id, start_day: 0, end_day: 1})
 
       france_iso = france.iso
+      france_iso3 = france.iso3
       france_name = france.name
       germany_iso = city.country.iso
+      germany_iso3 = city.country.iso3
       germany_name = city.country.name
 
       expected_days =
@@ -172,10 +174,21 @@ defmodule HamsterTravel.PlanningTest do
                countries: 2,
                days_on_the_road: ^expected_days,
                visited_countries: [
-                 %{iso: ^france_iso, name: ^france_name},
-                 %{iso: ^germany_iso, name: ^germany_name}
-               ]
+                 %{iso: ^france_iso, iso3: ^france_iso3, name: ^france_name},
+                 %{iso: ^germany_iso, iso3: ^germany_iso3, name: ^germany_name}
+               ],
+               visited_cities: visited_cities
              } = Planning.profile_stats(user)
+
+      assert Enum.sort_by(visited_cities, & &1.name) == [
+               %{name: city.name, lat: city.lat, lon: city.lon, country_iso: city.country_code},
+               %{
+                 name: paris.name,
+                 lat: paris.lat,
+                 lon: paris.lon,
+                 country_iso: paris.country_code
+               }
+             ]
     end
 
     test "profile_stats/1 localizes country names" do
@@ -195,7 +208,13 @@ defmodule HamsterTravel.PlanningTest do
     end
 
     test "profile_stats/1 returns empty stats for nil user" do
-      assert %{total_trips: 0, countries: 0, days_on_the_road: 0, visited_countries: []} =
+      assert %{
+               total_trips: 0,
+               countries: 0,
+               days_on_the_road: 0,
+               visited_countries: [],
+               visited_cities: []
+             } =
                Planning.profile_stats(nil)
     end
 

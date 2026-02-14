@@ -22,6 +22,7 @@ import TransferDragDrop from './transfer_drag_drop';
 import ActivityDragDrop from './activity_drag_drop';
 import PackingDragDrop from './packing_drag_drop';
 import FormattedTextArea from './formatted_text_area';
+import UserMap from './user_map';
 
 Alpine.plugin(persist);
 Alpine.plugin(collapse);
@@ -42,6 +43,7 @@ let hooks = {
   ...ActivityDragDrop,
   ...PackingDragDrop,
   ...FormattedTextArea,
+  ...UserMap,
 };
 
 let liveSocket = new LiveSocket('/live', Socket, {

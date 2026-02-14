@@ -146,14 +146,28 @@ defmodule HamsterTravel.Geo do
     end
   end
 
-  def city_name(city) do
-    case Gettext.get_locale(HamsterTravelWeb.Gettext) do
-      "ru" ->
-        city.name_ru || city.name
+  def country_name(country) do
+    country_name(country, Gettext.get_locale(HamsterTravelWeb.Gettext))
+  end
 
-      _ ->
-        city.name
-    end
+  def country_name(country, "ru") do
+    country.name_ru || country.name
+  end
+
+  def country_name(country, _locale) do
+    country.name
+  end
+
+  def city_name(city) do
+    city_name(city, Gettext.get_locale(HamsterTravelWeb.Gettext))
+  end
+
+  def city_name(city, "ru") do
+    city.name_ru || city.name
+  end
+
+  def city_name(city, _locale) do
+    city.name
   end
 
   def city_preloading_query do

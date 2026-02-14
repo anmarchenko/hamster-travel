@@ -30,13 +30,13 @@ msgstr[2] "дней"
 
 # plan statuses
 msgid "finished"
-msgstr "Состоявшееся"
+msgstr "Finished"
 
 msgid "planned"
-msgstr "Запланированное"
+msgstr "Planned"
 
 msgid "draft"
-msgstr "Черновик"
+msgstr "Draft"
 
 #: lib/hamster_travel_web/components/layouts.ex:24
 #: lib/hamster_travel_web/components/layouts.ex:112
@@ -140,7 +140,7 @@ msgstr "Пароль"
 msgid "Log out"
 msgstr "Выйти"
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:26
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:33
 #, elixir-autogen, elixir-format
 msgid "My profile"
 msgstr "Мой профиль"
@@ -874,19 +874,19 @@ msgstr "Выбрать фото"
 msgid "Drag and drop or choose a file."
 msgstr "Перетащите изображение или выберите файл."
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:73
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:84
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:336
 #, elixir-autogen, elixir-format
 msgid "Failed to update cover."
 msgstr "Не удалось обновить обложку."
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:121
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:132
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:450
 #, elixir-autogen, elixir-format
 msgid "Cover removed."
 msgstr "Обложка удалена"
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:128
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:139
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:453
 #, elixir-autogen, elixir-format
 msgid "Failed to remove cover."
@@ -912,31 +912,31 @@ msgstr "Точно удалить обложку?"
 msgid "Uploading..."
 msgstr "Загрузка..."
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:135
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:143
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:146
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:154
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1651
 #, elixir-autogen, elixir-format
 msgid "File is too large. Maximum size is %{size} MB."
 msgstr "Файл слишком большой. Максимальный размер — %{size} МБ."
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:137
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:145
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:148
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:156
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1653
 #, elixir-autogen, elixir-format
 msgid "Only one image can be uploaded at a time."
 msgstr "Можно загрузить только одно изображение за раз."
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:138
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:146
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:149
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:157
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1654
 #, elixir-autogen, elixir-format
 msgid "Unsupported file type. Use JPG, PNG, or WebP."
 msgstr "Неподдерживаемый тип файла. Используйте JPG, PNG или WebP."
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:139
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:140
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:147
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:148
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:150
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:151
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:158
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:159
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1655
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1656
 #, elixir-autogen, elixir-format
@@ -1055,17 +1055,17 @@ msgstr "Сохранить настройки"
 msgid "Settings updated successfully."
 msgstr "Настройки успешно обновлены."
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:98
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:109
 #, elixir-autogen, elixir-format
 msgid "Avatar removed."
 msgstr "Аватар удалён"
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:105
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:116
 #, elixir-autogen, elixir-format
 msgid "Failed to remove avatar."
 msgstr "Не удалось удалить аватар."
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:60
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:71
 #, elixir-autogen, elixir-format
 msgid "Failed to update avatar."
 msgstr "Не удалось обновить аватар."

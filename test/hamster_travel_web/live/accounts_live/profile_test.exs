@@ -49,12 +49,14 @@ defmodule HamsterTravelWeb.Accounts.ProfileLiveTest do
 
       expected_days = finished_trip_de.duration + finished_trip_fr.duration
 
-      {:ok, _view, html} = live(conn, ~p"/profile")
+      {:ok, view, html} = live(conn, ~p"/profile")
 
       assert html =~ user.name
       assert html =~ "Visited countries"
       assert html =~ france.name
       assert html =~ berlin.country.name
+      assert has_element?(view, "#profile-visited-countries-map")
+      assert html =~ "data-visited-country-iso3-codes="
       stats = stats_map(html)
 
       assert stats["Total trips"] == "2"

@@ -221,7 +221,10 @@
       </div>
     </div>
 
-    <div class="mt-8 rounded-3xl bg-white p-6 shadow-sm md:p-8 dark:bg-zinc-900">
+    <div
+      :if={@visited_countries != []}
+      class="mt-8 rounded-3xl bg-white p-6 shadow-sm md:p-8 dark:bg-zinc-900"
+    >
       <h2 class="text-xl font-semibold text-zinc-900 md:text-2xl dark:text-white">
         {gettext("Visited countries")}
       </h2>
@@ -236,6 +239,18 @@
             {country.name}
           </span>
         </div>
+      </div>
+
+      <div
+        id="profile-visited-countries-map"
+        class="mt-6 h-120 w-full overflow-hidden rounded-2xl border border-zinc-100 dark:border-zinc-700"
+        phx-hook="UserMap"
+        phx-update="ignore"
+        data-mapbox-access-token={@mapbox_access_token || ""}
+        data-mapbox-style-url={@mapbox_style_url}
+        data-visited-country-iso3-codes={@visited_country_iso3_codes_json}
+        data-visited-cities={@visited_cities_json}
+      >
       </div>
     </div>
   </div>

@@ -151,7 +151,7 @@ msgstr ""
 msgid "Log out"
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:26
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:33
 #, elixir-autogen, elixir-format
 msgid "My profile"
 msgstr ""
@@ -879,19 +879,19 @@ msgstr ""
 msgid "Drag and drop or choose a file."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:73
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:84
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:336
 #, elixir-autogen, elixir-format
 msgid "Failed to update cover."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:121
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:132
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:450
 #, elixir-autogen, elixir-format
 msgid "Cover removed."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:128
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:139
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:453
 #, elixir-autogen, elixir-format
 msgid "Failed to remove cover."
@@ -917,31 +917,31 @@ msgstr ""
 msgid "Uploading..."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:135
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:143
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:146
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:154
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1651
 #, elixir-autogen, elixir-format
 msgid "File is too large. Maximum size is %{size} MB."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:137
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:145
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:148
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:156
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1653
 #, elixir-autogen, elixir-format
 msgid "Only one image can be uploaded at a time."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:138
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:146
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:149
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:157
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1654
 #, elixir-autogen, elixir-format
 msgid "Unsupported file type. Use JPG, PNG, or WebP."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:139
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:140
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:147
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:148
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:150
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:151
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:158
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:159
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1655
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1656
 #, elixir-autogen, elixir-format
@@ -1060,17 +1060,17 @@ msgstr ""
 msgid "Settings updated successfully."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:98
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:109
 #, elixir-autogen, elixir-format
 msgid "Avatar removed."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:105
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:116
 #, elixir-autogen, elixir-format
 msgid "Failed to remove avatar."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:60
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:71
 #, elixir-autogen, elixir-format
 msgid "Failed to update avatar."
 msgstr ""

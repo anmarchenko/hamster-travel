@@ -4,3 +4,4 @@ export AWS_REGION=eu-central-1
 export AWS_S3_BUCKET=hamster-travel-dev-images
 export S3_ASSET_HOST=https://hamster-travel-dev-images.s3.eu-central-1.amazonaws.com
 export OPEN_EXCHANGE_RATES_APP_ID=YOUR_OPEN_EXCHANGE_RATES_APP_ID
+export MAPBOX_ACCESS_TOKEN=YOUR_MAPBOX_ACCESS_TOKEN

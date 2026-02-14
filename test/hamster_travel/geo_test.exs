@@ -99,5 +99,17 @@ defmodule HamsterTravel.GeoTest do
     test "get_city/1 returns nil if the city does not exist" do
       assert Geo.get_city(-1) == nil
     end
+
+    test "country_name/2 returns localized country names with fallback" do
+      assert Geo.country_name(%Country{name: "France", name_ru: "Франция"}, "ru") == "Франция"
+      assert Geo.country_name(%Country{name: "France", name_ru: nil}, "ru") == "France"
+      assert Geo.country_name(%Country{name: "France", name_ru: "Франция"}, "en") == "France"
+    end
+
+    test "city_name/2 returns localized city names with fallback" do
+      assert Geo.city_name(%City{name: "Paris", name_ru: "Париж"}, "ru") == "Париж"
+      assert Geo.city_name(%City{name: "Paris", name_ru: nil}, "ru") == "Paris"
+      assert Geo.city_name(%City{name: "Paris", name_ru: "Париж"}, "en") == "Paris"
+    end
   end
 end

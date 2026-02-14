@@ -114,3 +114,7 @@ ul[data-task-list="true"] li > div p {
     height: auto;
     display: block;
 }
+
+.map-city-popup-flag {
+    margin-right: 0.35rem;
+}
