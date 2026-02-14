@@ -21,6 +21,7 @@ defmodule HamsterTravelWeb.Accounts.Profile do
   def mount(_params, _session, socket) do
     profile_stats = Planning.profile_stats(socket.assigns.current_user)
     mapbox_options = Application.get_env(:hamster_travel, :mapbox, [])
+    mapbox_style_url = Keyword.get(mapbox_options, :style_url) || @mapbox_style
 
     visited_country_iso3_codes =
       profile_stats.visited_countries
@@ -38,7 +39,7 @@ defmodule HamsterTravelWeb.Accounts.Profile do
         visited_country_iso3_codes_json: Jason.encode!(visited_country_iso3_codes),
         visited_cities_json: Jason.encode!(profile_stats.visited_cities),
         mapbox_access_token: Keyword.get(mapbox_options, :access_token),
-        mapbox_style_url: Keyword.get(mapbox_options, :style_url, @mapbox_style),
+        mapbox_style_url: mapbox_style_url,
         avatar_upload_errors: [],
         cover_upload_errors: []
       )

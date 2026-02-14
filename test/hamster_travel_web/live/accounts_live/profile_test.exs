@@ -57,6 +57,7 @@ defmodule HamsterTravelWeb.Accounts.ProfileLiveTest do
       assert html =~ berlin.country.name
       assert has_element?(view, "#profile-visited-countries-map")
       assert html =~ "data-visited-country-iso3-codes="
+      assert html =~ "data-mapbox-style-url="
       stats = stats_map(html)
 
       assert stats["Total trips"] == "2"

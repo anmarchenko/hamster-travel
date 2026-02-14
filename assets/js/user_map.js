@@ -1,12 +1,9 @@
-const MAPBOX_JS_URL = 'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js';
-const MAPBOX_CSS_URL = 'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css';
-const MAPBOX_SCRIPT_ID = 'hamster-mapbox-script';
-const MAPBOX_STYLE_ID = 'hamster-mapbox-style';
-const LEGACY_VISITED_COUNTRIES_LAYER = 'visited-countries';
-const CITIES_SOURCE_ID = 'visited-cities';
-const CITIES_LAYER_ID = 'visited-cities';
+import mapboxgl from 'mapbox-gl';
 
-let mapboxAssetsPromise;
+const VISITED_COUNTRIES_LAYER_ID = 'visited-countries';
+const CITIES_SOURCE_ID = 'visited-cities';
+const CITIES_SYMBOL_LAYER_ID = 'visited-cities-symbol';
+const CITIES_CIRCLE_LAYER_ID = 'visited-cities-circle';
 
 function parseJsonArray(value) {
   if (!value) {
@@ -63,60 +60,38 @@ function cityPopupHtml(cityName, countryIso) {
   return `<span class="map-city-popup-flag">${flagEmoji}</span>${escapeHtml(cityName)}`;
 }
 
-function ensureMapboxAssets() {
-  if (window.mapboxgl) {
-    return Promise.resolve(window.mapboxgl);
+function addCitiesLayer(map) {
+  if (map.hasImage('marker-15')) {
+    map.addLayer({
+      id: CITIES_SYMBOL_LAYER_ID,
+      type: 'symbol',
+      source: CITIES_SOURCE_ID,
+      layout: {
+        'icon-image': 'marker-15',
+        'icon-allow-overlap': true,
+      },
+    });
+
+    return CITIES_SYMBOL_LAYER_ID;
   }
 
-  if (mapboxAssetsPromise) {
-    return mapboxAssetsPromise;
-  }
-
-  mapboxAssetsPromise = new Promise((resolve, reject) => {
-    if (!document.getElementById(MAPBOX_STYLE_ID)) {
-      const styleLink = document.createElement('link');
-      styleLink.id = MAPBOX_STYLE_ID;
-      styleLink.rel = 'stylesheet';
-      styleLink.href = MAPBOX_CSS_URL;
-      document.head.appendChild(styleLink);
-    }
-
-    let script = document.getElementById(MAPBOX_SCRIPT_ID);
-
-    if (!script) {
-      script = document.createElement('script');
-      script.id = MAPBOX_SCRIPT_ID;
-      script.async = true;
-      script.src = MAPBOX_JS_URL;
-      document.head.appendChild(script);
-    }
-
-    script.addEventListener(
-      'load',
-      () => {
-        if (window.mapboxgl) {
-          resolve(window.mapboxgl);
-        } else {
-          reject(new Error('Mapbox GL script loaded but window.mapboxgl is unavailable.'));
-        }
-      },
-      { once: true },
-    );
-
-    script.addEventListener(
-      'error',
-      () => {
-        reject(new Error('Failed to load Mapbox GL script.'));
-      },
-      { once: true },
-    );
+  map.addLayer({
+    id: CITIES_CIRCLE_LAYER_ID,
+    type: 'circle',
+    source: CITIES_SOURCE_ID,
+    paint: {
+      'circle-radius': 5,
+      'circle-color': '#f97316',
+      'circle-stroke-width': 1,
+      'circle-stroke-color': '#ffffff',
+    },
   });
 
-  return mapboxAssetsPromise;
+  return CITIES_CIRCLE_LAYER_ID;
 }
 
 const UserMap = {
-  async mounted() {
+  mounted() {
     this.map = null;
     this.popup = null;
 
@@ -134,7 +109,8 @@ const UserMap = {
     const visitedCities = parseJsonArray(this.el.dataset.visitedCities).filter(validCity);
 
     try {
-      const mapboxgl = await ensureMapboxAssets();
+      // Mapbox expects an empty container before map initialization.
+      this.el.replaceChildren();
       mapboxgl.accessToken = token;
 
       this.map = new mapboxgl.Map({
@@ -149,13 +125,13 @@ const UserMap = {
       this.map.addControl(new mapboxgl.NavigationControl());
 
       this.map.on('load', () => {
-        if (this.map.getLayer(LEGACY_VISITED_COUNTRIES_LAYER)) {
+        if (this.map.getLayer(VISITED_COUNTRIES_LAYER_ID)) {
           const filter =
             countryIso3Codes.length > 0
               ? ['in', 'ADM0_A3_IS', ...countryIso3Codes]
               : ['==', 'ADM0_A3_IS', '__none__'];
 
-          this.map.setFilter(LEGACY_VISITED_COUNTRIES_LAYER, filter);
+          this.map.setFilter(VISITED_COUNTRIES_LAYER_ID, filter);
         }
 
         this.map.addSource(CITIES_SOURCE_ID, {
@@ -176,22 +152,15 @@ const UserMap = {
           },
         });
 
-        this.map.addLayer({
-          id: CITIES_LAYER_ID,
-          type: 'symbol',
-          source: CITIES_SOURCE_ID,
-          layout: {
-            'icon-image': 'marker-15',
-            'icon-allow-overlap': true,
-          },
-        });
+        const citiesLayerId = addCitiesLayer(this.map);
 
         this.popup = new mapboxgl.Popup({
           closeButton: false,
           closeOnClick: false,
+          className: 'profile-city-popup',
         });
 
-        this.map.on('mousemove', CITIES_LAYER_ID, (event) => {
+        this.map.on('mousemove', citiesLayerId, (event) => {
           const [feature] = event.features || [];
 
           if (!feature || !this.popup) {
@@ -206,7 +175,7 @@ const UserMap = {
             .addTo(this.map);
         });
 
-        this.map.on('mouseleave', CITIES_LAYER_ID, () => {
+        this.map.on('mouseleave', citiesLayerId, () => {
           this.map.getCanvas().style.cursor = '';
           this.popup?.remove();
         });

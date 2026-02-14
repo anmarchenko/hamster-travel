@@ -1,5 +1,6 @@
 @import "tailwindcss/base";
 @import "../../deps/petal_components/assets/default.css";
+@import "../node_modules/mapbox-gl/dist/mapbox-gl.css";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
@@ -117,4 +118,8 @@ ul[data-task-list="true"] li > div p {
 
 .map-city-popup-flag {
     margin-right: 0.35rem;
+}
+
+.profile-city-popup .mapboxgl-popup-content {
+    color: #1f2937;
 }
