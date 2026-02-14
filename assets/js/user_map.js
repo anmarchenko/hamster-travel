@@ -2,8 +2,7 @@ import mapboxgl from 'mapbox-gl';
 
 const VISITED_COUNTRIES_LAYER_ID = 'visited-countries';
 const CITIES_SOURCE_ID = 'visited-cities';
-const CITIES_SYMBOL_LAYER_ID = 'visited-cities-symbol';
-const CITIES_CIRCLE_LAYER_ID = 'visited-cities-circle';
+const CITIES_LAYER_ID = 'visited-cities';
 
 function parseJsonArray(value) {
   if (!value) {
@@ -61,33 +60,19 @@ function cityPopupHtml(cityName, countryIso) {
 }
 
 function addCitiesLayer(map) {
-  if (map.hasImage('marker-15')) {
-    map.addLayer({
-      id: CITIES_SYMBOL_LAYER_ID,
-      type: 'symbol',
-      source: CITIES_SOURCE_ID,
-      layout: {
-        'icon-image': 'marker-15',
-        'icon-allow-overlap': true,
-      },
-    });
-
-    return CITIES_SYMBOL_LAYER_ID;
-  }
-
   map.addLayer({
-    id: CITIES_CIRCLE_LAYER_ID,
+    id: CITIES_LAYER_ID,
     type: 'circle',
     source: CITIES_SOURCE_ID,
     paint: {
-      'circle-radius': 5,
-      'circle-color': '#f97316',
-      'circle-stroke-width': 1,
+      'circle-radius': 6,
+      'circle-color': '#7c3aed',
+      'circle-stroke-width': 2,
       'circle-stroke-color': '#ffffff',
     },
   });
 
-  return CITIES_CIRCLE_LAYER_ID;
+  return CITIES_LAYER_ID;
 }
 
 const UserMap = {
