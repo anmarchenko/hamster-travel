@@ -137,6 +137,41 @@ defmodule HamsterTravelWeb.TripPdfTest do
       refute html =~ note_token
     end
 
+    test "renders all transport mode icons as inline svg" do
+      geonames_fixture()
+
+      trip = trip_fixture(%{dates_unknown: true, duration: 3})
+      berlin = Geo.find_city_by_geonames_id("2950159")
+      hamburg = Geo.find_city_by_geonames_id("2911298")
+
+      modes = ["flight", "train", "bus", "car", "taxi", "boat"]
+
+      Enum.each(modes, fn mode ->
+        {:ok, _transfer} =
+          Planning.create_transfer(trip, %{
+            transport_mode: mode,
+            departure_city_id: berlin.id,
+            arrival_city_id: hamburg.id,
+            departure_time: "09:00",
+            arrival_time: "11:00",
+            day_index: 0
+          })
+      end)
+
+      html = trip_html(trip)
+
+      Enum.each(modes, fn mode ->
+        assert html =~ ~s(data-transport-icon="#{mode}")
+      end)
+
+      refute html =~ "🚆"
+      refute html =~ "🚌"
+      refute html =~ "🚗"
+      refute html =~ "🚕"
+      refute html =~ "⛴"
+      refute html =~ "✈"
+    end
+
     test "overview prints hotel description only for first appearance of each hotel" do
       trip = trip_fixture(%{dates_unknown: true, duration: 4})
 

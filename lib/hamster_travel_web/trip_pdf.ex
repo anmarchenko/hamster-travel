@@ -307,9 +307,16 @@ defmodule HamsterTravelWeb.TripPdf do
           }
 
           .transfer-icon {
-            font-size: 1.05em;
-            line-height: 1;
+            display: inline-flex;
+            width: 14px;
+            height: 14px;
             flex-shrink: 0;
+          }
+
+          .transfer-icon-svg {
+            display: block;
+            width: 100%;
+            height: 100%;
           }
 
           .expense-total {
@@ -590,7 +597,7 @@ defmodule HamsterTravelWeb.TripPdf do
         arrival_route_point = city_with_optional_station(arrival_city, transfer.arrival_station)
         route = "#{departure_route_point} -> #{arrival_route_point}"
         transport_mode = transport_mode_label(transfer.transport_mode)
-        transport_icon = transport_mode_icon(transfer.transport_mode)
+        transport_icon = transport_mode_icon_html(transfer.transport_mode)
 
         time_text =
           join_with_arrow([
@@ -615,7 +622,7 @@ defmodule HamsterTravelWeb.TripPdf do
           <div class="card-header">
             <div>
               <div class="transfer-route" title="#{escape_html(transport_mode)}">
-                <span class="transfer-icon">#{escape_html(transport_icon)}</span>
+                <span class="transfer-icon">#{transport_icon}</span>
                 <span>#{escape_html(route)}</span>
               </div>
             </div>
@@ -1017,13 +1024,103 @@ defmodule HamsterTravelWeb.TripPdf do
 
   defp transport_mode_label(_), do: gettext("Transfer")
 
-  defp transport_mode_icon("flight"), do: "✈"
-  defp transport_mode_icon("train"), do: "🚆"
-  defp transport_mode_icon("bus"), do: "🚌"
-  defp transport_mode_icon("car"), do: "🚗"
-  defp transport_mode_icon("taxi"), do: "🚕"
-  defp transport_mode_icon("boat"), do: "⛴"
-  defp transport_mode_icon(_), do: "→"
+  defp transport_mode_icon_html("flight") do
+    transport_icon_svg("flight", gettext("Flight"), """
+    <path d="M10.5 4.5V9.16745C10.5 9.37433 10.3934 9.56661 10.218 9.67625L2.782 14.3237C2.60657 14.4334 2.5 14.6257 2.5 14.8325V15.7315C2.5 16.1219 2.86683 16.4083 3.24552 16.3136L9.75448 14.6864C10.1332 14.5917 10.5 14.8781 10.5 15.2685V18.2277C10.5 18.4008 10.4253 18.5654 10.2951 18.6793L8.13481 20.5695C7.6765 20.9706 8.03808 21.7204 8.63724 21.6114L11.8927 21.0195C11.9636 21.0066 12.0364 21.0066 12.1073 21.0195L15.3628 21.6114C15.9619 21.7204 16.3235 20.9706 15.8652 20.5695L13.7049 18.6793C13.5747 18.5654 13.5 18.4008 13.5 18.2277V15.2685C13.5 14.8781 13.8668 14.5917 14.2455 14.6864L20.7545 16.3136C21.1332 16.4083 21.5 16.1219 21.5 15.7315V14.8325C21.5 14.6257 21.3934 14.4334 21.218 14.3237L13.782 9.67625C13.6066 9.56661 13.5 9.37433 13.5 9.16745V4.5C13.5 3.67157 12.8284 3 12 3C11.1716 3 10.5 3.67157 10.5 4.5Z" />
+    """)
+  end
+
+  defp transport_mode_icon_html("train") do
+    transport_icon_svg("train", gettext("Train"), """
+    <rect x="5" y="3.5" width="14" height="14" rx="3" />
+    <path d="M8 8H16" />
+    <circle cx="9" cy="13.5" r="1.2" fill="currentColor" stroke="none" />
+    <circle cx="15" cy="13.5" r="1.2" fill="currentColor" stroke="none" />
+    <path d="M9 17.5L7.5 20.5" />
+    <path d="M15 17.5L16.5 20.5" />
+    """)
+  end
+
+  defp transport_mode_icon_html("bus") do
+    transport_icon_svg("bus", gettext("Bus"), """
+    <rect x="5" y="3.5" width="14" height="15" rx="2" />
+    <path d="M5 8.5H19" />
+    <path d="M8 12H11" />
+    <path d="M13 12H16" />
+    <circle cx="8" cy="17.5" r="1.3" fill="currentColor" stroke="none" />
+    <circle cx="16" cy="17.5" r="1.3" fill="currentColor" stroke="none" />
+    """)
+  end
+
+  defp transport_mode_icon_html("car") do
+    transport_icon_svg("car", gettext("Car"), """
+    <path d="M6 13.5L7.5 9.5H16.5L18 13.5H6Z" />
+    <rect x="4" y="13.5" width="16" height="4" rx="1" />
+    <circle cx="7.5" cy="18.5" r="1.5" fill="currentColor" stroke="none" />
+    <circle cx="16.5" cy="18.5" r="1.5" fill="currentColor" stroke="none" />
+    <path d="M8 11H10.5" />
+    <path d="M13.5 11H16" />
+    """)
+  end
+
+  defp transport_mode_icon_html("taxi") do
+    transport_icon_svg("taxi", gettext("Taxi"), """
+    <rect x="9" y="7.5" width="6" height="1.8" rx="0.6" />
+    <path d="M6 13.5L7.5 9.5H16.5L18 13.5H6Z" />
+    <rect x="4" y="13.5" width="16" height="4" rx="1" />
+    <path d="M10 7.5V6.3H14V7.5" />
+    <circle cx="7.5" cy="18.5" r="1.5" fill="currentColor" stroke="none" />
+    <circle cx="16.5" cy="18.5" r="1.5" fill="currentColor" stroke="none" />
+    """)
+  end
+
+  defp transport_mode_icon_html("boat") do
+    transport_icon_svg("boat", gettext("Boat"), """
+    <path d="M4 14.5L12 16.5L20 14.5L18.5 18.5H5.5L4 14.5Z" />
+    <path d="M12 4.5V13.5" />
+    <path d="M12 5.5L16 8.5H12V5.5Z" fill="currentColor" stroke="none" />
+    <path d="M3 20C4.2 18.8 5.8 18.8 7 20C8.2 21.2 9.8 21.2 11 20C12.2 18.8 13.8 18.8 15 20C16.2 21.2 17.8 21.2 19 20" />
+    """)
+  end
+
+  defp transport_mode_icon_html(mode) do
+    transport_icon_svg(transport_mode_data_key(mode), transport_mode_label(mode), """
+    <path d="M4 12H20" />
+    <path d="M14 6L20 12L14 18" />
+    """)
+  end
+
+  defp transport_icon_svg(mode, title, body_html) do
+    """
+    <svg
+      class="transfer-icon-svg"
+      data-transport-icon="#{escape_html(mode)}"
+      viewBox="0 0 24 24"
+      role="img"
+      aria-label="#{escape_html(title)}"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      #{body_html}
+    </svg>
+    """
+  end
+
+  defp transport_mode_data_key(mode) when is_binary(mode) do
+    mode
+    |> String.trim()
+    |> String.downcase()
+    |> case do
+      "" -> "transfer"
+      value -> value
+    end
+  end
+
+  defp transport_mode_data_key(_), do: "transfer"
 
   defp blank?(nil), do: true
   defp blank?(value) when is_binary(value), do: String.trim(value) == ""
