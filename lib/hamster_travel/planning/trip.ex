@@ -18,6 +18,7 @@ defmodule HamsterTravel.Planning.Trip do
   alias HamsterTravel.Planning.Transfer
   alias HamsterTravel.Planning.Trip.NameSlug
   alias HamsterTravel.Planning.TripCover
+  alias HamsterTravel.Planning.TripParticipant
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -47,6 +48,8 @@ defmodule HamsterTravel.Planning.Trip do
     field :cover, TripCover.Type
 
     belongs_to(:author, User)
+    has_many(:trip_participants, TripParticipant)
+    has_many(:participants, through: [:trip_participants, :user])
 
     has_many(:destinations, Destination)
     has_many(:cities, through: [:destinations, :city])

@@ -15,6 +15,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   alias HamsterTravel.Planning.Trip
   alias HamsterTravel.Planning.TripCover
   alias HamsterTravel.Repo
+  alias HamsterTravel.Social
   alias HamsterTravelWeb.Cldr
   alias HamsterTravelWeb.CoreComponents
 
@@ -78,7 +79,15 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               <.icon_text icon="hero-trash" label={gettext("Delete")} />
             </.button>
           </.inline>
-          <.status_row trip={@trip} />
+          <.inline :if={@current_user} class="items-center gap-3 flex-wrap">
+            <.status_row trip={@trip} class="gap-3" />
+            <.trip_participants
+              participants={@trip_participants}
+              removable_participant_ids={@removable_participant_ids}
+              can_add_participants={@can_add_participants}
+            />
+          </.inline>
+          <.status_row :if={!@current_user} trip={@trip} />
         </div>
         <div class="sm:pl-6">
           <div class="flex flex-col items-end gap-3">
@@ -117,6 +126,15 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         current_user={@current_user}
       />
     </.container>
+
+    <.modal
+      :if={@show_invite_participant_modal}
+      id="trip-invite-participant-modal"
+      show
+      on_cancel={JS.push("close_invite_participant_modal")}
+    >
+      <.invite_participant_modal available_participants={@available_participants} />
+    </.modal>
     """
   end
 
@@ -135,16 +153,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         socket
       end
 
-    can_edit = can_edit?(trip, socket.assigns.current_user)
-
     socket =
       socket
       |> assign(mobile_menu: :plan_tabs)
       |> assign(active_tab: fetch_tab(params))
       |> assign(active_nav: active_nav(trip))
       |> assign(page_title: trip.name)
-      |> assign(trip: trip)
-      |> assign(budget: Planning.calculate_budget(trip))
       |> assign(display_currency: display_currency)
       |> assign(active_destination_adding_component_id: nil)
       |> assign(active_accommodation_adding_component_id: nil)
@@ -152,8 +166,9 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> assign(active_activity_adding_component_id: nil)
       |> assign(active_day_expense_adding_component_id: nil)
       |> assign(active_note_adding_component_id: nil)
-      |> assign(can_edit: can_edit)
       |> assign(cover_upload_errors: [])
+      |> assign(show_invite_participant_modal: false)
+      |> assign_trip_state(trip)
 
     socket =
       allow_upload(socket, :cover,
@@ -325,7 +340,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               File.rm(temp_path)
 
               socket
-              |> assign(trip: updated_trip)
+              |> assign_trip_state(updated_trip)
               |> assign(cover_upload_errors: [])
 
             {:error, _error} ->
@@ -446,7 +461,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         case Planning.update_trip(trip, %{cover: nil}) do
           {:ok, updated_trip} ->
             socket
-            |> assign(trip: updated_trip)
+            |> assign_trip_state(updated_trip)
             |> put_flash(:info, gettext("Cover removed."))
 
           {:error, _changeset} ->
@@ -457,6 +472,73 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     else
       {:noreply, socket}
     end
+  end
+
+  @impl true
+  def handle_event("open_invite_participant_modal", _params, socket) do
+    {:noreply, assign(socket, :show_invite_participant_modal, true)}
+  end
+
+  @impl true
+  def handle_event("close_invite_participant_modal", _params, socket) do
+    {:noreply, assign(socket, :show_invite_participant_modal, false)}
+  end
+
+  @impl true
+  def handle_event("quick_add_trip_participant", %{"user_id" => participant_id}, socket)
+      when participant_id in [nil, ""] do
+    {:noreply, put_flash(socket, :error, gettext("Please choose a friend."))}
+  end
+
+  @impl true
+  def handle_event("quick_add_trip_participant", %{"user_id" => participant_id}, socket) do
+    {:noreply, add_trip_participant_to_socket(socket, participant_id)}
+  end
+
+  @impl true
+  def handle_event(
+        "add_trip_participant",
+        %{"participant" => %{"user_id" => participant_id}},
+        socket
+      )
+      when participant_id in [nil, ""] do
+    {:noreply, put_flash(socket, :error, gettext("Please choose a friend."))}
+  end
+
+  @impl true
+  def handle_event(
+        "add_trip_participant",
+        %{"participant" => %{"user_id" => participant_id}},
+        socket
+      ) do
+    {:noreply, add_trip_participant_to_socket(socket, participant_id)}
+  end
+
+  @impl true
+  def handle_event("remove_trip_participant", %{"user_id" => participant_id}, socket) do
+    %{trip: trip, current_user: current_user} = socket.assigns
+
+    socket =
+      case Planning.remove_trip_participant(trip, current_user, participant_id) do
+        {:ok, updated_trip} ->
+          socket
+          |> assign_trip_state(updated_trip)
+          |> put_flash(:info, gettext("Participant removed."))
+
+        {:error, :cannot_remove_author} ->
+          put_flash(socket, :error, gettext("The trip author cannot be removed."))
+
+        {:error, :not_allowed} ->
+          put_flash(socket, :error, gettext("You are not allowed to remove this participant."))
+
+        {:error, :not_found} ->
+          put_flash(socket, :error, gettext("Participant not found."))
+
+        {:error, _reason} ->
+          put_flash(socket, :error, gettext("Failed to remove participant."))
+      end
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -1405,13 +1487,215 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     """
   end
 
+  attr(:participants, :list, required: true)
+  attr(:removable_participant_ids, :list, default: [])
+  attr(:can_add_participants, :boolean, default: false)
+  attr(:class, :string, default: nil)
+
+  def trip_participants(assigns) do
+    ~H"""
+    <div id="trip-participants" class={["flex flex-wrap items-center gap-3", @class]}>
+      <div
+        :for={participant <- @participants}
+        id={"trip-participant-#{participant.id}"}
+        class="group relative h-9 w-9 shrink-0"
+      >
+        <.avatar
+          size="sm"
+          src={participant.avatar_url}
+          name={participant.name}
+          random_color
+          class="h-9! w-9! ring-2 ring-white dark:ring-zinc-900"
+        />
+        <button
+          :if={participant.id in @removable_participant_ids}
+          type="button"
+          phx-click="remove_trip_participant"
+          phx-value-user_id={participant.id}
+          data-confirm={gettext("Remove this participant from the trip?")}
+          class="absolute z-10 inline-flex h-5 w-5 items-center justify-center rounded-full border border-zinc-300 bg-zinc-100 text-zinc-500 shadow-md transition-colors hover:bg-zinc-200 hover:text-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+          style="right: -0.5rem; top: -0.25rem;"
+          aria-label={gettext("Remove participant")}
+        >
+          <.icon name="hero-trash" class="h-3 w-3" />
+        </button>
+      </div>
+
+      <div
+        :if={@can_add_participants}
+        id="trip-add-participant"
+        class="relative"
+      >
+        <button
+          id="trip-open-invite-modal"
+          type="button"
+          phx-click="open_invite_participant_modal"
+          class="group inline-flex h-8 w-8 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-600 shadow-sm transition-all hover:shadow-md dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
+          aria-label={gettext("Invite friend")}
+        >
+          <.icon name="hero-plus" class="h-5 w-5" />
+        </button>
+      </div>
+    </div>
+    """
+  end
+
+  attr(:available_participants, :list, default: [])
+
+  def invite_participant_modal(assigns) do
+    ~H"""
+    <div class="mx-auto w-full max-w-2xl" x-data="{ search: '' }">
+      <div class="space-y-4">
+        <div class="text-xl sm:text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+          {gettext("Invite friend")}
+        </div>
+
+        <div class="text-sm font-medium text-zinc-600 dark:text-zinc-300">
+          {gettext("Select from friends")}
+        </div>
+
+        <div>
+          <input
+            type="text"
+            x-model="search"
+            placeholder={gettext("Search and select friends...")}
+            class="h-11 w-full rounded-xl border border-zinc-300 bg-white px-3 text-base text-zinc-700 shadow-sm outline-none transition focus:border-secondary-500 focus:ring-2 focus:ring-secondary-200 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 dark:focus:ring-secondary-900"
+          />
+        </div>
+
+        <div class="max-h-64 overflow-y-auto rounded-xl border border-zinc-200 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900">
+          <button
+            :for={friend <- @available_participants}
+            id={"trip-invite-friend-#{friend.id}"}
+            type="button"
+            phx-click="quick_add_trip_participant"
+            phx-value-user_id={friend.id}
+            data-name={String.downcase(friend.name)}
+            x-show="$el.dataset.name.includes(search.toLowerCase())"
+            class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800"
+          >
+            <.avatar
+              size="sm"
+              src={friend.avatar_url}
+              name={friend.name}
+              random_color
+              class="h-8! w-8!"
+            />
+            <span class="grow text-base leading-tight text-zinc-900 dark:text-zinc-100">
+              {friend.name}
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
   # HELPERS
 
   defp active_nav(%{status: "0_draft"}), do: drafts_nav_item()
   defp active_nav(_), do: plans_nav_item()
 
+  defp add_trip_participant_to_socket(socket, participant_id) do
+    %{trip: trip, current_user: current_user} = socket.assigns
+
+    case Planning.add_trip_participant(trip, current_user, participant_id) do
+      {:ok, updated_trip} ->
+        socket
+        |> assign_trip_state(updated_trip)
+        |> assign(show_invite_participant_modal: false)
+        |> put_flash(:info, gettext("Participant added."))
+
+      {:error, :already_participant} ->
+        put_flash(socket, :error, gettext("This user is already participating in the trip."))
+
+      {:error, :not_in_author_friend_circle} ->
+        put_flash(socket, :error, gettext("Only author's friends can be added to this trip."))
+
+      {:error, :author_cannot_be_added} ->
+        put_flash(socket, :error, gettext("The trip author is always a participant."))
+
+      {:error, :not_participant} ->
+        put_flash(socket, :error, gettext("Only trip participants can add participants."))
+
+      {:error, :user_not_found} ->
+        put_flash(socket, :error, gettext("User not found."))
+
+      {:error, _reason} ->
+        put_flash(socket, :error, gettext("Failed to add participant."))
+    end
+  end
+
   defp can_edit?(_trip, nil), do: false
   defp can_edit?(trip, user), do: Policy.authorized?(:edit, trip, user)
+
+  defp assign_trip_state(socket, %Trip{} = trip) do
+    current_user = socket.assigns.current_user
+    participants = trip_participant_users(trip)
+    removable_participant_ids = removable_participant_ids(trip, current_user)
+    available_participants = available_participants(trip)
+
+    can_add_participants =
+      can_add_participants?(trip, current_user, available_participants)
+
+    socket
+    |> assign(trip: trip)
+    |> assign(budget: Planning.calculate_budget(trip))
+    |> assign(can_edit: can_edit?(trip, current_user))
+    |> assign(trip_participants: participants)
+    |> assign(removable_participant_ids: removable_participant_ids)
+    |> assign(can_add_participants: can_add_participants)
+    |> assign(available_participants: available_participants)
+  end
+
+  defp trip_participant_users(%Trip{} = trip) do
+    trip_participants =
+      case trip.trip_participants do
+        participants when is_list(participants) -> participants
+        _ -> []
+      end
+
+    trip_participants
+    |> Enum.map(& &1.user)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.uniq_by(& &1.id)
+    |> Enum.sort_by(&(to_string(&1.name) |> String.downcase()))
+  end
+
+  defp available_participants(%Trip{} = trip) do
+    participant_ids =
+      trip
+      |> trip_participant_users()
+      |> Enum.map(& &1.id)
+      |> MapSet.new()
+
+    trip.author_id
+    |> Social.list_friends()
+    |> Enum.reject(&MapSet.member?(participant_ids, &1.id))
+  end
+
+  defp can_add_participants?(_trip, nil, _available_participants), do: false
+
+  defp can_add_participants?(trip, current_user, available_participants) do
+    available_participants != [] and Policy.participant?(trip, current_user)
+  end
+
+  defp removable_participant_ids(%Trip{}, nil), do: []
+
+  defp removable_participant_ids(%Trip{} = trip, current_user) do
+    participant_ids = Enum.map(trip.trip_participants, & &1.user_id)
+
+    cond do
+      current_user.id == trip.author_id ->
+        participant_ids
+
+      current_user.id in participant_ids ->
+        [current_user.id]
+
+      true ->
+        []
+    end
+  end
 
   defp fetch_tab(%{"tab" => tab})
        when tab in @tabs,

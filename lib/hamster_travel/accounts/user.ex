@@ -23,6 +23,7 @@ defmodule HamsterTravel.Accounts.User do
 
     has_many :friendships, HamsterTravel.Social.Friendship, foreign_key: :user_id
     has_many :visited_cities, HamsterTravel.Accounts.VisitedCity, foreign_key: :user_id
+    has_many :trip_participations, HamsterTravel.Planning.TripParticipant, foreign_key: :user_id
     belongs_to :home_city, HamsterTravel.Geo.City, type: :id
 
     timestamps()

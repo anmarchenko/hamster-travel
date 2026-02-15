@@ -312,6 +312,28 @@ defmodule HamsterTravel.Planning do
     Trips.change_trip(trip, attrs)
   end
 
+  @doc """
+  Adds a participant to the trip.
+
+  Pass the `%Trip{}`, current actor `%User{}`, and participant user id.
+  Returns `{:ok, %Trip{}}` with updated preloads or `{:error, reason}`.
+  """
+  def add_trip_participant(%Trip{} = trip, %User{} = actor, participant_id)
+      when is_binary(participant_id) do
+    Trips.add_trip_participant(trip, actor, participant_id)
+  end
+
+  @doc """
+  Removes a participant from the trip.
+
+  Pass the `%Trip{}`, current actor `%User{}`, and participant user id.
+  Returns `{:ok, %Trip{}}` with updated preloads or `{:error, reason}`.
+  """
+  def remove_trip_participant(%Trip{} = trip, %User{} = actor, participant_id)
+      when is_binary(participant_id) do
+    Trips.remove_trip_participant(trip, actor, participant_id)
+  end
+
   # Destinations functions
   @doc """
   Fetches a destination by id and raises if missing.

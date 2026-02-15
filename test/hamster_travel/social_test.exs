@@ -29,5 +29,18 @@ defmodule HamsterTravel.SocialTest do
       assert Social.list_friend_ids(user.id) == []
       assert Social.list_friend_ids(friend.id) == []
     end
+
+    test "list_friends/1 returns friend users sorted by name" do
+      user = user_fixture()
+      alice = user_fixture(%{name: "Alice"})
+      bob = user_fixture(%{name: "Bob"})
+
+      {:ok, _} = Social.add_friends(user.id, bob.id)
+      {:ok, _} = Social.add_friends(user.id, alice.id)
+
+      assert [%{id: alice_id}, %{id: bob_id}] = Social.list_friends(user.id)
+      assert alice_id == alice.id
+      assert bob_id == bob.id
+    end
   end
 end

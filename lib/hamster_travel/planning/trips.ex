@@ -8,6 +8,7 @@ defmodule HamsterTravel.Planning.Trips do
   alias Ecto.Multi
 
   alias HamsterTravel.Accounts.User
+  alias HamsterTravel.Social
 
   alias HamsterTravel.Planning.{
     Accommodations,
@@ -23,6 +24,7 @@ defmodule HamsterTravel.Planning.Trips do
     Transfer,
     Transfers,
     Trip,
+    TripParticipant,
     TripTombstone
   }
 
@@ -69,7 +71,10 @@ defmodule HamsterTravel.Planning.Trips do
 
   def list_profile_finished_trips(%User{} = user) do
     from(t in Trip,
-      where: t.author_id == ^user.id and t.status == ^Trip.finished()
+      left_join: tp in TripParticipant,
+      on: tp.trip_id == t.id,
+      where: t.status == ^Trip.finished() and (t.author_id == ^user.id or tp.user_id == ^user.id),
+      distinct: true
     )
     |> Repo.all()
     |> Repo.preload([:countries, :cities])
@@ -268,9 +273,30 @@ defmodule HamsterTravel.Planning.Trips do
     Trip.changeset(trip, attrs)
   end
 
+  def add_trip_participant(%Trip{} = trip, %User{} = actor, participant_id)
+      when is_binary(participant_id) do
+    trip = preload_trip_participants(trip)
+
+    with :ok <- authorize_participant_management(trip, actor),
+         :ok <- validate_addable_participant(trip, participant_id),
+         {:ok, _trip_participant} <- create_trip_participant(trip, participant_id) do
+      {:ok, get_trip!(trip.id)}
+    end
+  end
+
+  def remove_trip_participant(%Trip{} = trip, %User{} = actor, participant_id)
+      when is_binary(participant_id) do
+    trip = preload_trip_participants(trip)
+
+    with :ok <- authorize_participant_removal(trip, actor, participant_id),
+         {:ok, _trip_participant} <- delete_trip_participant(trip, participant_id) do
+      {:ok, get_trip!(trip.id)}
+    end
+  end
+
   defp trip_preloading(query) do
     query
-    |> Repo.preload([:author, :countries, :expenses])
+    |> Repo.preload([:author, :countries, :expenses, trip_participants: :user])
   end
 
   defp single_trip_preloading(query) do
@@ -279,6 +305,7 @@ defmodule HamsterTravel.Planning.Trips do
       :author,
       :countries,
       :expenses,
+      trip_participants: :user,
       food_expense: :expense,
       accommodations: :expense,
       day_expenses: DayExpenses.preloading_query(),
@@ -287,6 +314,96 @@ defmodule HamsterTravel.Planning.Trips do
       destinations: Destinations.preloading_query(),
       transfers: Transfers.preloading_query()
     ])
+  end
+
+  defp preload_trip_participants(%Trip{} = trip) do
+    Repo.preload(trip, trip_participants: :user)
+  end
+
+  defp authorize_participant_management(%Trip{} = trip, %User{} = actor) do
+    if Policy.participant?(trip, actor) do
+      :ok
+    else
+      {:error, :not_participant}
+    end
+  end
+
+  defp validate_addable_participant(%Trip{} = trip, participant_id) do
+    participant_ids =
+      trip.trip_participants
+      |> Enum.map(& &1.user_id)
+      |> Kernel.++([trip.author_id])
+
+    author_friend_ids = Social.list_friend_ids(trip.author_id)
+
+    cond do
+      participant_id == trip.author_id ->
+        {:error, :author_cannot_be_added}
+
+      participant_id in participant_ids ->
+        {:error, :already_participant}
+
+      participant_id not in author_friend_ids ->
+        {:error, :not_in_author_friend_circle}
+
+      true ->
+        :ok
+    end
+  end
+
+  defp create_trip_participant(%Trip{} = trip, participant_id) do
+    %TripParticipant{}
+    |> TripParticipant.changeset(%{trip_id: trip.id, user_id: participant_id})
+    |> Repo.insert()
+    |> case do
+      {:ok, trip_participant} ->
+        {:ok, trip_participant}
+
+      {:error, changeset} ->
+        cond do
+          has_constraint_error?(changeset, :trip_id, :foreign) ->
+            {:error, :trip_not_found}
+
+          has_constraint_error?(changeset, :user_id, :foreign) ->
+            {:error, :user_not_found}
+
+          true ->
+            {:error, changeset}
+        end
+    end
+  end
+
+  defp authorize_participant_removal(%Trip{} = trip, %User{} = actor, participant_id) do
+    cond do
+      participant_id == trip.author_id ->
+        {:error, :cannot_remove_author}
+
+      actor.id == trip.author_id ->
+        :ok
+
+      actor.id == participant_id and Policy.participant?(trip, actor) ->
+        :ok
+
+      true ->
+        {:error, :not_allowed}
+    end
+  end
+
+  defp delete_trip_participant(%Trip{} = trip, participant_id) do
+    case Repo.get_by(TripParticipant, trip_id: trip.id, user_id: participant_id) do
+      %TripParticipant{} = trip_participant ->
+        Repo.delete(trip_participant)
+
+      nil ->
+        {:error, :not_found}
+    end
+  end
+
+  defp has_constraint_error?(%Ecto.Changeset{} = changeset, field, constraint_type) do
+    Enum.any?(changeset.errors, fn
+      {^field, {_message, opts}} -> Keyword.get(opts, :constraint) == constraint_type
+      _ -> false
+    end)
   end
 
   defp copy_trip_associations(repo, %Trip{} = trip, %Trip{} = source_trip) do

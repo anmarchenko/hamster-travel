@@ -7,6 +7,7 @@ defmodule HamsterTravel.Social do
 
   alias Ecto.Multi
 
+  alias HamsterTravel.Accounts.User
   alias HamsterTravel.Repo
   alias HamsterTravel.Social.Friendship
 
@@ -21,6 +22,17 @@ defmodule HamsterTravel.Social do
   """
   def list_friend_ids(user_id) do
     from(f in Friendship, select: f.friend_id, where: f.user_id == ^user_id)
+    |> Repo.all()
+  end
+
+  @spec list_friends(String.t()) :: list(User.t())
+  def list_friends(user_id) when is_binary(user_id) do
+    from(u in User,
+      join: f in Friendship,
+      on: f.friend_id == u.id,
+      where: f.user_id == ^user_id,
+      order_by: [asc: fragment("LOWER(?)", u.name), asc: u.inserted_at]
+    )
     |> Repo.all()
   end
 
