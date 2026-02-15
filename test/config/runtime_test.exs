@@ -46,5 +46,6 @@ defmodule HamsterTravel.Config.RuntimeTest do
     assert Keyword.fetch!(session_pool_opts, :timeout) == 60_000
     assert Keyword.fetch!(session_pool_opts, :init_timeout) == 60_000
     assert Keyword.fetch!(session_pool_opts, :checkout_timeout) == 60_000
+    assert Keyword.fetch!(chromic_pdf_opts, :chrome_args) == "--disable-dev-shm-usage"
   end
 end

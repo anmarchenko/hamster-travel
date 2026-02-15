@@ -71,10 +71,22 @@ if config_env() == :prod do
     System.get_env("CHROMIC_PDF_DISCARD_STDERR", "true")
     |> env_true?.()
 
+  chromic_pdf_disable_dev_shm_usage? =
+    System.get_env("CHROMIC_PDF_DISABLE_DEV_SHM_USAGE", "true")
+    |> env_true?.()
+
+  chrome_args =
+    if chromic_pdf_disable_dev_shm_usage? do
+      "--disable-dev-shm-usage"
+    else
+      nil
+    end
+
   config :hamster_travel, ChromicPDF,
     on_demand: chromic_pdf_on_demand?,
     no_sandbox: chromic_pdf_no_sandbox?,
     discard_stderr: chromic_pdf_discard_stderr?,
+    chrome_args: chrome_args,
     chrome_executable: System.get_env("CHROME_BIN", "/usr/bin/chromium"),
     session_pool: [size: 1, timeout: 60_000, init_timeout: 60_000, checkout_timeout: 60_000],
     ghostscript_pool: [size: 1]
