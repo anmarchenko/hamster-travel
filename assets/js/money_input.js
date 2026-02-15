@@ -2,37 +2,28 @@ let MoneyInput = {
   mounted() {
     // pick user locale or fall back
     const locale = this.el.dataset.userLocale || 'en';
-    const fmtr = new Intl.NumberFormat(locale);
-    const parts = fmtr.formatToParts(1.1);
+    const parts = new Intl.NumberFormat(locale).formatToParts(1.1);
     const decSep = parts.find((part) => part.type === 'decimal')?.value || '.';
-
-    // Format initial value if present
-    const initialValue = this.el.value;
-    if (initialValue && !isNaN(parseFloat(initialValue))) {
-      const numValue = parseFloat(initialValue);
-      this.el.value = fmtr.format(numValue);
-    }
+    const altDecSep = decSep === ',' ? '.' : ',';
 
     this.el.addEventListener('input', (e) => {
-      const start = this.el.selectionStart;
+      // Accept both "," and "." as decimal separators and keep only one decimal separator.
+      let raw = this.el.value.replace(/[^\d.,]/g, '').replaceAll(altDecSep, decSep);
+      const firstDecimal = raw.indexOf(decSep);
+      if (firstDecimal !== -1) {
+        raw =
+          raw.slice(0, firstDecimal + 1) +
+          raw.slice(firstDecimal + 1).replaceAll(decSep, '');
+      }
 
-      // Allow only digits & one decimal separator
-      let raw = this.el.value
-        .replace(new RegExp(`[^\\d${decSep}]`, 'g'), '')
-        .replace(new RegExp(`${decSep}(?=.*${decSep})`, 'g'), '');
+      // Let users fully clear the field.
+      if (raw === '') {
+        this.el.value = '';
+        return;
+      }
 
-      // Split int/frac to preserve user-typed decimals
-      const [intPart, fracPart] = raw.split(decSep);
-      const formattedInt = fmtr.format(intPart || '0');
-
-      this.el.value =
-        fracPart === undefined
-          ? formattedInt
-          : `${formattedInt}${decSep}${fracPart}`;
-
-      // restore caret so typing feels natural
-      const diff = this.el.value.length - raw.length;
-      this.el.setSelectionRange(start + diff, start + diff);
+      // Keep normalized editable value without grouping separators.
+      this.el.value = raw.startsWith(decSep) ? `0${raw}` : raw;
     });
   },
 };

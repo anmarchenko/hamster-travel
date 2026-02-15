@@ -890,6 +890,156 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert updated.expense.price == expected
     end
 
+    test "recalculates budget when food expense changes", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft", currency: "EUR"})
+
+      {:ok, _expense} =
+        Planning.create_expense(trip, %{price: Money.new(:EUR, 40), name: "Souvenirs"})
+
+      trip = Planning.get_trip!(trip.id)
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      assert render(view) =~ "€40.00"
+
+      {:ok, updated_food_expense} =
+        Planning.update_food_expense(trip.food_expense, %{
+          price_per_day: Money.new(:EUR, 10),
+          days_count: 2,
+          people_count: 3
+        })
+
+      assert updated_food_expense.expense.price == Money.new(:EUR, 60)
+      assert_eventually_contains(view, "€100.00")
+    end
+
+    test "recalculates budget for standalone expense create/update/delete events", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft", currency: "EUR"})
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      assert render(view) =~ "€0.00"
+
+      {:ok, created_expense} =
+        Planning.create_expense(trip, %{price: Money.new(:EUR, 40), name: "Souvenirs"})
+
+      assert created_expense.price == Money.new(:EUR, 40)
+      assert_eventually_contains(view, "€40.00")
+
+      {:ok, updated_expense} =
+        Planning.update_expense(created_expense, %{price: Money.new(:EUR, 90)})
+
+      assert updated_expense.price == Money.new(:EUR, 90)
+      assert_eventually_contains(view, "€90.00")
+
+      {:ok, deleted_expense} = Planning.delete_expense(updated_expense)
+
+      assert deleted_expense.id == updated_expense.id
+      assert_eventually_contains(view, "€0.00")
+    end
+
+    test "recalculates budget for all expense-bearing entities", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft", currency: "EUR"})
+
+      {:ok, _base_expense} =
+        Planning.create_expense(trip, %{price: Money.new(:EUR, 10), name: "Base"})
+
+      {:ok, accommodation} =
+        Planning.create_accommodation(trip, %{
+          name: "Hotel",
+          start_day: 0,
+          end_day: 0,
+          expense: %{price: Money.new(:EUR, 20), name: "Hotel", trip_id: trip.id}
+        })
+
+      geonames_fixture()
+      berlin = Geo.find_city_by_geonames_id("2950159")
+      hamburg = Geo.find_city_by_geonames_id("2911298")
+
+      {:ok, transfer} =
+        Planning.create_transfer(trip, %{
+          transport_mode: "train",
+          departure_city_id: berlin.id,
+          arrival_city_id: hamburg.id,
+          departure_time: "08:00",
+          arrival_time: "12:00",
+          day_index: 0,
+          expense: %{price: Money.new(:EUR, 30), name: "Train", trip_id: trip.id}
+        })
+
+      {:ok, activity} =
+        Planning.create_activity(trip, %{
+          name: "Museum",
+          day_index: 0,
+          priority: 2,
+          expense: %{price: Money.new(:EUR, 40), name: "Museum", trip_id: trip.id}
+        })
+
+      {:ok, day_expense} =
+        Planning.create_day_expense(trip, %{
+          name: "Snacks",
+          day_index: 0,
+          expense: %{price: Money.new(:EUR, 50), name: "Snacks", trip_id: trip.id}
+        })
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      assert render(view) =~ "€150.00"
+
+      {:ok, updated_accommodation} =
+        Planning.update_accommodation(accommodation, %{
+          expense: %{id: accommodation.expense.id, price: Money.new(:EUR, 25)}
+        })
+
+      assert updated_accommodation.expense.price == Money.new(:EUR, 25)
+      assert_eventually_contains(view, "€155.00")
+
+      {:ok, updated_transfer} =
+        Planning.update_transfer(transfer, %{
+          expense: %{id: transfer.expense.id, price: Money.new(:EUR, 35)}
+        })
+
+      assert updated_transfer.expense.price == Money.new(:EUR, 35)
+      assert_eventually_contains(view, "€160.00")
+
+      {:ok, updated_activity} =
+        Planning.update_activity(activity, %{
+          expense: %{id: activity.expense.id, price: Money.new(:EUR, 45)}
+        })
+
+      assert updated_activity.expense.price == Money.new(:EUR, 45)
+      assert_eventually_contains(view, "€165.00")
+
+      {:ok, updated_day_expense} =
+        Planning.update_day_expense(day_expense, %{
+          expense: %{id: day_expense.expense.id, price: Money.new(:EUR, 55)}
+        })
+
+      assert updated_day_expense.expense.price == Money.new(:EUR, 55)
+      assert_eventually_contains(view, "€170.00")
+
+      {:ok, deleted_day_expense} = Planning.delete_day_expense(updated_day_expense)
+
+      assert deleted_day_expense.id == updated_day_expense.id
+      assert_eventually_contains(view, "€115.00")
+
+      {:ok, created_day_expense} =
+        Planning.create_day_expense(trip, %{
+          name: "Coffee",
+          day_index: 0,
+          expense: %{price: Money.new(:EUR, 20), name: "Coffee", trip_id: trip.id}
+        })
+
+      assert created_day_expense.expense.price == Money.new(:EUR, 20)
+      assert_eventually_contains(view, "€135.00")
+    end
+
     test "can move activity via drag and drop", %{conn: conn} do
       # Arrange
 
@@ -951,5 +1101,22 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert first.id == a2.id
       assert second.id == a1.id
     end
+  end
+
+  defp assert_eventually_contains(view, expected_text, attempts_left \\ 20)
+
+  defp assert_eventually_contains(view, expected_text, attempts_left) when attempts_left > 0 do
+    html = render(view)
+
+    if html =~ expected_text do
+      assert html =~ expected_text
+    else
+      Process.sleep(20)
+      assert_eventually_contains(view, expected_text, attempts_left - 1)
+    end
+  end
+
+  defp assert_eventually_contains(_view, expected_text, 0) do
+    flunk("expected rendered LiveView to include #{inspect(expected_text)}")
   end
 end

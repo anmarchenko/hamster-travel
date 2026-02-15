@@ -20,7 +20,7 @@ defmodule HamsterTravelWeb.Endpoint do
   plug Plug.Static,
     at: "/",
     from: :hamster_travel,
-    gzip: true,
+    gzip: Application.compile_env(:hamster_travel, :static_gzip, false),
     only: HamsterTravelWeb.static_paths()
 
   if Code.ensure_loaded?(Tidewave) do

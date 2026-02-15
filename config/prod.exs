@@ -13,5 +13,7 @@ config :hamster_travel, HamsterTravelWeb.Endpoint,
   url: [host: "example.com", port: 80],
   cache_static_manifest: "priv/static/cache_manifest.json"
 
+config :hamster_travel, :static_gzip, true
+
 # Do not print debug messages in production
 config :logger, level: :info

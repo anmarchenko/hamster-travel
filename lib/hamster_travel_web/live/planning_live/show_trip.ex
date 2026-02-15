@@ -283,6 +283,21 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   @impl true
+  def handle_info({[:expense, :created], %{value: _created_expense}}, socket) do
+    handle_expense_event(socket)
+  end
+
+  @impl true
+  def handle_info({[:expense, :updated], %{value: _updated_expense}}, socket) do
+    handle_expense_event(socket)
+  end
+
+  @impl true
+  def handle_info({[:expense, :deleted], %{value: _deleted_expense}}, socket) do
+    handle_expense_event(socket)
+  end
+
+  @impl true
   def handle_info({[:food_expense, :updated], %{value: updated_food_expense}}, socket) do
     handle_food_expense_event(updated_food_expense, socket)
   end
@@ -1938,7 +1953,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> Map.put(entities_key, updated_entities)
       |> maybe_preload_countries(entity_type)
 
-    # Recalculate budget if accommodation changed
+    # Recalculate budget if the changed entity has an expense attached
     socket =
       socket
       |> assign(trip: trip)
@@ -1947,15 +1962,23 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     {:noreply, socket}
   end
 
+  defp handle_expense_event(socket) do
+    socket =
+      socket
+      |> assign(budget: budget_from_db(socket.assigns.trip))
+
+    {:noreply, socket}
+  end
+
   defp handle_food_expense_event(food_expense, socket) do
     food_expense = Repo.preload(food_expense, [:expense])
 
-    trip = %{socket.assigns.trip | food_expense: food_expense}
+    trip = Map.put(socket.assigns.trip, :food_expense, food_expense)
 
     socket =
       socket
       |> assign(trip: trip)
-      |> assign(budget: Planning.calculate_budget(trip))
+      |> assign(budget: budget_from_db(trip))
 
     {:noreply, socket}
   end
@@ -1987,6 +2010,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   defp maybe_preload_countries(trip, :destination), do: Repo.preload(trip, :countries)
   defp maybe_preload_countries(trip, _), do: trip
 
+  defp budget_from_db(trip) do
+    trip
+    |> Map.put(:expenses, Planning.list_expenses(trip))
+    |> Planning.calculate_budget()
+  end
+
   defp update_entities_list(entities, :created, entity) do
     entities ++ [entity]
   end
@@ -2004,19 +2033,19 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   defp maybe_recalculate_budget(socket, :accommodation, trip) do
-    assign(socket, budget: Planning.calculate_budget(trip))
+    assign(socket, budget: budget_from_db(trip))
   end
 
   defp maybe_recalculate_budget(socket, :transfer, trip) do
-    assign(socket, budget: Planning.calculate_budget(trip))
+    assign(socket, budget: budget_from_db(trip))
   end
 
   defp maybe_recalculate_budget(socket, :activity, trip) do
-    assign(socket, budget: Planning.calculate_budget(trip))
+    assign(socket, budget: budget_from_db(trip))
   end
 
   defp maybe_recalculate_budget(socket, :day_expense, trip) do
-    assign(socket, budget: Planning.calculate_budget(trip))
+    assign(socket, budget: budget_from_db(trip))
   end
 
   defp maybe_recalculate_budget(socket, _entity_type, _trip), do: socket

@@ -30,6 +30,8 @@ config :hamster_travel, HamsterTravelWeb.Endpoint,
     esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]}
   ]
 
+config :hamster_travel, :static_gzip, false
+
 # Watch static and templates for browser reloading.
 config :hamster_travel, HamsterTravelWeb.Endpoint,
   live_reload: [
