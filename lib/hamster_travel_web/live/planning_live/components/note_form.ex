@@ -11,6 +11,7 @@ defmodule HamsterTravelWeb.Planning.NoteForm do
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :day_index, :integer, default: nil
   attr :on_finish, :fun, required: true
+  attr :can_edit, :boolean, default: false
 
   @impl true
   def render(assigns) do
@@ -75,7 +76,11 @@ defmodule HamsterTravelWeb.Planning.NoteForm do
 
   @impl true
   def handle_event("form_submit", %{"note" => note_params}, socket) do
-    on_submit(socket, socket.assigns.action, note_params)
+    if socket.assigns.can_edit do
+      on_submit(socket, socket.assigns.action, note_params)
+    else
+      {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
+    end
   end
 
   def handle_event("cancel", _, socket) do

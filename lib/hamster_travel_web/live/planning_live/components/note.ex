@@ -9,6 +9,7 @@ defmodule HamsterTravelWeb.Planning.Note do
 
   attr(:note, Note, required: true)
   attr(:trip, Trip, required: true)
+  attr(:can_edit, :boolean, default: false)
 
   def render(%{edit: true} = assigns) do
     ~H"""
@@ -20,6 +21,7 @@ defmodule HamsterTravelWeb.Planning.Note do
         trip={@trip}
         day_index={@note.day_index}
         action={:edit}
+        can_edit={@can_edit}
         on_finish={fn -> send_update(@myself, edit: false) end}
       />
     </div>
@@ -46,6 +48,7 @@ defmodule HamsterTravelWeb.Planning.Note do
           {@note.title}
         </span>
         <.edit_delete_buttons
+          :if={@can_edit}
           class="ml-1"
           edit_target={@myself}
           delete_target={@myself}
@@ -70,16 +73,24 @@ defmodule HamsterTravelWeb.Planning.Note do
   end
 
   def handle_event("edit", _, socket) do
-    {:noreply, assign(socket, :edit, true)}
+    if socket.assigns.can_edit do
+      {:noreply, assign(socket, :edit, true)}
+    else
+      {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
+    end
   end
 
   def handle_event("delete", _, socket) do
-    case Planning.delete_note(socket.assigns.note) do
-      {:ok, _note} ->
-        {:noreply, socket}
+    if socket.assigns.can_edit do
+      case Planning.delete_note(socket.assigns.note) do
+        {:ok, _note} ->
+          {:noreply, socket}
 
-      {:error, _changeset} ->
-        {:noreply, put_flash(socket, :error, gettext("Failed to delete note"))}
+        {:error, _changeset} ->
+          {:noreply, put_flash(socket, :error, gettext("Failed to delete note"))}
+      end
+    else
+      {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
     end
   end
 end

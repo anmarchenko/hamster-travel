@@ -2702,6 +2702,8 @@ defmodule HamsterTravel.PlanningTest do
           dates_unknown: true
         })
 
+      {:ok, trip} = Planning.add_trip_participant(trip, author, friend.id)
+
       # Preload transfers for the trip
       trip = Planning.get_trip!(trip.id)
 
@@ -2730,7 +2732,7 @@ defmodule HamsterTravel.PlanningTest do
       assert updated_transfer.expense.price
     end
 
-    test "successfully moves transfer to valid day for friend in friends circle", %{
+    test "successfully moves transfer to valid day for participant", %{
       friend: friend,
       trip: trip
     } do
@@ -3142,6 +3144,8 @@ defmodule HamsterTravel.PlanningTest do
           dates_unknown: true
         })
 
+      {:ok, trip} = Planning.add_trip_participant(trip, author, friend.id)
+
       # Preload activities for the trip
       trip = Planning.get_trip!(trip.id)
 
@@ -3166,7 +3170,10 @@ defmodule HamsterTravel.PlanningTest do
       assert updated_activity.id == activity.id
     end
 
-    test "successfully moves activity to valid day for friend", %{friend: friend, trip: trip} do
+    test "successfully moves activity to valid day for participant", %{
+      friend: friend,
+      trip: trip
+    } do
       activity = activity_fixture(%{trip_id: trip.id, day_index: 1})
       trip = Planning.get_trip!(trip.id)
 
@@ -3412,6 +3419,8 @@ defmodule HamsterTravel.PlanningTest do
           dates_unknown: true
         })
 
+      {:ok, trip} = Planning.add_trip_participant(trip, author, friend.id)
+
       trip = Planning.get_trip!(trip.id)
 
       {:ok,
@@ -3430,7 +3439,7 @@ defmodule HamsterTravel.PlanningTest do
       assert updated.id == note.id
     end
 
-    test "successfully moves note to valid day for friend", %{friend: friend, trip: trip} do
+    test "successfully moves note to valid day for participant", %{friend: friend, trip: trip} do
       {:ok, note} = Planning.create_note(trip, %{title: "Note", day_index: 1})
       trip = Planning.get_trip!(trip.id)
 
@@ -3746,6 +3755,8 @@ defmodule HamsterTravel.PlanningTest do
           dates_unknown: true
         })
 
+      {:ok, trip} = Planning.add_trip_participant(trip, author, friend.id)
+
       trip = Planning.get_trip!(trip.id)
 
       {:ok,
@@ -3773,7 +3784,10 @@ defmodule HamsterTravel.PlanningTest do
       assert updated.id == day_expense.id
     end
 
-    test "successfully moves day expense to valid day for friend", %{friend: friend, trip: trip} do
+    test "successfully moves day expense to valid day for participant", %{
+      friend: friend,
+      trip: trip
+    } do
       {:ok, day_expense} =
         Planning.create_day_expense(trip, %{
           name: "Transport",

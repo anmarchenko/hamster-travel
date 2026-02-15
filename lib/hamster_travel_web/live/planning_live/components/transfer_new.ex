@@ -11,6 +11,7 @@ defmodule HamsterTravelWeb.Planning.TransferNew do
   attr :day_index, :integer, required: true
   attr :class, :string, default: nil
   attr :edit, :boolean, default: false
+  attr :can_edit, :boolean, default: false
 
   def render(%{edit: true} = assigns) do
     ~H"""
@@ -22,6 +23,7 @@ defmodule HamsterTravelWeb.Planning.TransferNew do
         current_user={@current_user}
         day_index={@day_index}
         action={:new}
+        can_edit={@can_edit}
         on_finish={fn -> send(self(), {:finish_adding, "transfer"}) end}
       />
     </div>
@@ -32,6 +34,7 @@ defmodule HamsterTravelWeb.Planning.TransferNew do
     ~H"""
     <div class={@class}>
       <a
+        :if={@can_edit}
         href="#"
         phx-click="start_adding"
         phx-target={@myself}
@@ -55,7 +58,11 @@ defmodule HamsterTravelWeb.Planning.TransferNew do
   end
 
   def handle_event("start_adding", _, socket) do
-    send(self(), {:start_adding, "transfer", socket.assigns.id})
-    {:noreply, socket}
+    if socket.assigns.can_edit do
+      send(self(), {:start_adding, "transfer", socket.assigns.id})
+      {:noreply, socket}
+    else
+      {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
+    end
   end
 end

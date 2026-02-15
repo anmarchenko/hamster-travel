@@ -9,6 +9,7 @@ defmodule HamsterTravelWeb.Planning.FoodExpense do
   attr(:food_expense, FoodExpense, required: true)
   attr(:trip, Trip, required: true)
   attr(:display_currency, :string, required: true)
+  attr(:can_edit, :boolean, default: false)
 
   def render(%{edit: true} = assigns) do
     ~H"""
@@ -19,6 +20,7 @@ defmodule HamsterTravelWeb.Planning.FoodExpense do
         food_expense={@food_expense}
         trip={@trip}
         display_currency={@display_currency}
+        can_edit={@can_edit}
         on_finish={fn -> send_update(@myself, edit: false) end}
       />
     </div>
@@ -50,6 +52,7 @@ defmodule HamsterTravelWeb.Planning.FoodExpense do
           />
         </span>
         <.edit_delete_buttons
+          :if={@can_edit}
           class="ml-1"
           edit_target={@myself}
           show_delete={false}
@@ -64,6 +67,10 @@ defmodule HamsterTravelWeb.Planning.FoodExpense do
   end
 
   def handle_event("edit", _, socket) do
-    {:noreply, assign(socket, :edit, true)}
+    if socket.assigns.can_edit do
+      {:noreply, assign(socket, :edit, true)}
+    else
+      {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
+    end
   end
 end

@@ -12,6 +12,7 @@ defmodule HamsterTravelWeb.Planning.FoodExpenseForm do
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :display_currency, :string, required: true
   attr :on_finish, :fun, required: true
+  attr :can_edit, :boolean, default: false
 
   @impl true
   def render(assigns) do
@@ -100,9 +101,13 @@ defmodule HamsterTravelWeb.Planning.FoodExpenseForm do
 
   @impl true
   def handle_event("form_submit", %{"food_expense" => params}, socket) do
-    socket.assigns.food_expense
-    |> Planning.update_food_expense(params)
-    |> result(socket)
+    if socket.assigns.can_edit do
+      socket.assigns.food_expense
+      |> Planning.update_food_expense(params)
+      |> result(socket)
+    else
+      {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
+    end
   end
 
   def handle_event("cancel", _, socket) do

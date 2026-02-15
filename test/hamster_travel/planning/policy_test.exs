@@ -9,6 +9,7 @@ defmodule HamsterTravel.Planning.PolicyTest do
   alias HamsterTravel.Planning.Trip
   alias HamsterTravel.Planning.TripParticipant
   alias HamsterTravel.Repo
+  alias HamsterTravel.Social
 
   test "participant?/2 checks author, preloaded participants, and DB fallback" do
     author = user_fixture()
@@ -26,6 +27,25 @@ defmodule HamsterTravel.Planning.PolicyTest do
     assert Policy.participant?(trip_preloaded, participant)
     assert Policy.participant?(trip, participant)
     refute Policy.participant?(trip, outsider)
+  end
+
+  test "authorized?/3 :edit allows only participants" do
+    author = user_fixture()
+    participant = user_fixture()
+    friend = user_fixture()
+    outsider = user_fixture()
+    trip = trip_fixture(author, %{private: true})
+    {:ok, _} = Social.add_friends(author.id, friend.id)
+
+    %TripParticipant{}
+    |> TripParticipant.changeset(%{trip_id: trip.id, user_id: participant.id})
+    |> Repo.insert!()
+
+    assert Policy.authorized?(:edit, trip, author)
+    assert Policy.authorized?(:edit, trip, participant)
+    refute Policy.authorized?(:edit, trip, friend)
+    refute Policy.authorized?(:edit, trip, outsider)
+    refute Policy.authorized?(:edit, trip, nil)
   end
 
   test "user_trip_visibility_scope/2 includes private trips for participants" do

@@ -81,6 +81,36 @@ defmodule HamsterTravelWeb.Planning.ShowTripParticipantsTest do
 
       {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
       refute has_element?(view, "#trip-open-invite-modal")
+      refute has_element?(view, "a[href='/trips/#{trip.slug}/edit']")
+      refute has_element?(view, "form#cover-upload-form")
+      refute has_element?(view, "#destination-new-0")
+      refute has_element?(view, "#transfer-new-0")
+      refute has_element?(view, "#accommodation-new-0")
+      refute has_element?(view, "#activity-new-0")
+      refute has_element?(view, "#day-expense-new-0")
+      refute has_element?(view, "#note-new-unassigned")
+    end
+
+    test "non-participant friend cannot add participant via forged event", %{conn: conn} do
+      author = user_fixture()
+      participant = user_fixture()
+      non_participant_friend = user_fixture()
+      friend_to_add = user_fixture()
+      {:ok, _} = Social.add_friends(author.id, participant.id)
+      {:ok, _} = Social.add_friends(author.id, non_participant_friend.id)
+      {:ok, _} = Social.add_friends(author.id, friend_to_add.id)
+
+      trip = trip_fixture(author, %{})
+      {:ok, _} = Planning.add_trip_participant(trip, author, participant.id)
+      conn = log_in_user(conn, non_participant_friend)
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      render_click(view, "quick_add_trip_participant", %{"user_id" => friend_to_add.id})
+
+      updated_trip = Planning.get_trip!(trip.id)
+      assert Enum.map(updated_trip.trip_participants, & &1.user_id) == [participant.id]
+      assert render(view) =~ "Only trip participants can edit this trip."
     end
 
     test "author can remove any participant", %{conn: conn} do

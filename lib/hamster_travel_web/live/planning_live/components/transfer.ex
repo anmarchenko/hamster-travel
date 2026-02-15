@@ -15,6 +15,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
   attr(:trip, Trip, required: true)
   attr(:current_user, HamsterTravel.Accounts.User, default: nil)
   attr(:display_currency, :string, required: true)
+  attr(:can_edit, :boolean, default: false)
 
   def render(%{edit: true} = assigns) do
     ~H"""
@@ -26,6 +27,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
         trip={@trip}
         current_user={@current_user}
         action={:edit}
+        can_edit={@can_edit}
         on_finish={fn -> send_update(@myself, edit: false) end}
       />
     </div>
@@ -44,6 +46,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
         {@transfer.carrier}
         <.money_display money={@transfer.expense.price} display_currency={@display_currency} />
         <.edit_delete_buttons
+          :if={@can_edit}
           class="ml-auto"
           edit_target={@myself}
           delete_target={@myself}
@@ -83,22 +86,30 @@ defmodule HamsterTravelWeb.Planning.Transfer do
   end
 
   def handle_event("edit", _, socket) do
-    socket =
-      socket
-      |> assign(:edit, true)
+    if socket.assigns.can_edit do
+      socket =
+        socket
+        |> assign(:edit, true)
 
-    {:noreply, socket}
+      {:noreply, socket}
+    else
+      {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
+    end
   end
 
   def handle_event("delete", _, socket) do
-    case Planning.delete_transfer(socket.assigns.transfer) do
-      {:ok, _transfer} ->
-        {:noreply, socket}
+    if socket.assigns.can_edit do
+      case Planning.delete_transfer(socket.assigns.transfer) do
+        {:ok, _transfer} ->
+          {:noreply, socket}
 
-      {:error, _changeset} ->
-        {:noreply,
-         socket
-         |> put_flash(:error, gettext("Failed to delete transfer"))}
+        {:error, _changeset} ->
+          {:noreply,
+           socket
+           |> put_flash(:error, gettext("Failed to delete transfer"))}
+      end
+    else
+      {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
     end
   end
 

@@ -11,6 +11,7 @@ defmodule HamsterTravelWeb.Planning.DayExpenseForm do
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :day_index, :integer, required: true
   attr :on_finish, :fun, required: true
+  attr :can_edit, :boolean, default: false
 
   @impl true
   def render(assigns) do
@@ -82,7 +83,11 @@ defmodule HamsterTravelWeb.Planning.DayExpenseForm do
 
   @impl true
   def handle_event("form_submit", %{"day_expense" => day_expense_params}, socket) do
-    on_submit(socket, socket.assigns.action, day_expense_params)
+    if socket.assigns.can_edit do
+      on_submit(socket, socket.assigns.action, day_expense_params)
+    else
+      {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
+    end
   end
 
   def handle_event("cancel", _, socket) do

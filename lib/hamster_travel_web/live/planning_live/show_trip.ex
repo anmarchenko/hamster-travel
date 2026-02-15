@@ -124,6 +124,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         budget={@budget}
         display_currency={@display_currency}
         current_user={@current_user}
+        can_edit={@can_edit}
       />
     </.container>
 
@@ -360,53 +361,65 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   @impl true
   def handle_event("delete_outside_notes", _params, socket) do
-    socket.assigns.trip
-    |> notes_outside()
-    |> Enum.each(&Planning.delete_note/1)
+    if socket.assigns.can_edit do
+      socket.assigns.trip
+      |> notes_outside()
+      |> Enum.each(&Planning.delete_note/1)
 
-    {:noreply, socket}
+      {:noreply, socket}
+    else
+      {:noreply, unauthorized_edit(socket)}
+    end
   end
 
   @impl true
   def handle_event("delete_outside_itinerary", _params, socket) do
-    trip = socket.assigns.trip
+    if socket.assigns.can_edit do
+      trip = socket.assigns.trip
 
-    trip
-    |> destinations_outside()
-    |> Enum.each(&Planning.delete_destination/1)
+      trip
+      |> destinations_outside()
+      |> Enum.each(&Planning.delete_destination/1)
 
-    trip
-    |> accommodations_outside()
-    |> Enum.each(&Planning.delete_accommodation/1)
+      trip
+      |> accommodations_outside()
+      |> Enum.each(&Planning.delete_accommodation/1)
 
-    trip
-    |> transfers_outside()
-    |> Enum.each(&Planning.delete_transfer/1)
+      trip
+      |> transfers_outside()
+      |> Enum.each(&Planning.delete_transfer/1)
 
-    {:noreply, socket}
+      {:noreply, socket}
+    else
+      {:noreply, unauthorized_edit(socket)}
+    end
   end
 
   @impl true
   def handle_event("delete_outside_activities", _params, socket) do
-    trip = socket.assigns.trip
+    if socket.assigns.can_edit do
+      trip = socket.assigns.trip
 
-    trip
-    |> destinations_outside()
-    |> Enum.each(&Planning.delete_destination/1)
+      trip
+      |> destinations_outside()
+      |> Enum.each(&Planning.delete_destination/1)
 
-    trip
-    |> activities_outside()
-    |> Enum.each(&Planning.delete_activity/1)
+      trip
+      |> activities_outside()
+      |> Enum.each(&Planning.delete_activity/1)
 
-    trip
-    |> day_expenses_outside()
-    |> Enum.each(&Planning.delete_day_expense/1)
+      trip
+      |> day_expenses_outside()
+      |> Enum.each(&Planning.delete_day_expense/1)
 
-    trip
-    |> notes_outside()
-    |> Enum.each(&Planning.delete_note/1)
+      trip
+      |> notes_outside()
+      |> Enum.each(&Planning.delete_note/1)
 
-    {:noreply, socket}
+      {:noreply, socket}
+    else
+      {:noreply, unauthorized_edit(socket)}
+    end
   end
 
   @impl true
@@ -470,29 +483,45 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
       {:noreply, socket}
     else
-      {:noreply, socket}
+      {:noreply, unauthorized_edit(socket)}
     end
   end
 
   @impl true
   def handle_event("open_invite_participant_modal", _params, socket) do
-    {:noreply, assign(socket, :show_invite_participant_modal, true)}
+    if socket.assigns.can_edit do
+      {:noreply, assign(socket, :show_invite_participant_modal, true)}
+    else
+      {:noreply, unauthorized_edit(socket)}
+    end
   end
 
   @impl true
   def handle_event("close_invite_participant_modal", _params, socket) do
-    {:noreply, assign(socket, :show_invite_participant_modal, false)}
+    if socket.assigns.can_edit do
+      {:noreply, assign(socket, :show_invite_participant_modal, false)}
+    else
+      {:noreply, unauthorized_edit(socket)}
+    end
   end
 
   @impl true
   def handle_event("quick_add_trip_participant", %{"user_id" => participant_id}, socket)
       when participant_id in [nil, ""] do
-    {:noreply, put_flash(socket, :error, gettext("Please choose a friend."))}
+    if socket.assigns.can_edit do
+      {:noreply, put_flash(socket, :error, gettext("Please choose a friend."))}
+    else
+      {:noreply, unauthorized_edit(socket)}
+    end
   end
 
   @impl true
   def handle_event("quick_add_trip_participant", %{"user_id" => participant_id}, socket) do
-    {:noreply, add_trip_participant_to_socket(socket, participant_id)}
+    if socket.assigns.can_edit do
+      {:noreply, add_trip_participant_to_socket(socket, participant_id)}
+    else
+      {:noreply, unauthorized_edit(socket)}
+    end
   end
 
   @impl true
@@ -502,7 +531,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         socket
       )
       when participant_id in [nil, ""] do
-    {:noreply, put_flash(socket, :error, gettext("Please choose a friend."))}
+    if socket.assigns.can_edit do
+      {:noreply, put_flash(socket, :error, gettext("Please choose a friend."))}
+    else
+      {:noreply, unauthorized_edit(socket)}
+    end
   end
 
   @impl true
@@ -511,7 +544,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         %{"participant" => %{"user_id" => participant_id}},
         socket
       ) do
-    {:noreply, add_trip_participant_to_socket(socket, participant_id)}
+    if socket.assigns.can_edit do
+      {:noreply, add_trip_participant_to_socket(socket, participant_id)}
+    else
+      {:noreply, unauthorized_edit(socket)}
+    end
   end
 
   @impl true
@@ -771,6 +808,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       budget={@budget}
       display_currency={@display_currency}
       current_user={@current_user}
+      can_edit={@can_edit}
     />
     """
   end
@@ -789,6 +827,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       day_expenses_outside={day_expenses_outside(@trip)}
       budget={@budget}
       display_currency={@display_currency}
+      can_edit={@can_edit}
     />
     """
   end
@@ -799,6 +838,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       trip={@trip}
       notes={@trip.notes}
       notes_outside={notes_outside(@trip)}
+      can_edit={@can_edit}
     />
     """
   end
@@ -858,6 +898,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:trip, Trip, required: true)
   attr(:notes, :list, required: true)
   attr(:notes_outside, :list, required: true)
+  attr(:can_edit, :boolean, required: true)
 
   def tab_notes(assigns) do
     ~H"""
@@ -868,9 +909,9 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         class="mt-4"
       >
         <div class="flex flex-col gap-y-1" data-note-drop-zone data-target-day="outside">
-          <.notes_list notes={@notes_outside} day_index={-1} trip={@trip} />
+          <.notes_list notes={@notes_outside} day_index={-1} trip={@trip} can_edit={@can_edit} />
         </div>
-        <div class="flex justify-start mt-4">
+        <div :if={@can_edit} class="flex justify-start mt-4">
           <.button
             color="danger"
             size="xs"
@@ -886,12 +927,19 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         <div class="flex flex-col gap-y-2">
           <.section_header icon="hero-document-text" label={gettext("Trip notes")} />
           <div class="flex flex-col gap-y-1" data-note-drop-zone data-target-day="unassigned">
-            <.notes_list notes={Planning.notes_unassigned(@notes)} day_index={-1} trip={@trip} />
+            <.notes_list
+              notes={Planning.notes_unassigned(@notes)}
+              day_index={-1}
+              trip={@trip}
+              can_edit={@can_edit}
+            />
             <.live_component
+              :if={@can_edit}
               module={NoteNew}
               id="note-new-unassigned"
               trip={@trip}
               day_index={nil}
+              can_edit={@can_edit}
             />
           </div>
         </div>
@@ -901,12 +949,19 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             <.day_label day_index={i} start_date={@trip.start_date} />
           </div>
           <div class="flex flex-col gap-y-1" data-note-drop-zone data-target-day={i}>
-            <.notes_list notes={Planning.notes_for_day(i, @notes)} day_index={i} trip={@trip} />
+            <.notes_list
+              notes={Planning.notes_for_day(i, @notes)}
+              day_index={i}
+              trip={@trip}
+              can_edit={@can_edit}
+            />
             <.live_component
+              :if={@can_edit}
               module={NoteNew}
               id={"note-new-#{i}"}
               trip={@trip}
               day_index={i}
+              can_edit={@can_edit}
             />
           </div>
           <hr />
@@ -926,6 +981,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:accommodations, :list, required: true)
   attr(:accommodations_outside, :list, required: true)
   attr(:current_user, HamsterTravel.Accounts.User, default: nil)
+  attr(:can_edit, :boolean, required: true)
 
   def tab_itinerary(assigns) do
     ~H"""
@@ -951,7 +1007,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           label={gettext("Places")}
           class="mb-2"
         />
-        <.destinations_list trip={@trip} destinations={@destinations_outside} day_index={0} />
+        <.destinations_list
+          trip={@trip}
+          destinations={@destinations_outside}
+          day_index={0}
+          can_edit={@can_edit}
+        />
 
         <.section_header
           :if={Enum.any?(@accommodations_outside)}
@@ -964,6 +1025,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           accommodations={@accommodations_outside}
           display_currency={@display_currency}
           day_index={0}
+          can_edit={@can_edit}
         />
 
         <.section_header
@@ -983,9 +1045,10 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             current_user={@current_user}
             display_currency={@display_currency}
             day_index={-1}
+            can_edit={@can_edit}
           />
         </div>
-        <div class="flex justify-start mt-4">
+        <div :if={@can_edit} class="flex justify-start mt-4">
           <.button
             color="danger"
             size="xs"
@@ -1027,12 +1090,15 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                   trip={@trip}
                   destinations={Planning.items_for_day(i, @destinations)}
                   day_index={i}
+                  can_edit={@can_edit}
                 />
                 <.live_component
+                  :if={@can_edit}
                   module={DestinationNew}
                   id={"destination-new-#{i}"}
                   trip={@trip}
                   day_index={i}
+                  can_edit={@can_edit}
                 />
               </div>
             </td>
@@ -1053,13 +1119,16 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                   current_user={@current_user}
                   display_currency={@display_currency}
                   day_index={i}
+                  can_edit={@can_edit}
                 />
                 <.live_component
+                  :if={@can_edit}
                   module={TransferNew}
                   id={"transfer-new-#{i}"}
                   trip={@trip}
                   current_user={@current_user}
                   day_index={i}
+                  can_edit={@can_edit}
                 />
               </div>
             </td>
@@ -1071,12 +1140,15 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                   accommodations={Planning.items_for_day(i, @accommodations)}
                   display_currency={@display_currency}
                   day_index={i}
+                  can_edit={@can_edit}
                 />
                 <.live_component
+                  :if={@can_edit}
                   module={AccommodationNew}
                   id={"accommodation-new-#{i}"}
                   trip={@trip}
                   day_index={i}
+                  can_edit={@can_edit}
                 />
               </div>
             </td>
@@ -1098,6 +1170,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:notes_outside, :list, required: true)
   attr(:day_expenses, :list, required: true)
   attr(:day_expenses_outside, :list, required: true)
+  attr(:can_edit, :boolean, required: true)
 
   def tab_activity(assigns) do
     ~H"""
@@ -1121,7 +1194,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           icon="hero-map-pin"
           label={gettext("Places")}
         />
-        <.destinations_list trip={@trip} destinations={@destinations_outside} day_index={0} />
+        <.destinations_list
+          trip={@trip}
+          destinations={@destinations_outside}
+          day_index={0}
+          can_edit={@can_edit}
+        />
 
         <div
           :if={
@@ -1146,6 +1224,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               day_index={-1}
               trip={@trip}
               display_currency={@display_currency}
+              can_edit={@can_edit}
             />
           </div>
           <.section_header
@@ -1164,6 +1243,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               day_index={-1}
               trip={@trip}
               display_currency={@display_currency}
+              can_edit={@can_edit}
             />
           </div>
           <.section_header
@@ -1176,10 +1256,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               notes={@notes_outside}
               day_index={-1}
               trip={@trip}
+              can_edit={@can_edit}
             />
           </div>
         </div>
-        <div class="flex justify-start mt-4">
+        <div :if={@can_edit} class="flex justify-start mt-4">
           <.button
             color="danger"
             size="xs"
@@ -1200,6 +1281,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             trip={@trip}
             food_expense={@trip.food_expense}
             display_currency={@display_currency}
+            can_edit={@can_edit}
           />
         </div>
       </div>
@@ -1215,15 +1297,17 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               trip={@trip}
               destinations={Planning.items_for_day(i, @destinations)}
               day_index={i}
+              can_edit={@can_edit}
             />
           </div>
-          <div class="inline-block">
+          <div :if={@can_edit} class="inline-block">
             <.live_component
               module={DestinationNew}
               id={"destination-new-#{i}"}
               trip={@trip}
               day_index={i}
               class="inline-block"
+              can_edit={@can_edit}
             />
           </div>
 
@@ -1235,12 +1319,15 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                 day_index={i}
                 trip={@trip}
                 display_currency={@display_currency}
+                can_edit={@can_edit}
               />
               <.live_component
+                :if={@can_edit}
                 module={DayExpenseNew}
                 id={"day-expense-new-#{i}"}
                 trip={@trip}
                 day_index={i}
+                can_edit={@can_edit}
               />
             </div>
             <.section_header icon="hero-ticket" label={gettext("Activities")} />
@@ -1250,12 +1337,15 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                 day_index={i}
                 trip={@trip}
                 display_currency={@display_currency}
+                can_edit={@can_edit}
               />
               <.live_component
+                :if={@can_edit}
                 module={ActivityNew}
                 id={"activity-new-#{i}"}
                 trip={@trip}
                 day_index={i}
+                can_edit={@can_edit}
               />
             </div>
             <.section_header icon="hero-document-text" label={gettext("Notes")} />
@@ -1264,12 +1354,15 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                 notes={Planning.notes_for_day(i, @notes)}
                 day_index={i}
                 trip={@trip}
+                can_edit={@can_edit}
               />
               <.live_component
+                :if={@can_edit}
                 module={NoteNew}
                 id={"note-new-#{i}"}
                 trip={@trip}
                 day_index={i}
+                can_edit={@can_edit}
               />
             </div>
           </div>
@@ -1283,6 +1376,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:trip, Trip, required: true)
   attr(:destinations, :list, required: true)
   attr(:day_index, :integer, required: true)
+  attr(:can_edit, :boolean, required: true)
 
   def destinations_list(assigns) do
     ~H"""
@@ -1293,6 +1387,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       trip={@trip}
       destination={destination}
       day_index={@day_index}
+      can_edit={@can_edit}
     />
     """
   end
@@ -1317,6 +1412,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:current_user, HamsterTravel.Accounts.User, default: nil)
   attr(:day_index, :integer, required: true)
   attr(:display_currency, :string, required: true)
+  attr(:can_edit, :boolean, required: true)
 
   def transfers_list(assigns) do
     ~H"""
@@ -1329,6 +1425,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       current_user={@current_user}
       display_currency={@display_currency}
       day_index={@day_index}
+      can_edit={@can_edit}
     />
     """
   end
@@ -1337,6 +1434,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:accommodations, :list, required: true)
   attr(:day_index, :integer, required: true)
   attr(:display_currency, :string, required: true)
+  attr(:can_edit, :boolean, required: true)
 
   def accommodations_list(assigns) do
     ~H"""
@@ -1348,6 +1446,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       accommodation={accommodation}
       display_currency={@display_currency}
       day_index={@day_index}
+      can_edit={@can_edit}
     />
     """
   end
@@ -1356,6 +1455,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:day_index, :integer, required: true)
   attr(:trip, Trip, required: true)
   attr(:display_currency, :string, required: true)
+  attr(:can_edit, :boolean, required: true)
 
   def activities_list(assigns) do
     ~H"""
@@ -1367,6 +1467,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       trip={@trip}
       display_currency={@display_currency}
       index={index}
+      can_edit={@can_edit}
     />
     """
   end
@@ -1375,6 +1476,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:day_index, :integer, required: true)
   attr(:trip, Trip, required: true)
   attr(:display_currency, :string, required: true)
+  attr(:can_edit, :boolean, required: true)
 
   def day_expenses_list(assigns) do
     ~H"""
@@ -1385,6 +1487,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       day_expense={day_expense}
       trip={@trip}
       display_currency={@display_currency}
+      can_edit={@can_edit}
     />
     """
   end
@@ -1392,6 +1495,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:trip, Trip, required: true)
   attr(:notes, :list, required: true)
   attr(:day_index, :integer, required: true)
+  attr(:can_edit, :boolean, required: true)
 
   def notes_list(assigns) do
     ~H"""
@@ -1401,6 +1505,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       id={"note-#{note.id}-day-#{@day_index}"}
       trip={@trip}
       note={note}
+      can_edit={@can_edit}
     />
     """
   end
@@ -1624,6 +1729,10 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       {:error, _reason} ->
         put_flash(socket, :error, gettext("Failed to add participant."))
     end
+  end
+
+  defp unauthorized_edit(socket) do
+    put_flash(socket, :error, gettext("Only trip participants can edit this trip."))
   end
 
   defp can_edit?(_trip, nil), do: false

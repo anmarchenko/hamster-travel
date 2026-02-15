@@ -8,6 +8,7 @@ defmodule HamsterTravelWeb.Planning.NoteNew do
   attr :day_index, :integer, default: nil
   attr :edit, :boolean, default: false
   attr :class, :string, default: nil
+  attr :can_edit, :boolean, default: false
 
   def render(%{edit: true} = assigns) do
     ~H"""
@@ -18,6 +19,7 @@ defmodule HamsterTravelWeb.Planning.NoteNew do
         trip={@trip}
         day_index={@day_index}
         action={:new}
+        can_edit={@can_edit}
         on_finish={fn -> send(self(), {:finish_adding, "note"}) end}
       />
     </div>
@@ -28,6 +30,7 @@ defmodule HamsterTravelWeb.Planning.NoteNew do
     ~H"""
     <div class={@class} id={@id}>
       <a
+        :if={@can_edit}
         href="#"
         phx-click="add_note"
         phx-target={@myself}
@@ -47,7 +50,11 @@ defmodule HamsterTravelWeb.Planning.NoteNew do
   end
 
   def handle_event("add_note", _, socket) do
-    send(self(), {:start_adding, "note", socket.assigns.id})
-    {:noreply, socket}
+    if socket.assigns.can_edit do
+      send(self(), {:start_adding, "note", socket.assigns.id})
+      {:noreply, socket}
+    else
+      {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
+    end
   end
 end

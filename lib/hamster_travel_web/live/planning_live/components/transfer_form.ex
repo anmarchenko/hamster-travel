@@ -14,6 +14,7 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
   attr :current_user, HamsterTravel.Accounts.User, default: nil
   attr :day_index, :integer, required: true
   attr :on_finish, :fun, required: true
+  attr :can_edit, :boolean, default: false
 
   @impl true
   def render(assigns) do
@@ -222,13 +223,17 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
 
   @impl true
   def handle_event("form_submit", %{"transfer" => transfer_params}, socket) do
-    transfer_params =
-      transfer_params
-      |> CityInput.process_selected_value_on_submit("departure_city")
-      |> CityInput.process_selected_value_on_submit("arrival_city")
-      |> cleanup_carrier_fields_if_not_shown(socket.assigns.show_carrier_info)
+    if socket.assigns.can_edit do
+      transfer_params =
+        transfer_params
+        |> CityInput.process_selected_value_on_submit("departure_city")
+        |> CityInput.process_selected_value_on_submit("arrival_city")
+        |> cleanup_carrier_fields_if_not_shown(socket.assigns.show_carrier_info)
 
-    on_submit(socket, socket.assigns.action, transfer_params)
+      on_submit(socket, socket.assigns.action, transfer_params)
+    else
+      {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
+    end
   end
 
   def handle_event("form_changed", %{"transfer" => %{"transport_mode" => transport_mode}}, socket) do
