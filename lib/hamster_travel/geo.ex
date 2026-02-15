@@ -162,6 +162,10 @@ defmodule HamsterTravel.Geo do
     city_name(city, Gettext.get_locale(HamsterTravelWeb.Gettext))
   end
 
+  def city_name(nil, _locale) do
+    Gettext.gettext(HamsterTravelWeb.Gettext, "Unknown city")
+  end
+
   def city_name(city, "ru") do
     city.name_ru || city.name
   end

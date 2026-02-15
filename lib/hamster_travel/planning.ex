@@ -277,6 +277,21 @@ defmodule HamsterTravel.Planning do
   end
 
   @doc """
+  Moves one trip day to another position and shifts all day-based data accordingly.
+
+  Pass the `%Trip{}`, source day index, target day index, and current user.
+  Returns `{:ok, %Trip{}}` with refreshed preloads or `{:error, reason}`.
+
+  ## Examples
+
+      iex> move_trip_day(trip, 0, 2, user)
+      {:ok, %Trip{}}
+  """
+  def move_trip_day(%Trip{} = trip, from_day_index, to_day_index, user) do
+    Trips.move_day(trip, from_day_index, to_day_index, user)
+  end
+
+  @doc """
   Stores a trip cover and updates the trip with the stored file metadata.
 
   Returns `{:ok, %Trip{}}` or `{:error, reason}`.

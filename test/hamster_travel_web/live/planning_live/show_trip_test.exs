@@ -522,6 +522,57 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "a.pc-tab__underline--is-active", "Transfers and hotels")
     end
 
+    test "opens day reorder modal from the transfers table", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft", duration: 3})
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      assert has_element?(view, "#open-reorder-days-0", "Move")
+
+      view
+      |> element("#open-reorder-days-0", "Move")
+      |> render_click()
+
+      assert has_element?(view, "#trip-reorder-days-modal")
+      assert has_element?(view, "#move-day-up-0")
+      assert has_element?(view, "#move-day-down-0")
+    end
+
+    test "reorders days from the modal and moves transfers", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft", duration: 3})
+
+      transfer_day0 =
+        transfer_fixture(%{
+          trip_id: trip.id,
+          day_index: 0,
+          vessel_number: "DAY0"
+        })
+
+      transfer_day1 =
+        transfer_fixture(%{
+          trip_id: trip.id,
+          day_index: 1,
+          vessel_number: "DAY1"
+        })
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      view
+      |> element("#open-reorder-days-0", "Move")
+      |> render_click()
+
+      view
+      |> element("#move-day-down-0")
+      |> render_click()
+
+      assert Planning.get_transfer!(transfer_day0.id).day_index == 1
+      assert Planning.get_transfer!(transfer_day1.id).day_index == 0
+    end
+
     test "shows transfer form when clicking add transfer link", %{conn: conn} do
       # Arrange
       user = user_fixture()

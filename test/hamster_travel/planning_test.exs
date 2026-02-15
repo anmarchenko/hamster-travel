@@ -1287,6 +1287,182 @@ defmodule HamsterTravel.PlanningTest do
     end
   end
 
+  describe "move_trip_day/4" do
+    setup do
+      geonames_fixture()
+      author = user_fixture()
+      participant = user_fixture()
+      stranger = user_fixture()
+      Social.add_friends(author.id, participant.id)
+
+      trip =
+        trip_fixture(%{
+          author_id: author.id,
+          dates_unknown: true,
+          duration: 4
+        })
+
+      {:ok, trip} = Planning.add_trip_participant(trip, author, participant.id)
+
+      berlin = HamsterTravel.Geo.find_city_by_geonames_id("2950159")
+      hamburg = HamsterTravel.Geo.find_city_by_geonames_id("2911298")
+
+      {:ok,
+       author: Repo.preload(author, :friendships),
+       participant: Repo.preload(participant, :friendships),
+       stranger: Repo.preload(stranger, :friendships),
+       trip: Planning.get_trip!(trip.id),
+       berlin: berlin,
+       hamburg: hamburg}
+    end
+
+    test "moves all day-bound entities together", %{
+      trip: trip,
+      author: author,
+      berlin: berlin,
+      hamburg: hamburg
+    } do
+      {:ok, destination_day0} =
+        Planning.create_destination(trip, %{city_id: berlin.id, start_day: 0, end_day: 0})
+
+      {:ok, destination_day1} =
+        Planning.create_destination(trip, %{city_id: hamburg.id, start_day: 1, end_day: 1})
+
+      {:ok, accommodation_day0} =
+        Planning.create_accommodation(trip, %{
+          name: "Day 0 hotel",
+          start_day: 0,
+          end_day: 0,
+          expense: %{price: Money.new(:EUR, 10_000), name: "D0 hotel", trip_id: trip.id}
+        })
+
+      {:ok, accommodation_day1} =
+        Planning.create_accommodation(trip, %{
+          name: "Day 1 hotel",
+          start_day: 1,
+          end_day: 1,
+          expense: %{price: Money.new(:EUR, 11_000), name: "D1 hotel", trip_id: trip.id}
+        })
+
+      {:ok, transfer_day0} =
+        Planning.create_transfer(trip, %{
+          transport_mode: "train",
+          departure_city_id: berlin.id,
+          arrival_city_id: hamburg.id,
+          departure_time: "08:00",
+          arrival_time: "10:00",
+          day_index: 0
+        })
+
+      {:ok, transfer_day1} =
+        Planning.create_transfer(trip, %{
+          transport_mode: "train",
+          departure_city_id: hamburg.id,
+          arrival_city_id: berlin.id,
+          departure_time: "11:00",
+          arrival_time: "13:00",
+          day_index: 1
+        })
+
+      {:ok, activity_day0} =
+        Planning.create_activity(trip, %{name: "Activity 0", day_index: 0, priority: 2})
+
+      {:ok, activity_day1} =
+        Planning.create_activity(trip, %{name: "Activity 1", day_index: 1, priority: 2})
+
+      {:ok, day_expense_day0} =
+        Planning.create_day_expense(trip, %{name: "Expense 0", day_index: 0})
+
+      {:ok, day_expense_day1} =
+        Planning.create_day_expense(trip, %{name: "Expense 1", day_index: 1})
+
+      {:ok, note_day0} = Planning.create_note(trip, %{title: "Note 0", day_index: 0})
+      {:ok, note_day1} = Planning.create_note(trip, %{title: "Note 1", day_index: 1})
+      {:ok, unassigned_note} = Planning.create_note(trip, %{title: "Unassigned", day_index: nil})
+
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:ok, moved_trip} = Planning.move_trip_day(trip, 0, 1, author)
+
+      moved_destination_day0 = Enum.find(moved_trip.destinations, &(&1.id == destination_day0.id))
+      moved_destination_day1 = Enum.find(moved_trip.destinations, &(&1.id == destination_day1.id))
+      assert moved_destination_day0.start_day == 1
+      assert moved_destination_day0.end_day == 1
+      assert moved_destination_day1.start_day == 0
+      assert moved_destination_day1.end_day == 0
+
+      moved_accommodation_day0 =
+        Enum.find(moved_trip.accommodations, &(&1.id == accommodation_day0.id))
+
+      moved_accommodation_day1 =
+        Enum.find(moved_trip.accommodations, &(&1.id == accommodation_day1.id))
+
+      assert moved_accommodation_day0.start_day == 1
+      assert moved_accommodation_day0.end_day == 1
+      assert moved_accommodation_day1.start_day == 0
+      assert moved_accommodation_day1.end_day == 0
+
+      assert Enum.find(moved_trip.transfers, &(&1.id == transfer_day0.id)).day_index == 1
+      assert Enum.find(moved_trip.transfers, &(&1.id == transfer_day1.id)).day_index == 0
+
+      assert Enum.find(moved_trip.activities, &(&1.id == activity_day0.id)).day_index == 1
+      assert Enum.find(moved_trip.activities, &(&1.id == activity_day1.id)).day_index == 0
+
+      assert Enum.find(moved_trip.day_expenses, &(&1.id == day_expense_day0.id)).day_index == 1
+      assert Enum.find(moved_trip.day_expenses, &(&1.id == day_expense_day1.id)).day_index == 0
+
+      assert Enum.find(moved_trip.notes, &(&1.id == note_day0.id)).day_index == 1
+      assert Enum.find(moved_trip.notes, &(&1.id == note_day1.id)).day_index == 0
+      assert Enum.find(moved_trip.notes, &(&1.id == unassigned_note.id)).day_index == nil
+    end
+
+    test "returns unauthorized when user is not a participant", %{trip: trip, stranger: stranger} do
+      assert {:error, "Unauthorized"} = Planning.move_trip_day(trip, 0, 1, stranger)
+    end
+
+    test "keeps destination and accommodation ranges valid when swapping two days", %{
+      trip: trip,
+      author: author,
+      berlin: berlin
+    } do
+      {:ok, destination} =
+        Planning.create_destination(trip, %{city_id: berlin.id, start_day: 0, end_day: 1})
+
+      {:ok, accommodation} =
+        Planning.create_accommodation(trip, %{
+          name: "Range hotel",
+          start_day: 0,
+          end_day: 1,
+          expense: %{price: Money.new(:EUR, 20_000), name: "Range hotel", trip_id: trip.id}
+        })
+
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:ok, moved_trip} = Planning.move_trip_day(trip, 0, 1, author)
+
+      moved_destination = Enum.find(moved_trip.destinations, &(&1.id == destination.id))
+      moved_accommodation = Enum.find(moved_trip.accommodations, &(&1.id == accommodation.id))
+
+      assert moved_destination.start_day <= moved_destination.end_day
+      assert moved_accommodation.start_day <= moved_accommodation.end_day
+    end
+
+    test "validates day index bounds", %{trip: trip, author: author} do
+      assert {:error, "Day index must be between 0 and 3"} =
+               Planning.move_trip_day(trip, -1, 1, author)
+
+      assert {:error, "Day index must be between 0 and 3"} =
+               Planning.move_trip_day(trip, 1, 4, author)
+    end
+
+    test "broadcasts trip updated event", %{trip: trip, author: author} do
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
+
+      assert {:ok, moved_trip} = Planning.move_trip_day(trip, 0, 1, author)
+      assert_receive {[:trip, :updated], %{value: ^moved_trip}}
+    end
+  end
+
   describe "destinations" do
     alias HamsterTravel.Planning.Destination
 

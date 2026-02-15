@@ -13,6 +13,7 @@ defmodule HamsterTravel.Planning.Trips do
   alias HamsterTravel.Planning.{
     Accommodations,
     Activities,
+    Common,
     DayExpenses,
     Destinations,
     FoodExpense,
@@ -21,6 +22,7 @@ defmodule HamsterTravel.Planning.Trips do
     Note,
     Notes,
     Policy,
+    PubSub,
     Transfer,
     Transfers,
     Trip,
@@ -290,6 +292,22 @@ defmodule HamsterTravel.Planning.Trips do
     end)
   end
 
+  def move_day(%Trip{} = _trip, _from_day_index, _to_day_index, nil), do: {:error, "Unauthorized"}
+
+  def move_day(%Trip{} = trip, from_day_index, to_day_index, %User{} = user) do
+    with :ok <- Policy.authorize_edit(trip, user),
+         :ok <- Common.validate_day_index_in_trip_duration(from_day_index, trip.duration),
+         :ok <- Common.validate_day_index_in_trip_duration(to_day_index, trip.duration) do
+      if from_day_index == to_day_index do
+        {:ok, get_trip!(trip.id)}
+      else
+        trip
+        |> move_day_transaction(from_day_index, to_day_index)
+        |> PubSub.broadcast([:trip, :updated], trip.id)
+      end
+    end
+  end
+
   def update_trip_cover(%Trip{} = trip, %Plug.Upload{} = upload) do
     with {:ok, file_name} <- TripCover.store({upload, trip}) do
       cover = %{
@@ -397,6 +415,119 @@ defmodule HamsterTravel.Planning.Trips do
   defp preload_trip_participants(%Trip{} = trip) do
     Repo.preload(trip, trip_participants: :user)
   end
+
+  defp move_day_transaction(%Trip{} = trip, from_day_index, to_day_index) do
+    Repo.transaction(fn ->
+      trip = get_trip!(trip.id)
+
+      with :ok <- move_day_for_destinations(trip.destinations, from_day_index, to_day_index),
+           :ok <- move_day_for_accommodations(trip.accommodations, from_day_index, to_day_index),
+           :ok <- move_day_for_transfers(trip.transfers, from_day_index, to_day_index),
+           :ok <- move_day_for_activities(trip.activities, from_day_index, to_day_index),
+           :ok <- move_day_for_day_expenses(trip.day_expenses, from_day_index, to_day_index),
+           :ok <- move_day_for_notes(trip.notes, from_day_index, to_day_index) do
+        get_trip!(trip.id)
+      else
+        {:error, reason} -> Repo.rollback(reason)
+      end
+    end)
+  end
+
+  defp move_day_for_destinations(destinations, from_day_index, to_day_index) do
+    move_day_for_records(destinations, &Destination.changeset/2, fn destination ->
+      new_start_day = remap_day_index(destination.start_day, from_day_index, to_day_index)
+      new_end_day = remap_day_index(destination.end_day, from_day_index, to_day_index)
+      {new_start_day, new_end_day} = normalize_day_range(new_start_day, new_end_day)
+
+      changed_attrs(destination, %{start_day: new_start_day, end_day: new_end_day})
+    end)
+  end
+
+  defp move_day_for_accommodations(accommodations, from_day_index, to_day_index) do
+    move_day_for_records(accommodations, &Accommodation.changeset/2, fn accommodation ->
+      new_start_day = remap_day_index(accommodation.start_day, from_day_index, to_day_index)
+      new_end_day = remap_day_index(accommodation.end_day, from_day_index, to_day_index)
+      {new_start_day, new_end_day} = normalize_day_range(new_start_day, new_end_day)
+
+      changed_attrs(accommodation, %{start_day: new_start_day, end_day: new_end_day})
+    end)
+  end
+
+  defp move_day_for_transfers(transfers, from_day_index, to_day_index) do
+    move_day_for_records(transfers, &Transfer.changeset/2, fn transfer ->
+      new_day_index = remap_day_index(transfer.day_index, from_day_index, to_day_index)
+      changed_attrs(transfer, %{day_index: new_day_index})
+    end)
+  end
+
+  defp move_day_for_activities(activities, from_day_index, to_day_index) do
+    move_day_for_records(activities, &Activity.changeset/2, fn activity ->
+      new_day_index = remap_day_index(activity.day_index, from_day_index, to_day_index)
+      changed_attrs(activity, %{day_index: new_day_index})
+    end)
+  end
+
+  defp move_day_for_day_expenses(day_expenses, from_day_index, to_day_index) do
+    move_day_for_records(day_expenses, &DayExpense.changeset/2, fn day_expense ->
+      new_day_index = remap_day_index(day_expense.day_index, from_day_index, to_day_index)
+      changed_attrs(day_expense, %{day_index: new_day_index})
+    end)
+  end
+
+  defp move_day_for_notes(notes, from_day_index, to_day_index) do
+    move_day_for_records(notes, &Note.changeset/2, fn note ->
+      new_day_index =
+        case note.day_index do
+          nil -> nil
+          day_index -> remap_day_index(day_index, from_day_index, to_day_index)
+        end
+
+      changed_attrs(note, %{day_index: new_day_index})
+    end)
+  end
+
+  defp move_day_for_records(records, changeset_fun, attrs_fun) do
+    Enum.reduce_while(records, :ok, fn record, :ok ->
+      attrs = attrs_fun.(record)
+
+      if map_size(attrs) == 0 do
+        {:cont, :ok}
+      else
+        case Repo.update(changeset_fun.(record, attrs)) do
+          {:ok, _updated_record} -> {:cont, :ok}
+          {:error, changeset} -> {:halt, {:error, changeset}}
+        end
+      end
+    end)
+  end
+
+  defp changed_attrs(record, attrs) do
+    Enum.reduce(attrs, %{}, fn {key, value}, acc ->
+      if Map.get(record, key) == value do
+        acc
+      else
+        Map.put(acc, key, value)
+      end
+    end)
+  end
+
+  defp remap_day_index(day_index, from_day_index, to_day_index) when day_index == from_day_index,
+    do: to_day_index
+
+  defp remap_day_index(day_index, from_day_index, to_day_index)
+       when from_day_index < to_day_index and day_index > from_day_index and
+              day_index <= to_day_index,
+       do: day_index - 1
+
+  defp remap_day_index(day_index, from_day_index, to_day_index)
+       when from_day_index > to_day_index and day_index >= to_day_index and
+              day_index < from_day_index,
+       do: day_index + 1
+
+  defp remap_day_index(day_index, _from_day_index, _to_day_index), do: day_index
+
+  defp normalize_day_range(start_day, end_day) when start_day <= end_day, do: {start_day, end_day}
+  defp normalize_day_range(start_day, end_day), do: {end_day, start_day}
 
   defp paginate(query, page, page_size, preload_callback) when is_function(preload_callback, 1) do
     page = normalize_page(page)
