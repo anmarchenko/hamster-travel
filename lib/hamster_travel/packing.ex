@@ -18,15 +18,37 @@ defmodule HamsterTravel.Packing do
   alias HamsterTravel.Packing.Template
 
   @topic "backpacks"
+  @default_page_size 12
 
   # BACKPACK
 
   def list_backpacks(user) do
-    query = from b in Backpack, order_by: [desc: b.inserted_at]
-
-    query
-    |> Policy.user_scope(user)
+    user
+    |> backpacks_query()
     |> Repo.all()
+  end
+
+  def list_backpacks_paginated(user, page \\ 1, page_size \\ @default_page_size) do
+    query = backpacks_query(user)
+    page = normalize_page(page)
+    page_size = normalize_page_size(page_size)
+    total_entries = Repo.aggregate(query, :count, :id)
+    total_pages = total_pages(total_entries, page_size)
+    current_page = min(page, total_pages)
+
+    entries =
+      query
+      |> limit(^page_size)
+      |> offset(^((current_page - 1) * page_size))
+      |> Repo.all()
+
+    %{
+      entries: entries,
+      page: current_page,
+      page_size: page_size,
+      total_entries: total_entries,
+      total_pages: total_pages
+    }
   end
 
   def fetch_backpack!(slug, user) do
@@ -217,6 +239,12 @@ defmodule HamsterTravel.Packing do
     backpacks_count
   end
 
+  defp backpacks_query(user) do
+    query = from b in Backpack, order_by: [desc: b.inserted_at]
+
+    Policy.user_scope(query, user)
+  end
+
   defp backpack_preloading(query) do
     items_preload_query = from i in Item, order_by: [i.rank]
 
@@ -264,4 +292,14 @@ defmodule HamsterTravel.Packing do
   end
 
   defp send_telemetry_event(result, _, _), do: result
+
+  defp normalize_page(page) when is_integer(page) and page > 0, do: page
+  defp normalize_page(_), do: 1
+
+  defp normalize_page_size(page_size) when is_integer(page_size) and page_size > 0, do: page_size
+  defp normalize_page_size(_), do: @default_page_size
+
+  defp total_pages(total_entries, page_size) do
+    max(1, div(total_entries + page_size - 1, page_size))
+  end
 end

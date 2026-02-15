@@ -95,6 +95,7 @@ defmodule HamsterTravelWeb do
       import PetalComponents.Form
       import PetalComponents.Field
       import PetalComponents.Input
+      import PetalComponents.Pagination
       import PetalComponents.Tabs
       import PetalComponents.Icon
 

@@ -51,6 +51,25 @@ defmodule HamsterTravelWeb.Packing.IndexBackpacksTest do
       assert html =~ "New backpack"
     end
 
+    test "shows pagination when backpacks exceed one page", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      for idx <- 1..13 do
+        backpack_fixture(%{user_id: user.id, name: "Backpack #{idx}"})
+      end
+
+      {:ok, _view, html} = live(conn, ~p"/backpacks")
+
+      assert html =~ "pc-pagination"
+      assert html =~ "/backpacks?page=2"
+
+      {:ok, _view, page_2_html} = live(conn, ~p"/backpacks?page=2")
+
+      assert page_2_html =~ "pc-pagination"
+      assert page_2_html =~ "/backpacks?page=1"
+    end
+
     test "redirects if user is not authenticated", %{conn: conn} do
       # Try to visit the backpacks page without logging in
       result = live(conn, ~p"/backpacks")

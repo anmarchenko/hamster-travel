@@ -53,6 +53,25 @@ defmodule HamsterTravelWeb.Planning.IndexPlansTest do
       assert html =~ "Plan your first trip"
     end
 
+    test "shows pagination when plans exceed one page", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      for idx <- 1..13 do
+        trip_fixture(%{author_id: user.id, status: "1_planned", name: "Trip #{idx}"})
+      end
+
+      {:ok, _view, html} = live(conn, ~p"/plans")
+
+      assert html =~ "pc-pagination"
+      assert html =~ "/plans?page=2"
+
+      {:ok, _view, page_2_html} = live(conn, ~p"/plans?page=2")
+
+      assert page_2_html =~ "pc-pagination"
+      assert page_2_html =~ "/plans?page=1"
+    end
+
     test "uses current user default currency for displayed budget", %{conn: conn} do
       user = user_fixture(%{default_currency: "USD"})
       conn = log_in_user(conn, user)

@@ -40,7 +40,35 @@ defmodule HamsterTravel.Planning.Trips do
 
   alias HamsterTravel.Repo
 
+  @default_page_size 12
+
   def list_plans(user \\ nil) do
+    user
+    |> plans_query()
+    |> Repo.all()
+    |> trip_preloading()
+  end
+
+  def list_plans_paginated(user \\ nil, page \\ 1, page_size \\ @default_page_size) do
+    user
+    |> plans_query()
+    |> paginate(page, page_size, &trip_preloading/1)
+  end
+
+  def list_drafts(user) do
+    user
+    |> drafts_query()
+    |> Repo.all()
+    |> trip_preloading()
+  end
+
+  def list_drafts_paginated(user, page \\ 1, page_size \\ @default_page_size) do
+    user
+    |> drafts_query()
+    |> paginate(page, page_size, &trip_preloading/1)
+  end
+
+  defp plans_query(user) do
     query =
       from t in Trip,
         where: t.status in [^Trip.planned(), ^Trip.finished()],
@@ -51,11 +79,9 @@ defmodule HamsterTravel.Planning.Trips do
 
     query
     |> Policy.user_plans_scope(user)
-    |> Repo.all()
-    |> trip_preloading()
   end
 
-  def list_drafts(user) do
+  defp drafts_query(user) do
     query =
       from t in Trip,
         where: t.status == ^Trip.draft(),
@@ -65,8 +91,6 @@ defmodule HamsterTravel.Planning.Trips do
 
     query
     |> Policy.user_drafts_scope(user)
-    |> Repo.all()
-    |> trip_preloading()
   end
 
   def list_profile_finished_trips(%User{} = user) do
@@ -318,6 +342,39 @@ defmodule HamsterTravel.Planning.Trips do
 
   defp preload_trip_participants(%Trip{} = trip) do
     Repo.preload(trip, trip_participants: :user)
+  end
+
+  defp paginate(query, page, page_size, preload_callback) when is_function(preload_callback, 1) do
+    page = normalize_page(page)
+    page_size = normalize_page_size(page_size)
+    total_entries = Repo.aggregate(query, :count, :id)
+    total_pages = total_pages(total_entries, page_size)
+    current_page = min(page, total_pages)
+
+    entries =
+      query
+      |> limit(^page_size)
+      |> offset(^((current_page - 1) * page_size))
+      |> Repo.all()
+      |> preload_callback.()
+
+    %{
+      entries: entries,
+      page: current_page,
+      page_size: page_size,
+      total_entries: total_entries,
+      total_pages: total_pages
+    }
+  end
+
+  defp normalize_page(page) when is_integer(page) and page > 0, do: page
+  defp normalize_page(_), do: 1
+
+  defp normalize_page_size(page_size) when is_integer(page_size) and page_size > 0, do: page_size
+  defp normalize_page_size(_), do: @default_page_size
+
+  defp total_pages(total_entries, page_size) do
+    max(1, div(total_entries + page_size - 1, page_size))
   end
 
   defp authorize_participant_management(%Trip{} = trip, %User{} = actor) do

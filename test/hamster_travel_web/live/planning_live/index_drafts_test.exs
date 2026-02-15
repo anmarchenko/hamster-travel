@@ -50,6 +50,25 @@ defmodule HamsterTravelWeb.Planning.IndexDraftsTest do
       assert html =~ "Create your first draft"
     end
 
+    test "shows pagination when drafts exceed one page", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      for idx <- 1..13 do
+        trip_fixture(%{author_id: user.id, status: Trip.draft(), name: "Draft #{idx}"})
+      end
+
+      {:ok, _view, html} = live(conn, ~p"/drafts")
+
+      assert html =~ "pc-pagination"
+      assert html =~ "/drafts?page=2"
+
+      {:ok, _view, page_2_html} = live(conn, ~p"/drafts?page=2")
+
+      assert page_2_html =~ "pc-pagination"
+      assert page_2_html =~ "/drafts?page=1"
+    end
+
     test "redirects if user is not authenticated", %{conn: conn} do
       # Try to visit the drafts page without logging in
       result = live(conn, ~p"/drafts")

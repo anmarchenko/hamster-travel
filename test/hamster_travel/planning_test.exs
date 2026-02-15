@@ -88,6 +88,37 @@ defmodule HamsterTravel.PlanningTest do
                Planning.list_plans()
     end
 
+    test "list_plans_paginated/3 returns paginated planned and finished trips", %{user: user} do
+      for idx <- 1..15 do
+        start_date = Date.add(~D[2023-01-01], idx)
+        end_date = Date.add(start_date, 1)
+
+        trip_fixture(%{
+          author_id: user.id,
+          status: Trip.planned(),
+          name: "Planned Trip #{idx}",
+          start_date: start_date,
+          end_date: end_date
+        })
+      end
+
+      page_1 = Planning.list_plans_paginated(user, 1, 10)
+      page_2 = Planning.list_plans_paginated(user, 2, 10)
+      page_3 = Planning.list_plans_paginated(user, 3, 10)
+
+      assert page_1.page == 1
+      assert page_1.page_size == 10
+      assert page_1.total_entries == 15
+      assert page_1.total_pages == 2
+      assert length(page_1.entries) == 10
+
+      assert page_2.page == 2
+      assert length(page_2.entries) == 5
+
+      assert page_3.page == 2
+      assert length(page_3.entries) == 5
+    end
+
     test "list_drafts/1 returns all drafts for user", %{
       user: user,
       friend: friend
@@ -114,6 +145,32 @@ defmodule HamsterTravel.PlanningTest do
                %Trip{id: ^second_id}
              ] =
                Planning.list_drafts(user)
+    end
+
+    test "list_drafts_paginated/3 returns paginated drafts", %{user: user} do
+      for idx <- 1..15 do
+        trip_fixture(%{
+          author_id: user.id,
+          status: Trip.draft(),
+          name: "Draft #{String.pad_leading(Integer.to_string(idx), 2, "0")}"
+        })
+      end
+
+      page_1 = Planning.list_drafts_paginated(user, 1, 10)
+      page_2 = Planning.list_drafts_paginated(user, 2, 10)
+      page_3 = Planning.list_drafts_paginated(user, 3, 10)
+
+      assert page_1.page == 1
+      assert page_1.page_size == 10
+      assert page_1.total_entries == 15
+      assert page_1.total_pages == 2
+      assert length(page_1.entries) == 10
+
+      assert page_2.page == 2
+      assert length(page_2.entries) == 5
+
+      assert page_3.page == 2
+      assert length(page_3.entries) == 5
     end
 
     test "profile_stats/1 returns totals and unique countries from finished trips and manually added cities",

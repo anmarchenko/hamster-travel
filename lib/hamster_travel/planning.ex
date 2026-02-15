@@ -50,6 +50,15 @@ defmodule HamsterTravel.Planning do
   end
 
   @doc """
+  Lists planned and finished trips with pagination metadata.
+
+  Returns a map with `:entries`, `:page`, `:page_size`, `:total_entries`, and `:total_pages`.
+  """
+  def list_plans_paginated(user \\ nil, page \\ 1, page_size \\ 12) do
+    Trips.list_plans_paginated(user, page, page_size)
+  end
+
+  @doc """
   Lists draft trips visible to the given user.
 
   Pass the author `%User{}` to fetch their drafts.
@@ -62,6 +71,15 @@ defmodule HamsterTravel.Planning do
   """
   def list_drafts(user) do
     Trips.list_drafts(user)
+  end
+
+  @doc """
+  Lists draft trips visible to the given user with pagination metadata.
+
+  Returns a map with `:entries`, `:page`, `:page_size`, `:total_entries`, and `:total_pages`.
+  """
+  def list_drafts_paginated(user, page \\ 1, page_size \\ 12) do
+    Trips.list_drafts_paginated(user, page, page_size)
   end
 
   @type profile_stats :: %{

@@ -30,6 +30,32 @@ defmodule HamsterTravel.PackingTest do
                Packing.list_backpacks(user)
     end
 
+    test "list_backpacks_paginated/3 returns paginated backpacks including ones from friends", %{
+      user: user,
+      friend: friend
+    } do
+      for idx <- 1..15 do
+        owner_id = if idx <= 8, do: user.id, else: friend.id
+        backpack_fixture(%{user_id: owner_id, name: "Backpack #{idx}"})
+      end
+
+      page_1 = Packing.list_backpacks_paginated(user, 1, 10)
+      page_2 = Packing.list_backpacks_paginated(user, 2, 10)
+      page_3 = Packing.list_backpacks_paginated(user, 3, 10)
+
+      assert page_1.page == 1
+      assert page_1.page_size == 10
+      assert page_1.total_entries == 15
+      assert page_1.total_pages == 2
+      assert length(page_1.entries) == 10
+
+      assert page_2.page == 2
+      assert length(page_2.entries) == 5
+
+      assert page_3.page == 2
+      assert length(page_3.entries) == 5
+    end
+
     test "get_backpack/1 returns the backpack with given id and preloads" do
       backpack = backpack_fixture()
       db_backpack = Packing.get_backpack(backpack.id)
