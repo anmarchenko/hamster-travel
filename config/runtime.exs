@@ -56,7 +56,7 @@ if config_env() == :prod do
   env_true? = fn value ->
     value
     |> String.downcase()
-    |> Kernel.in?(["1", "true", "yes", "on"])
+    |> then(&(&1 in ["1", "true", "yes", "on"]))
   end
 
   chromic_pdf_on_demand? =
