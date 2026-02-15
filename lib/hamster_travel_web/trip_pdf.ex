@@ -298,22 +298,18 @@ defmodule HamsterTravelWeb.TripPdf do
             font-style: italic;
           }
 
-          .mode-pill {
-            display: inline-flex;
-            align-items: center;
-            border: 1px solid #cbd5e1;
-            border-radius: 999px;
-            padding: 1px 7px;
-            font-size: 0.62em;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            margin-bottom: 2px;
-          }
-
           .transfer-route {
             font-weight: 800;
             margin-bottom: 1px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+          }
+
+          .transfer-icon {
+            font-size: 1.05em;
+            line-height: 1;
+            flex-shrink: 0;
           }
 
           .expense-total {
@@ -593,6 +589,8 @@ defmodule HamsterTravelWeb.TripPdf do
 
         arrival_route_point = city_with_optional_station(arrival_city, transfer.arrival_station)
         route = "#{departure_route_point} -> #{arrival_route_point}"
+        transport_mode = transport_mode_label(transfer.transport_mode)
+        transport_icon = transport_mode_icon(transfer.transport_mode)
 
         time_text =
           join_with_arrow([
@@ -616,8 +614,10 @@ defmodule HamsterTravelWeb.TripPdf do
         <article class="card transfer-card">
           <div class="card-header">
             <div>
-              <div class="mode-pill">#{escape_html(transport_mode_label(transfer.transport_mode))}</div>
-              <div class="transfer-route">#{escape_html(route)}</div>
+              <div class="transfer-route" title="#{escape_html(transport_mode)}">
+                <span class="transfer-icon">#{escape_html(transport_icon)}</span>
+                <span>#{escape_html(route)}</span>
+              </div>
             </div>
             #{card_price_html(money_text(expense_price(transfer), display_currency))}
           </div>
@@ -1016,6 +1016,14 @@ defmodule HamsterTravelWeb.TripPdf do
   end
 
   defp transport_mode_label(_), do: gettext("Transfer")
+
+  defp transport_mode_icon("flight"), do: "✈"
+  defp transport_mode_icon("train"), do: "🚆"
+  defp transport_mode_icon("bus"), do: "🚌"
+  defp transport_mode_icon("car"), do: "🚗"
+  defp transport_mode_icon("taxi"), do: "🚕"
+  defp transport_mode_icon("boat"), do: "⛴"
+  defp transport_mode_icon(_), do: "→"
 
   defp blank?(nil), do: true
   defp blank?(value) when is_binary(value), do: String.trim(value) == ""
