@@ -70,6 +70,9 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             >
               <.icon_text icon="hero-document-duplicate" label={gettext("Make a copy")} />
             </.button>
+            <.button link_type="a" to={trip_url(@trip.slug, :export_pdf)} color="secondary">
+              <.icon_text icon="hero-arrow-down-tray" label={gettext("Export to PDF")} />
+            </.button>
             <.button
               :if={Policy.authorized?(:delete, @trip, @current_user)}
               phx-click="delete_trip"

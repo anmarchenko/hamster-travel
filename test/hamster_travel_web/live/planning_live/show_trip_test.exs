@@ -32,6 +32,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       # Verify copy button is displayed
       assert html =~ "Make a copy"
+      assert has_element?(view, "a[href=\"/trips/#{trip.slug}/export.pdf\"]", "Export to PDF")
 
       # Verify that the tabs are rendered
       assert has_element?(view, "a", "Transfers and hotels")

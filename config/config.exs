@@ -77,6 +77,8 @@ config :hamster_travel, HamsterTravelWeb.Telemetry,
 
 config :hamster_travel, :geonames_req_options, []
 
+config :hamster_travel, :trip_pdf_renderer, HamsterTravelWeb.TripPdf.ChromicRenderer
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

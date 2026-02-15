@@ -8,9 +8,12 @@ defmodule HamsterTravel.Application do
 
   @impl true
   def start(_type, _args) do
+    chromic_pdf_opts = Application.get_env(:hamster_travel, ChromicPDF, [])
+
     children = [
       # Start the Ecto repository
       HamsterTravel.Repo,
+      {ChromicPDF, chromic_pdf_opts},
       # Start the Telemetry supervisor
       HamsterTravelWeb.Telemetry,
       # Start the PubSub system

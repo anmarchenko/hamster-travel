@@ -53,6 +53,32 @@ if config_env() == :prod do
     report_metrics: true,
     periodic_measurements_enabled: false
 
+  env_true? = fn value ->
+    value
+    |> String.downcase()
+    |> Kernel.in?(["1", "true", "yes", "on"])
+  end
+
+  chromic_pdf_on_demand? =
+    System.get_env("CHROMIC_PDF_ON_DEMAND", "true")
+    |> env_true?.()
+
+  chromic_pdf_no_sandbox? =
+    System.get_env("CHROMIC_PDF_NO_SANDBOX", "true")
+    |> env_true?.()
+
+  chromic_pdf_discard_stderr? =
+    System.get_env("CHROMIC_PDF_DISCARD_STDERR", "true")
+    |> env_true?.()
+
+  config :hamster_travel, ChromicPDF,
+    on_demand: chromic_pdf_on_demand?,
+    no_sandbox: chromic_pdf_no_sandbox?,
+    discard_stderr: chromic_pdf_discard_stderr?,
+    chrome_executable: System.get_env("CHROME_BIN", "/usr/bin/chromium"),
+    session_pool: [size: 1, timeout: 60_000, checkout_timeout: 60_000],
+    ghostscript_pool: [size: 1]
+
   config :ex_money,
     auto_start_exchange_rate_service: true,
     # 2 hours

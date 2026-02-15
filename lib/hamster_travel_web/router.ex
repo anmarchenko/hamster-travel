@@ -21,6 +21,7 @@ defmodule HamsterTravelWeb.Router do
     pipe_through [:browser, :require_authenticated_user]
 
     delete "/users/log_out", UserSessionController, :delete
+    get "/trips/:trip_slug/export.pdf", TripPdfController, :show
 
     live_session :authenticated,
       on_mount: [

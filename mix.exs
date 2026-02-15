@@ -96,6 +96,7 @@ defmodule HamsterTravel.MixProject do
       # money
       {:ex_money, "~> 5.0"},
       {:ex_money_sql, "~> 1.0"},
+      {:chromic_pdf, "~> 1.16"},
 
       # observability
       {:phoenix_live_dashboard, "~> 0.8"},
