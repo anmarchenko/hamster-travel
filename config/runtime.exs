@@ -60,7 +60,7 @@ if config_env() == :prod do
   end
 
   chromic_pdf_on_demand? =
-    System.get_env("CHROMIC_PDF_ON_DEMAND", "true")
+    System.get_env("CHROMIC_PDF_ON_DEMAND", "false")
     |> env_true?.()
 
   chromic_pdf_no_sandbox? =

@@ -8,16 +8,26 @@ defmodule HamsterTravel.Config.RuntimeTest do
     "PHX_HOST" => "example.com",
     "OPEN_EXCHANGE_RATES_APP_ID" => "test-app-id"
   }
+  @defaulted_env [
+    "CHROMIC_PDF_ON_DEMAND",
+    "CHROMIC_PDF_NO_SANDBOX",
+    "CHROMIC_PDF_DISCARD_STDERR",
+    "CHROMIC_PDF_DISABLE_DEV_SHM_USAGE"
+  ]
 
   setup do
+    managed_keys = Map.keys(@required_env) ++ @defaulted_env
+
     original_values =
-      Map.new(@required_env, fn {key, _value} ->
+      Map.new(managed_keys, fn key ->
         {key, System.get_env(key)}
       end)
 
     Enum.each(@required_env, fn {key, value} ->
       System.put_env(key, value)
     end)
+
+    Enum.each(@defaulted_env, &System.delete_env/1)
 
     on_exit(fn ->
       Enum.each(original_values, fn
@@ -43,6 +53,7 @@ defmodule HamsterTravel.Config.RuntimeTest do
 
     session_pool_opts = Keyword.fetch!(chromic_pdf_opts, :session_pool)
 
+    assert Keyword.fetch!(chromic_pdf_opts, :on_demand) == false
     assert Keyword.fetch!(session_pool_opts, :timeout) == 60_000
     assert Keyword.fetch!(session_pool_opts, :init_timeout) == 60_000
     assert Keyword.fetch!(session_pool_opts, :checkout_timeout) == 60_000

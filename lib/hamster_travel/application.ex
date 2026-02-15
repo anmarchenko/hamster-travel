@@ -9,6 +9,7 @@ defmodule HamsterTravel.Application do
   @impl true
   def start(_type, _args) do
     chromic_pdf_opts = Application.get_env(:hamster_travel, ChromicPDF, [])
+    log_chromic_pdf_startup_config(chromic_pdf_opts)
 
     children = [
       # Start the Ecto repository
@@ -72,6 +73,24 @@ defmodule HamsterTravel.Application do
         )
       end
     end
+  end
+
+  defp log_chromic_pdf_startup_config(chromic_pdf_opts) do
+    effective_opts =
+      chromic_pdf_opts
+      |> Keyword.take([
+        :on_demand,
+        :no_sandbox,
+        :discard_stderr,
+        :chrome_args,
+        :chrome_executable,
+        :session_pool,
+        :ghostscript_pool,
+        :offline,
+        :ignore_certificate_errors
+      ])
+
+    Logger.info("ChromicPDF startup config: #{inspect(effective_opts)}")
   end
 
   defp maybe_add_missing(missing, nil, key), do: missing ++ [key]
