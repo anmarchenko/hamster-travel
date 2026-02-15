@@ -49,9 +49,15 @@ defmodule HamsterTravel.Planning.Trips do
     |> trip_preloading()
   end
 
-  def list_plans_paginated(user \\ nil, page \\ 1, page_size \\ @default_page_size) do
+  def list_plans_paginated(
+        user \\ nil,
+        page \\ 1,
+        page_size \\ @default_page_size,
+        search_query \\ nil
+      ) do
     user
     |> plans_query()
+    |> apply_search_query(search_query)
     |> paginate(page, page_size, &trip_preloading/1)
   end
 
@@ -62,9 +68,10 @@ defmodule HamsterTravel.Planning.Trips do
     |> trip_preloading()
   end
 
-  def list_drafts_paginated(user, page \\ 1, page_size \\ @default_page_size) do
+  def list_drafts_paginated(user, page \\ 1, page_size \\ @default_page_size, search_query \\ nil) do
     user
     |> drafts_query()
+    |> apply_search_query(search_query)
     |> paginate(page, page_size, &trip_preloading/1)
   end
 
@@ -91,6 +98,53 @@ defmodule HamsterTravel.Planning.Trips do
 
     query
     |> Policy.user_drafts_scope(user)
+  end
+
+  defp apply_search_query(query, search_query) do
+    case to_prefix_tsquery(search_query) do
+      nil ->
+        query
+
+      tsquery ->
+        query
+        |> where(
+          [t],
+          fragment(
+            "(setweight(to_tsvector('simple', coalesce(?, '')), 'A') || setweight(to_tsvector('simple', coalesce(?, '')), 'B')) @@ to_tsquery('simple', ?)",
+            t.name,
+            t.search_text,
+            ^tsquery
+          )
+        )
+        |> prepend_order_by(
+          [t],
+          desc:
+            fragment(
+              "ts_rank_cd((setweight(to_tsvector('simple', coalesce(?, '')), 'A') || setweight(to_tsvector('simple', coalesce(?, '')), 'B')), to_tsquery('simple', ?))",
+              t.name,
+              t.search_text,
+              ^tsquery
+            )
+        )
+    end
+  end
+
+  defp to_prefix_tsquery(search_query) when is_binary(search_query) do
+    search_query
+    |> String.trim()
+    |> String.split(~r/\s+/u, trim: true)
+    |> Enum.map(&sanitize_search_token/1)
+    |> Enum.reject(&(&1 == ""))
+    |> case do
+      [] -> nil
+      tokens -> Enum.map_join(tokens, " & ", &"#{&1}:*")
+    end
+  end
+
+  defp to_prefix_tsquery(_), do: nil
+
+  defp sanitize_search_token(token) do
+    String.replace(token, ~r/[^\p{L}\p{N}]/u, "")
   end
 
   def list_profile_finished_trips(%User{} = user) do

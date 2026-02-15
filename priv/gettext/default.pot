@@ -12,14 +12,14 @@ msgstr ""
 
 #: lib/hamster_travel_web/components/layouts.ex:21
 #: lib/hamster_travel_web/components/layouts.ex:104
-#: lib/hamster_travel_web/live/planning_live/index_plans.ex:43
+#: lib/hamster_travel_web/live/planning_live/index_plans.ex:79
 #, elixir-autogen, elixir-format
 msgid "Plans"
 msgstr ""
 
 #: lib/hamster_travel_web/components/layouts.ex:27
 #: lib/hamster_travel_web/components/layouts.ex:120
-#: lib/hamster_travel_web/live/packing_live/index_backpacks.ex:34
+#: lib/hamster_travel_web/live/packing_live/index_backpacks.ex:44
 #, elixir-autogen, elixir-format
 msgid "Backpacks"
 msgstr ""
@@ -33,8 +33,8 @@ msgstr ""
 #: lib/hamster_travel_web/live/packing_live/show_backpack.ex:29
 #: lib/hamster_travel_web/live/planning_live/components/food_expense.ex:40
 #: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:136
-#: lib/hamster_travel_web/trip_pdf.ex:773
-#: lib/hamster_travel_web/trip_pdf.ex:824
+#: lib/hamster_travel_web/trip_pdf.ex:838
+#: lib/hamster_travel_web/trip_pdf.ex:889
 #, elixir-format, ex-autogen, elixir-autogen
 msgid "day"
 msgid_plural "days"
@@ -53,7 +53,7 @@ msgstr "Draft"
 
 #: lib/hamster_travel_web/components/layouts.ex:24
 #: lib/hamster_travel_web/components/layouts.ex:112
-#: lib/hamster_travel_web/live/planning_live/index_drafts.ex:43
+#: lib/hamster_travel_web/live/planning_live/index_drafts.ex:79
 #, elixir-autogen, elixir-format
 msgid "Drafts"
 msgstr ""
@@ -68,7 +68,7 @@ msgstr ""
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:898
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1251
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1351
-#: lib/hamster_travel_web/trip_pdf.ex:696
+#: lib/hamster_travel_web/trip_pdf.ex:761
 #, elixir-autogen, elixir-format
 msgid "Activities"
 msgstr ""
@@ -87,8 +87,8 @@ msgstr ""
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1052
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1091
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1126
-#: lib/hamster_travel_web/trip_pdf.ex:360
-#: lib/hamster_travel_web/trip_pdf.ex:686
+#: lib/hamster_travel_web/trip_pdf.ex:436
+#: lib/hamster_travel_web/trip_pdf.ex:751
 #, elixir-autogen, elixir-format
 msgid "Transfers"
 msgstr ""
@@ -96,7 +96,7 @@ msgstr ""
 #: lib/hamster_travel_web/live/planning_live/components/day_range_select.ex:50
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1086
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1418
-#: lib/hamster_travel_web/trip_pdf.ex:358
+#: lib/hamster_travel_web/trip_pdf.ex:434
 #, elixir-autogen, elixir-format
 msgid "Day"
 msgstr ""
@@ -174,7 +174,7 @@ msgid "Backpack name"
 msgstr ""
 
 #: lib/hamster_travel_web/live/packing_live/create_backpack.ex:45
-#: lib/hamster_travel_web/live/packing_live/index_backpacks.ex:19
+#: lib/hamster_travel_web/live/packing_live/index_backpacks.ex:21
 #, elixir-autogen, elixir-format
 msgid "Create backpack"
 msgstr ""
@@ -197,8 +197,8 @@ msgstr ""
 #: lib/hamster_travel_web/live/packing_live/components/packing_components.ex:23
 #: lib/hamster_travel_web/live/packing_live/show_backpack.ex:29
 #: lib/hamster_travel_web/live/planning_live/components/accommodation.ex:61
-#: lib/hamster_travel_web/trip_pdf.ex:900
-#: lib/hamster_travel_web/trip_pdf.ex:903
+#: lib/hamster_travel_web/trip_pdf.ex:1069
+#: lib/hamster_travel_web/trip_pdf.ex:1072
 #, elixir-autogen, elixir-format
 msgid "night"
 msgid_plural "nights"
@@ -235,8 +235,8 @@ msgstr ""
 msgid "Sign in to your account"
 msgstr ""
 
-#: lib/hamster_travel/packing.ex:64
-#: lib/hamster_travel/planning/trips.ex:123
+#: lib/hamster_travel/packing.ex:86
+#: lib/hamster_travel/planning/trips.ex:201
 #, elixir-autogen, elixir-format
 msgid "Copy"
 msgstr ""
@@ -334,12 +334,12 @@ msgstr ""
 msgid "Backpack template"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/index_plans.ex:27
+#: lib/hamster_travel_web/live/planning_live/index_plans.ex:29
 #, elixir-autogen, elixir-format
 msgid "Create trip"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/index_drafts.ex:27
+#: lib/hamster_travel_web/live/planning_live/index_drafts.ex:29
 #, elixir-autogen, elixir-format
 msgid "Create draft"
 msgstr ""
@@ -520,19 +520,19 @@ msgid "Arrival time"
 msgstr ""
 
 #: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:306
-#: lib/hamster_travel_web/trip_pdf.ex:857
+#: lib/hamster_travel_web/trip_pdf.ex:1010
 #, elixir-autogen, elixir-format
 msgid "Boat"
 msgstr ""
 
 #: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:303
-#: lib/hamster_travel_web/trip_pdf.ex:854
+#: lib/hamster_travel_web/trip_pdf.ex:1007
 #, elixir-autogen, elixir-format
 msgid "Bus"
 msgstr ""
 
 #: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:304
-#: lib/hamster_travel_web/trip_pdf.ex:855
+#: lib/hamster_travel_web/trip_pdf.ex:1008
 #, elixir-autogen, elixir-format
 msgid "Car"
 msgstr ""
@@ -548,19 +548,19 @@ msgid "Departure time"
 msgstr ""
 
 #: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:301
-#: lib/hamster_travel_web/trip_pdf.ex:852
+#: lib/hamster_travel_web/trip_pdf.ex:1005
 #, elixir-autogen, elixir-format
 msgid "Flight"
 msgstr ""
 
 #: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:305
-#: lib/hamster_travel_web/trip_pdf.ex:856
+#: lib/hamster_travel_web/trip_pdf.ex:1009
 #, elixir-autogen, elixir-format
 msgid "Taxi"
 msgstr ""
 
 #: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:302
-#: lib/hamster_travel_web/trip_pdf.ex:853
+#: lib/hamster_travel_web/trip_pdf.ex:1006
 #, elixir-autogen, elixir-format
 msgid "Train"
 msgstr ""
@@ -734,7 +734,7 @@ msgstr ""
 
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1232
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1333
-#: lib/hamster_travel_web/trip_pdf.ex:342
+#: lib/hamster_travel_web/trip_pdf.ex:414
 #, elixir-autogen, elixir-format
 msgid "Expenses"
 msgstr ""
@@ -765,13 +765,13 @@ msgid "People"
 msgstr ""
 
 #: lib/hamster_travel_web/live/planning_live/components/food_expense_form.ex:62
-#: lib/hamster_travel_web/trip_pdf.ex:740
+#: lib/hamster_travel_web/trip_pdf.ex:805
 #, elixir-autogen, elixir-format
 msgid "Total"
 msgstr ""
 
 #: lib/hamster_travel_web/live/planning_live/components/food_expense.ex:40
-#: lib/hamster_travel_web/trip_pdf.ex:827
+#: lib/hamster_travel_web/trip_pdf.ex:892
 #, elixir-autogen, elixir-format
 msgid "per day"
 msgstr ""
@@ -782,7 +782,7 @@ msgid "Food expenses"
 msgstr ""
 
 #: lib/hamster_travel_web/live/planning_live/components/food_expense.ex:44
-#: lib/hamster_travel_web/trip_pdf.ex:825
+#: lib/hamster_travel_web/trip_pdf.ex:890
 #, elixir-autogen, elixir-format
 msgid "person"
 msgid_plural "people"
@@ -1248,13 +1248,13 @@ msgstr ""
 msgid "Select from friends"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/index_drafts.ex:21
+#: lib/hamster_travel_web/live/planning_live/index_drafts.ex:23
 #, elixir-autogen, elixir-format
 msgid "Create your first draft"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/index_drafts.ex:17
-#: lib/hamster_travel_web/live/planning_live/index_plans.ex:17
+#: lib/hamster_travel_web/live/planning_live/index_drafts.ex:19
+#: lib/hamster_travel_web/live/planning_live/index_plans.ex:19
 #, elixir-autogen, elixir-format
 msgid "No adventures yet"
 msgstr ""
@@ -1290,53 +1290,53 @@ msgstr ""
 msgid "Only trip participants can edit this trip."
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/index_plans.ex:21
+#: lib/hamster_travel_web/live/planning_live/index_plans.ex:23
 #, elixir-autogen, elixir-format
 msgid "Plan your first trip"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/index_drafts.ex:19
-#: lib/hamster_travel_web/live/planning_live/index_plans.ex:19
+#: lib/hamster_travel_web/live/planning_live/index_drafts.ex:21
+#: lib/hamster_travel_web/live/planning_live/index_plans.ex:21
 #, elixir-autogen, elixir-format
 msgid "Your next journey is just a click away. Start planning your dream vacation today."
 msgstr ""
 
-#: lib/hamster_travel_web/trip_pdf.ex:444
+#: lib/hamster_travel_web/trip_pdf.ex:552
 #, elixir-autogen, elixir-format
 msgid "All activities"
 msgstr ""
 
-#: lib/hamster_travel_web/trip_pdf.ex:442
+#: lib/hamster_travel_web/trip_pdf.ex:550
 #, elixir-autogen, elixir-format
 msgid "All expenses planned for today"
 msgstr ""
 
-#: lib/hamster_travel_web/trip_pdf.ex:734
+#: lib/hamster_travel_web/trip_pdf.ex:799
 #, elixir-autogen, elixir-format
 msgid "Amount"
 msgstr ""
 
-#: lib/hamster_travel_web/trip_pdf.ex:733
+#: lib/hamster_travel_web/trip_pdf.ex:798
 #, elixir-autogen, elixir-format
 msgid "Category"
 msgstr ""
 
-#: lib/hamster_travel_web/trip_pdf.ex:359
+#: lib/hamster_travel_web/trip_pdf.ex:435
 #, elixir-autogen, elixir-format
 msgid "Cities"
 msgstr ""
 
-#: lib/hamster_travel_web/trip_pdf.ex:765
+#: lib/hamster_travel_web/trip_pdf.ex:830
 #, elixir-autogen, elixir-format
 msgid "Day %{number}"
 msgstr ""
 
-#: lib/hamster_travel_web/trip_pdf.ex:701
+#: lib/hamster_travel_web/trip_pdf.ex:766
 #, elixir-autogen, elixir-format
 msgid "Day expenses"
 msgstr ""
 
-#: lib/hamster_travel_web/trip_pdf.ex:349
+#: lib/hamster_travel_web/trip_pdf.ex:419
 #, elixir-autogen, elixir-format
 msgid "Day-by-day plan"
 msgstr ""
@@ -1351,56 +1351,71 @@ msgstr ""
 msgid "Failed to export trip to PDF."
 msgstr ""
 
-#: lib/hamster_travel_web/trip_pdf.ex:706
+#: lib/hamster_travel_web/trip_pdf.ex:771
 #, elixir-autogen, elixir-format
 msgid "Food"
 msgstr ""
 
-#: lib/hamster_travel_web/trip_pdf.ex:361
-#: lib/hamster_travel_web/trip_pdf.ex:691
+#: lib/hamster_travel_web/trip_pdf.ex:437
+#: lib/hamster_travel_web/trip_pdf.ex:756
 #, elixir-autogen, elixir-format
 msgid "Hotels"
 msgstr ""
 
-#: lib/hamster_travel_web/trip_pdf.ex:440
-#, elixir-autogen, elixir-format
-msgid "Hotels we stay in"
-msgstr ""
-
-#: lib/hamster_travel_web/trip_pdf.ex:443
+#: lib/hamster_travel_web/trip_pdf.ex:551
 #, elixir-autogen, elixir-format
 msgid "Notes for today"
 msgstr ""
 
-#: lib/hamster_travel_web/trip_pdf.ex:865
+#: lib/hamster_travel_web/trip_pdf.ex:1018
 #, elixir-autogen, elixir-format
 msgid "Transfer"
 msgstr ""
 
-#: lib/hamster_travel_web/trip_pdf.ex:354
+#: lib/hamster_travel_web/trip_pdf.ex:424
 #, elixir-autogen, elixir-format
 msgid "Transfers and hotels overview"
 msgstr ""
 
-#: lib/hamster_travel_web/trip_pdf.ex:441
+#: lib/hamster_travel_web/trip_pdf.ex:549
 #, elixir-autogen, elixir-format
 msgid "Transfers planned today"
 msgstr ""
 
-#: lib/hamster_travel_web/trip_pdf.ex:86
+#: lib/hamster_travel_web/trip_pdf.ex:94
 #, elixir-autogen, elixir-format
 msgid "Trip plan"
 msgstr ""
 
-#: lib/hamster_travel_web/trip_pdf.ex:517
-#: lib/hamster_travel_web/trip_pdf.ex:518
-#: lib/hamster_travel_web/trip_pdf.ex:658
-#: lib/hamster_travel_web/trip_pdf.ex:661
+#: lib/hamster_travel_web/trip_pdf.ex:584
+#: lib/hamster_travel_web/trip_pdf.ex:585
 #, elixir-autogen, elixir-format
 msgid "Unknown city"
 msgstr ""
 
-#: lib/hamster_travel_web/trip_pdf.ex:73
+#: lib/hamster_travel_web/trip_pdf.ex:81
 #, elixir-autogen, elixir-format
 msgid "Whole-trip notes"
+msgstr ""
+
+#: lib/hamster_travel_web/live/planning_live/index_drafts.ex:53
+#: lib/hamster_travel_web/live/planning_live/index_plans.ex:53
+#, elixir-autogen, elixir-format
+msgid "No trips found for your search."
+msgstr ""
+
+#: lib/hamster_travel_web/live/planning_live/index_drafts.ex:44
+#: lib/hamster_travel_web/live/planning_live/index_plans.ex:44
+#, elixir-autogen, elixir-format
+msgid "Search by trip, city, country"
+msgstr ""
+
+#: lib/hamster_travel_web/live/planning_live/index_drafts.ex:37
+#, elixir-autogen, elixir-format
+msgid "Search drafts"
+msgstr ""
+
+#: lib/hamster_travel_web/live/planning_live/index_plans.ex:37
+#, elixir-autogen, elixir-format
+msgid "Search trips"
 msgstr ""

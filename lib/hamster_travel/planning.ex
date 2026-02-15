@@ -54,8 +54,8 @@ defmodule HamsterTravel.Planning do
 
   Returns a map with `:entries`, `:page`, `:page_size`, `:total_entries`, and `:total_pages`.
   """
-  def list_plans_paginated(user \\ nil, page \\ 1, page_size \\ 12) do
-    Trips.list_plans_paginated(user, page, page_size)
+  def list_plans_paginated(user \\ nil, page \\ 1, page_size \\ 12, search_query \\ nil) do
+    Trips.list_plans_paginated(user, page, page_size, search_query)
   end
 
   @doc """
@@ -78,8 +78,8 @@ defmodule HamsterTravel.Planning do
 
   Returns a map with `:entries`, `:page`, `:page_size`, `:total_entries`, and `:total_pages`.
   """
-  def list_drafts_paginated(user, page \\ 1, page_size \\ 12) do
-    Trips.list_drafts_paginated(user, page, page_size)
+  def list_drafts_paginated(user, page \\ 1, page_size \\ 12, search_query \\ nil) do
+    Trips.list_drafts_paginated(user, page, page_size, search_query)
   end
 
   @type profile_stats :: %{

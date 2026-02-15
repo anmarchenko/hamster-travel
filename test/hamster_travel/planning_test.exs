@@ -119,6 +119,75 @@ defmodule HamsterTravel.PlanningTest do
       assert length(page_3.entries) == 5
     end
 
+    test "list_plans_paginated/4 filters by trip name, city, and country", %{
+      user: user,
+      city: city
+    } do
+      city_country_name = city.country.name
+
+      name_match_trip =
+        trip_fixture(%{
+          author_id: user.id,
+          status: Trip.planned(),
+          name: "Kyoto adventure"
+        })
+
+      geo_match_trip =
+        trip_fixture(%{
+          author_id: user.id,
+          status: Trip.planned(),
+          name: "Summer ideas"
+        })
+
+      {:ok, _destination} =
+        Planning.create_destination(geo_match_trip, %{city_id: city.id, start_day: 0, end_day: 1})
+
+      _other_trip =
+        trip_fixture(%{
+          author_id: user.id,
+          status: Trip.planned(),
+          name: "Random destination"
+        })
+
+      name_match_trip_id = name_match_trip.id
+      geo_match_trip_id = geo_match_trip.id
+
+      assert %{entries: [%Trip{id: ^name_match_trip_id}], total_entries: 1} =
+               Planning.list_plans_paginated(user, 1, 10, "Kyoto")
+
+      assert %{entries: [%Trip{id: ^geo_match_trip_id}], total_entries: 1} =
+               Planning.list_plans_paginated(user, 1, 10, city.name)
+
+      country_fragment = String.slice(city_country_name, 0, 4)
+
+      assert %{entries: [%Trip{id: ^geo_match_trip_id}], total_entries: 1} =
+               Planning.list_plans_paginated(user, 1, 10, country_fragment)
+    end
+
+    test "list_plans_paginated/4 can immediately find a trip after adding a city", %{
+      user: user,
+      city: city
+    } do
+      trip =
+        trip_fixture(%{
+          author_id: user.id,
+          status: Trip.planned(),
+          name: "Weekend plan"
+        })
+
+      trip_id = trip.id
+      city_name = city.name
+
+      assert %{entries: [], total_entries: 0} =
+               Planning.list_plans_paginated(user, 1, 10, city_name)
+
+      {:ok, _destination} =
+        Planning.create_destination(trip, %{city_id: city.id, start_day: 0, end_day: 1})
+
+      assert %{entries: [%Trip{id: ^trip_id}], total_entries: 1} =
+               Planning.list_plans_paginated(user, 1, 10, city_name)
+    end
+
     test "list_drafts/1 returns all drafts for user", %{
       user: user,
       friend: friend
@@ -171,6 +240,27 @@ defmodule HamsterTravel.PlanningTest do
 
       assert page_3.page == 2
       assert length(page_3.entries) == 5
+    end
+
+    test "list_drafts_paginated/4 filters drafts by search query", %{user: user} do
+      matching_trip =
+        trip_fixture(%{
+          author_id: user.id,
+          status: Trip.draft(),
+          name: "Draft Venice"
+        })
+
+      _other_trip =
+        trip_fixture(%{
+          author_id: user.id,
+          status: Trip.draft(),
+          name: "Draft Berlin"
+        })
+
+      matching_trip_id = matching_trip.id
+
+      assert %{entries: [%Trip{id: ^matching_trip_id}], total_entries: 1} =
+               Planning.list_drafts_paginated(user, 1, 10, "venice")
     end
 
     test "profile_stats/1 returns totals and unique countries from finished trips and manually added cities",

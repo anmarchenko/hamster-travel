@@ -3,6 +3,7 @@ defmodule HamsterTravelWeb.Planning.IndexPlansTest do
 
   import Phoenix.LiveViewTest
   import HamsterTravel.AccountsFixtures
+  import HamsterTravel.GeoFixtures
   import HamsterTravel.PlanningFixtures
 
   alias HamsterTravel.Planning
@@ -35,6 +36,7 @@ defmodule HamsterTravelWeb.Planning.IndexPlansTest do
 
       # Check for the Create trip button
       assert has_element?(view, "a", "Create trip")
+      assert has_element?(view, "#plans-search-input")
     end
 
     test "renders plans page with no plans", %{conn: conn} do
@@ -70,6 +72,39 @@ defmodule HamsterTravelWeb.Planning.IndexPlansTest do
 
       assert page_2_html =~ "pc-pagination"
       assert page_2_html =~ "/plans?page=1"
+    end
+
+    test "filters plans by destination search query", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      geonames_fixture()
+      city = HamsterTravel.Geo.find_city_by_geonames_id("2950159")
+
+      matching_trip = trip_fixture(%{author_id: user.id, status: "1_planned", name: "Ideas list"})
+      hidden_trip = trip_fixture(%{author_id: user.id, status: "1_planned", name: "No geo match"})
+
+      {:ok, _destination} =
+        Planning.create_destination(matching_trip, %{city_id: city.id, start_day: 0, end_day: 1})
+
+      {:ok, _view, html} = live(conn, ~p"/plans?q=#{city.name}")
+
+      assert html =~ matching_trip.name
+      refute html =~ hidden_trip.name
+    end
+
+    test "keeps search query in pagination links", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      for idx <- 1..13 do
+        trip_fixture(%{author_id: user.id, status: "1_planned", name: "Searchable #{idx}"})
+      end
+
+      {:ok, _view, html} = live(conn, ~p"/plans?q=Searchable")
+
+      assert html =~ "q=Searchable"
+      assert html =~ "page=2"
     end
 
     test "uses current user default currency for displayed budget", %{conn: conn} do

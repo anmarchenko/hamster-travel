@@ -32,6 +32,7 @@ defmodule HamsterTravelWeb.Planning.IndexDraftsTest do
 
       # Check for the "Create draft" button
       assert has_element?(view, "a", "Create draft")
+      assert has_element?(view, "#drafts-search-input")
     end
 
     test "renders drafts page with no drafts", %{conn: conn} do
@@ -67,6 +68,36 @@ defmodule HamsterTravelWeb.Planning.IndexDraftsTest do
 
       assert page_2_html =~ "pc-pagination"
       assert page_2_html =~ "/drafts?page=1"
+    end
+
+    test "filters drafts by search query", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      matching_trip =
+        trip_fixture(%{author_id: user.id, status: Trip.draft(), name: "Roadmap draft"})
+
+      hidden_trip =
+        trip_fixture(%{author_id: user.id, status: Trip.draft(), name: "Another draft"})
+
+      {:ok, _view, html} = live(conn, ~p"/drafts?q=Roadmap")
+
+      assert html =~ matching_trip.name
+      refute html =~ hidden_trip.name
+    end
+
+    test "keeps drafts search query in pagination links", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      for idx <- 1..13 do
+        trip_fixture(%{author_id: user.id, status: Trip.draft(), name: "Searchable draft #{idx}"})
+      end
+
+      {:ok, _view, html} = live(conn, ~p"/drafts?q=Searchable")
+
+      assert html =~ "q=Searchable"
+      assert html =~ "page=2"
     end
 
     test "redirects if user is not authenticated", %{conn: conn} do

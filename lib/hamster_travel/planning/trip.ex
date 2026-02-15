@@ -46,6 +46,7 @@ defmodule HamsterTravel.Planning.Trip do
     field :people_count, :integer
     field :private, :boolean, default: false
     field :cover, TripCover.Type
+    field :search_text, :string, default: ""
 
     belongs_to(:author, User)
     has_many(:trip_participants, TripParticipant)
