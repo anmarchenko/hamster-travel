@@ -45,8 +45,9 @@ defmodule HamsterTravelWeb.Planning.IndexDraftsTest do
       # Assert the page renders successfully
       assert html =~ "Drafts"
 
-      # Check for the "Create draft" button
-      assert html =~ "Create draft"
+      # Check for the empty-state CTA
+      assert html =~ "No adventures yet"
+      assert html =~ "Create your first draft"
     end
 
     test "redirects if user is not authenticated", %{conn: conn} do

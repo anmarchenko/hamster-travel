@@ -48,8 +48,9 @@ defmodule HamsterTravelWeb.Planning.IndexPlansTest do
       # Assert the page renders successfully
       assert html =~ "Travels"
 
-      # Check for the Create trip button
-      assert html =~ "Create trip"
+      # Check for the empty-state CTA
+      assert html =~ "No adventures yet"
+      assert html =~ "Plan your first trip"
     end
 
     test "uses current user default currency for displayed budget", %{conn: conn} do
