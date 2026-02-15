@@ -380,6 +380,8 @@ defmodule HamsterTravelWeb.TripPdf do
             border: 1px solid #9ca3af;
             vertical-align: top;
             padding: 5px;
+            overflow-wrap: anywhere;
+            word-break: break-word;
           }
 
           th {
@@ -396,11 +398,11 @@ defmodule HamsterTravelWeb.TripPdf do
           }
 
           .overview-table col.overview-col-day {
-            width: 10%;
+            width: 16%;
           }
 
           .overview-day-column {
-            white-space: nowrap;
+            white-space: normal;
             font-weight: 700;
           }
 
