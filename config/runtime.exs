@@ -76,7 +76,7 @@ if config_env() == :prod do
     no_sandbox: chromic_pdf_no_sandbox?,
     discard_stderr: chromic_pdf_discard_stderr?,
     chrome_executable: System.get_env("CHROME_BIN", "/usr/bin/chromium"),
-    session_pool: [size: 1, timeout: 60_000, checkout_timeout: 60_000],
+    session_pool: [size: 1, timeout: 60_000, init_timeout: 60_000, checkout_timeout: 60_000],
     ghostscript_pool: [size: 1]
 
   config :ex_money,

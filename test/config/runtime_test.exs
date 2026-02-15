@@ -32,4 +32,19 @@ defmodule HamsterTravel.Config.RuntimeTest do
   test "runtime.exs can be evaluated for prod" do
     assert is_list(Config.Reader.read!(@runtime_path, env: :prod))
   end
+
+  test "chromic pdf session pool has explicit init timeout in prod config" do
+    config = Config.Reader.read!(@runtime_path, env: :prod)
+
+    chromic_pdf_opts =
+      config
+      |> Keyword.fetch!(:hamster_travel)
+      |> Keyword.fetch!(ChromicPDF)
+
+    session_pool_opts = Keyword.fetch!(chromic_pdf_opts, :session_pool)
+
+    assert Keyword.fetch!(session_pool_opts, :timeout) == 60_000
+    assert Keyword.fetch!(session_pool_opts, :init_timeout) == 60_000
+    assert Keyword.fetch!(session_pool_opts, :checkout_timeout) == 60_000
+  end
 end
