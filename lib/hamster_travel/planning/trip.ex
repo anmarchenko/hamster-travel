@@ -115,11 +115,8 @@ defmodule HamsterTravel.Planning.Trip do
   end
 
   defp validate_finished_trip_has_known_dates(changeset) do
-    if @finished == get_field(changeset, :status) do
-      changeset
-      |> validate_change(:dates_unknown, fn :dates_unknown, dates_unknown ->
-        validate_dates_unkown(dates_unknown)
-      end)
+    if @finished == get_field(changeset, :status) && get_field(changeset, :dates_unknown) do
+      add_error(changeset, :dates_unknown, "dates must be known for a finished trip")
     else
       changeset
     end
@@ -153,14 +150,6 @@ defmodule HamsterTravel.Planning.Trip do
       changeset
     else
       add_error(changeset, :start_date, "trip duration invalid")
-    end
-  end
-
-  defp validate_dates_unkown(dates_unknown) do
-    if dates_unknown do
-      [dates_unknown: "dates must be known for a finished trip"]
-    else
-      []
     end
   end
 

@@ -1067,6 +1067,28 @@ defmodule HamsterTravel.PlanningTest do
       refute Planning.get_trip!(trip.id).dates_unknown
     end
 
+    test "update_trip/2 validates dates when changing planned trip with unknown dates to finished" do
+      trip = trip_fixture(%{status: Trip.planned()})
+
+      assert {:ok, trip} =
+               Planning.update_trip(trip, %{
+                 status: Trip.planned(),
+                 dates_unknown: true,
+                 duration: 4
+               })
+
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               Planning.update_trip(trip, %{status: Trip.finished()})
+
+      assert "dates must be known for a finished trip" in errors_on(changeset).dates_unknown
+
+      persisted_trip = Planning.get_trip!(trip.id)
+      assert persisted_trip.status == Trip.planned()
+      assert persisted_trip.dates_unknown
+      assert persisted_trip.start_date == nil
+      assert persisted_trip.end_date == nil
+    end
+
     test "delete_trip/1 deletes the trip" do
       trip = trip_fixture()
       assert {:ok, %Trip{}} = Planning.delete_trip(trip)

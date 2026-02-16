@@ -47,6 +47,10 @@ defmodule HamsterTravelWeb.Planning.TripForm do
 
   @impl true
   def render(assigns) do
+    assigns =
+      assigns
+      |> assign(:selected_duration, selected_duration(assigns.form))
+
     ~H"""
     <div>
       <.form_container>
@@ -104,6 +108,11 @@ defmodule HamsterTravelWeb.Planning.TripForm do
                 start_date_field={@form[:start_date]}
                 end_date_field={@form[:end_date]}
                 required={true}
+                hint={
+                  if @selected_duration > 0 do
+                    "#{gettext("Duration")}: #{@selected_duration} #{ngettext("day", "days", @selected_duration)}"
+                  end
+                }
               />
             </div>
             <div :if={@dates_unknown} class="col-span-6">
@@ -238,6 +247,7 @@ defmodule HamsterTravelWeb.Planning.TripForm do
 
   @impl true
   def handle_event("form_submit", %{"trip" => trip_params}, socket) do
+    trip_params = normalize_trip_params(socket, trip_params)
     on_submit(socket, socket.assigns.action, trip_params)
   end
 
@@ -268,11 +278,10 @@ defmodule HamsterTravelWeb.Planning.TripForm do
   end
 
   def result({:error, changeset}, socket) do
-    {
-      :noreply,
-      socket
-      |> assign_form(changeset)
-    }
+    {:noreply,
+     socket
+     |> assign_trip_fields(changeset)
+     |> assign_form(changeset)}
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
@@ -281,5 +290,27 @@ defmodule HamsterTravelWeb.Planning.TripForm do
 
   defp assign_form(socket, trip_params) when is_map(trip_params) do
     assign_form(socket, Planning.trip_changeset(trip_params))
+  end
+
+  defp normalize_trip_params(socket, trip_params) do
+    status = Map.get(trip_params, "status", socket.assigns.status)
+
+    if status == Trip.finished() do
+      Map.put(trip_params, "dates_unknown", false)
+    else
+      trip_params
+    end
+  end
+
+  defp assign_trip_fields(socket, changeset) do
+    socket
+    |> assign(:dates_unknown, Changeset.get_field(changeset, :dates_unknown))
+    |> assign(:start_date, Changeset.get_field(changeset, :start_date))
+    |> assign(:end_date, Changeset.get_field(changeset, :end_date))
+    |> assign(:status, Changeset.get_field(changeset, :status))
+  end
+
+  defp selected_duration(form) do
+    Dates.duration(form[:start_date].value, form[:end_date].value)
   end
 end

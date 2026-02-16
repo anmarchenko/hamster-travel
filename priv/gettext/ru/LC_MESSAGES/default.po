@@ -287,7 +287,7 @@ msgstr "Точные даты еще не известны"
 #: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:113
 #, elixir-autogen, elixir-format
 msgid "Duration"
-msgstr "Продолжительность (дней)"
+msgstr "Продолжительность"
 
 #: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:121
 #, elixir-autogen, elixir-format

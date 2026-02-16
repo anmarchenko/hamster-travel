@@ -1089,10 +1089,11 @@ defmodule HamsterTravelWeb.CoreComponents do
   attr(:start_date_field, Phoenix.HTML.FormField, required: true)
   attr(:end_date_field, Phoenix.HTML.FormField, required: true)
   attr(:required, :boolean, default: false)
+  attr(:hint, :string, default: nil)
 
   def date_range_field(assigns) do
     ~H"""
-    <div>
+    <div class="pc-form-field-wrapper">
       <.label for={@id}>{@label}</.label>
       <div
         id={@id}
@@ -1129,6 +1130,10 @@ defmodule HamsterTravelWeb.CoreComponents do
       <.field_error :for={{msg, opts} <- @start_date_field.errors}>
         {translate_error({msg, opts})}
       </.field_error>
+
+      <p :if={@hint} class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+        {@hint}
+      </p>
     </div>
     """
   end

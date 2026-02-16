@@ -38,6 +38,7 @@ defmodule HamsterTravelWeb.Planning.CreateTripTest do
       {:ok, view, html} = live(conn, ~p"/trips/new?copy=#{trip.id}")
 
       assert html =~ "Create a new trip"
+      assert html =~ ~r/Duration:\s*3\s*days/
 
       assert view |> element("input[name='trip[name]']") |> render() =~
                "Original trip (Copy)"
