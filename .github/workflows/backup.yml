@@ -1,0 +1,74 @@
+name: pipeline-hamster-travel-backup
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+  push:
+    branches: ['master']
+
+permissions:
+  contents: read
+
+env:
+  FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+  FLY_DB_APP: ${{ secrets.FLY_DB_APP_NAME }}
+  POSTGRES_USER: ${{ secrets.FLY_POSTGRES_USER }}
+  POSTGRES_PASSWORD: ${{ secrets.FLY_POSTGRES_PASSWORD }}
+  POSTGRES_DB: ${{ secrets.FLY_POSTGRES_DB }}
+  POSTGRES_HOST: 127.0.0.1
+  POSTGRES_PORT: 5434
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+  S3_PREFIX: fly-db-backups
+
+jobs:
+  backup-db:
+    name: job-hamster-travel-backup-db
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Set filename
+        run: echo "FILENAME=db-$(date -u +'%Y-%m-%d-%H%M%S').dump" >> "$GITHUB_ENV"
+
+      - name: Install pg_dump version 14
+        run: |
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /etc/apt/trusted.gpg.d/pgdg.asc >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-14
+          pg_dump --version
+
+      - name: Dump database, gzip, and upload to S3
+        run: |
+          set -euo pipefail
+
+          flyctl proxy ${POSTGRES_PORT}:5432 -a "${FLY_DB_APP}" &
+          FLY_PROXY_PID=$!
+          trap 'kill "${FLY_PROXY_PID}"' EXIT
+
+          sleep 5
+
+          PGPASSWORD="${POSTGRES_PASSWORD}" pg_dump \
+            -h "${POSTGRES_HOST}" \
+            -p "${POSTGRES_PORT}" \
+            -U "${POSTGRES_USER}" \
+            -d "${POSTGRES_DB}" \
+            -F c \
+            -Z 0 \
+            -f "${FILENAME}"
+
+          gzip "${FILENAME}"
+          aws s3 cp "${FILENAME}.gz" "s3://${BUCKET}/${S3_PREFIX}/${FILENAME}.gz"
