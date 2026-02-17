@@ -55,20 +55,32 @@ jobs:
         run: |
           set -euo pipefail
 
-          flyctl proxy $POSTGRES_PORT:5432 -a $FLY_DB_APP &
+          flyctl proxy "${POSTGRES_PORT}:5432" -a "${FLY_DB_APP}" > fly-proxy.log 2>&1 &
           FLY_PROXY_PID=$!
-          trap 'kill "${FLY_PROXY_PID}"' EXIT
+          trap 'status=$?; kill "${FLY_PROXY_PID}" >/dev/null 2>&1 || true; if [ "${status}" -ne 0 ]; then echo "flyctl proxy log:"; cat fly-proxy.log || true; fi; exit "${status}"' EXIT
 
-          sleep 5
+          for _ in $(seq 1 30); do
+            if nc -z "${POSTGRES_HOST}" "${POSTGRES_PORT}"; then
+              break
+            fi
+            sleep 1
+          done
 
-          PGPASSWORD="${POSTGRES_PASSWORD}" pg_dump \
+          if ! nc -z "${POSTGRES_HOST}" "${POSTGRES_PORT}"; then
+            echo "flyctl proxy did not open ${POSTGRES_HOST}:${POSTGRES_PORT}"
+            cat fly-proxy.log || true
+            exit 1
+          fi
+
+          PGPASSWORD="${POSTGRES_PASSWORD}" timeout 20m pg_dump \
             -h "${POSTGRES_HOST}" \
             -p "${POSTGRES_PORT}" \
             -U "${POSTGRES_USER}" \
             -d "${POSTGRES_DB}" \
             -F c \
             -Z 0 \
-            -f "${FILENAME}"
+            -f "${FILENAME}" \
+            -v
 
           gzip "${FILENAME}"
           aws s3 cp "${FILENAME}.gz" "s3://${BUCKET}/${S3_PREFIX}/${FILENAME}.gz"
