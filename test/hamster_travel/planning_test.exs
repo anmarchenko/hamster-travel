@@ -2703,11 +2703,11 @@ defmodule HamsterTravel.PlanningTest do
       assert transfer.trip_id == trip.id
     end
 
-    test "create_transfer/2 fails if departure and arrival cities are the same", %{
+    test "create_transfer/2 allows same departure and arrival city", %{
       trip: trip,
       berlin: berlin
     } do
-      invalid_attrs = %{
+      attrs = %{
         transport_mode: "train",
         departure_city_id: berlin.id,
         arrival_city_id: berlin.id,
@@ -2716,10 +2716,9 @@ defmodule HamsterTravel.PlanningTest do
         day_index: 0
       }
 
-      assert {:error, %Ecto.Changeset{} = changeset} =
-               Planning.create_transfer(trip, invalid_attrs)
-
-      assert %{arrival_city_id: ["must be different from departure city"]} = errors_on(changeset)
+      assert {:ok, %Transfer{} = transfer} = Planning.create_transfer(trip, attrs)
+      assert transfer.departure_city_id == berlin.id
+      assert transfer.arrival_city_id == berlin.id
     end
 
     test "create_transfer/2 fails if day_index is negative", %{
