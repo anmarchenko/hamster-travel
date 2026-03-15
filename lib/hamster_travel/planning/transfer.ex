@@ -68,7 +68,6 @@ defmodule HamsterTravel.Planning.Transfer do
     ])
     |> validate_inclusion(:transport_mode, @transport_modes)
     |> validate_number(:day_index, greater_than_or_equal_to: 0)
-    |> validate_different_cities()
   end
 
   # Convert time strings to datetime with anchored date
@@ -127,20 +126,4 @@ defmodule HamsterTravel.Planning.Transfer do
   Returns the list of valid transport modes.
   """
   def transport_modes, do: @transport_modes
-
-  defp validate_different_cities(changeset) do
-    departure_city_id = get_field(changeset, :departure_city_id)
-    arrival_city_id = get_field(changeset, :arrival_city_id)
-
-    cond do
-      is_nil(departure_city_id) or is_nil(arrival_city_id) ->
-        changeset
-
-      departure_city_id == arrival_city_id ->
-        add_error(changeset, :arrival_city_id, "must be different from departure city")
-
-      true ->
-        changeset
-    end
-  end
 end
