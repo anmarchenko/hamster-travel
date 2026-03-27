@@ -43,3 +43,10 @@ uploads
 
 # page snapshots
 .playwright-cli/
+
+# python
+*.pyc
+
+# import intermediate representation
+legacy_csv
+legacy_csv_clean
