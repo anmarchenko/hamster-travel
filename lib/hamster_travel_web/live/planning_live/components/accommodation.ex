@@ -56,7 +56,7 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
         <.money_display
           money={@price}
           display_currency={@display_currency}
-          class="inline-flex text-md font-bold"
+          class="inline-flex text-sm font-normal"
         >
           <:suffix>&nbsp;/&nbsp;{gettext("night")}</:suffix>
         </.money_display>
