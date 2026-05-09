@@ -1,5 +1,46 @@
 # Production Migration Progress
 
+## 2026-05-09 (drop placeholder legacy accommodations)
+
+### Goal
+Do not import placeholder accommodations named `Legacy accommodation` that carry no useful data.
+
+### Completed
+- Updated converter logic in [`scripts/convert_legacy_csv_for_import.py`](/Users/marvin/p/hamster-travel/scripts/convert_legacy_csv_for_import.py):
+  - skip legacy hotel rows when name is `Legacy accommodation` (case-insensitive) and row has no link, note, or expense
+  - also skip fully empty hotel rows
+  - for non-empty rows without a name, use fallback title `Accommodation`
+- Re-generated import bundle:
+  - `UV_CACHE_DIR=.uv-cache uv run python scripts/convert_legacy_csv_for_import.py`
+- Re-imported local dev DB:
+  - `MIX_BUILD_PATH=_build_codex mix legacy.import_trips --bundle-dir prod_backup/import_ready --user-map-file prod_backup/import_ready/legacy_user_mapping.dev.json --continue-on-error`
+
+### Validation
+- Converted bundle contains `0` accommodations named `Legacy accommodation`.
+- DB check after import:
+  - `SELECT count(*) FROM accommodations WHERE name ILIKE 'legacy accommodation'` -> `0`
+- Import result:
+  - `total: 98`
+  - `imported: 98`
+  - `failed: 0`
+
+## 2026-05-09 (draft visibility policy)
+
+### Goal
+Show wife-authored drafts in the new app drafts list for friends (same as imported dataset expectation).
+
+### Completed
+- Updated draft visibility policy in [`lib/hamster_travel/planning/policy.ex`](/Users/marvin/p/hamster-travel/lib/hamster_travel/planning/policy.ex):
+  - `user_drafts_scope/2` now includes drafts where `author_id` is in the user's friends circle (not only own drafts / participant drafts).
+- Added unit coverage in [`test/hamster_travel/planning/policy_test.exs`](/Users/marvin/p/hamster-travel/test/hamster_travel/planning/policy_test.exs):
+  - new test for friend-authored draft visibility.
+- Updated planning behavior assertion in [`test/hamster_travel/planning_test.exs`](/Users/marvin/p/hamster-travel/test/hamster_travel/planning_test.exs):
+  - `list_drafts/1` now expects friend-authored drafts in results.
+
+### Validation
+- `mix test test/hamster_travel/planning/policy_test.exs test/hamster_travel/planning_test.exs`
+- Result: `252 tests, 0 failures`.
+
 ## 2026-03-04
 
 ### Goal
@@ -497,3 +538,333 @@ MIX_BUILD_PATH=_build_codex mix legacy.import_trips \
 
 ### Validation
 - Import log (`/tmp/legacy_import_latest.log`) contains final summary with no failures.
+
+## 2026-04-28 (warning inspection)
+
+### Goal
+Inspect conversion warnings and investigate one warning type in detail.
+
+### Warning Summary (`prod_backup/import_ready/warnings.jsonl`)
+- `transfer_missing_departure_time`: `103`
+- `transfer_missing_arrival_time`: `102`
+- `transfer_missing_city`: `15`
+- `transfer_unknown_mode`: `13`
+- Total warnings: `233`
+
+### Investigation: `transfer_missing_city` (`15`)
+
+Root cause analysis against `legacy_csv_clean/transfers.csv` + `cities.csv`:
+- `empty_city_to_id`: `8`
+- `empty_city_from_id`: `7`
+- No cases where city id existed but city geonames mapping was missing.
+
+Conclusion:
+- This warning type is caused by incomplete legacy transfer rows (missing one side of route), not by missing geo dictionaries.
+- A simple fallback using same-day destination city can recover only `1/15` rows; most rows remain ambiguous because either:
+  - day has no destination places, or
+  - day destination equals the known transfer side (so opposite side cannot be inferred reliably).
+
+## 2026-04-28 (transfer missing-time fallback)
+
+### Goal
+When transfer time is missing/invalid, use midnight of the transfer day date instead of epoch fallback.
+
+### Completed
+- Updated `scripts/convert_legacy_csv_for_import.py`:
+  - added `day_midnight_iso_utc/1` helper for `YYYY-MM-DD -> YYYY-MM-DDT00:00:00Z`
+  - transfer fallback now uses `days.date_when` midnight for:
+    - missing departure time
+    - missing arrival time
+  - keeps `1970-01-01T00:00:00Z` only as last-resort fallback when day date is unavailable.
+
+### Validation
+- Re-generated bundle and checked warnings + payload:
+  - sample warning changed from epoch to day date:
+    - `transfer 1221`: `fallback to 2014-02-23T00:00:00Z`
+  - sample payload values:
+    - `legacy_trip_441`, transfer `1221`:
+      - `departure_time = 2014-02-23T00:00:00Z`
+      - `arrival_time = 2014-02-23T00:00:00Z`
+
+## 2026-05-03 (archived/deleted-trip check)
+
+### Goal
+Verify whether legacy trips that appear deleted/archived are still included in conversion output.
+
+### Findings
+- Legacy source row for `FullStackFest 2016` (`trip_id=500`) has `archived = t`.
+- The trip is currently included in converted bundle (`prod_backup/import_ready/trips.jsonl`).
+- Current converter does not filter archived trips.
+
+### Counts
+- `legacy_csv_clean/trips.csv`:
+  - total: `144`
+  - archived: `47`
+  - active: `97`
+- Converted bundle (`trips.jsonl`):
+  - total: `144`
+  - archived trips included: `47`
+
+## 2026-05-03 (skip archived trips)
+
+### Goal
+Exclude archived legacy trips from conversion output.
+
+### Completed
+- Updated `scripts/convert_legacy_csv_for_import.py`:
+  - skip trip rows where `archived = t/true/1`.
+- Re-generated bundle:
+  - `UV_CACHE_DIR=.uv-cache uv run python scripts/convert_legacy_csv_for_import.py`
+
+### Validation
+- `legacy_csv_clean/trips.csv` active trips: `97`
+- Converted `trips.jsonl` total: `97`
+- Archived trips included in bundle: `0`
+- `FullStackFest 2016` (`trip_id=500`) is no longer present in bundle.
+
+## 2026-05-03 (local reimport after archived filter)
+
+### Goal
+Re-import locally after excluding archived trips from conversion output.
+
+### Command Run
+```bash
+MIX_BUILD_PATH=_build_codex mix legacy.import_trips \
+  --bundle-dir prod_backup/import_ready \
+  --user-map-file prod_backup/import_ready/legacy_user_mapping.dev.json \
+  --continue-on-error
+```
+
+### Result
+- `total`: `97`
+- `imported`: `97`
+- `failed`: `0`
+
+## 2026-05-03 (Açores transfer 00:00 investigation)
+
+### Goal
+Investigate why transfer `Франкфурт-на-Майне -> Берлин` in `Азорские острова` is imported with `00:00`.
+
+### Findings
+- Affected legacy transfer row: `transfer_id=2049` (`LH202`, `FRA -> BER`).
+- Legacy source has valid times with fractional seconds:
+  - `start_time = 2025-05-04 21:15:19.214`
+  - `end_time = 2025-05-04 22:25:19.215`
+- Converter currently parses transfer time with strict format `%Y-%m-%d %H:%M:%S` only.
+- Because of `.SSS` fractional part, parsing fails and fallback logic applies day-midnight:
+  - `2025-08-03T00:00:00Z` for this trip day.
+
+### Scope
+- Not only one transfer:
+  - `transfer_missing_departure_time`: `59` warnings total, `14` of them have non-empty source times with fractional seconds.
+  - `transfer_missing_arrival_time`: `58` warnings total, `13` of them have non-empty source times with fractional seconds.
+
+## 2026-05-03 (fractional-seconds timestamp support + rerun)
+
+### Goal
+Parse legacy transfer timestamps that include fractional seconds and avoid incorrect `00:00` fallbacks.
+
+### Completed
+- Updated `scripts/convert_legacy_csv_for_import.py`:
+  - `parse_timestamp_to_iso_utc/1` now accepts both formats:
+    - `%Y-%m-%d %H:%M:%S`
+    - `%Y-%m-%d %H:%M:%S.%f`
+- Re-generated bundle:
+  - `UV_CACHE_DIR=.uv-cache uv run python scripts/convert_legacy_csv_for_import.py`
+- Re-imported locally:
+  - `MIX_BUILD_PATH=_build_codex mix legacy.import_trips --bundle-dir prod_backup/import_ready --user-map-file prod_backup/import_ready/legacy_user_mapping.dev.json --continue-on-error`
+
+### Validation
+- Warning reduction after conversion:
+  - `transfer_missing_departure_time`: `45` (was `59`)
+  - `transfer_missing_arrival_time`: `45` (was `58`)
+- `Азорские острова` / `LH202` (`FRA -> BER`) converted times:
+  - `departure_time = 2025-05-04T21:15:19Z`
+  - `arrival_time = 2025-05-04T22:25:19Z`
+- Local DB after import (`hamster_travel_dev`) confirms:
+  - `azorskie-ostrova | FRA -> BER | 2025-05-04 21:15:19 -> 2025-05-04 22:25:19 | Lufthansa | LH202`
+- Import result:
+  - `total: 97`
+  - `imported: 97`
+  - `failed: 0`
+
+## 2026-05-03 (transfer date anchoring validation for sorting)
+
+### Goal
+Fix and validate wrong transfer ordering caused by legacy timestamp date parts not matching trip day dates.
+
+### Completed
+- Converter now anchors transfer `departure_time/arrival_time` to `days.date_when` while preserving the clock time.
+- If anchored arrival is earlier than anchored departure, arrival is shifted to next day (overnight transfer case).
+
+### Validation (trip: `Азорские острова`)
+- Day 9 transfers in `hamster_travel_dev` are now stored as:
+  - `LH1549`: `2025-08-03 13:30 -> 2025-08-03 20:15`
+  - `LH202`: `2025-08-03 21:15 -> 2025-08-03 22:25`
+- With these timestamps, UI sorting by `departure_time` is chronologically correct (`LH1549` before `LH202`).
+
+## 2026-05-03 (food days_count fix)
+
+### Goal
+Fix migrated food expense day counts (total amount was correct, days were inflated to trip duration).
+
+### Root Cause
+- In `scripts/convert_legacy_csv_for_import.py`, food `days_count` was set from trip `day_count`.
+- This overrode legacy catering `days_count` and forced a recomputed lower `price_per_day` to keep the same total.
+
+### Completed
+- Updated converter to derive food `days_count` from legacy catering rows:
+  - `days_count = sum(caterings.days_count)` (fallback min `1`).
+- Re-generated import bundle and re-imported dev DB.
+
+### Validation
+- Programmatic check against `legacy_csv_clean/caterings.csv`:
+  - `checked trips with food: 91`
+  - `mismatch count: 0`
+- Import result:
+  - `total: 97`
+  - `imported: 97`
+  - `failed: 0`
+
+## 2026-05-09 (day link title hostnames)
+
+### Goal
+Replace placeholder note title `Legacy day link` with a hostname-derived title.
+
+### Completed
+- Updated converter day-link note title logic in `scripts/convert_legacy_csv_for_import.py`:
+  - parse hostname from URL
+  - drop `www.` prefix
+  - capitalize first letter
+  - treat existing `description == "Legacy day link"` as placeholder and replace with hostname title
+- Re-generated bundle and re-imported dev DB.
+
+### Validation
+- Converted bundle contains no `Legacy day link` titles.
+- Post-import DB check: `legacy_day_link_notes=0`.
+- Import result: `total=97`, `imported=97`, `failed=0`.
+
+## 2026-05-09 (activity ordering by legacy order_index)
+
+### Goal
+Preserve legacy per-day activity order during migration.
+
+### Root Cause
+- Converter sorted activities by legacy `id` instead of legacy `order_index`.
+
+### Completed
+- Updated `scripts/convert_legacy_csv_for_import.py` activities sort key:
+  - primary: `order_index`
+  - tie-breaker: `id`
+- Re-generated bundle and re-imported dev DB.
+
+### Validation
+- Affected trip (`Свадьба в готическом замке, море пива и знакомство с абсентной феей`), day 1 now imports in legacy order:
+  1. Заселение и встреча с организатором свадьбы
+  2. Стракова Академия
+  3. Самая узкая улочка Праги
+  4. Музей Франца Кафки
+  5. Карлов мост
+  6. Карлова улица
+  7. Церковь св. Сальватора
+  8. Клементинум
+  9. Храм Святого Франциска Ассизского
+  10. Танцующий дом
+  11. Церковь Святого Николая (Мала-Страна)
+  12. Остров Кампа
+- Import result: `total=97`, `imported=97`, `failed=0`.
+
+## 2026-05-09 (Hong Kong trip crash fix: destination preload)
+
+### Symptom
+- Opening trip `gonkong-aziya-kak-ona-est` crashed with:
+  - `BadMapError expected a map, got nil`
+  - in `planning_live/components/destination.ex`
+
+### Root Cause
+- `Geo.city_preloading_query/0` used an inner join to `regions`.
+- Imported destination cities `Hong Kong` and `Macau` have `region_code = NULL`, so they were filtered out by the join and preloaded as `nil`.
+
+### Fix
+- Updated `lib/hamster_travel/geo.ex`:
+  - `city_preloading_query/0`: `join Region` -> `left_join Region`
+  - `get_city/1`: `join Region` -> `left_join Region`
+
+### Validation
+- For trip slug `gonkong-aziya-kak-ona-est`, destination preload now returns `nil city count = 0`.
+- Hong Kong and Macau cities are now present in preloaded destination data.
+
+## 2026-05-09 (full rerun from fresh production dump)
+
+### Goal
+Re-run the complete legacy migration pipeline from the newly provided production SQL dump.
+
+### Input
+- Dump file: `prod_backup/PostgreSQL.sql`
+
+### Pipeline Run
+1. Restore + cleanup + cleaned CSV export:
+```bash
+scripts/legacy_dump_to_csv.sh \
+  --dump prod_backup/PostgreSQL.sql \
+  --keep-users 191,192 \
+  --csv-dir prod_backup/legacy_csv_clean \
+  --schema-doc docs/legacy-db-schema-clean.md
+```
+
+2. Convert cleaned CSV to import bundle:
+```bash
+UV_CACHE_DIR=.uv-cache uv run python scripts/convert_legacy_csv_for_import.py
+```
+
+3. Import into local dev app DB:
+```bash
+MIX_BUILD_PATH=_build_codex mix legacy.import_trips \
+  --bundle-dir prod_backup/import_ready \
+  --user-map-file prod_backup/import_ready/legacy_user_mapping.dev.json \
+  --continue-on-error
+```
+
+### Results
+- Legacy cleanup/export snapshot after keeping users `191,192`:
+  - `users: 2`
+  - `trips: 145`
+  - `days: 887`
+  - `activities: 2406`
+  - `transfers: 521`
+  - `hotels: 887`
+  - `expenses: 1095`
+  - `external_links: 1779`
+- Conversion output:
+  - `Converted trips: 98`
+  - `Warnings: 98`
+- Import output:
+  - `total: 98`
+  - `imported: 98`
+  - `failed: 0`
+
+### Notes
+- The importer purged existing trip-related planning data before import (expected behavior).
+- This run is now the baseline for final validation.
+
+## 2026-05-09 (post-import smoke test as Hamster user)
+
+### Goal
+Run authenticated smoke test by opening all accessible trip pages (including drafts) and ensure there are no runtime failures.
+
+### Account Used
+- `hamster@hamsters.test` (`Hamster Hamsters`)
+
+### Method
+- Logged in via local `/users/log_in` endpoint with CSRF-protected session.
+- Enumerated all trip slugs accessible to this user.
+- Opened each URL `/trips/:slug` with authenticated session and checked HTTP response.
+
+### Result
+- Total trip pages tested: `92`
+- Draft trips tested: `13`
+- Failures (non-200 or login-redirect): `0`
+
+### Artifacts
+- Trip list used: `/tmp/hamster_trips.tsv`
+- Smoke result table: `/tmp/hamster_smoke_results.tsv`

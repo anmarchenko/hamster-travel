@@ -3,13 +3,13 @@
 - Source DB: `hamster_travel_legacy_prod`
 - Host: `localhost:6000`
 - Schema: `public`
-- Generated at: `2026-03-08 17:09:21Z`
+- Generated at: `2026-05-09 10:06:06Z`
 
 ## Tables
 
 ### activities
 
-- Rows: `2394`
+- Rows: `2406`
 - Primary key: `id`
 - Foreign keys: `0`
 
@@ -186,7 +186,7 @@ _(none)_
 
 ### caterings
 
-- Rows: `119`
+- Rows: `120`
 - Primary key: `id`
 - Foreign keys: `0`
 
@@ -322,7 +322,7 @@ _(none)_
 
 ### days
 
-- Rows: `879`
+- Rows: `887`
 - Primary key: `id`
 - Foreign keys: `0`
 
@@ -423,7 +423,7 @@ _(none)_
 
 ### expenses
 
-- Rows: `1082`
+- Rows: `1095`
 - Primary key: `id`
 - Foreign keys: `0`
 
@@ -442,7 +442,7 @@ _(none)_
 
 ### external_links
 
-- Rows: `1759`
+- Rows: `1779`
 - Primary key: `id`
 - Foreign keys: `0`
 
@@ -460,7 +460,7 @@ _(none)_
 
 ### hotels
 
-- Rows: `879`
+- Rows: `887`
 - Primary key: `id`
 - Foreign keys: `0`
 
@@ -479,7 +479,7 @@ _(none)_
 
 ### places
 
-- Rows: `976`
+- Rows: `985`
 - Primary key: `id`
 - Foreign keys: `1`
 
@@ -556,7 +556,7 @@ _(none)_
 
 ### transfers
 
-- Rows: `515`
+- Rows: `521`
 - Primary key: `id`
 - Foreign keys: `0`
 
@@ -602,7 +602,7 @@ _(none)_
 
 ### trips
 
-- Rows: `144`
+- Rows: `145`
 - Primary key: `id`
 - Foreign keys: `0`
 
@@ -669,7 +669,7 @@ _(none)_
 
 ### users_trips
 
-- Rows: `242`
+- Rows: `243`
 - Primary key: _(none)_
 - Foreign keys: `0`
 

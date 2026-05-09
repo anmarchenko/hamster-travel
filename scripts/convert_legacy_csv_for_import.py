@@ -13,10 +13,11 @@ import csv
 import json
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from html import escape
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 
 VALID_TRIP_STATUSES = {"0_draft", "1_planned", "2_finished"}
@@ -123,6 +124,16 @@ def rich_text_link(url: str, label: str | None = None) -> str:
     return f"<p><a href=\"{safe_url}\" target=\"_blank\" rel=\"noopener noreferrer\">{safe_label}</a></p>"
 
 
+def title_from_url_hostname(url: str, fallback: str = "Link") -> str:
+    parsed = urlparse(url)
+    hostname = (parsed.hostname or "").strip()
+    if hostname.lower().startswith("www."):
+        hostname = hostname[4:]
+    if not hostname:
+        return fallback
+    return hostname[0].upper() + hostname[1:]
+
+
 def build_food_note_html(trip_caterings: list[dict[str, str]]) -> str | None:
     entries: list[str] = []
     for row in sorted(trip_caterings, key=lambda c: parse_int(c.get("id"), 0)):
@@ -149,11 +160,56 @@ def parse_timestamp_to_iso_utc(value: str | None) -> str | None:
     value = clean_text(value)
     if not value:
         return None
-    try:
-        dt = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
-    except ValueError:
+    dt = None
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S.%f"):
+        try:
+            dt = datetime.strptime(value, fmt)
+            break
+        except ValueError:
+            continue
+    if dt is None:
         return None
     return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def day_midnight_iso_utc(value: str | None) -> str | None:
+    value = clean_text(value)
+    if not value:
+        return None
+    try:
+        day = datetime.strptime(value, "%Y-%m-%d")
+    except ValueError:
+        return None
+    return day.strftime("%Y-%m-%dT00:00:00Z")
+
+
+def parse_iso_utc(value: str | None) -> datetime | None:
+    value = clean_text(value)
+    if not value:
+        return None
+    try:
+        return datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
+    except ValueError:
+        return None
+
+
+def anchor_iso_timestamp_to_day(timestamp_iso: str | None, day_date: str, day_offset: int = 0) -> str | None:
+    parsed_dt = parse_iso_utc(timestamp_iso)
+    if parsed_dt is None:
+        return None
+    try:
+        anchor_day = datetime.strptime(day_date, "%Y-%m-%d") + timedelta(days=day_offset)
+    except ValueError:
+        return None
+    anchored = datetime(
+        anchor_day.year,
+        anchor_day.month,
+        anchor_day.day,
+        parsed_dt.hour,
+        parsed_dt.minute,
+        parsed_dt.second,
+    )
+    return anchored.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def ensure_dir(path: Path) -> None:
@@ -299,6 +355,8 @@ def main() -> None:
         legacy_trip_id = trip["id"]
         trip_ref = f"legacy_trip_{legacy_trip_id}"
         author_legacy_user_id = parse_int(trip.get("author_user_id"))
+        if parse_bool(trip.get("archived"), False):
+            continue
 
         status = clean_text(trip.get("status_code")) or "1_planned"
         if status not in VALID_TRIP_STATUSES:
@@ -420,7 +478,13 @@ def main() -> None:
         for day in ordered_days:
             day_id = day["id"]
             day_index = day_index_by_day_id[day_id]
-            for row in sorted(activities_by_day.get(day_id, []), key=lambda a: parse_int(a.get("id"), 0)):
+            for row in sorted(
+                activities_by_day.get(day_id, []),
+                key=lambda a: (
+                    parse_int(a.get("order_index"), 10**9),
+                    parse_int(a.get("id"), 10**9),
+                ),
+            ):
                 priority = parse_int(row.get("rating"), 2) or 2
                 if priority < 1:
                     priority = 1
@@ -460,25 +524,36 @@ def main() -> None:
                 hotel_id = clean_text(row.get("id"))
                 links = external_links_by_type_id.get(("Travels::Hotel", hotel_id), [])
                 link_url = clean_text(links[0].get("url")) if links else ""
-                name = clean_text(row.get("name")) or "Legacy accommodation"
+                name = clean_text(row.get("name"))
+                note = rich_text_from_plain(row.get("comment"))
 
                 amount_cents = parse_int(row.get("amount_cents"), 0) or 0
                 amount_currency = clean_text(row.get("amount_currency")) or currency
                 expense = None
                 if amount_cents > 0:
                     expense = {
-                        "name": name,
+                        "name": name or "Accommodation expense",
                         "amount_cents": amount_cents,
                         "currency": amount_currency,
                     }
 
+                name_is_legacy_placeholder = (name or "").strip().lower() == "legacy accommodation"
+
+                # Skip placeholder or empty legacy hotel rows that have no meaningful data.
+                if name_is_legacy_placeholder and not link_url and not note and expense is None:
+                    continue
+                if not name and not link_url and not note and expense is None:
+                    continue
+
+                accommodation_name = name or title_from_url_hostname(link_url, "Accommodation")
+
                 accommodation_records.append(
                     {
                         "legacy_hotel_id": parse_int(row.get("id")),
-                        "name": name,
+                        "name": accommodation_name,
                         "link": link_url or None,
                         "address": None,
-                        "note": rich_text_from_plain(row.get("comment")),
+                        "note": note,
                         "start_day": day_index,
                         "end_day": day_index,
                         "expense": expense,
@@ -523,30 +598,49 @@ def main() -> None:
                     )
                     continue
 
+                day_date = clean_text(day.get("date_when"))
+                day_midnight = day_midnight_iso_utc(day_date)
                 dep_time = parse_timestamp_to_iso_utc(row.get("start_time"))
                 arr_time = parse_timestamp_to_iso_utc(row.get("end_time"))
                 if dep_time is None:
-                    dep_time = "1970-01-01T00:00:00Z"
+                    dep_time = day_midnight or "1970-01-01T00:00:00Z"
                     warnings.append(
                         WarningItem(
                             code="transfer_missing_departure_time",
                             trip_id=legacy_trip_id,
                             entity="transfer",
                             entity_id=transfer_id,
-                            message="Missing/invalid departure time, fallback to 1970-01-01T00:00:00Z.",
+                            message=f"Missing/invalid departure time, fallback to {dep_time}.",
                         )
                     )
                 if arr_time is None:
-                    arr_time = dep_time
+                    arr_time = day_midnight or dep_time
                     warnings.append(
                         WarningItem(
                             code="transfer_missing_arrival_time",
                             trip_id=legacy_trip_id,
                             entity="transfer",
                             entity_id=transfer_id,
-                            message="Missing/invalid arrival time, fallback to departure time.",
+                            message=f"Missing/invalid arrival time, fallback to {arr_time}.",
                         )
                     )
+
+                # Legacy transfer timestamps often carry unrelated calendar dates.
+                # Align transfer datetimes to the actual trip day and keep only clock time.
+                if day_date:
+                    anchored_dep = anchor_iso_timestamp_to_day(dep_time, day_date)
+                    anchored_arr = anchor_iso_timestamp_to_day(arr_time, day_date)
+                    if anchored_dep:
+                        dep_time = anchored_dep
+                    if anchored_arr:
+                        arr_time = anchored_arr
+
+                    dep_dt = parse_iso_utc(dep_time)
+                    arr_dt = parse_iso_utc(arr_time)
+                    if dep_dt and arr_dt and arr_dt < dep_dt:
+                        next_day_arr = anchor_iso_timestamp_to_day(arr_time, day_date, day_offset=1)
+                        if next_day_arr:
+                            arr_time = next_day_arr
 
                 amount_cents = parse_int(row.get("amount_cents"), 0) or 0
                 amount_currency = clean_text(row.get("amount_currency")) or currency
@@ -613,7 +707,9 @@ def main() -> None:
             days_count_candidates = [parse_int(c.get("days_count")) for c in trip_caterings]
             days_count_candidates = [v for v in days_count_candidates if v and v > 0]
             sum_days_count = sum(days_count_candidates)
-            days_count = day_count if day_count and day_count > 0 else max(sum_days_count, 1)
+            # Preserve legacy catering duration semantics for food expenses.
+            # Trip duration may differ from legacy food-specific days_count.
+            days_count = max(sum_days_count, 1)
 
             people_count_candidates = [parse_int(c.get("persons_count")) for c in trip_caterings]
             people_count_candidates = [v for v in people_count_candidates if v and v > 0]
@@ -684,10 +780,13 @@ def main() -> None:
                 external_links_by_type_id.get(("Travels::Day", day_id), []),
                 key=lambda r: parse_int(r.get("id"), 0),
             ):
-                title = clean_text(link_row.get("description")) or "Legacy day link"
                 url = clean_text(link_row.get("url"))
                 if not url:
                     continue
+                raw_title = clean_text(link_row.get("description"))
+                if raw_title.lower() == "legacy day link":
+                    raw_title = ""
+                title = raw_title or title_from_url_hostname(url)
                 note_records.append(
                     {
                         "title": title,

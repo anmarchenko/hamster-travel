@@ -45,6 +45,7 @@ Key mapping decisions:
 - Geo references use geonames IDs (`city_geonames_id`).
 - Legacy `days` are converted to `day_index` (0-based per trip).
 - Multiple cities on the same day are preserved via overlapping destination ranges.
+- Legacy trips marked `archived = true` are skipped and not included in the output bundle.
 - Legacy plain-text descriptions/comments are converted to rich HTML expected by the current editor/rendering pipeline:
   - paragraphs: `<p>...</p>`
   - line breaks inside paragraph: `<br>`
