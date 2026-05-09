@@ -1,0 +1,1470 @@
+[info] Exchange Rates will be retrieved now and then every 36,000 seconds.
+[info] ChromicPDF startup config: []
+[info] Storage startup check: storage=s3 bucket=MISSING asset_host=MISSING region=MISSING
+[warning] Storage startup check: missing or unresolved config AWS_S3_BUCKET, S3_ASSET_HOST, AWS_REGION
+[debug] QUERY OK source="trips" db=1.5ms decode=1.1ms queue=3.3ms idle=0.0ms
+SELECT t0."id", t0."name" FROM "trips" AS t0 ORDER BY t0."inserted_at", t0."id" []
+[debug] QUERY OK source="accommodations" db=5.0ms queue=1.7ms idle=17.7ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["2f1cc27c-437d-4aa3-a9ab-1cefc179c7af"]
+[debug] %Postgrex.Query{ref: nil, name: "ecto_2", statement: "SELECT e0.\"id\", e0.\"price\", e0.\"name\", e0.\"trip_id\", e0.\"accommodation_id\", e0.\"transfer_id\", e0.\"activity_id\", e0.\"day_expense_id\", e0.\"food_expense_id\", e0.\"inserted_at\", e0.\"updated_at\" FROM \"expenses\" AS e0 WHERE ((e0.\"trip_id\" = $1) AND e0.\"accommodation_id\" = ANY($2)) ORDER BY e0.\"id\"", param_oids: nil, param_formats: nil, param_types: nil, columns: nil, result_oids: nil, result_formats: nil, result_types: nil, types: nil, cache: :reference} uses unknown oid(s) 57366forcing us to reload type information from the database. This is expected behaviour whenever you migrate your database.
+[debug] QUERY OK source="expenses" db=7.9ms queue=16.6ms idle=26.3ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["2f1cc27c-437d-4aa3-a9ab-1cefc179c7af", [12066, 12067, 12068, 12069, 12070, 12071, 12072, 12073, 12074, 12075, 12076, 12077, 12078, 12079, 12080, 12081, 12082]]
+[DRY-RUN][TRIP] #2f1cc27c-437d-4aa3-a9ab-1cefc179c7af "Италия": 5 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12066 "Hotel Esposizione Roma" days 0-0 -> 0-2
+[DRY-RUN][UPDATE] keep expense #51754 (accommodation #12066) price -> Money.new(:RUB, "9426.00")
+[DRY-RUN][DELETE] expense #51755
+[DRY-RUN][DELETE] expense #51756
+[DRY-RUN][DELETE] accommodation #12067 "Hotel Esposizione Roma" days 1-1
+[DRY-RUN][DELETE] accommodation #12068 "Hotel Esposizione Roma" days 2-2
+[DRY-RUN][UPDATE] keep accommodation #12069 "Hotel Fiorentino" days 3-3 -> 3-5
+[DRY-RUN][UPDATE] keep expense #51757 (accommodation #12069) price -> Money.new(:RUB, "10368.00")
+[DRY-RUN][DELETE] expense #51758
+[DRY-RUN][DELETE] expense #51759
+[DRY-RUN][DELETE] accommodation #12070 "Hotel Fiorentino" days 4-4
+[DRY-RUN][DELETE] accommodation #12071 "Hotel Fiorentino" days 5-5
+[DRY-RUN][UPDATE] keep accommodation #12072 "Residenza Ca' Zanardi" days 6-6 -> 6-7
+[DRY-RUN][UPDATE] keep expense #51760 (accommodation #12072) price -> Money.new(:RUB, "14268.00")
+[DRY-RUN][DELETE] expense #51761
+[DRY-RUN][DELETE] accommodation #12073 "Residenza Ca' Zanardi" days 7-7
+[DRY-RUN][UPDATE] keep accommodation #12074 "Hotel La Pergola di Venezia" days 8-8 -> 8-11
+[DRY-RUN][UPDATE] keep expense #51762 (accommodation #12074) price -> Money.new(:RUB, "17976.00")
+[DRY-RUN][DELETE] expense #51763
+[DRY-RUN][DELETE] expense #51764
+[DRY-RUN][DELETE] expense #51765
+[DRY-RUN][DELETE] accommodation #12075 "Hotel La Pergola di Venezia" days 9-9
+[DRY-RUN][DELETE] accommodation #12076 "Hotel La Pergola di Venezia" days 10-10
+[DRY-RUN][DELETE] accommodation #12077 "Hotel La Pergola di Venezia" days 11-11
+[DRY-RUN][UPDATE] keep accommodation #12078 "Ibis Milano Centro" days 12-12 -> 12-15
+[DRY-RUN][UPDATE] keep expense #51766 (accommodation #12078) price -> Money.new(:RUB, "16552.00")
+[DRY-RUN][DELETE] expense #51767
+[DRY-RUN][DELETE] expense #51768
+[DRY-RUN][DELETE] expense #51769
+[DRY-RUN][DELETE] accommodation #12079 "Ibis Milano Centro" days 13-13
+[DRY-RUN][DELETE] accommodation #12080 "Ibis Milano Centro" days 14-14
+[DRY-RUN][DELETE] accommodation #12081 "Ibis Milano Centro" days 15-15
+[DRY-RUN][TRIP] #2f1cc27c-437d-4aa3-a9ab-1cefc179c7af "Италия" sanity check OK: accommodation totals EUR=0.00, RUB=68590.00
+[debug] QUERY OK source="accommodations" db=2.5ms idle=65.5ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["61e27bce-ebd1-4617-a8f6-df265aa3993c"]
+[DRY-RUN][TRIP] #61e27bce-ebd1-4617-a8f6-df265aa3993c "Выходные в Нижнем Новгороде": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=1.8ms idle=68.2ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["61e27bce-ebd1-4617-a8f6-df265aa3993c", [12062, 12063]]
+[DRY-RUN][UPDATE] keep accommodation #12062 "Отель Ibis Нижний Новгород" days 0-0 -> 0-1
+[DRY-RUN][UPDATE] keep expense #51723 (accommodation #12062) price -> Money.new(:RUB, "2480.00")
+[DRY-RUN][DELETE] expense #51724
+[DRY-RUN][DELETE] accommodation #12063 "Отель Ibis Нижний Новгород" days 1-1
+[DRY-RUN][TRIP] #61e27bce-ebd1-4617-a8f6-df265aa3993c "Выходные в Нижнем Новгороде" sanity check OK: accommodation totals RUB=2480.00
+[debug] QUERY OK source="accommodations" db=3.2ms idle=70.2ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["6586f5a1-16a1-409c-bf09-0930143c0169"]
+[debug] QUERY OK source="expenses" db=2.9ms idle=73.5ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["6586f5a1-16a1-409c-bf09-0930143c0169", [12064, 12065]]
+[debug] QUERY OK source="accommodations" db=2.0ms idle=76.5ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["39632964-3909-45af-8047-0c4cfca2c843"]
+[debug] QUERY OK source="expenses" db=1.6ms idle=78.6ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["39632964-3909-45af-8047-0c4cfca2c843", [12101, 12102, 12103, 12104, 12105, 12106, 12107, 12108, 12109]]
+[DRY-RUN][TRIP] #39632964-3909-45af-8047-0c4cfca2c843 "Израиль - такой неповторимый и такой разный!": 1 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12101 "Lev Yerushalayim Hotel" days 0-0 -> 0-7
+[DRY-RUN][UPDATE] keep expense #51958 (accommodation #12101) price -> Money.new(:USD, "1144.00")
+[DRY-RUN][DELETE] expense #51959
+[DRY-RUN][DELETE] expense #51960
+[DRY-RUN][DELETE] expense #51961
+[DRY-RUN][DELETE] expense #51962
+[DRY-RUN][DELETE] expense #51963
+[DRY-RUN][DELETE] expense #51964
+[DRY-RUN][DELETE] expense #51965
+[DRY-RUN][DELETE] accommodation #12102 "Lev Yerushalayim Hotel" days 1-1
+[DRY-RUN][DELETE] accommodation #12103 "Lev Yerushalayim Hotel" days 2-2
+[DRY-RUN][DELETE] accommodation #12104 "Lev Yerushalayim Hotel" days 3-3
+[DRY-RUN][DELETE] accommodation #12105 "Lev Yerushalayim Hotel" days 4-4
+[DRY-RUN][DELETE] accommodation #12106 "Lev Yerushalayim Hotel" days 5-5
+[DRY-RUN][DELETE] accommodation #12107 "Lev Yerushalayim Hotel" days 6-6
+[DRY-RUN][DELETE] accommodation #12108 "Lev Yerushalayim Hotel" days 7-7
+[DRY-RUN][TRIP] #39632964-3909-45af-8047-0c4cfca2c843 "Израиль - такой неповторимый и такой разный!" sanity check OK: accommodation totals ILS=0.00, USD=1144.00
+[debug] QUERY OK source="accommodations" db=2.7ms idle=80.8ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["3fa121b0-8019-49f3-b026-c8557d9d2474"]
+[debug] QUERY OK source="expenses" db=5.3ms idle=80.4ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["3fa121b0-8019-49f3-b026-c8557d9d2474", [12096, 12097, 12098, 12099, 12100]]
+[DRY-RUN][TRIP] #3fa121b0-8019-49f3-b026-c8557d9d2474 "Осло на ноябрьские праздники": 1 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12096 "Квартира друзей" days 0-0 -> 0-4
+[DRY-RUN][UPDATE] keep expense #51925 (accommodation #12096) price -> Money.new(:RUB, "0.00")
+[DRY-RUN][DELETE] expense #51926
+[DRY-RUN][DELETE] expense #51927
+[DRY-RUN][DELETE] expense #51928
+[DRY-RUN][DELETE] expense #51929
+[DRY-RUN][DELETE] accommodation #12097 "Квартира друзей" days 1-1
+[DRY-RUN][DELETE] accommodation #12098 "Квартира друзей" days 2-2
+[DRY-RUN][DELETE] accommodation #12099 "Квартира друзей" days 3-3
+[DRY-RUN][DELETE] accommodation #12100 "Квартира друзей" days 4-4
+[DRY-RUN][TRIP] #3fa121b0-8019-49f3-b026-c8557d9d2474 "Осло на ноябрьские праздники" sanity check OK: accommodation totals RUB=0.00
+[debug] QUERY OK source="accommodations" db=0.4ms idle=65.1ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["5e2f5bdf-0409-43cf-8c24-b43aa6e09b5e"]
+[debug] QUERY OK source="expenses" db=0.6ms idle=39.1ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["5e2f5bdf-0409-43cf-8c24-b43aa6e09b5e", [12110, 12111, 12112, 12113, 12114, 12115, 12116, 12117, 12118]]
+[DRY-RUN][TRIP] #5e2f5bdf-0409-43cf-8c24-b43aa6e09b5e "Октябрьский Пафос": 1 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12110 "Hotel Veronica" days 0-0 -> 0-8
+[DRY-RUN][UPDATE] keep expense #52023 (accommodation #12110) price -> Money.new(:RUB, "0.00")
+[DRY-RUN][DELETE] expense #52024
+[DRY-RUN][DELETE] expense #52025
+[DRY-RUN][DELETE] expense #52026
+[DRY-RUN][DELETE] expense #52027
+[DRY-RUN][DELETE] expense #52028
+[DRY-RUN][DELETE] expense #52029
+[DRY-RUN][DELETE] expense #52030
+[DRY-RUN][DELETE] expense #52031
+[DRY-RUN][DELETE] accommodation #12111 "Hotel Veronica" days 1-1
+[DRY-RUN][DELETE] accommodation #12112 "Hotel Veronica" days 2-2
+[DRY-RUN][DELETE] accommodation #12113 "Hotel Veronica" days 3-3
+[DRY-RUN][DELETE] accommodation #12114 "Hotel Veronica" days 4-4
+[DRY-RUN][DELETE] accommodation #12115 "Hotel Veronica" days 5-5
+[DRY-RUN][DELETE] accommodation #12116 "Hotel Veronica" days 6-6
+[DRY-RUN][DELETE] accommodation #12117 "Hotel Veronica" days 7-7
+[DRY-RUN][DELETE] accommodation #12118 "Hotel Veronica" days 8-8
+[DRY-RUN][TRIP] #5e2f5bdf-0409-43cf-8c24-b43aa6e09b5e "Октябрьский Пафос" sanity check OK: accommodation totals RUB=0.00
+[debug] QUERY OK source="accommodations" db=0.6ms idle=24.3ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["babe7581-09b5-48f8-9f43-b2ade10693fa"]
+[debug] QUERY OK source="expenses" db=0.8ms idle=23.1ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["babe7581-09b5-48f8-9f43-b2ade10693fa", [12083, 12084, 12085, 12086, 12087, 12088, 12089, 12090, 12091, 12092]]
+[DRY-RUN][TRIP] #babe7581-09b5-48f8-9f43-b2ade10693fa "Швейцария и покатушки на горнолыжном курорте Вербье": 1 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12083 "Beautiful apartment in Haute-Nendaz" days 0-0 -> 0-9
+[DRY-RUN][UPDATE] keep expense #51870 (accommodation #12083) price -> Money.new(:RUB, "13740.00")
+[DRY-RUN][DELETE] expense #51871
+[DRY-RUN][DELETE] expense #51872
+[DRY-RUN][DELETE] expense #51873
+[DRY-RUN][DELETE] expense #51874
+[DRY-RUN][DELETE] expense #51875
+[DRY-RUN][DELETE] expense #51876
+[DRY-RUN][DELETE] expense #51877
+[DRY-RUN][DELETE] expense #51878
+[DRY-RUN][DELETE] expense #51879
+[DRY-RUN][DELETE] accommodation #12084 "Beautiful apartment in Haute-Nendaz" days 1-1
+[DRY-RUN][DELETE] accommodation #12085 "Beautiful apartment in Haute-Nendaz" days 2-2
+[DRY-RUN][DELETE] accommodation #12086 "Beautiful apartment in Haute-Nendaz" days 3-3
+[DRY-RUN][DELETE] accommodation #12087 "Beautiful apartment in Haute-Nendaz" days 4-4
+[DRY-RUN][DELETE] accommodation #12088 "Beautiful apartment in Haute-Nendaz" days 5-5
+[DRY-RUN][DELETE] accommodation #12089 "Beautiful apartment in Haute-Nendaz" days 6-6
+[DRY-RUN][DELETE] accommodation #12090 "Beautiful apartment in Haute-Nendaz" days 7-7
+[DRY-RUN][DELETE] accommodation #12091 "Beautiful apartment in Haute-Nendaz" days 8-8
+[DRY-RUN][DELETE] accommodation #12092 "Beautiful apartment in Haute-Nendaz" days 9-9
+[DRY-RUN][TRIP] #babe7581-09b5-48f8-9f43-b2ade10693fa "Швейцария и покатушки на горнолыжном курорте Вербье" sanity check OK: accommodation totals RUB=13740.00
+[debug] QUERY OK source="accommodations" db=1.1ms idle=21.2ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["bb0840dd-f8f6-4d20-850b-f9bd742769d9"]
+[DRY-RUN][TRIP] #bb0840dd-f8f6-4d20-850b-f9bd742769d9 "Выходные в Суздале": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=1.3ms idle=19.5ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["bb0840dd-f8f6-4d20-850b-f9bd742769d9", [12093, 12094, 12095]]
+[DRY-RUN][UPDATE] keep accommodation #12093 "Домик с Сауной" days 0-0 -> 0-2
+[DRY-RUN][UPDATE] keep expense #51908 (accommodation #12093) price -> Money.new(:RUB, "5000.00")
+[DRY-RUN][DELETE] expense #51909
+[DRY-RUN][DELETE] expense #51910
+[DRY-RUN][DELETE] accommodation #12094 "Домик с Сауной" days 1-1
+[DRY-RUN][DELETE] accommodation #12095 "Домик с Сауной" days 2-2
+[DRY-RUN][TRIP] #bb0840dd-f8f6-4d20-850b-f9bd742769d9 "Выходные в Суздале" sanity check OK: accommodation totals RUB=5000.00
+[debug] QUERY OK source="accommodations" db=0.4ms idle=19.0ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["697b4470-4afc-45ac-86ba-bedb007357bc"]
+[DRY-RUN][TRIP] #697b4470-4afc-45ac-86ba-bedb007357bc "Дубай на майские": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.3ms idle=17.7ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["697b4470-4afc-45ac-86ba-bedb007357bc", [12119, 12120, 12121, 12122, 12123, 12124, 12125, 12126]]
+[DRY-RUN][UPDATE] keep accommodation #12119 "Arabian Park Hotel" days 0-0 -> 0-6
+[DRY-RUN][UPDATE] keep expense #52054 (accommodation #12119) price -> Money.new(:RUB, "0.00")
+[DRY-RUN][DELETE] expense #52055
+[DRY-RUN][DELETE] expense #52056
+[DRY-RUN][DELETE] expense #52057
+[DRY-RUN][DELETE] expense #52058
+[DRY-RUN][DELETE] expense #52059
+[DRY-RUN][DELETE] expense #52060
+[DRY-RUN][DELETE] accommodation #12120 "Arabian Park Hotel" days 1-1
+[DRY-RUN][DELETE] accommodation #12121 "Arabian Park Hotel" days 2-2
+[DRY-RUN][DELETE] accommodation #12122 "Arabian Park Hotel" days 3-3
+[DRY-RUN][DELETE] accommodation #12123 "Arabian Park Hotel" days 4-4
+[DRY-RUN][DELETE] accommodation #12124 "Arabian Park Hotel" days 5-5
+[DRY-RUN][DELETE] accommodation #12125 "Arabian Park Hotel" days 6-6
+[DRY-RUN][TRIP] #697b4470-4afc-45ac-86ba-bedb007357bc "Дубай на майские" sanity check OK: accommodation totals RUB=0.00
+[debug] QUERY OK source="accommodations" db=0.3ms idle=15.1ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["965fcbe8-ab90-46d1-8b2c-8854cdb60db2"]
+[debug] QUERY OK source="expenses" db=0.9ms queue=0.3ms idle=10.1ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["965fcbe8-ab90-46d1-8b2c-8854cdb60db2", [12127, 12128, 12129, 12130, 12131, 12132, 12133, 12134, 12135, 12136, 12137, 12138, 12139]]
+[DRY-RUN][TRIP] #965fcbe8-ab90-46d1-8b2c-8854cdb60db2 "Свадьба в готическом замке, море пива и знакомство с абсентной феей": 1 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12127 "Hotel Hoffmeister & Spa" days 0-0 -> 0-11
+[DRY-RUN][UPDATE] keep expense #52099 (accommodation #12127) price -> Money.new(:EUR, "1392.00")
+[DRY-RUN][DELETE] expense #52100
+[DRY-RUN][DELETE] expense #52101
+[DRY-RUN][DELETE] expense #52102
+[DRY-RUN][DELETE] expense #52103
+[DRY-RUN][DELETE] expense #52104
+[DRY-RUN][DELETE] expense #52105
+[DRY-RUN][DELETE] expense #52106
+[DRY-RUN][DELETE] expense #52107
+[DRY-RUN][DELETE] expense #52108
+[DRY-RUN][DELETE] expense #52109
+[DRY-RUN][DELETE] expense #52110
+[DRY-RUN][DELETE] accommodation #12128 "Hotel Hoffmeister & Spa" days 1-1
+[DRY-RUN][DELETE] accommodation #12129 "Hotel Hoffmeister & Spa" days 2-2
+[DRY-RUN][DELETE] accommodation #12130 "Hotel Hoffmeister & Spa" days 3-3
+[DRY-RUN][DELETE] accommodation #12131 "Hotel Hoffmeister & Spa" days 4-4
+[DRY-RUN][DELETE] accommodation #12132 "Hotel Hoffmeister & Spa" days 5-5
+[DRY-RUN][DELETE] accommodation #12133 "Hotel Hoffmeister & Spa" days 6-6
+[DRY-RUN][DELETE] accommodation #12134 "Hotel Hoffmeister & Spa" days 7-7
+[DRY-RUN][DELETE] accommodation #12135 "Hotel Hoffmeister & Spa" days 8-8
+[DRY-RUN][DELETE] accommodation #12136 "Hotel Hoffmeister & Spa" days 9-9
+[DRY-RUN][DELETE] accommodation #12137 "Hotel Hoffmeister & Spa" days 10-10
+[DRY-RUN][DELETE] accommodation #12138 "Hotel Hoffmeister & Spa" days 11-11
+[DRY-RUN][TRIP] #965fcbe8-ab90-46d1-8b2c-8854cdb60db2 "Свадьба в готическом замке, море пива и знакомство с абсентной феей" sanity check OK: accommodation totals CZK=0.00, EUR=1392.00
+[debug] QUERY OK source="accommodations" db=0.9ms idle=11.4ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["e2449def-b354-4150-b873-99ca30b83c60"]
+[DRY-RUN][TRIP] #e2449def-b354-4150-b873-99ca30b83c60 "Брюссель и Брюгге за 4 дня!": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.5ms idle=11.7ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["e2449def-b354-4150-b873-99ca30b83c60", [12140, 12141, 12142]]
+[DRY-RUN][UPDATE] keep accommodation #12140 "Husa President Park Hotel" days 0-0 -> 0-2
+[DRY-RUN][UPDATE] keep expense #52216 (accommodation #12140) price -> Money.new(:EUR, "183.00")
+[DRY-RUN][DELETE] expense #52217
+[DRY-RUN][DELETE] expense #52218
+[DRY-RUN][DELETE] accommodation #12141 "Husa President Park Hotel" days 1-1
+[DRY-RUN][DELETE] accommodation #12142 "Husa President Park Hotel" days 2-2
+[DRY-RUN][TRIP] #e2449def-b354-4150-b873-99ca30b83c60 "Брюссель и Брюгге за 4 дня!" sanity check OK: accommodation totals EUR=183.00
+[debug] QUERY OK source="accommodations" db=0.2ms idle=10.2ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["24bbcd31-cc67-4085-a347-c7959ee1ff55"]
+[DRY-RUN][TRIP] #24bbcd31-cc67-4085-a347-c7959ee1ff55 "Barcelona - BaRuCo conference": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.2ms idle=9.7ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["24bbcd31-cc67-4085-a347-c7959ee1ff55", [12144, 12145, 12146]]
+[DRY-RUN][UPDATE] keep accommodation #12144 "NH Barcelona Les Corts" days 0-0 -> 0-2
+[DRY-RUN][UPDATE] keep expense #52282 (accommodation #12144) price -> Money.new(:EUR, "0.00")
+[DRY-RUN][DELETE] expense #52283
+[DRY-RUN][DELETE] expense #52284
+[DRY-RUN][DELETE] accommodation #12145 "NH Barcelona Les Corts" days 1-1
+[DRY-RUN][DELETE] accommodation #12146 "NH Barcelona Les Corts" days 2-2
+[DRY-RUN][TRIP] #24bbcd31-cc67-4085-a347-c7959ee1ff55 "Barcelona - BaRuCo conference" sanity check OK: accommodation totals EUR=0.00
+[debug] QUERY OK source="accommodations" db=0.3ms idle=8.3ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["4c94ee5c-b7d2-4ba4-99ca-8f9761bc0201"]
+[debug] QUERY OK source="expenses" db=0.3ms idle=7.2ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["4c94ee5c-b7d2-4ba4-99ca-8f9761bc0201", [12151, 12152, 12153, 12154, 12155, 12156, 12157, 12158, 12159, 12160, 12161, 12162, 12163]]
+[DRY-RUN][TRIP] #4c94ee5c-b7d2-4ba4-99ca-8f9761bc0201 "Гонконг - Азия как она есть": 1 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12151 "Ibis Hong Kong Central & Sheung Wan" days 0-0 -> 0-12
+[DRY-RUN][UPDATE] keep expense #52327 (accommodation #12151) price -> Money.new(:HKD, "12675.00")
+[DRY-RUN][DELETE] expense #52328
+[DRY-RUN][DELETE] expense #52329
+[DRY-RUN][DELETE] expense #52330
+[DRY-RUN][DELETE] expense #52331
+[DRY-RUN][DELETE] expense #52332
+[DRY-RUN][DELETE] expense #52333
+[DRY-RUN][DELETE] expense #52334
+[DRY-RUN][DELETE] expense #52335
+[DRY-RUN][DELETE] expense #52336
+[DRY-RUN][DELETE] expense #52337
+[DRY-RUN][DELETE] expense #52338
+[DRY-RUN][DELETE] expense #52339
+[DRY-RUN][DELETE] accommodation #12152 "Ibis Hong Kong Central & Sheung Wan" days 1-1
+[DRY-RUN][DELETE] accommodation #12153 "Ibis Hong Kong Central & Sheung Wan" days 2-2
+[DRY-RUN][DELETE] accommodation #12154 "Ibis Hong Kong Central & Sheung Wan" days 3-3
+[DRY-RUN][DELETE] accommodation #12155 "Ibis Hong Kong Central & Sheung Wan" days 4-4
+[DRY-RUN][DELETE] accommodation #12156 "Ibis Hong Kong Central & Sheung Wan" days 5-5
+[DRY-RUN][DELETE] accommodation #12157 "Ibis Hong Kong Central & Sheung Wan" days 6-6
+[DRY-RUN][DELETE] accommodation #12158 "Ibis Hong Kong Central & Sheung Wan" days 7-7
+[DRY-RUN][DELETE] accommodation #12159 "Ibis Hong Kong Central & Sheung Wan" days 8-8
+[DRY-RUN][DELETE] accommodation #12160 "Ibis Hong Kong Central & Sheung Wan" days 9-9
+[DRY-RUN][DELETE] accommodation #12161 "Ibis Hong Kong Central & Sheung Wan" days 10-10
+[DRY-RUN][DELETE] accommodation #12162 "Ibis Hong Kong Central & Sheung Wan" days 11-11
+[DRY-RUN][DELETE] accommodation #12163 "Ibis Hong Kong Central & Sheung Wan" days 12-12
+[DRY-RUN][TRIP] #4c94ee5c-b7d2-4ba4-99ca-8f9761bc0201 "Гонконг - Азия как она есть" sanity check OK: accommodation totals HKD=12675.00
+[debug] QUERY OK source="accommodations" db=0.3ms idle=7.8ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["8bc38ca6-9a07-4876-83c1-b7214d052e08"]
+[debug] QUERY OK source="accommodations" db=1.3ms idle=7.7ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["8c9ed707-2fa9-4f20-a36b-e46104453ff7"]
+[DRY-RUN][TRIP] #8c9ed707-2fa9-4f20-a36b-e46104453ff7 "Прекрасный и зеленый город Киев": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=1.5ms idle=8.4ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["8c9ed707-2fa9-4f20-a36b-e46104453ff7", [12147, 12148, 12149, 12150]]
+[DRY-RUN][UPDATE] keep accommodation #12147 "Ibis Kiev Shevchenko Boulevard" days 0-0 -> 0-2
+[DRY-RUN][UPDATE] keep expense #52304 (accommodation #12147) price -> Money.new(:RUB, "7800.00")
+[DRY-RUN][DELETE] expense #52305
+[DRY-RUN][DELETE] expense #52306
+[DRY-RUN][DELETE] accommodation #12148 "Ibis Kiev Shevchenko Boulevard" days 1-1
+[DRY-RUN][DELETE] accommodation #12149 "Ibis Kiev Shevchenko Boulevard" days 2-2
+[DRY-RUN][TRIP] #8c9ed707-2fa9-4f20-a36b-e46104453ff7 "Прекрасный и зеленый город Киев" sanity check OK: accommodation totals RUB=7800.00
+[debug] QUERY OK source="accommodations" db=1.1ms idle=9.0ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["0bb224b0-9124-4b57-b993-d200b978ae7b"]
+[debug] QUERY OK source="expenses" db=1.5ms idle=8.3ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["0bb224b0-9124-4b57-b993-d200b978ae7b", [12181, 12182, 12183, 12184, 12185, 12186, 12187, 12188, 12189, 12190, 12191, 12192, 12193]]
+[DRY-RUN][TRIP] #0bb224b0-9124-4b57-b993-d200b978ae7b "Экскурсионный Порту, Лиссабон и пару дней на пляже!": 2 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12181 "Oporto Downtown Studio Low-cost II" days 0-0 -> 0-4
+[DRY-RUN][UPDATE] keep expense #52587 (accommodation #12181) price -> Money.new(:EUR, "199.00")
+[DRY-RUN][DELETE] expense #52588
+[DRY-RUN][DELETE] expense #52589
+[DRY-RUN][DELETE] expense #52590
+[DRY-RUN][DELETE] expense #52591
+[DRY-RUN][DELETE] accommodation #12182 "Oporto Downtown Studio Low-cost II" days 1-1
+[DRY-RUN][DELETE] accommodation #12183 "Oporto Downtown Studio Low-cost II" days 2-2
+[DRY-RUN][DELETE] accommodation #12184 "Oporto Downtown Studio Low-cost II" days 3-3
+[DRY-RUN][DELETE] accommodation #12185 "Oporto Downtown Studio Low-cost II" days 4-4
+[DRY-RUN][UPDATE] keep accommodation #12186 "Mini me House" days 5-5 -> 5-11
+[DRY-RUN][UPDATE] keep expense #52592 (accommodation #12186) price -> Money.new(:EUR, "263.97")
+[DRY-RUN][DELETE] expense #52593
+[DRY-RUN][DELETE] expense #52594
+[DRY-RUN][DELETE] expense #52595
+[DRY-RUN][DELETE] expense #52596
+[DRY-RUN][DELETE] expense #52597
+[DRY-RUN][DELETE] expense #52598
+[DRY-RUN][DELETE] accommodation #12187 "Mini me House" days 6-6
+[DRY-RUN][DELETE] accommodation #12188 "Mini me House" days 7-7
+[DRY-RUN][DELETE] accommodation #12189 "Mini me House" days 8-8
+[DRY-RUN][DELETE] accommodation #12190 "Mini me House" days 9-9
+[DRY-RUN][DELETE] accommodation #12191 "Mini me House" days 10-10
+[DRY-RUN][DELETE] accommodation #12192 "Mini me House" days 11-11
+[DRY-RUN][TRIP] #0bb224b0-9124-4b57-b993-d200b978ae7b "Экскурсионный Порту, Лиссабон и пару дней на пляже!" sanity check OK: accommodation totals EUR=462.97
+[debug] QUERY OK source="accommodations" db=2.4ms idle=12.8ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["0d901486-2063-41f5-ad2e-d8a53738a285"]
+[debug] QUERY OK source="accommodations" db=0.7ms idle=14.7ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["2a1dac2e-9924-4c91-9361-4f6294711735"]
+[DRY-RUN][TRIP] #2a1dac2e-9924-4c91-9361-4f6294711735 "Самые красивые города Польши": 3 merge group(s)
+[debug] QUERY OK source="expenses" db=1.0ms idle=15.3ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["2a1dac2e-9924-4c91-9361-4f6294711735", [12164, 12165, 12166, 12167, 12168, 12169, 12170, 12171]]
+[DRY-RUN][UPDATE] keep accommodation #12164 "Sky view 126" days 0-0 -> 0-1
+[DRY-RUN][UPDATE] keep expense #52409 (accommodation #12164) price -> Money.new(:EUR, "76.00")
+[DRY-RUN][DELETE] expense #52410
+[DRY-RUN][DELETE] accommodation #12165 "Sky view 126" days 1-1
+[DRY-RUN][UPDATE] keep accommodation #12166 "ibis budget Варшава Центр" days 2-2 -> 2-3
+[DRY-RUN][UPDATE] keep expense #52411 (accommodation #12166) price -> Money.new(:PLN, "78.00")
+[DRY-RUN][DELETE] expense #52412
+[DRY-RUN][DELETE] accommodation #12167 "ibis budget Варшава Центр" days 3-3
+[DRY-RUN][UPDATE] keep accommodation #12168 "ibis budget Краков Старая Площадь" days 4-4 -> 4-5
+[DRY-RUN][UPDATE] keep expense #52413 (accommodation #12168) price -> Money.new(:PLN, "278.00")
+[DRY-RUN][DELETE] expense #52414
+[DRY-RUN][DELETE] accommodation #12169 "ibis budget Краков Старая Площадь" days 5-5
+[DRY-RUN][TRIP] #2a1dac2e-9924-4c91-9361-4f6294711735 "Самые красивые города Польши" sanity check OK: accommodation totals EUR=76.00, PLN=470.76
+[debug] QUERY OK source="accommodations" db=1.0ms idle=16.7ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["3428eda9-829c-4fed-8ae6-02ba532cc5f8"]
+[DRY-RUN][TRIP] #3428eda9-829c-4fed-8ae6-02ba532cc5f8 "Кто был в Братиславе?!": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.3ms idle=17.5ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["3428eda9-829c-4fed-8ae6-02ba532cc5f8", [12197, 12198, 12199, 12200]]
+[DRY-RUN][UPDATE] keep accommodation #12197 "Ibis Bratislava Centrum" days 0-0 -> 0-2
+[DRY-RUN][UPDATE] keep expense #52791 (accommodation #12197) price -> Money.new(:EUR, "122.58")
+[DRY-RUN][DELETE] expense #52792
+[DRY-RUN][DELETE] expense #52793
+[DRY-RUN][DELETE] accommodation #12198 "Ibis Bratislava Centrum" days 1-1
+[DRY-RUN][DELETE] accommodation #12199 "Ibis Bratislava Centrum" days 2-2
+[DRY-RUN][TRIP] #3428eda9-829c-4fed-8ae6-02ba532cc5f8 "Кто был в Братиславе?!" sanity check OK: accommodation totals EUR=122.58
+[debug] QUERY OK source="accommodations" db=1.1ms idle=16.9ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["5c038c0b-f8ef-4504-b683-43a6ecb6ffd9"]
+[debug] QUERY OK source="expenses" db=1.3ms idle=16.7ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["5c038c0b-f8ef-4504-b683-43a6ecb6ffd9", [12201, 12202, 12203, 12204, 12205, 12206, 12207, 12208, 12209, 12210]]
+[DRY-RUN][TRIP] #5c038c0b-f8ef-4504-b683-43a6ecb6ffd9 "Горячая Испания": 2 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12201 "Acogedor Parc Guell Can Baro 4" days 0-0 -> 0-4
+[DRY-RUN][UPDATE] keep expense #52836 (accommodation #12201) price -> Money.new(:EUR, "337.00")
+[DRY-RUN][DELETE] expense #52837
+[DRY-RUN][DELETE] expense #52838
+[DRY-RUN][DELETE] expense #52839
+[DRY-RUN][DELETE] expense #52840
+[DRY-RUN][DELETE] accommodation #12202 "Acogedor Parc Guell Can Baro 4" days 1-1
+[DRY-RUN][DELETE] accommodation #12203 "Acogedor Parc Guell Can Baro 4" days 2-2
+[DRY-RUN][DELETE] accommodation #12204 "Acogedor Parc Guell Can Baro 4" days 3-3
+[DRY-RUN][DELETE] accommodation #12205 "Acogedor Parc Guell Can Baro 4" days 4-4
+[DRY-RUN][UPDATE] keep accommodation #12207 "Apartamento reformado 20m en Gran Vía" days 6-6 -> 6-8
+[DRY-RUN][UPDATE] keep expense #52842 (accommodation #12207) price -> Money.new(:EUR, "138.00")
+[DRY-RUN][DELETE] expense #52843
+[DRY-RUN][DELETE] expense #52844
+[DRY-RUN][DELETE] accommodation #12208 "Apartamento reformado 20m en Gran Vía" days 7-7
+[DRY-RUN][DELETE] accommodation #12209 "Apartamento reformado 20m en Gran Vía" days 8-8
+[DRY-RUN][TRIP] #5c038c0b-f8ef-4504-b683-43a6ecb6ffd9 "Горячая Испания" sanity check OK: accommodation totals EUR=512.05
+[debug] QUERY OK source="accommodations" db=0.7ms idle=17.9ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["5e4de25e-49d4-46e9-a742-568125b8a67f"]
+[DRY-RUN][TRIP] #5e4de25e-49d4-46e9-a742-568125b8a67f "Мюнхен и Гармиш-Партенкирхен": 2 merge group(s)
+[debug] QUERY OK source="expenses" db=1.3ms idle=17.3ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["5e4de25e-49d4-46e9-a742-568125b8a67f", [12172, 12173, 12174, 12175, 12176, 12177, 12178, 12179, 12180]]
+[DRY-RUN][UPDATE] keep accommodation #12172 "Ibis Muenchen City Ost" days 0-0 -> 0-2
+[DRY-RUN][UPDATE] keep expense #52544 (accommodation #12172) price -> Money.new(:EUR, "168.00")
+[DRY-RUN][DELETE] expense #52545
+[DRY-RUN][DELETE] expense #52546
+[DRY-RUN][DELETE] accommodation #12173 "Ibis Muenchen City Ost" days 1-1
+[DRY-RUN][DELETE] accommodation #12174 "Ibis Muenchen City Ost" days 2-2
+[DRY-RUN][UPDATE] keep accommodation #12175 "Airbnb" days 3-3 -> 3-7
+[DRY-RUN][UPDATE] keep expense #52547 (accommodation #12175) price -> Money.new(:EUR, "335.00")
+[DRY-RUN][DELETE] expense #52548
+[DRY-RUN][DELETE] expense #52549
+[DRY-RUN][DELETE] expense #52550
+[DRY-RUN][DELETE] expense #52551
+[DRY-RUN][DELETE] accommodation #12176 "Airbnb" days 4-4
+[DRY-RUN][DELETE] accommodation #12177 "Airbnb" days 5-5
+[DRY-RUN][DELETE] accommodation #12178 "Airbnb" days 6-6
+[DRY-RUN][DELETE] accommodation #12179 "Airbnb" days 7-7
+[DRY-RUN][TRIP] #5e4de25e-49d4-46e9-a742-568125b8a67f "Мюнхен и Гармиш-Партенкирхен" sanity check OK: accommodation totals EUR=503.00
+[debug] QUERY OK source="accommodations" db=1.2ms idle=18.2ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["c22f0b9f-f014-49c9-ab0e-5bbbeda08e70"]
+[debug] QUERY OK source="accommodations" db=0.4ms idle=13.4ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["cb5e9cef-e852-416d-8eba-f1cf03c4a332"]
+[debug] QUERY OK source="accommodations" db=0.3ms idle=13.1ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["d4dc1e78-872d-4b2e-94ca-274bc14768be"]
+[debug] QUERY OK source="accommodations" db=3.5ms idle=12.4ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["e15af1f7-38c3-4dac-976a-dc3343a4b154"]
+[debug] QUERY OK source="accommodations" db=0.9ms idle=13.9ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["ef290a46-940a-4e5b-95ad-afd2b090383f"]
+[debug] QUERY OK source="accommodations" db=1.6ms queue=0.5ms idle=14.5ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["050c3ce3-0c52-4f4c-b38e-b75bba656595"]
+[DRY-RUN][TRIP] #050c3ce3-0c52-4f4c-b38e-b75bba656595 "Будапешт и Тапольца": 2 merge group(s)
+[debug] QUERY OK source="expenses" db=2.1ms idle=15.3ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["050c3ce3-0c52-4f4c-b38e-b75bba656595", [12229, 12230, 12231, 12232, 12233, 12234, 12235, 12236]]
+[DRY-RUN][UPDATE] keep accommodation #12229 "Impulso Fashion Hotel" days 0-0 -> 0-4
+[DRY-RUN][UPDATE] keep expense #53118 (accommodation #12229) price -> Money.new(:EUR, "351.00")
+[DRY-RUN][DELETE] expense #53119
+[DRY-RUN][DELETE] expense #53120
+[DRY-RUN][DELETE] expense #53121
+[DRY-RUN][DELETE] expense #53122
+[DRY-RUN][DELETE] accommodation #12230 "Impulso Fashion Hotel" days 1-1
+[DRY-RUN][DELETE] accommodation #12231 "Impulso Fashion Hotel" days 2-2
+[DRY-RUN][DELETE] accommodation #12232 "Impulso Fashion Hotel" days 3-3
+[DRY-RUN][DELETE] accommodation #12233 "Impulso Fashion Hotel" days 4-4
+[DRY-RUN][UPDATE] keep accommodation #12234 "Hunguest Hotel Pelion" days 5-5 -> 5-6
+[DRY-RUN][UPDATE] keep expense #53123 (accommodation #12234) price -> Money.new(:EUR, "203.00")
+[DRY-RUN][DELETE] expense #53124
+[DRY-RUN][DELETE] accommodation #12235 "Hunguest Hotel Pelion" days 6-6
+[DRY-RUN][TRIP] #050c3ce3-0c52-4f4c-b38e-b75bba656595 "Будапешт и Тапольца" sanity check OK: accommodation totals EUR=554.00, HUF=0.00
+[debug] QUERY OK source="accommodations" db=0.7ms idle=16.6ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["0c944f67-74ed-478f-88f2-01736966985f"]
+[DRY-RUN][TRIP] #0c944f67-74ed-478f-88f2-01736966985f "Релакс в Бад-Саарове": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.8ms idle=14.9ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["0c944f67-74ed-478f-88f2-01736966985f", [12360, 12361, 12362]]
+[DRY-RUN][UPDATE] keep accommodation #12360 "Aja Bad Saarow" days 0-0 -> 0-1
+[DRY-RUN][UPDATE] keep expense #53958 (accommodation #12360) price -> Money.new(:EUR, "497.00")
+[DRY-RUN][DELETE] expense #53959
+[DRY-RUN][DELETE] accommodation #12361 "Aja Bad Saarow" days 1-1
+[DRY-RUN][TRIP] #0c944f67-74ed-478f-88f2-01736966985f "Релакс в Бад-Саарове" sanity check OK: accommodation totals EUR=497.00
+[debug] QUERY OK source="accommodations" db=0.8ms idle=14.6ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["28c19de3-3b3e-4ed0-97b6-7f00a646cf94"]
+[DRY-RUN][TRIP] #28c19de3-3b3e-4ed0-97b6-7f00a646cf94 "Рюген": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.4ms idle=13.1ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["28c19de3-3b3e-4ed0-97b6-7f00a646cf94", [12248, 12249, 12250]]
+[DRY-RUN][UPDATE] keep accommodation #12248 "Precise Resort Rügen & SPLASH Erlebniswelt" days 0-0 -> 0-1
+[DRY-RUN][UPDATE] keep expense #53300 (accommodation #12248) price -> Money.new(:EUR, "540.00")
+[DRY-RUN][DELETE] expense #53301
+[DRY-RUN][DELETE] accommodation #12249 "Precise Resort Rügen & SPLASH Erlebniswelt" days 1-1
+[DRY-RUN][TRIP] #28c19de3-3b3e-4ed0-97b6-7f00a646cf94 "Рюген" sanity check OK: accommodation totals EUR=540.00
+[debug] QUERY OK source="accommodations" db=1.1ms idle=13.3ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["2c129d1c-e648-4038-8763-aeea49bd7908"]
+[DRY-RUN][TRIP] #2c129d1c-e648-4038-8763-aeea49bd7908 "Мальорка": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=1.7ms idle=14.1ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["2c129d1c-e648-4038-8763-aeea49bd7908", [12283, 12284, 12285, 12286, 12287, 12288, 12289, 12290, 12291]]
+[DRY-RUN][UPDATE] keep accommodation #12283 "Iberostar Cristina" days 0-0 -> 0-7
+[DRY-RUN][UPDATE] keep expense #53489 (accommodation #12283) price -> Money.new(:EUR, "2465.00")
+[DRY-RUN][DELETE] expense #53490
+[DRY-RUN][DELETE] expense #53491
+[DRY-RUN][DELETE] expense #53492
+[DRY-RUN][DELETE] expense #53493
+[DRY-RUN][DELETE] expense #53494
+[DRY-RUN][DELETE] expense #53495
+[DRY-RUN][DELETE] expense #53496
+[DRY-RUN][DELETE] accommodation #12284 "Iberostar Cristina" days 1-1
+[DRY-RUN][DELETE] accommodation #12285 "Iberostar Cristina" days 2-2
+[DRY-RUN][DELETE] accommodation #12286 "Iberostar Cristina" days 3-3
+[DRY-RUN][DELETE] accommodation #12287 "Iberostar Cristina" days 4-4
+[DRY-RUN][DELETE] accommodation #12288 "Iberostar Cristina" days 5-5
+[DRY-RUN][DELETE] accommodation #12289 "Iberostar Cristina" days 6-6
+[DRY-RUN][DELETE] accommodation #12290 "Iberostar Cristina" days 7-7
+[DRY-RUN][TRIP] #2c129d1c-e648-4038-8763-aeea49bd7908 "Мальорка" sanity check OK: accommodation totals EUR=2465.00
+[debug] QUERY OK source="accommodations" db=0.9ms idle=13.4ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["3b4341f3-accc-49b2-a6ba-f7fefde03426"]
+[DRY-RUN][TRIP] #3b4341f3-accc-49b2-a6ba-f7fefde03426 "Париж на пасху": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=3.8ms idle=13.4ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["3b4341f3-accc-49b2-a6ba-f7fefde03426", [12341, 12342, 12343, 12344]]
+[DRY-RUN][UPDATE] keep accommodation #12341 "Novotel Suites Paris Expo Porte de Versailles" days 0-0 -> 0-2
+[DRY-RUN][UPDATE] keep expense #53844 (accommodation #12341) price -> Money.new(:EUR, "545.28")
+[DRY-RUN][DELETE] expense #53845
+[DRY-RUN][DELETE] expense #53846
+[DRY-RUN][DELETE] accommodation #12342 "Novotel Suites Paris Expo Porte de Versailles" days 1-1
+[DRY-RUN][DELETE] accommodation #12343 "Novotel Suites Paris Expo Porte de Versailles" days 2-2
+[DRY-RUN][TRIP] #3b4341f3-accc-49b2-a6ba-f7fefde03426 "Париж на пасху" sanity check OK: accommodation totals EUR=545.28
+[debug] QUERY OK source="accommodations" db=0.5ms idle=15.5ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["3e60c40e-dc85-4b3f-8913-e6e6bf5c28d4"]
+[debug] QUERY OK source="accommodations" db=0.7ms idle=14.0ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["40141cec-8365-4296-a2e5-9c23c6459c50"]
+[debug] QUERY OK source="expenses" db=0.9ms idle=13.6ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["40141cec-8365-4296-a2e5-9c23c6459c50", [12296, 12297, 12298, 12299, 12300, 12301, 12302, 12303, 12304, 12305]]
+[DRY-RUN][TRIP] #40141cec-8365-4296-a2e5-9c23c6459c50 "Моречко в Турции": 1 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12296 "Güral Premier Belek" days 0-0 -> 0-9
+[DRY-RUN][UPDATE] keep expense #53557 (accommodation #12296) price -> Money.new(:EUR, "3944.00")
+[DRY-RUN][DELETE] expense #53558
+[DRY-RUN][DELETE] expense #53559
+[DRY-RUN][DELETE] expense #53560
+[DRY-RUN][DELETE] expense #53561
+[DRY-RUN][DELETE] expense #53562
+[DRY-RUN][DELETE] expense #53563
+[DRY-RUN][DELETE] expense #53564
+[DRY-RUN][DELETE] expense #53565
+[DRY-RUN][DELETE] expense #53566
+[DRY-RUN][DELETE] accommodation #12297 "Güral Premier Belek" days 1-1
+[DRY-RUN][DELETE] accommodation #12298 "Güral Premier Belek" days 2-2
+[DRY-RUN][DELETE] accommodation #12299 "Güral Premier Belek" days 3-3
+[DRY-RUN][DELETE] accommodation #12300 "Güral Premier Belek" days 4-4
+[DRY-RUN][DELETE] accommodation #12301 "Güral Premier Belek" days 5-5
+[DRY-RUN][DELETE] accommodation #12302 "Güral Premier Belek" days 6-6
+[DRY-RUN][DELETE] accommodation #12303 "Güral Premier Belek" days 7-7
+[DRY-RUN][DELETE] accommodation #12304 "Güral Premier Belek" days 8-8
+[DRY-RUN][DELETE] accommodation #12305 "Güral Premier Belek" days 9-9
+[DRY-RUN][TRIP] #40141cec-8365-4296-a2e5-9c23c6459c50 "Моречко в Турции" sanity check OK: accommodation totals EUR=3944.00
+[debug] QUERY OK source="accommodations" db=0.9ms queue=0.4ms idle=14.9ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["52329d6a-6288-4423-9c24-513d05306750"]
+[DRY-RUN][TRIP] #52329d6a-6288-4423-9c24-513d05306750 "Загадочная Македония": 2 merge group(s)
+[debug] QUERY OK source="expenses" db=0.4ms idle=15.2ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["52329d6a-6288-4423-9c24-513d05306750", [12238, 12239, 12240, 12241, 12242, 12243]]
+[DRY-RUN][UPDATE] keep accommodation #12238 "Hotel Super 8" days 0-0 -> 0-1
+[DRY-RUN][UPDATE] keep expense #53187 (accommodation #12238) price -> Money.new(:EUR, "77.48")
+[DRY-RUN][DELETE] expense #53188
+[DRY-RUN][DELETE] accommodation #12239 "Hotel Super 8" days 1-1
+[DRY-RUN][UPDATE] keep accommodation #12240 "Maslov Apartments" days 2-2 -> 2-4
+[DRY-RUN][UPDATE] keep expense #53189 (accommodation #12240) price -> Money.new(:EUR, "120.00")
+[DRY-RUN][DELETE] expense #53190
+[DRY-RUN][DELETE] expense #53191
+[DRY-RUN][DELETE] accommodation #12241 "Maslov Apartments" days 3-3
+[DRY-RUN][DELETE] accommodation #12242 "Maslov Apartments" days 4-4
+[DRY-RUN][TRIP] #52329d6a-6288-4423-9c24-513d05306750 "Загадочная Македония" sanity check OK: accommodation totals EUR=197.48
+[debug] QUERY OK source="accommodations" db=1.4ms idle=16.8ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["540f1f88-8d48-4246-8851-4db81ffde390"]
+[debug] QUERY OK source="accommodations" db=1.1ms idle=16.9ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["5db256bc-e804-4890-91c9-3cbdfc1b5f73"]
+[debug] QUERY OK source="accommodations" db=0.8ms idle=16.2ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["62a1993e-8b3a-4d49-9bc0-dcd22c1ac7c5"]
+[debug] QUERY OK source="expenses" db=0.8ms idle=15.1ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["62a1993e-8b3a-4d49-9bc0-dcd22c1ac7c5", [12345, 12346, 12347, 12348, 12349, 12350, 12351, 12352, 12353, 12354]]
+[DRY-RUN][TRIP] #62a1993e-8b3a-4d49-9bc0-dcd22c1ac7c5 "Итальянские озера": 3 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12346 "Hotel Metropole Bellagio" days 1-1 -> 1-2
+[DRY-RUN][UPDATE] keep expense #53882 (accommodation #12346) price -> Money.new(:EUR, "325.90")
+[DRY-RUN][DELETE] expense #53883
+[DRY-RUN][DELETE] accommodation #12347 "Hotel Metropole Bellagio" days 2-2
+[DRY-RUN][UPDATE] keep accommodation #12348 "Hotel Sirmione" days 3-3 -> 3-5
+[DRY-RUN][UPDATE] keep expense #53884 (accommodation #12348) price -> Money.new(:EUR, "658.80")
+[DRY-RUN][DELETE] expense #53885
+[DRY-RUN][DELETE] expense #53886
+[DRY-RUN][DELETE] accommodation #12349 "Hotel Sirmione" days 4-4
+[DRY-RUN][DELETE] accommodation #12350 "Hotel Sirmione" days 5-5
+[DRY-RUN][UPDATE] keep accommodation #12351 "Garda Room" days 6-6 -> 6-7
+[DRY-RUN][UPDATE] keep expense #53887 (accommodation #12351) price -> Money.new(:EUR, "222.00")
+[DRY-RUN][DELETE] expense #53888
+[DRY-RUN][DELETE] accommodation #12352 "Garda Room" days 7-7
+[DRY-RUN][TRIP] #62a1993e-8b3a-4d49-9bc0-dcd22c1ac7c5 "Итальянские озера" sanity check OK: accommodation totals EUR=1547.70
+[debug] QUERY OK source="accommodations" db=0.4ms idle=14.5ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["6564a57e-7e09-43ff-84d3-684c9ddece0e"]
+[debug] QUERY OK source="expenses" db=1.0ms queue=0.5ms idle=14.0ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["6564a57e-7e09-43ff-84d3-684c9ddece0e", [12268, 12269, 12270, 12271, 12272, 12273, 12274, 12275, 12276]]
+[DRY-RUN][TRIP] #6564a57e-7e09-43ff-84d3-684c9ddece0e "Горнолыжная Австрия: Целль-ам-Циллер": 1 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12268 "Apartments Lily Rose" days 0-0 -> 0-7
+[DRY-RUN][UPDATE] keep expense #53403 (accommodation #12268) price -> Money.new(:EUR, "816.00")
+[DRY-RUN][DELETE] expense #53404
+[DRY-RUN][DELETE] expense #53405
+[DRY-RUN][DELETE] expense #53406
+[DRY-RUN][DELETE] expense #53407
+[DRY-RUN][DELETE] expense #53408
+[DRY-RUN][DELETE] expense #53409
+[DRY-RUN][DELETE] expense #53410
+[DRY-RUN][DELETE] accommodation #12269 "Apartments Lily Rose" days 1-1
+[DRY-RUN][DELETE] accommodation #12270 "Apartments Lily Rose" days 2-2
+[DRY-RUN][DELETE] accommodation #12271 "Apartments Lily Rose" days 3-3
+[DRY-RUN][DELETE] accommodation #12272 "Apartments Lily Rose" days 4-4
+[DRY-RUN][DELETE] accommodation #12273 "Apartments Lily Rose" days 5-5
+[DRY-RUN][DELETE] accommodation #12274 "Apartments Lily Rose" days 6-6
+[DRY-RUN][DELETE] accommodation #12275 "Apartments Lily Rose" days 7-7
+[DRY-RUN][TRIP] #6564a57e-7e09-43ff-84d3-684c9ddece0e "Горнолыжная Австрия: Целль-ам-Циллер" sanity check OK: accommodation totals EUR=816.00
+[debug] QUERY OK source="accommodations" db=0.7ms idle=15.8ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["6e555bf8-b21b-4134-8d74-0f8f2eb5553d"]
+[DRY-RUN][TRIP] #6e555bf8-b21b-4134-8d74-0f8f2eb5553d "Люксембург": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.9ms idle=15.7ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["6e555bf8-b21b-4134-8d74-0f8f2eb5553d", [12327, 12328, 12329, 12330]]
+[DRY-RUN][UPDATE] keep accommodation #12327 "Novotel Luxembourg Centre" days 0-0 -> 0-2
+[DRY-RUN][UPDATE] keep expense #53770 (accommodation #12327) price -> Money.new(:EUR, "540.99")
+[DRY-RUN][DELETE] expense #53771
+[DRY-RUN][DELETE] expense #53772
+[DRY-RUN][DELETE] accommodation #12328 "Novotel Luxembourg Centre" days 1-1
+[DRY-RUN][DELETE] accommodation #12329 "Novotel Luxembourg Centre" days 2-2
+[DRY-RUN][TRIP] #6e555bf8-b21b-4134-8d74-0f8f2eb5553d "Люксембург" sanity check OK: accommodation totals EUR=540.99
+[debug] QUERY OK source="accommodations" db=1.0ms idle=14.4ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["6ff58f8d-730e-4c67-9cdf-df03bbc488e2"]
+[debug] QUERY OK source="expenses" db=0.3ms idle=15.0ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["6ff58f8d-730e-4c67-9cdf-df03bbc488e2", [12307, 12308]]
+[debug] QUERY OK source="accommodations" db=0.5ms idle=12.3ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["7366f023-1561-4c8e-9679-134d610fec1b"]
+[DRY-RUN][TRIP] #7366f023-1561-4c8e-9679-134d610fec1b "Крит": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.4ms idle=11.7ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["7366f023-1561-4c8e-9679-134d610fec1b", [12331, 12332, 12333, 12334, 12335, 12336, 12337, 12338]]
+[DRY-RUN][UPDATE] keep accommodation #12331 "Creta Maris Beach Resort" days 0-0 -> 0-6
+[DRY-RUN][UPDATE] keep expense #53791 (accommodation #12331) price -> Money.new(:EUR, "4451.00")
+[DRY-RUN][DELETE] expense #53792
+[DRY-RUN][DELETE] expense #53793
+[DRY-RUN][DELETE] expense #53794
+[DRY-RUN][DELETE] expense #53795
+[DRY-RUN][DELETE] expense #53796
+[DRY-RUN][DELETE] expense #53797
+[DRY-RUN][DELETE] accommodation #12332 "Creta Maris Beach Resort" days 1-1
+[DRY-RUN][DELETE] accommodation #12333 "Creta Maris Beach Resort" days 2-2
+[DRY-RUN][DELETE] accommodation #12334 "Creta Maris Beach Resort" days 3-3
+[DRY-RUN][DELETE] accommodation #12335 "Creta Maris Beach Resort" days 4-4
+[DRY-RUN][DELETE] accommodation #12336 "Creta Maris Beach Resort" days 5-5
+[DRY-RUN][DELETE] accommodation #12337 "Creta Maris Beach Resort" days 6-6
+[DRY-RUN][TRIP] #7366f023-1561-4c8e-9679-134d610fec1b "Крит" sanity check OK: accommodation totals EUR=4451.00
+[debug] QUERY OK source="accommodations" db=0.1ms idle=11.4ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["7452f4a3-0fca-4d86-9ddb-9c3a41e5fdcb"]
+[DRY-RUN][TRIP] #7452f4a3-0fca-4d86-9ddb-9c3a41e5fdcb "Серфинг в Португалии": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.6ms idle=10.7ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["7452f4a3-0fca-4d86-9ddb-9c3a41e5fdcb", [12211, 12212, 12213, 12214, 12215, 12216, 12217, 12218]]
+[DRY-RUN][UPDATE] keep accommodation #12211 "Surfcamp" days 0-0 -> 0-6
+[DRY-RUN][UPDATE] keep expense #52951 (accommodation #12211) price -> Money.new(:EUR, "0.00")
+[DRY-RUN][DELETE] expense #52952
+[DRY-RUN][DELETE] expense #52953
+[DRY-RUN][DELETE] expense #52954
+[DRY-RUN][DELETE] expense #52955
+[DRY-RUN][DELETE] expense #52956
+[DRY-RUN][DELETE] expense #52957
+[DRY-RUN][DELETE] accommodation #12212 "Surfcamp" days 1-1
+[DRY-RUN][DELETE] accommodation #12213 "Surfcamp" days 2-2
+[DRY-RUN][DELETE] accommodation #12214 "Surfcamp" days 3-3
+[DRY-RUN][DELETE] accommodation #12215 "Surfcamp" days 4-4
+[DRY-RUN][DELETE] accommodation #12216 "Surfcamp" days 5-5
+[DRY-RUN][DELETE] accommodation #12217 "Surfcamp" days 6-6
+[DRY-RUN][TRIP] #7452f4a3-0fca-4d86-9ddb-9c3a41e5fdcb "Серфинг в Португалии" sanity check OK: accommodation totals EUR=0.00
+[debug] QUERY OK source="accommodations" db=0.9ms idle=11.2ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["7987b30f-70f0-4e20-941c-6e48080ed9b1"]
+[DRY-RUN][TRIP] #7987b30f-70f0-4e20-941c-6e48080ed9b1 "Копенгаген и немного Швеции": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.9ms idle=10.7ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["7987b30f-70f0-4e20-941c-6e48080ed9b1", [12251, 12252, 12253, 12254]]
+[DRY-RUN][UPDATE] keep accommodation #12251 "Квартира" days 0-0 -> 0-2
+[DRY-RUN][UPDATE] keep expense #53313 (accommodation #12251) price -> Money.new(:EUR, "396.00")
+[DRY-RUN][DELETE] expense #53314
+[DRY-RUN][DELETE] expense #53315
+[DRY-RUN][DELETE] accommodation #12252 "Квартира" days 1-1
+[DRY-RUN][DELETE] accommodation #12253 "Квартира" days 2-2
+[DRY-RUN][TRIP] #7987b30f-70f0-4e20-941c-6e48080ed9b1 "Копенгаген и немного Швеции" sanity check OK: accommodation totals DKK=0.00, EUR=396.00
+[debug] QUERY OK source="accommodations" db=0.2ms idle=10.1ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["89c52e55-831e-4dd5-b6b3-163f32ea1bf7"]
+[DRY-RUN][TRIP] #89c52e55-831e-4dd5-b6b3-163f32ea1bf7 "Рига и Юрмала с детьми": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.5ms idle=9.4ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["89c52e55-831e-4dd5-b6b3-163f32ea1bf7", [12277, 12278, 12279, 12280]]
+[DRY-RUN][UPDATE] keep accommodation #12277 "Old Riga Central Family Apartment" days 0-0 -> 0-2
+[DRY-RUN][UPDATE] keep expense #53434 (accommodation #12277) price -> Money.new(:EUR, "105.00")
+[DRY-RUN][DELETE] expense #53435
+[DRY-RUN][DELETE] expense #53436
+[DRY-RUN][DELETE] accommodation #12278 "Old Riga Central Family Apartment" days 1-1
+[DRY-RUN][DELETE] accommodation #12279 "Old Riga Central Family Apartment" days 2-2
+[DRY-RUN][TRIP] #89c52e55-831e-4dd5-b6b3-163f32ea1bf7 "Рига и Юрмала с детьми" sanity check OK: accommodation totals EUR=105.00
+[debug] QUERY OK source="accommodations" db=0.3ms idle=8.8ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["91127e4c-8da2-4d11-bc41-8226c41d723e"]
+[debug] QUERY OK source="expenses" db=0.3ms idle=8.8ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["91127e4c-8da2-4d11-bc41-8226c41d723e", [12281, 12282]]
+[debug] QUERY OK source="accommodations" db=0.2ms idle=8.6ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["914c68c9-1d68-4ec4-803d-0a594e679519"]
+[debug] QUERY OK source="expenses" db=0.3ms idle=8.4ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["914c68c9-1d68-4ec4-803d-0a594e679519", [12312, 12313, 12314, 12315]]
+[DRY-RUN][TRIP] #914c68c9-1d68-4ec4-803d-0a594e679519 "Гамбург": 1 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12312 "IntercityHotel Hamburg Dammtor-Messe" days 0-0 -> 0-2
+[DRY-RUN][UPDATE] keep expense #53679 (accommodation #12312) price -> Money.new(:EUR, "201.00")
+[DRY-RUN][DELETE] expense #53680
+[DRY-RUN][DELETE] expense #53681
+[DRY-RUN][DELETE] accommodation #12313 "IntercityHotel Hamburg Dammtor-Messe" days 1-1
+[DRY-RUN][DELETE] accommodation #12314 "IntercityHotel Hamburg Dammtor-Messe" days 2-2
+[DRY-RUN][TRIP] #914c68c9-1d68-4ec4-803d-0a594e679519 "Гамбург" sanity check OK: accommodation totals EUR=201.00
+[debug] QUERY OK source="accommodations" db=0.6ms idle=9.1ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["a924f8ea-d1bf-4852-9720-b3d047a7d05c"]
+[debug] QUERY OK source="accommodations" db=0.7ms idle=9.1ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["af24ba04-dcb3-4dc7-9023-f62fb84be656"]
+[debug] QUERY OK source="expenses" db=0.4ms idle=6.2ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["af24ba04-dcb3-4dc7-9023-f62fb84be656", [12244, 12245]]
+[debug] QUERY OK source="accommodations" db=0.4ms idle=5.7ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["b36a31d4-f3d8-4b59-bfe4-7eada6ec0adc"]
+[debug] QUERY OK source="expenses" db=0.4ms idle=5.6ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["b36a31d4-f3d8-4b59-bfe4-7eada6ec0adc", [12223, 12224]]
+[debug] QUERY OK source="accommodations" db=0.2ms idle=5.5ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["c9509b53-d004-4084-87c4-3d71e05215cd"]
+[debug] QUERY OK source="accommodations" db=0.2ms idle=5.1ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["ca2cc9db-1258-4c5a-a798-537a99f214ca"]
+[debug] QUERY OK source="expenses" db=0.5ms idle=4.9ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["ca2cc9db-1258-4c5a-a798-537a99f214ca", [12316, 12317, 12318, 12319, 12320, 12321]]
+[DRY-RUN][TRIP] #ca2cc9db-1258-4c5a-a798-537a99f214ca "Босния и Герцеговина": 1 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12316 "Hotel Hills Sarajevo Congress & Thermal Spa Resort" days 0-0 -> 0-4
+[DRY-RUN][UPDATE] keep expense #53708 (accommodation #12316) price -> Money.new(:EUR, "561.05")
+[DRY-RUN][DELETE] expense #53709
+[DRY-RUN][DELETE] expense #53710
+[DRY-RUN][DELETE] expense #53711
+[DRY-RUN][DELETE] expense #53712
+[DRY-RUN][DELETE] accommodation #12317 "Hotel Hills Sarajevo Congress & Thermal Spa Resort" days 1-1
+[DRY-RUN][DELETE] accommodation #12318 "Hotel Hills Sarajevo Congress & Thermal Spa Resort" days 2-2
+[DRY-RUN][DELETE] accommodation #12319 "Hotel Hills Sarajevo Congress & Thermal Spa Resort" days 3-3
+[DRY-RUN][DELETE] accommodation #12320 "Hotel Hills Sarajevo Congress & Thermal Spa Resort" days 4-4
+[DRY-RUN][TRIP] #ca2cc9db-1258-4c5a-a798-537a99f214ca "Босния и Герцеговина" sanity check OK: accommodation totals EUR=561.05
+[debug] QUERY OK source="accommodations" db=0.3ms idle=6.1ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["d36ce8dc-d956-4099-93d2-d3f7ed877f37"]
+[DRY-RUN][TRIP] #d36ce8dc-d956-4099-93d2-d3f7ed877f37 "В Псков через Ригу": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.4ms idle=6.1ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["d36ce8dc-d956-4099-93d2-d3f7ed877f37", [12219, 12220, 12221]]
+[DRY-RUN][UPDATE] keep accommodation #12219 "Дом" days 0-0 -> 0-2
+[DRY-RUN][UPDATE] keep expense #52988 (accommodation #12219) price -> Money.new(:EUR, "0.00")
+[DRY-RUN][DELETE] expense #52989
+[DRY-RUN][DELETE] expense #52990
+[DRY-RUN][DELETE] accommodation #12220 "Дом" days 1-1
+[DRY-RUN][DELETE] accommodation #12221 "Дом" days 2-2
+[DRY-RUN][TRIP] #d36ce8dc-d956-4099-93d2-d3f7ed877f37 "В Псков через Ригу" sanity check OK: accommodation totals EUR=0.00
+[debug] QUERY OK source="accommodations" db=0.2ms idle=5.4ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["d4dcef27-2ab7-4675-8c55-c07eb01e5481"]
+[DRY-RUN][TRIP] #d4dcef27-2ab7-4675-8c55-c07eb01e5481 "Новый год в Осло": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.3ms idle=4.9ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["d4dcef27-2ab7-4675-8c55-c07eb01e5481", [12355, 12356, 12357, 12358, 12359]]
+[DRY-RUN][UPDATE] keep accommodation #12355 "В гостях у Насти и Ильи" days 0-0 -> 0-3
+[DRY-RUN][UPDATE] keep expense #53938 (accommodation #12355) price -> Money.new(:NOK, "0.00")
+[DRY-RUN][DELETE] expense #53939
+[DRY-RUN][DELETE] expense #53940
+[DRY-RUN][DELETE] expense #53941
+[DRY-RUN][DELETE] accommodation #12356 "В гостях у Насти и Ильи" days 1-1
+[DRY-RUN][DELETE] accommodation #12357 "В гостях у Насти и Ильи" days 2-2
+[DRY-RUN][DELETE] accommodation #12358 "В гостях у Насти и Ильи" days 3-3
+[DRY-RUN][TRIP] #d4dcef27-2ab7-4675-8c55-c07eb01e5481 "Новый год в Осло" sanity check OK: accommodation totals NOK=0.00
+[debug] QUERY OK source="accommodations" db=0.2ms idle=4.9ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["dca2ac1e-2025-4cff-8cb9-9a3deb405122"]
+[DRY-RUN][TRIP] #dca2ac1e-2025-4cff-8cb9-9a3deb405122 "За венским шницелем и штруделем!": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.2ms idle=4.7ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["dca2ac1e-2025-4cff-8cb9-9a3deb405122", [12225, 12226, 12227, 12228]]
+[DRY-RUN][UPDATE] keep accommodation #12225 "Novum Hotel Kaffeemühle" days 0-0 -> 0-2
+[DRY-RUN][UPDATE] keep expense #53054 (accommodation #12225) price -> Money.new(:EUR, "111.81")
+[DRY-RUN][DELETE] expense #53055
+[DRY-RUN][DELETE] expense #53056
+[DRY-RUN][DELETE] accommodation #12226 "Novum Hotel Kaffeemühle" days 1-1
+[DRY-RUN][DELETE] accommodation #12227 "Novum Hotel Kaffeemühle" days 2-2
+[DRY-RUN][TRIP] #dca2ac1e-2025-4cff-8cb9-9a3deb405122 "За венским шницелем и штруделем!" sanity check OK: accommodation totals EUR=111.81
+[debug] QUERY OK source="accommodations" db=0.2ms idle=5.5ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["dcae0a80-6abe-4e1f-8218-058f570294ee"]
+[debug] QUERY OK source="expenses" db=0.5ms idle=5.4ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["dcae0a80-6abe-4e1f-8218-058f570294ee", [12339, 12340]]
+[debug] QUERY OK source="accommodations" db=0.3ms idle=5.7ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["de5aebd2-9ffc-4c18-a3bc-2e98b34643f6"]
+[DRY-RUN][TRIP] #de5aebd2-9ffc-4c18-a3bc-2e98b34643f6 "Рождественский Стокгольм": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=1.1ms idle=5.5ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["de5aebd2-9ffc-4c18-a3bc-2e98b34643f6", [12292, 12293, 12294, 12295]]
+[DRY-RUN][UPDATE] keep accommodation #12292 "Clarion Hotel Amaranten" days 0-0 -> 0-2
+[DRY-RUN][UPDATE] keep expense #53525 (accommodation #12292) price -> Money.new(:EUR, "282.00")
+[DRY-RUN][DELETE] expense #53526
+[DRY-RUN][DELETE] expense #53527
+[DRY-RUN][DELETE] accommodation #12293 "Clarion Hotel Amaranten" days 1-1
+[DRY-RUN][DELETE] accommodation #12294 "Clarion Hotel Amaranten" days 2-2
+[DRY-RUN][TRIP] #de5aebd2-9ffc-4c18-a3bc-2e98b34643f6 "Рождественский Стокгольм" sanity check OK: accommodation totals EUR=282.00, SEK=0.00
+[debug] QUERY OK source="accommodations" db=0.9ms idle=5.7ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["dec1a1b1-d63a-4638-8ee2-6ff34d4a69df"]
+[debug] QUERY OK source="expenses" db=0.4ms idle=6.3ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["dec1a1b1-d63a-4638-8ee2-6ff34d4a69df", [12255, 12256, 12257, 12258, 12259, 12260, 12261, 12262, 12263, 12264, 12265, 12266, 12267]]
+[DRY-RUN][TRIP] #dec1a1b1-d63a-4638-8ee2-6ff34d4a69df "Горнолыжка в Кортина-д'Ампеццо": 1 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12255 "Appartamento Cortina" days 0-0 -> 0-11
+[DRY-RUN][UPDATE] keep expense #53372 (accommodation #12255) price -> Money.new(:EUR, "1368.00")
+[DRY-RUN][DELETE] expense #53373
+[DRY-RUN][DELETE] expense #53374
+[DRY-RUN][DELETE] expense #53375
+[DRY-RUN][DELETE] expense #53376
+[DRY-RUN][DELETE] expense #53377
+[DRY-RUN][DELETE] expense #53378
+[DRY-RUN][DELETE] expense #53379
+[DRY-RUN][DELETE] expense #53380
+[DRY-RUN][DELETE] expense #53381
+[DRY-RUN][DELETE] expense #53382
+[DRY-RUN][DELETE] expense #53383
+[DRY-RUN][DELETE] accommodation #12256 "Appartamento Cortina" days 1-1
+[DRY-RUN][DELETE] accommodation #12257 "Appartamento Cortina" days 2-2
+[DRY-RUN][DELETE] accommodation #12258 "Appartamento Cortina" days 3-3
+[DRY-RUN][DELETE] accommodation #12259 "Appartamento Cortina" days 4-4
+[DRY-RUN][DELETE] accommodation #12260 "Appartamento Cortina" days 5-5
+[DRY-RUN][DELETE] accommodation #12261 "Appartamento Cortina" days 6-6
+[DRY-RUN][DELETE] accommodation #12262 "Appartamento Cortina" days 7-7
+[DRY-RUN][DELETE] accommodation #12263 "Appartamento Cortina" days 8-8
+[DRY-RUN][DELETE] accommodation #12264 "Appartamento Cortina" days 9-9
+[DRY-RUN][DELETE] accommodation #12265 "Appartamento Cortina" days 10-10
+[DRY-RUN][DELETE] accommodation #12266 "Appartamento Cortina" days 11-11
+[DRY-RUN][TRIP] #dec1a1b1-d63a-4638-8ee2-6ff34d4a69df "Горнолыжка в Кортина-д'Ампеццо" sanity check OK: accommodation totals EUR=1368.00
+[debug] QUERY OK source="accommodations" db=0.9ms idle=6.5ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["f982aaa1-b420-4b1e-97bc-275161aeca33"]
+[DRY-RUN][TRIP] #f982aaa1-b420-4b1e-97bc-275161aeca33 "Гельголанд: в гости к тюленюшкам": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=1.0ms idle=7.1ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["f982aaa1-b420-4b1e-97bc-275161aeca33", [12322, 12323, 12324, 12325, 12326]]
+[DRY-RUN][UPDATE] keep accommodation #12323 "Hotel Rickmers' Insulaner" days 1-1 -> 1-3
+[DRY-RUN][UPDATE] keep expense #53752 (accommodation #12323) price -> Money.new(:EUR, "816.00")
+[DRY-RUN][DELETE] expense #53753
+[DRY-RUN][DELETE] expense #53754
+[DRY-RUN][DELETE] accommodation #12324 "Hotel Rickmers' Insulaner" days 2-2
+[DRY-RUN][DELETE] accommodation #12325 "Hotel Rickmers' Insulaner" days 3-3
+[DRY-RUN][TRIP] #f982aaa1-b420-4b1e-97bc-275161aeca33 "Гельголанд: в гости к тюленюшкам" sanity check OK: accommodation totals EUR=965.97
+[debug] QUERY OK source="accommodations" db=0.3ms idle=8.2ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["fe748b75-bbe2-4da8-955c-3bdad8ba7210"]
+[DRY-RUN][TRIP] #fe748b75-bbe2-4da8-955c-3bdad8ba7210 "Стамбул": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.2ms idle=8.2ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["fe748b75-bbe2-4da8-955c-3bdad8ba7210", [12309, 12310, 12311]]
+[DRY-RUN][UPDATE] keep accommodation #12309 "Woxx Hotel" days 0-0 -> 0-1
+[DRY-RUN][UPDATE] keep expense #53658 (accommodation #12309) price -> Money.new(:EUR, "115.00")
+[DRY-RUN][DELETE] expense #53659
+[DRY-RUN][DELETE] accommodation #12310 "Woxx Hotel" days 1-1
+[DRY-RUN][TRIP] #fe748b75-bbe2-4da8-955c-3bdad8ba7210 "Стамбул" sanity check OK: accommodation totals EUR=115.00
+[debug] QUERY OK source="accommodations" db=0.2ms idle=8.7ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["043e2fce-8e50-4abd-add8-9b5b46b9d4df"]
+[DRY-RUN][TRIP] #043e2fce-8e50-4abd-add8-9b5b46b9d4df "Кёнигсзе": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.6ms idle=8.4ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["043e2fce-8e50-4abd-add8-9b5b46b9d4df", [12455, 12456, 12457, 12458, 12459]]
+[DRY-RUN][UPDATE] keep accommodation #12456 "Stoll's Hotel Alpina" days 1-1 -> 1-3
+[DRY-RUN][UPDATE] keep expense #54419 (accommodation #12456) price -> Money.new(:EUR, "999.00")
+[DRY-RUN][DELETE] expense #54420
+[DRY-RUN][DELETE] expense #54421
+[DRY-RUN][DELETE] accommodation #12457 "Stoll's Hotel Alpina" days 2-2
+[DRY-RUN][DELETE] accommodation #12458 "Stoll's Hotel Alpina" days 3-3
+[DRY-RUN][TRIP] #043e2fce-8e50-4abd-add8-9b5b46b9d4df "Кёнигсзе" sanity check OK: accommodation totals EUR=1152.00
+[debug] QUERY OK source="accommodations" db=0.9ms idle=10.4ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["0e17d4cc-13ce-45fc-b6a5-152e8658d8f9"]
+[DRY-RUN][TRIP] #0e17d4cc-13ce-45fc-b6a5-152e8658d8f9 "RubyKaigi": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=1.4ms idle=10.2ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["0e17d4cc-13ce-45fc-b6a5-152e8658d8f9", [12605, 12606, 12607, 12608, 12609, 12610]]
+[DRY-RUN][UPDATE] keep accommodation #12607 "Bourou Noguchi Hakodate" days 2-2 -> 2-5
+[DRY-RUN][UPDATE] keep expense #55063 (accommodation #12607) price -> Money.new(:JPY, "0")
+[DRY-RUN][DELETE] expense #55064
+[DRY-RUN][DELETE] expense #55065
+[DRY-RUN][DELETE] expense #55066
+[DRY-RUN][DELETE] accommodation #12608 "Bourou Noguchi Hakodate" days 3-3
+[DRY-RUN][DELETE] accommodation #12609 "Bourou Noguchi Hakodate" days 4-4
+[DRY-RUN][DELETE] accommodation #12610 "Bourou Noguchi Hakodate" days 5-5
+[DRY-RUN][TRIP] #0e17d4cc-13ce-45fc-b6a5-152e8658d8f9 "RubyKaigi" sanity check OK: accommodation totals JPY=32324
+[debug] QUERY OK source="accommodations" db=0.6ms idle=11.2ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["13ed47e9-9a43-4775-ac98-13ca1394a6fc"]
+[DRY-RUN][TRIP] #13ed47e9-9a43-4775-ac98-13ca1394a6fc "Албания": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.4ms idle=11.4ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["13ed47e9-9a43-4775-ac98-13ca1394a6fc", [12529, 12530, 12531, 12532, 12533, 12534]]
+[DRY-RUN][UPDATE] keep accommodation #12529 "Klajdi Resort & SPA" days 0-0 -> 0-4
+[DRY-RUN][UPDATE] keep expense #54775 (accommodation #12529) price -> Money.new(:EUR, "662.00")
+[DRY-RUN][DELETE] expense #54776
+[DRY-RUN][DELETE] expense #54777
+[DRY-RUN][DELETE] expense #54778
+[DRY-RUN][DELETE] expense #54779
+[DRY-RUN][DELETE] accommodation #12530 "Klajdi Resort & SPA" days 1-1
+[DRY-RUN][DELETE] accommodation #12531 "Klajdi Resort & SPA" days 2-2
+[DRY-RUN][DELETE] accommodation #12532 "Klajdi Resort & SPA" days 3-3
+[DRY-RUN][DELETE] accommodation #12533 "Klajdi Resort & SPA" days 4-4
+[DRY-RUN][TRIP] #13ed47e9-9a43-4775-ac98-13ca1394a6fc "Албания" sanity check OK: accommodation totals EUR=662.00
+[debug] QUERY OK source="accommodations" db=0.6ms idle=10.8ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["16d7e5f1-b6e6-434c-bc97-0d02f30c503a"]
+[DRY-RUN][TRIP] #16d7e5f1-b6e6-434c-bc97-0d02f30c503a "Гармиш-Партенкирхен на выходные": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.4ms idle=10.4ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["16d7e5f1-b6e6-434c-bc97-0d02f30c503a", [12511, 12512, 12513]]
+[DRY-RUN][UPDATE] keep accommodation #12511 "aja Garmisch-Partenkirchen" days 0-0 -> 0-1
+[DRY-RUN][UPDATE] keep expense #54682 (accommodation #12511) price -> Money.new(:EUR, "305.00")
+[DRY-RUN][DELETE] expense #54683
+[DRY-RUN][DELETE] accommodation #12512 "aja Garmisch-Partenkirchen" days 1-1
+[DRY-RUN][TRIP] #16d7e5f1-b6e6-434c-bc97-0d02f30c503a "Гармиш-Партенкирхен на выходные" sanity check OK: accommodation totals EUR=305.00
+[debug] QUERY OK source="accommodations" db=0.7ms idle=11.5ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["1de65657-e6db-45a3-b152-4eb2aed07c33"]
+[DRY-RUN][TRIP] #1de65657-e6db-45a3-b152-4eb2aed07c33 "Нидерланды": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.4ms idle=11.9ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["1de65657-e6db-45a3-b152-4eb2aed07c33", [12472, 12473, 12474, 12475, 12476]]
+[DRY-RUN][UPDATE] keep accommodation #12474 "Leonardo Royal Hotel Den Haag Promenade" days 2-2 -> 2-3
+[DRY-RUN][UPDATE] keep expense #54505 (accommodation #12474) price -> Money.new(:EUR, "802.00")
+[DRY-RUN][DELETE] expense #54506
+[DRY-RUN][DELETE] accommodation #12475 "Leonardo Royal Hotel Den Haag Promenade" days 3-3
+[DRY-RUN][TRIP] #1de65657-e6db-45a3-b152-4eb2aed07c33 "Нидерланды" sanity check OK: accommodation totals EUR=1326.00
+[debug] QUERY OK source="accommodations" db=0.5ms idle=10.9ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["208fc54a-f358-4351-bb72-a85a95576bd0"]
+[debug] QUERY OK source="expenses" db=0.4ms idle=10.9ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["208fc54a-f358-4351-bb72-a85a95576bd0", [12383, 12384]]
+[debug] QUERY OK source="accommodations" db=0.2ms idle=8.7ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["27a9d173-432f-45b1-9c15-99e323421f83"]
+[DRY-RUN][TRIP] #27a9d173-432f-45b1-9c15-99e323421f83 "Словения": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.7ms idle=7.5ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["27a9d173-432f-45b1-9c15-99e323421f83", [12403, 12404, 12405, 12406, 12407, 12408, 12409, 12410, 12411]]
+[DRY-RUN][UPDATE] keep accommodation #12404 "Hotel Lovec" days 1-1 -> 1-6
+[DRY-RUN][UPDATE] keep expense #54164 (accommodation #12404) price -> Money.new(:EUR, "898.14")
+[DRY-RUN][DELETE] expense #54165
+[DRY-RUN][DELETE] expense #54166
+[DRY-RUN][DELETE] expense #54167
+[DRY-RUN][DELETE] expense #54168
+[DRY-RUN][DELETE] expense #54169
+[DRY-RUN][DELETE] accommodation #12405 "Hotel Lovec" days 2-2
+[DRY-RUN][DELETE] accommodation #12406 "Hotel Lovec" days 3-3
+[DRY-RUN][DELETE] accommodation #12407 "Hotel Lovec" days 4-4
+[DRY-RUN][DELETE] accommodation #12408 "Hotel Lovec" days 5-5
+[DRY-RUN][DELETE] accommodation #12409 "Hotel Lovec" days 6-6
+[DRY-RUN][TRIP] #27a9d173-432f-45b1-9c15-99e323421f83 "Словения" sanity check OK: accommodation totals EUR=1142.14
+[debug] QUERY OK source="accommodations" db=0.2ms idle=7.1ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["2af082cc-568f-431f-9e31-c05d427ae28d"]
+[debug] QUERY OK source="expenses" db=1.2ms idle=6.9ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["2af082cc-568f-431f-9e31-c05d427ae28d", [12366, 12367, 12368, 12369, 12370, 12371, 12372, 12373, 12374, 12375, 12376, 12377]]
+[DRY-RUN][TRIP] #2af082cc-568f-431f-9e31-c05d427ae28d "Горнолыжка Бадгастайн": 2 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12366 "MONDI Hotel Bellevue Gastein" days 0-0 -> 0-8
+[DRY-RUN][UPDATE] keep expense #53997 (accommodation #12366) price -> Money.new(:EUR, "3231.00")
+[DRY-RUN][DELETE] expense #53998
+[DRY-RUN][DELETE] expense #53999
+[DRY-RUN][DELETE] expense #54000
+[DRY-RUN][DELETE] expense #54001
+[DRY-RUN][DELETE] expense #54002
+[DRY-RUN][DELETE] expense #54003
+[DRY-RUN][DELETE] expense #54004
+[DRY-RUN][DELETE] expense #54005
+[DRY-RUN][DELETE] accommodation #12367 "MONDI Hotel Bellevue Gastein" days 1-1
+[DRY-RUN][DELETE] accommodation #12368 "MONDI Hotel Bellevue Gastein" days 2-2
+[DRY-RUN][DELETE] accommodation #12369 "MONDI Hotel Bellevue Gastein" days 3-3
+[DRY-RUN][DELETE] accommodation #12370 "MONDI Hotel Bellevue Gastein" days 4-4
+[DRY-RUN][DELETE] accommodation #12371 "MONDI Hotel Bellevue Gastein" days 5-5
+[DRY-RUN][DELETE] accommodation #12372 "MONDI Hotel Bellevue Gastein" days 6-6
+[DRY-RUN][DELETE] accommodation #12373 "MONDI Hotel Bellevue Gastein" days 7-7
+[DRY-RUN][DELETE] accommodation #12374 "MONDI Hotel Bellevue Gastein" days 8-8
+[DRY-RUN][UPDATE] keep accommodation #12375 "Hotel am Mirabellplatz" days 9-9 -> 9-10
+[DRY-RUN][UPDATE] keep expense #54006 (accommodation #12375) price -> Money.new(:EUR, "442.56")
+[DRY-RUN][DELETE] expense #54007
+[DRY-RUN][DELETE] accommodation #12376 "Hotel am Mirabellplatz" days 10-10
+[DRY-RUN][TRIP] #2af082cc-568f-431f-9e31-c05d427ae28d "Горнолыжка Бадгастайн" sanity check OK: accommodation totals EUR=3673.56
+[debug] QUERY OK source="accommodations" db=1.0ms idle=7.8ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["2d9f12f3-0454-472b-9250-4473581d8a3d"]
+[debug] QUERY OK source="expenses" db=0.8ms idle=8.4ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["2d9f12f3-0454-472b-9250-4473581d8a3d", [12539, 12540, 12541, 12542, 12543, 12544, 12545, 12546, 12547, 12548, 12549, 12550, 12551, 12552, 12553]]
+[DRY-RUN][TRIP] #2d9f12f3-0454-472b-9250-4473581d8a3d "Монако и еще чуток Европы": 6 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12541 "Hotel Regina Palace" days 2-2 -> 2-3
+[DRY-RUN][UPDATE] keep expense #54831 (accommodation #12541) price -> Money.new(:EUR, "644.00")
+[DRY-RUN][DELETE] expense #54832
+[DRY-RUN][DELETE] accommodation #12542 "Hotel Regina Palace" days 3-3
+[DRY-RUN][UPDATE] keep accommodation #12543 "Novotel Monte-Carlo" days 4-4 -> 4-5
+[DRY-RUN][UPDATE] keep expense #54833 (accommodation #12543) price -> Money.new(:EUR, "751.00")
+[DRY-RUN][DELETE] expense #54834
+[DRY-RUN][DELETE] accommodation #12544 "Novotel Monte-Carlo" days 5-5
+[DRY-RUN][UPDATE] keep accommodation #12545 "Affittacamere Casa Dane'" days 6-6 -> 6-7
+[DRY-RUN][UPDATE] keep expense #54835 (accommodation #12545) price -> Money.new(:EUR, "163.00")
+[DRY-RUN][DELETE] expense #54836
+[DRY-RUN][DELETE] accommodation #12546 "Affittacamere Casa Dane'" days 7-7
+[DRY-RUN][UPDATE] keep accommodation #12547 "Sovana Hotel & Resort" days 8-8 -> 8-9
+[DRY-RUN][UPDATE] keep expense #54837 (accommodation #12547) price -> Money.new(:EUR, "430.00")
+[DRY-RUN][DELETE] expense #54838
+[DRY-RUN][DELETE] accommodation #12548 "Sovana Hotel & Resort" days 9-9
+[DRY-RUN][UPDATE] keep accommodation #12549 "Hotel Malcesine" days 10-10 -> 10-11
+[DRY-RUN][UPDATE] keep expense #54839 (accommodation #12549) price -> Money.new(:EUR, "294.00")
+[DRY-RUN][DELETE] expense #54840
+[DRY-RUN][DELETE] accommodation #12550 "Hotel Malcesine" days 11-11
+[DRY-RUN][UPDATE] keep accommodation #12551 "Aqua Dome 4 Sterne Superior Hotel & Tirol Therme Längenfeld" days 12-12 -> 12-13
+[DRY-RUN][UPDATE] keep expense #54841 (accommodation #12551) price -> Money.new(:EUR, "1464.00")
+[DRY-RUN][DELETE] expense #54842
+[DRY-RUN][DELETE] accommodation #12552 "Aqua Dome 4 Sterne Superior Hotel & Tirol Therme Längenfeld" days 13-13
+[DRY-RUN][TRIP] #2d9f12f3-0454-472b-9250-4473581d8a3d "Монако и еще чуток Европы" sanity check OK: accommodation totals EUR=4148.00
+[debug] QUERY OK source="accommodations" db=0.4ms idle=8.6ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["43f800f8-a065-4035-9e79-a6b919d4e9f8"]
+[DRY-RUN][TRIP] #43f800f8-a065-4035-9e79-a6b919d4e9f8 "Сербия на пасху": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.6ms idle=8.7ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["43f800f8-a065-4035-9e79-a6b919d4e9f8", [12391, 12392, 12393, 12394]]
+[DRY-RUN][UPDATE] keep accommodation #12391 "Amsterdam Hotel" days 0-0 -> 0-2
+[DRY-RUN][UPDATE] keep expense #54112 (accommodation #12391) price -> Money.new(:EUR, "381.90")
+[DRY-RUN][DELETE] expense #54113
+[DRY-RUN][DELETE] expense #54114
+[DRY-RUN][DELETE] accommodation #12392 "Amsterdam Hotel" days 1-1
+[DRY-RUN][DELETE] accommodation #12393 "Amsterdam Hotel" days 2-2
+[DRY-RUN][TRIP] #43f800f8-a065-4035-9e79-a6b919d4e9f8 "Сербия на пасху" sanity check OK: accommodation totals EUR=381.90
+[debug] QUERY OK source="accommodations" db=0.3ms idle=8.8ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["442fae92-7432-4662-93eb-71255eaff76f"]
+[debug] QUERY OK source="expenses" db=0.5ms idle=8.7ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["442fae92-7432-4662-93eb-71255eaff76f", [12439, 12440, 12441, 12442, 12443, 12444, 12445, 12446]]
+[DRY-RUN][TRIP] #442fae92-7432-4662-93eb-71255eaff76f "Лондон": 1 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12439 "Hilton London Canary Wharf" days 0-0 -> 0-6
+[DRY-RUN][UPDATE] keep expense #54350 (accommodation #12439) price -> Money.new(:GBP, "1680.00")
+[DRY-RUN][DELETE] expense #54351
+[DRY-RUN][DELETE] expense #54352
+[DRY-RUN][DELETE] expense #54353
+[DRY-RUN][DELETE] expense #54354
+[DRY-RUN][DELETE] expense #54355
+[DRY-RUN][DELETE] expense #54356
+[DRY-RUN][DELETE] accommodation #12440 "Hilton London Canary Wharf" days 1-1
+[DRY-RUN][DELETE] accommodation #12441 "Hilton London Canary Wharf" days 2-2
+[DRY-RUN][DELETE] accommodation #12442 "Hilton London Canary Wharf" days 3-3
+[DRY-RUN][DELETE] accommodation #12443 "Hilton London Canary Wharf" days 4-4
+[DRY-RUN][DELETE] accommodation #12444 "Hilton London Canary Wharf" days 5-5
+[DRY-RUN][DELETE] accommodation #12445 "Hilton London Canary Wharf" days 6-6
+[DRY-RUN][TRIP] #442fae92-7432-4662-93eb-71255eaff76f "Лондон" sanity check OK: accommodation totals GBP=1680.00
+[debug] QUERY OK source="accommodations" db=0.2ms idle=9.3ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["4cf2a8c5-0033-4f7c-ad1f-9709d15c485e"]
+[DRY-RUN][TRIP] #4cf2a8c5-0033-4f7c-ad1f-9709d15c485e "По красотам Швейцарии , Боденского озера и Лихтенштейна": 4 merge group(s)
+[debug] QUERY OK source="expenses" db=0.3ms idle=8.8ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["4cf2a8c5-0033-4f7c-ad1f-9709d15c485e", [12477, 12478, 12479, 12480, 12481, 12482, 12483, 12484, 12485, 12486, 12487, 12488, 12489]]
+[DRY-RUN][UPDATE] keep accommodation #12478 "Flair Hotel zum Schiff" days 1-1 -> 1-2
+[DRY-RUN][UPDATE] keep expense #54528 (accommodation #12478) price -> Money.new(:EUR, "448.00")
+[DRY-RUN][DELETE] expense #54529
+[DRY-RUN][DELETE] accommodation #12479 "Flair Hotel zum Schiff" days 2-2
+[DRY-RUN][UPDATE] keep accommodation #12480 "Hotel City Zürich Design & Lifestyle" days 3-3 -> 3-4
+[DRY-RUN][UPDATE] keep expense #54530 (accommodation #12480) price -> Money.new(:EUR, "658.00")
+[DRY-RUN][DELETE] expense #54531
+[DRY-RUN][DELETE] accommodation #12481 "Hotel City Zürich Design & Lifestyle" days 4-4
+[DRY-RUN][UPDATE] keep accommodation #12483 "Hotel Eden Spiez" days 6-6 -> 6-8
+[DRY-RUN][UPDATE] keep expense #54533 (accommodation #12483) price -> Money.new(:EUR, "1830.00")
+[DRY-RUN][DELETE] expense #54534
+[DRY-RUN][DELETE] expense #54535
+[DRY-RUN][DELETE] accommodation #12484 "Hotel Eden Spiez" days 7-7
+[DRY-RUN][DELETE] accommodation #12485 "Hotel Eden Spiez" days 8-8
+[DRY-RUN][UPDATE] keep accommodation #12486 "Park Hotel Sonnenhof - Relais & Châteaux" days 9-9 -> 9-11
+[DRY-RUN][UPDATE] keep expense #54536 (accommodation #12486) price -> Money.new(:EUR, "1539.00")
+[DRY-RUN][DELETE] expense #54537
+[DRY-RUN][DELETE] expense #54538
+[DRY-RUN][DELETE] accommodation #12487 "Park Hotel Sonnenhof - Relais & Châteaux" days 10-10
+[DRY-RUN][DELETE] accommodation #12488 "Park Hotel Sonnenhof - Relais & Châteaux" days 11-11
+[DRY-RUN][TRIP] #4cf2a8c5-0033-4f7c-ad1f-9709d15c485e "По красотам Швейцарии , Боденского озера и Лихтенштейна" sanity check OK: accommodation totals EUR=4931.10
+[debug] QUERY OK source="accommodations" db=0.2ms idle=9.1ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["5088ca95-8f13-4d6f-9e79-902d0888f267"]
+[DRY-RUN][TRIP] #5088ca95-8f13-4d6f-9e79-902d0888f267 "Свиноустье": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.3ms idle=8.1ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["5088ca95-8f13-4d6f-9e79-902d0888f267", [12460, 12461, 12462, 12463]]
+[DRY-RUN][UPDATE] keep accommodation #12460 "Hotel Cesarskie Ogrody" days 0-0 -> 0-2
+[DRY-RUN][UPDATE] keep expense #54443 (accommodation #12460) price -> Money.new(:EUR, "552.00")
+[DRY-RUN][DELETE] expense #54444
+[DRY-RUN][DELETE] expense #54445
+[DRY-RUN][DELETE] accommodation #12461 "Hotel Cesarskie Ogrody" days 1-1
+[DRY-RUN][DELETE] accommodation #12462 "Hotel Cesarskie Ogrody" days 2-2
+[DRY-RUN][TRIP] #5088ca95-8f13-4d6f-9e79-902d0888f267 "Свиноустье" sanity check OK: accommodation totals EUR=552.00
+[debug] QUERY OK source="accommodations" db=0.4ms idle=7.5ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["660612e4-23b7-4938-a69e-8c00da00cb66"]
+[DRY-RUN][TRIP] #660612e4-23b7-4938-a69e-8c00da00cb66 "В Париж на Мулен Руж": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.6ms idle=7.2ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["660612e4-23b7-4938-a69e-8c00da00cb66", [12535, 12536, 12537]]
+[DRY-RUN][UPDATE] keep accommodation #12535 "Hotel 29 Lepic" days 0-0 -> 0-1
+[DRY-RUN][UPDATE] keep expense #54806 (accommodation #12535) price -> Money.new(:EUR, "211.14")
+[DRY-RUN][DELETE] expense #54807
+[DRY-RUN][DELETE] accommodation #12536 "Hotel 29 Lepic" days 1-1
+[DRY-RUN][TRIP] #660612e4-23b7-4938-a69e-8c00da00cb66 "В Париж на Мулен Руж" sanity check OK: accommodation totals EUR=211.14
+[debug] QUERY OK source="accommodations" db=0.5ms idle=7.1ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["71afe754-1508-4a70-84ff-57301073a8a7"]
+[debug] QUERY OK source="expenses" db=0.4ms idle=7.0ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["71afe754-1508-4a70-84ff-57301073a8a7", [12508, 12509, 12510]]
+[debug] QUERY OK source="accommodations" db=0.2ms idle=7.0ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["7b30b777-9009-42f0-a054-852105c384c3"]
+[DRY-RUN][TRIP] #7b30b777-9009-42f0-a054-852105c384c3 "Богемская Швейцария на выходные": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.2ms idle=6.7ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["7b30b777-9009-42f0-a054-852105c384c3", [12412, 12413, 12414]]
+[DRY-RUN][UPDATE] keep accommodation #12412 "Resort Mezná" days 0-0 -> 0-1
+[DRY-RUN][UPDATE] keep expense #54241 (accommodation #12412) price -> Money.new(:EUR, "281.20")
+[DRY-RUN][DELETE] expense #54242
+[DRY-RUN][DELETE] accommodation #12413 "Resort Mezná" days 1-1
+[DRY-RUN][TRIP] #7b30b777-9009-42f0-a054-852105c384c3 "Богемская Швейцария на выходные" sanity check OK: accommodation totals EUR=281.20
+[debug] QUERY OK source="accommodations" db=0.2ms idle=6.5ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["7d7b3ae0-4d2e-4ad2-a47c-d0abe656758b"]
+[DRY-RUN][TRIP] #7d7b3ae0-4d2e-4ad2-a47c-d0abe656758b "Исландия": 2 merge group(s)
+[debug] QUERY OK source="expenses" db=0.4ms idle=6.4ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["7d7b3ae0-4d2e-4ad2-a47c-d0abe656758b", [12490, 12491, 12492, 12493, 12494, 12495, 12496, 12497, 12498]]
+[DRY-RUN][UPDATE] keep accommodation #12490 "Frost and Fire Hotel" days 0-0 -> 0-1
+[DRY-RUN][UPDATE] keep expense #54608 (accommodation #12490) price -> Money.new(:EUR, "1033.00")
+[DRY-RUN][DELETE] expense #54609
+[DRY-RUN][DELETE] accommodation #12491 "Frost and Fire Hotel" days 1-1
+[DRY-RUN][UPDATE] keep accommodation #12495 "Reykjavik Lights Hotel by Keahotels" days 5-5 -> 5-7
+[DRY-RUN][UPDATE] keep expense #54613 (accommodation #12495) price -> Money.new(:EUR, "1302.90")
+[DRY-RUN][DELETE] expense #54614
+[DRY-RUN][DELETE] expense #54615
+[DRY-RUN][DELETE] accommodation #12496 "Reykjavik Lights Hotel by Keahotels" days 6-6
+[DRY-RUN][DELETE] accommodation #12497 "Reykjavik Lights Hotel by Keahotels" days 7-7
+[DRY-RUN][TRIP] #7d7b3ae0-4d2e-4ad2-a47c-d0abe656758b "Исландия" sanity check OK: accommodation totals EUR=3872.90
+[debug] QUERY OK source="accommodations" db=0.5ms idle=6.6ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["826a3977-aadd-4133-af58-d27b993b9733"]
+[DRY-RUN][TRIP] #826a3977-aadd-4133-af58-d27b993b9733 "Рождество в гостях у Санты": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.4ms idle=6.8ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["826a3977-aadd-4133-af58-d27b993b9733", [12385, 12386, 12387, 12388, 12389, 12390]]
+[DRY-RUN][UPDATE] keep accommodation #12385 "Scandic Rovaniemi City" days 0-0 -> 0-4
+[DRY-RUN][UPDATE] keep expense #54077 (accommodation #12385) price -> Money.new(:EUR, "1930.00")
+[DRY-RUN][DELETE] expense #54078
+[DRY-RUN][DELETE] expense #54079
+[DRY-RUN][DELETE] expense #54080
+[DRY-RUN][DELETE] expense #54081
+[DRY-RUN][DELETE] accommodation #12386 "Scandic Rovaniemi City" days 1-1
+[DRY-RUN][DELETE] accommodation #12387 "Scandic Rovaniemi City" days 2-2
+[DRY-RUN][DELETE] accommodation #12388 "Scandic Rovaniemi City" days 3-3
+[DRY-RUN][DELETE] accommodation #12389 "Scandic Rovaniemi City" days 4-4
+[DRY-RUN][TRIP] #826a3977-aadd-4133-af58-d27b993b9733 "Рождество в гостях у Санты" sanity check OK: accommodation totals EUR=1930.00
+[debug] QUERY OK source="accommodations" db=0.3ms idle=6.5ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["878af794-d38a-4b41-b053-e11a344bc249"]
+[DRY-RUN][TRIP] #878af794-d38a-4b41-b053-e11a344bc249 "Бремен": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.3ms idle=6.1ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["878af794-d38a-4b41-b053-e11a344bc249", [12514, 12515, 12516]]
+[DRY-RUN][UPDATE] keep accommodation #12514 "Parkhotel Bremen – ein Mitglied der Hommage Luxury Hotels Collection" days 0-0 -> 0-1
+[DRY-RUN][UPDATE] keep expense #54693 (accommodation #12514) price -> Money.new(:EUR, "466.00")
+[DRY-RUN][DELETE] expense #54694
+[DRY-RUN][DELETE] accommodation #12515 "Parkhotel Bremen – ein Mitglied der Hommage Luxury Hotels Collection" days 1-1
+[DRY-RUN][TRIP] #878af794-d38a-4b41-b053-e11a344bc249 "Бремен" sanity check OK: accommodation totals EUR=466.00
+[debug] QUERY OK source="accommodations" db=0.2ms idle=4.7ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["8c459ec2-39a3-489c-8a26-77703d0a80d4"]
+[DRY-RUN][TRIP] #8c459ec2-39a3-489c-8a26-77703d0a80d4 "Азорские острова": 2 merge group(s)
+[debug] QUERY OK source="expenses" db=0.6ms idle=4.7ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["8c459ec2-39a3-489c-8a26-77703d0a80d4", [12517, 12518, 12519, 12520, 12521, 12522, 12523, 12524, 12525]]
+[DRY-RUN][UPDATE] keep accommodation #12517 "Octant Furnas" days 0-0 -> 0-2
+[DRY-RUN][UPDATE] keep expense #54709 (accommodation #12517) price -> Money.new(:EUR, "1469.10")
+[DRY-RUN][DELETE] expense #54710
+[DRY-RUN][DELETE] expense #54711
+[DRY-RUN][DELETE] accommodation #12518 "Octant Furnas" days 1-1
+[DRY-RUN][DELETE] accommodation #12519 "Octant Furnas" days 2-2
+[DRY-RUN][UPDATE] keep accommodation #12520 "Hotel Verde Mar & SPA" days 3-3 -> 3-7
+[DRY-RUN][UPDATE] keep expense #54712 (accommodation #12520) price -> Money.new(:EUR, "2060.00")
+[DRY-RUN][DELETE] expense #54713
+[DRY-RUN][DELETE] expense #54714
+[DRY-RUN][DELETE] expense #54715
+[DRY-RUN][DELETE] expense #54716
+[DRY-RUN][DELETE] accommodation #12521 "Hotel Verde Mar & SPA" days 4-4
+[DRY-RUN][DELETE] accommodation #12522 "Hotel Verde Mar & SPA" days 5-5
+[DRY-RUN][DELETE] accommodation #12523 "Hotel Verde Mar & SPA" days 6-6
+[DRY-RUN][DELETE] accommodation #12524 "Hotel Verde Mar & SPA" days 7-7
+[DRY-RUN][TRIP] #8c459ec2-39a3-489c-8a26-77703d0a80d4 "Азорские острова" sanity check OK: accommodation totals EUR=3529.10
+[debug] QUERY OK source="accommodations" db=0.3ms idle=5.5ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["944dc1db-4628-4598-9b86-98570807c520"]
+[DRY-RUN][TRIP] #944dc1db-4628-4598-9b86-98570807c520 "Лансароте": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.3ms idle=5.5ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["944dc1db-4628-4598-9b86-98570807c520", [12447, 12448, 12449, 12450, 12451, 12452, 12453, 12454]]
+[DRY-RUN][UPDATE] keep accommodation #12447 "Seaside Los Jameos" days 0-0 -> 0-7
+[DRY-RUN][UPDATE] keep expense #54385 (accommodation #12447) price -> Money.new(:EUR, "3584.00")
+[DRY-RUN][DELETE] expense #54386
+[DRY-RUN][DELETE] expense #54387
+[DRY-RUN][DELETE] expense #54388
+[DRY-RUN][DELETE] expense #54389
+[DRY-RUN][DELETE] expense #54390
+[DRY-RUN][DELETE] expense #54391
+[DRY-RUN][DELETE] expense #54392
+[DRY-RUN][DELETE] accommodation #12448 "Seaside Los Jameos" days 1-1
+[DRY-RUN][DELETE] accommodation #12449 "Seaside Los Jameos" days 2-2
+[DRY-RUN][DELETE] accommodation #12450 "Seaside Los Jameos" days 3-3
+[DRY-RUN][DELETE] accommodation #12451 "Seaside Los Jameos" days 4-4
+[DRY-RUN][DELETE] accommodation #12452 "Seaside Los Jameos" days 5-5
+[DRY-RUN][DELETE] accommodation #12453 "Seaside Los Jameos" days 6-6
+[DRY-RUN][DELETE] accommodation #12454 "Seaside Los Jameos" days 7-7
+[DRY-RUN][TRIP] #944dc1db-4628-4598-9b86-98570807c520 "Лансароте" sanity check OK: accommodation totals EUR=3584.00
+[debug] QUERY OK source="accommodations" db=0.2ms idle=5.7ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["9acd6229-26f6-4b48-a91c-8a4a96dc3d3f"]
+[debug] QUERY OK source="expenses" db=0.4ms idle=5.6ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["9acd6229-26f6-4b48-a91c-8a4a96dc3d3f", [12587, 12588, 12589, 12590, 12591, 12592, 12593, 12594, 12595, 12596]]
+[DRY-RUN][TRIP] #9acd6229-26f6-4b48-a91c-8a4a96dc3d3f "Мадейра": 1 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12587 "Hotel Porto Mare - PortoBay" days 0-0 -> 0-8
+[DRY-RUN][UPDATE] keep expense #54991 (accommodation #12587) price -> Money.new(:EUR, "2567.70")
+[DRY-RUN][DELETE] expense #54992
+[DRY-RUN][DELETE] expense #54993
+[DRY-RUN][DELETE] expense #54994
+[DRY-RUN][DELETE] expense #54995
+[DRY-RUN][DELETE] expense #54996
+[DRY-RUN][DELETE] expense #54997
+[DRY-RUN][DELETE] expense #54998
+[DRY-RUN][DELETE] expense #54999
+[DRY-RUN][DELETE] accommodation #12588 "Hotel Porto Mare - PortoBay" days 1-1
+[DRY-RUN][DELETE] accommodation #12589 "Hotel Porto Mare - PortoBay" days 2-2
+[DRY-RUN][DELETE] accommodation #12590 "Hotel Porto Mare - PortoBay" days 3-3
+[DRY-RUN][DELETE] accommodation #12591 "Hotel Porto Mare - PortoBay" days 4-4
+[DRY-RUN][DELETE] accommodation #12592 "Hotel Porto Mare - PortoBay" days 5-5
+[DRY-RUN][DELETE] accommodation #12593 "Hotel Porto Mare - PortoBay" days 6-6
+[DRY-RUN][DELETE] accommodation #12594 "Hotel Porto Mare - PortoBay" days 7-7
+[DRY-RUN][DELETE] accommodation #12595 "Hotel Porto Mare - PortoBay" days 8-8
+[DRY-RUN][TRIP] #9acd6229-26f6-4b48-a91c-8a4a96dc3d3f "Мадейра" sanity check OK: accommodation totals EUR=2567.70
+[debug] QUERY OK source="accommodations" db=0.4ms idle=6.4ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["9b2600b4-3559-4e76-8e6f-abd11cbc2a98"]
+[debug] QUERY OK source="expenses" db=0.3ms idle=6.4ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["9b2600b4-3559-4e76-8e6f-abd11cbc2a98", [12571, 12572, 12573, 12574, 12575, 12576, 12577, 12578, 12579, 12580, 12581, 12582, 12583, 12584, 12585, 12586]]
+[DRY-RUN][TRIP] #9b2600b4-3559-4e76-8e6f-abd11cbc2a98 "Тайланд в октябре": 2 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12572 "Eastin Grand Hotel Phayathai" days 1-1 -> 1-6
+[DRY-RUN][UPDATE] keep expense #54950 (accommodation #12572) price -> Money.new(:EUR, "1069.20")
+[DRY-RUN][DELETE] expense #54951
+[DRY-RUN][DELETE] expense #54952
+[DRY-RUN][DELETE] expense #54953
+[DRY-RUN][DELETE] expense #54954
+[DRY-RUN][DELETE] expense #54955
+[DRY-RUN][DELETE] accommodation #12573 "Eastin Grand Hotel Phayathai" days 2-2
+[DRY-RUN][DELETE] accommodation #12574 "Eastin Grand Hotel Phayathai" days 3-3
+[DRY-RUN][DELETE] accommodation #12575 "Eastin Grand Hotel Phayathai" days 4-4
+[DRY-RUN][DELETE] accommodation #12576 "Eastin Grand Hotel Phayathai" days 5-5
+[DRY-RUN][DELETE] accommodation #12577 "Eastin Grand Hotel Phayathai" days 6-6
+[DRY-RUN][UPDATE] keep accommodation #12578 "Phuket Marriott Resort & Spa, Merlin Beach" days 7-7 -> 7-13
+[DRY-RUN][UPDATE] keep expense #54956 (accommodation #12578) price -> Money.new(:EUR, "2492.00")
+[DRY-RUN][DELETE] expense #54957
+[DRY-RUN][DELETE] expense #54958
+[DRY-RUN][DELETE] expense #54959
+[DRY-RUN][DELETE] expense #54960
+[DRY-RUN][DELETE] expense #54961
+[DRY-RUN][DELETE] expense #54962
+[DRY-RUN][DELETE] accommodation #12579 "Phuket Marriott Resort & Spa, Merlin Beach" days 8-8
+[DRY-RUN][DELETE] accommodation #12580 "Phuket Marriott Resort & Spa, Merlin Beach" days 9-9
+[DRY-RUN][DELETE] accommodation #12581 "Phuket Marriott Resort & Spa, Merlin Beach" days 10-10
+[DRY-RUN][DELETE] accommodation #12582 "Phuket Marriott Resort & Spa, Merlin Beach" days 11-11
+[DRY-RUN][DELETE] accommodation #12583 "Phuket Marriott Resort & Spa, Merlin Beach" days 12-12
+[DRY-RUN][DELETE] accommodation #12584 "Phuket Marriott Resort & Spa, Merlin Beach" days 13-13
+[DRY-RUN][TRIP] #9b2600b4-3559-4e76-8e6f-abd11cbc2a98 "Тайланд в октябре" sanity check OK: accommodation totals EUR=3561.20
+[debug] QUERY OK source="accommodations" db=0.2ms idle=6.6ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["a069d431-039a-4e7a-bb5f-dd5997efbb3e"]
+[DRY-RUN][TRIP] #a069d431-039a-4e7a-bb5f-dd5997efbb3e "Неаполь": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.8ms idle=6.5ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["a069d431-039a-4e7a-bb5f-dd5997efbb3e", [12436, 12437, 12438]]
+[DRY-RUN][UPDATE] keep accommodation #12436 "Costantinopoli 104" days 0-0 -> 0-1
+[DRY-RUN][UPDATE] keep expense #54328 (accommodation #12436) price -> Money.new(:EUR, "227.00")
+[DRY-RUN][DELETE] expense #54329
+[DRY-RUN][DELETE] accommodation #12437 "Costantinopoli 104" days 1-1
+[DRY-RUN][TRIP] #a069d431-039a-4e7a-bb5f-dd5997efbb3e "Неаполь" sanity check OK: accommodation totals EUR=227.00
+[debug] QUERY OK source="accommodations" db=0.3ms idle=7.4ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["a802915c-3620-4211-a0c5-fde1df97e63d"]
+[debug] QUERY OK source="expenses" db=0.3ms idle=7.0ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["a802915c-3620-4211-a0c5-fde1df97e63d", [12566, 12567, 12568, 12569, 12570]]
+[DRY-RUN][TRIP] #a802915c-3620-4211-a0c5-fde1df97e63d "Наконец-то доехали до Плитвицких Озер :)": 1 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12566 "Falkensteiner Club Funimation Borik" days 0-0 -> 0-3
+[DRY-RUN][UPDATE] keep expense #54930 (accommodation #12566) price -> Money.new(:EUR, "1477.00")
+[DRY-RUN][DELETE] expense #54931
+[DRY-RUN][DELETE] expense #54932
+[DRY-RUN][DELETE] expense #54933
+[DRY-RUN][DELETE] accommodation #12567 "Falkensteiner Club Funimation Borik" days 1-1
+[DRY-RUN][DELETE] accommodation #12568 "Falkensteiner Club Funimation Borik" days 2-2
+[DRY-RUN][DELETE] accommodation #12569 "Falkensteiner Club Funimation Borik" days 3-3
+[DRY-RUN][TRIP] #a802915c-3620-4211-a0c5-fde1df97e63d "Наконец-то доехали до Плитвицких Озер :)" sanity check OK: accommodation totals EUR=1477.00
+[debug] QUERY OK source="accommodations" db=0.3ms idle=7.5ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["ae513485-3574-4a48-8433-678e699da4ba"]
+[DRY-RUN][TRIP] #ae513485-3574-4a48-8433-678e699da4ba "Леголенд в Биллунде": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.8ms queue=0.2ms idle=7.6ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["ae513485-3574-4a48-8433-678e699da4ba", [12415, 12416, 12417, 12418]]
+[DRY-RUN][UPDATE] keep accommodation #12415 "The Lodge Billund" days 0-0 -> 0-2
+[DRY-RUN][UPDATE] keep expense #54258 (accommodation #12415) price -> Money.new(:EUR, "711.00")
+[DRY-RUN][DELETE] expense #54259
+[DRY-RUN][DELETE] expense #54260
+[DRY-RUN][DELETE] accommodation #12416 "The Lodge Billund" days 1-1
+[DRY-RUN][DELETE] accommodation #12417 "The Lodge Billund" days 2-2
+[DRY-RUN][TRIP] #ae513485-3574-4a48-8433-678e699da4ba "Леголенд в Биллунде" sanity check OK: accommodation totals EUR=711.00
+[debug] QUERY OK source="accommodations" db=0.6ms idle=8.7ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["aee5f92c-71b6-45f7-b904-a4ccbfb32663"]
+[DRY-RUN][TRIP] #aee5f92c-71b6-45f7-b904-a4ccbfb32663 "Карловы Вары": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.3ms idle=8.9ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["aee5f92c-71b6-45f7-b904-a4ccbfb32663", [12469, 12470, 12471]]
+[DRY-RUN][UPDATE] keep accommodation #12469 "Bristol Palace" days 0-0 -> 0-1
+[DRY-RUN][UPDATE] keep expense #54492 (accommodation #12469) price -> Money.new(:EUR, "360.00")
+[DRY-RUN][DELETE] expense #54493
+[DRY-RUN][DELETE] accommodation #12470 "Bristol Palace" days 1-1
+[DRY-RUN][TRIP] #aee5f92c-71b6-45f7-b904-a4ccbfb32663 "Карловы Вары" sanity check OK: accommodation totals EUR=360.00
+[debug] QUERY OK source="accommodations" db=0.3ms idle=8.2ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["ba370194-87e0-467d-8f9f-ff2bb79e6f90"]
+[debug] QUERY OK source="expenses" db=0.6ms idle=8.2ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["ba370194-87e0-467d-8f9f-ff2bb79e6f90", [12555, 12556, 12557, 12558, 12559, 12560, 12561, 12562, 12563, 12564, 12565]]
+[DRY-RUN][TRIP] #ba370194-87e0-467d-8f9f-ff2bb79e6f90 "Кто был на Кабо-верде?!": 1 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12555 "Hotel Riu Palace Santa Maria - All Inclusive" days 0-0 -> 0-8
+[DRY-RUN][UPDATE] keep expense #54895 (accommodation #12555) price -> Money.new(:EUR, "7092.00")
+[DRY-RUN][DELETE] expense #54896
+[DRY-RUN][DELETE] expense #54897
+[DRY-RUN][DELETE] expense #54898
+[DRY-RUN][DELETE] expense #54899
+[DRY-RUN][DELETE] expense #54900
+[DRY-RUN][DELETE] expense #54901
+[DRY-RUN][DELETE] expense #54902
+[DRY-RUN][DELETE] expense #54903
+[DRY-RUN][DELETE] accommodation #12556 "Hotel Riu Palace Santa Maria - All Inclusive" days 1-1
+[DRY-RUN][DELETE] accommodation #12557 "Hotel Riu Palace Santa Maria - All Inclusive" days 2-2
+[DRY-RUN][DELETE] accommodation #12558 "Hotel Riu Palace Santa Maria - All Inclusive" days 3-3
+[DRY-RUN][DELETE] accommodation #12559 "Hotel Riu Palace Santa Maria - All Inclusive" days 4-4
+[DRY-RUN][DELETE] accommodation #12560 "Hotel Riu Palace Santa Maria - All Inclusive" days 5-5
+[DRY-RUN][DELETE] accommodation #12561 "Hotel Riu Palace Santa Maria - All Inclusive" days 6-6
+[DRY-RUN][DELETE] accommodation #12562 "Hotel Riu Palace Santa Maria - All Inclusive" days 7-7
+[DRY-RUN][DELETE] accommodation #12563 "Hotel Riu Palace Santa Maria - All Inclusive" days 8-8
+[DRY-RUN][TRIP] #ba370194-87e0-467d-8f9f-ff2bb79e6f90 "Кто был на Кабо-верде?!" sanity check OK: accommodation totals EUR=7092.00
+[debug] QUERY OK source="accommodations" db=0.2ms idle=8.9ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["c47a13f2-b371-45f6-ac2c-a50e9beaacf0"]
+[DRY-RUN][TRIP] #c47a13f2-b371-45f6-ac2c-a50e9beaacf0 "Таллин": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.5ms idle=8.2ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["c47a13f2-b371-45f6-ac2c-a50e9beaacf0", [12526, 12527, 12528]]
+[DRY-RUN][UPDATE] keep accommodation #12526 "Kalev Spa Hotel & Waterpark" days 0-0 -> 0-1
+[DRY-RUN][UPDATE] keep expense #54748 (accommodation #12526) price -> Money.new(:EUR, "338.00")
+[DRY-RUN][DELETE] expense #54749
+[DRY-RUN][DELETE] accommodation #12527 "Kalev Spa Hotel & Waterpark" days 1-1
+[DRY-RUN][TRIP] #c47a13f2-b371-45f6-ac2c-a50e9beaacf0 "Таллин" sanity check OK: accommodation totals EUR=338.00
+[debug] QUERY OK source="accommodations" db=0.7ms idle=8.3ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["c5d43358-16ff-4f35-9aa6-f4a37b9da8e4"]
+[debug] QUERY OK source="accommodations" db=2.1ms idle=8.8ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["c7aa0bb2-9dd9-46b2-b1fa-60c740b31d1e"]
+[DRY-RUN][TRIP] #c7aa0bb2-9dd9-46b2-b1fa-60c740b31d1e "Незабываемое сафари в Африке и тюлений отдых на пляже": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=2.8ms idle=9.7ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["c7aa0bb2-9dd9-46b2-b1fa-60c740b31d1e", [12378, 12379, 12380, 12381, 12382]]
+[DRY-RUN][UPDATE] keep accommodation #12378 "Golden Tulip Zanzibar Airport Hotel & Spa" days 0-0 -> 0-1
+[DRY-RUN][UPDATE] keep expense #54054 (accommodation #12378) price -> Money.new(:EUR, "273.00")
+[DRY-RUN][DELETE] expense #54055
+[DRY-RUN][DELETE] accommodation #12379 "Golden Tulip Zanzibar Airport Hotel & Spa" days 1-1
+[DRY-RUN][TRIP] #c7aa0bb2-9dd9-46b2-b1fa-60c740b31d1e "Незабываемое сафари в Африке и тюлений отдых на пляже" sanity check OK: accommodation totals EUR=4079.50
+[debug] QUERY OK source="accommodations" db=0.5ms idle=11.5ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["ca4698df-aa98-4faf-865a-f550ec3871ee"]
+[DRY-RUN][TRIP] #ca4698df-aa98-4faf-865a-f550ec3871ee "Марокко": 2 merge group(s)
+[debug] QUERY OK source="expenses" db=0.7ms idle=10.9ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["ca4698df-aa98-4faf-865a-f550ec3871ee", [12395, 12396, 12397, 12398, 12399, 12400, 12401, 12402]]
+[DRY-RUN][UPDATE] keep accommodation #12395 "Ambre Epices Medina Riad" days 0-0 -> 0-2
+[DRY-RUN][UPDATE] keep expense #54129 (accommodation #12395) price -> Money.new(:EUR, "638.10")
+[DRY-RUN][DELETE] expense #54130
+[DRY-RUN][DELETE] expense #54131
+[DRY-RUN][DELETE] accommodation #12396 "Ambre Epices Medina Riad" days 1-1
+[DRY-RUN][DELETE] accommodation #12397 "Ambre Epices Medina Riad" days 2-2
+[DRY-RUN][UPDATE] keep accommodation #12398 "Pickalbatros Palais Des Roses - Agadir - All Inclusive" days 3-3 -> 3-6
+[DRY-RUN][UPDATE] keep expense #54132 (accommodation #12398) price -> Money.new(:EUR, "861.00")
+[DRY-RUN][DELETE] expense #54133
+[DRY-RUN][DELETE] expense #54134
+[DRY-RUN][DELETE] expense #54135
+[DRY-RUN][DELETE] accommodation #12399 "Pickalbatros Palais Des Roses - Agadir - All Inclusive" days 4-4
+[DRY-RUN][DELETE] accommodation #12400 "Pickalbatros Palais Des Roses - Agadir - All Inclusive" days 5-5
+[DRY-RUN][DELETE] accommodation #12401 "Pickalbatros Palais Des Roses - Agadir - All Inclusive" days 6-6
+[DRY-RUN][TRIP] #ca4698df-aa98-4faf-865a-f550ec3871ee "Марокко" sanity check OK: accommodation totals EUR=1499.10
+[debug] QUERY OK source="accommodations" db=1.5ms queue=0.5ms idle=11.8ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["cb28f790-4958-4eaa-acc8-cde8473bcd95"]
+[debug] QUERY OK source="accommodations" db=6.0ms idle=12.8ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["dddd8297-6976-4712-97e4-3da7d2ed9b95"]
+[DRY-RUN][TRIP] #dddd8297-6976-4712-97e4-3da7d2ed9b95 "Росток": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.6ms idle=18.2ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["dddd8297-6976-4712-97e4-3da7d2ed9b95", [12363, 12364, 12365]]
+[DRY-RUN][UPDATE] keep accommodation #12364 "Дом" days 1-1 -> 1-2
+[DRY-RUN][UPDATE] keep expense #53969 (accommodation #12364) price -> Money.new(:EUR, "0.00")
+[DRY-RUN][DELETE] expense #53970
+[DRY-RUN][DELETE] accommodation #12365 "Дом" days 2-2
+[DRY-RUN][TRIP] #dddd8297-6976-4712-97e4-3da7d2ed9b95 "Росток" sanity check OK: accommodation totals EUR=159.60
+[debug] QUERY OK source="accommodations" db=0.3ms idle=18.1ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["e5756eb3-9a65-4f96-92c3-35722fd246ce"]
+[debug] QUERY OK source="expenses" db=0.7ms idle=17.9ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["e5756eb3-9a65-4f96-92c3-35722fd246ce", [12499, 12500, 12501, 12502, 12503, 12504, 12505, 12506, 12507]]
+[DRY-RUN][TRIP] #e5756eb3-9a65-4f96-92c3-35722fd246ce "Зимний отпуск в Австрии (Stubaital) 2025": 1 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12500 "Familotel Kindl" days 1-1 -> 1-7
+[DRY-RUN][UPDATE] keep expense #54649 (accommodation #12500) price -> Money.new(:EUR, "2709.00")
+[DRY-RUN][DELETE] expense #54650
+[DRY-RUN][DELETE] expense #54651
+[DRY-RUN][DELETE] expense #54652
+[DRY-RUN][DELETE] expense #54653
+[DRY-RUN][DELETE] expense #54654
+[DRY-RUN][DELETE] expense #54655
+[DRY-RUN][DELETE] accommodation #12501 "Familotel Kindl" days 2-2
+[DRY-RUN][DELETE] accommodation #12502 "Familotel Kindl" days 3-3
+[DRY-RUN][DELETE] accommodation #12503 "Familotel Kindl" days 4-4
+[DRY-RUN][DELETE] accommodation #12504 "Familotel Kindl" days 5-5
+[DRY-RUN][DELETE] accommodation #12505 "Familotel Kindl" days 6-6
+[DRY-RUN][DELETE] accommodation #12506 "Familotel Kindl" days 7-7
+[DRY-RUN][TRIP] #e5756eb3-9a65-4f96-92c3-35722fd246ce "Зимний отпуск в Австрии (Stubaital) 2025" sanity check OK: accommodation totals EUR=2851.00
+[debug] QUERY OK source="accommodations" db=0.2ms idle=19.5ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["efa8e032-8511-4871-a54f-c91c9a8cfa29"]
+[DRY-RUN][TRIP] #efa8e032-8511-4871-a54f-c91c9a8cfa29 "Кто был на Кабо-верде?! (зимние каникулы)": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.3ms idle=17.6ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["efa8e032-8511-4871-a54f-c91c9a8cfa29", [12597, 12598, 12599, 12600, 12601, 12602, 12603, 12604]]
+[DRY-RUN][UPDATE] keep accommodation #12597 "Hotel Riu Palace Santa Maria - All Inclusive" days 0-0 -> 0-5
+[DRY-RUN][UPDATE] keep expense #55037 (accommodation #12597) price -> Money.new(:EUR, "2587.80")
+[DRY-RUN][DELETE] expense #55038
+[DRY-RUN][DELETE] expense #55039
+[DRY-RUN][DELETE] expense #55040
+[DRY-RUN][DELETE] expense #55041
+[DRY-RUN][DELETE] expense #55042
+[DRY-RUN][DELETE] accommodation #12598 "Hotel Riu Palace Santa Maria - All Inclusive" days 1-1
+[DRY-RUN][DELETE] accommodation #12599 "Hotel Riu Palace Santa Maria - All Inclusive" days 2-2
+[DRY-RUN][DELETE] accommodation #12600 "Hotel Riu Palace Santa Maria - All Inclusive" days 3-3
+[DRY-RUN][DELETE] accommodation #12601 "Hotel Riu Palace Santa Maria - All Inclusive" days 4-4
+[DRY-RUN][DELETE] accommodation #12602 "Hotel Riu Palace Santa Maria - All Inclusive" days 5-5
+[DRY-RUN][TRIP] #efa8e032-8511-4871-a54f-c91c9a8cfa29 "Кто был на Кабо-верде?! (зимние каникулы)" sanity check OK: accommodation totals EUR=2587.80
+[debug] QUERY OK source="accommodations" db=0.2ms idle=15.6ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["f0a97659-5930-485b-ac9d-f5e54e719fa6"]
+[DRY-RUN][TRIP] #f0a97659-5930-485b-ac9d-f5e54e719fa6 "Австрия на день рождения": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.3ms idle=15.1ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["f0a97659-5930-485b-ac9d-f5e54e719fa6", [12464, 12465, 12466, 12467, 12468]]
+[DRY-RUN][UPDATE] keep accommodation #12465 "MONDI Hotel am Grundlsee" days 1-1 -> 1-3
+[DRY-RUN][UPDATE] keep expense #54460 (accommodation #12465) price -> Money.new(:EUR, "916.56")
+[DRY-RUN][DELETE] expense #54461
+[DRY-RUN][DELETE] expense #54462
+[DRY-RUN][DELETE] accommodation #12466 "MONDI Hotel am Grundlsee" days 2-2
+[DRY-RUN][DELETE] accommodation #12467 "MONDI Hotel am Grundlsee" days 3-3
+[DRY-RUN][TRIP] #f0a97659-5930-485b-ac9d-f5e54e719fa6 "Австрия на день рождения" sanity check OK: accommodation totals EUR=1011.99
+[debug] QUERY OK source="accommodations" db=0.2ms idle=14.9ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["f343fb86-4821-41fc-855a-0ce6efba6cc7"]
+[DRY-RUN][TRIP] #f343fb86-4821-41fc-855a-0ce6efba6cc7 "Фарерские о-ва": 2 merge group(s)
+[debug] QUERY OK source="expenses" db=0.2ms idle=12.4ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["f343fb86-4821-41fc-855a-0ce6efba6cc7", [12428, 12429, 12430, 12431, 12432, 12433, 12434, 12435]]
+[DRY-RUN][UPDATE] keep accommodation #12428 "Múlafossur Cottages by famous waterfall in Gásadalur" days 0-0 -> 0-1
+[DRY-RUN][UPDATE] keep expense #54303 (accommodation #12428) price -> Money.new(:EUR, "534.00")
+[DRY-RUN][DELETE] expense #54304
+[DRY-RUN][DELETE] accommodation #12429 "Múlafossur Cottages by famous waterfall in Gásadalur" days 1-1
+[DRY-RUN][UPDATE] keep accommodation #12430 "Hilton Garden Inn Faroe Islands" days 2-2 -> 2-5
+[DRY-RUN][UPDATE] keep expense #54305 (accommodation #12430) price -> Money.new(:EUR, "1280.00")
+[DRY-RUN][DELETE] expense #54306
+[DRY-RUN][DELETE] expense #54307
+[DRY-RUN][DELETE] expense #54308
+[DRY-RUN][DELETE] accommodation #12431 "Hilton Garden Inn Faroe Islands" days 3-3
+[DRY-RUN][DELETE] accommodation #12432 "Hilton Garden Inn Faroe Islands" days 4-4
+[DRY-RUN][DELETE] accommodation #12433 "Hilton Garden Inn Faroe Islands" days 5-5
+[DRY-RUN][TRIP] #f343fb86-4821-41fc-855a-0ce6efba6cc7 "Фарерские о-ва" sanity check OK: accommodation totals EUR=2006.00
+[debug] QUERY OK source="accommodations" db=0.2ms idle=7.1ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["ff98df1a-219e-4656-86f0-dcdcc2a961a1"]
+[DRY-RUN][TRIP] #ff98df1a-219e-4656-86f0-dcdcc2a961a1 "Горнолыжка в Зёльдене": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.2ms idle=6.6ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["ff98df1a-219e-4656-86f0-dcdcc2a961a1", [12419, 12420, 12421, 12422, 12423, 12424, 12425, 12426, 12427]]
+[DRY-RUN][UPDATE] keep accommodation #12420 "die berge lifestyle-hotel sölden" days 1-1 -> 1-7
+[DRY-RUN][UPDATE] keep expense #54274 (accommodation #12420) price -> Money.new(:EUR, "3591.14")
+[DRY-RUN][DELETE] expense #54275
+[DRY-RUN][DELETE] expense #54276
+[DRY-RUN][DELETE] expense #54277
+[DRY-RUN][DELETE] expense #54278
+[DRY-RUN][DELETE] expense #54279
+[DRY-RUN][DELETE] expense #54280
+[DRY-RUN][DELETE] accommodation #12421 "die berge lifestyle-hotel sölden" days 2-2
+[DRY-RUN][DELETE] accommodation #12422 "die berge lifestyle-hotel sölden" days 3-3
+[DRY-RUN][DELETE] accommodation #12423 "die berge lifestyle-hotel sölden" days 4-4
+[DRY-RUN][DELETE] accommodation #12424 "die berge lifestyle-hotel sölden" days 5-5
+[DRY-RUN][DELETE] accommodation #12425 "die berge lifestyle-hotel sölden" days 6-6
+[DRY-RUN][DELETE] accommodation #12426 "die berge lifestyle-hotel sölden" days 7-7
+[DRY-RUN][TRIP] #ff98df1a-219e-4656-86f0-dcdcc2a961a1 "Горнолыжка в Зёльдене" sanity check OK: accommodation totals EUR=3694.14
+[debug] QUERY OK source="accommodations" db=0.2ms idle=6.6ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["025653dc-2555-4bbc-b29b-0a542fa36485"]
+[debug] QUERY OK source="expenses" db=0.6ms idle=6.1ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["025653dc-2555-4bbc-b29b-0a542fa36485", [12618, 12619, 12620, 12621, 12622, 12623, 12624, 12625, 12626, 12627, 12628, 12629, 12630, 12631, 12632]]
+[DRY-RUN][TRIP] #025653dc-2555-4bbc-b29b-0a542fa36485 "Самостоятельное путешествие по удивительной Индии": 4 merge group(s)
+[DRY-RUN][UPDATE] keep accommodation #12618 "Jaiwana Haveli" days 0-0 -> 0-1
+[DRY-RUN][UPDATE] keep expense #55117 (accommodation #12618) price -> Money.new(:INR, "4000.00")
+[DRY-RUN][DELETE] expense #55118
+[DRY-RUN][DELETE] accommodation #12619 "Jaiwana Haveli" days 1-1
+[DRY-RUN][UPDATE] keep accommodation #12620 "Hotel H.R. Palace" days 2-2 -> 2-3
+[DRY-RUN][UPDATE] keep expense #55119 (accommodation #12620) price -> Money.new(:INR, "3334.00")
+[DRY-RUN][DELETE] expense #55120
+[DRY-RUN][DELETE] accommodation #12621 "Hotel H.R. Palace" days 3-3
+[DRY-RUN][UPDATE] keep accommodation #12623 "Palm Tree Heritage" days 5-5 -> 5-11
+[DRY-RUN][UPDATE] keep expense #55122 (accommodation #12623) price -> Money.new(:INR, "35000.00")
+[DRY-RUN][DELETE] expense #55123
+[DRY-RUN][DELETE] expense #55124
+[DRY-RUN][DELETE] expense #55125
+[DRY-RUN][DELETE] expense #55126
+[DRY-RUN][DELETE] expense #55127
+[DRY-RUN][DELETE] expense #55128
+[DRY-RUN][DELETE] accommodation #12624 "Palm Tree Heritage" days 6-6
+[DRY-RUN][DELETE] accommodation #12625 "Palm Tree Heritage" days 7-7
+[DRY-RUN][DELETE] accommodation #12626 "Palm Tree Heritage" days 8-8
+[DRY-RUN][DELETE] accommodation #12627 "Palm Tree Heritage" days 9-9
+[DRY-RUN][DELETE] accommodation #12628 "Palm Tree Heritage" days 10-10
+[DRY-RUN][DELETE] accommodation #12629 "Palm Tree Heritage" days 11-11
+[DRY-RUN][UPDATE] keep accommodation #12630 "Hotel Krishna" days 12-12 -> 12-13
+[DRY-RUN][UPDATE] keep expense #55129 (accommodation #12630) price -> Money.new(:INR, "4500.00")
+[DRY-RUN][DELETE] expense #55130
+[DRY-RUN][DELETE] accommodation #12631 "Hotel Krishna" days 13-13
+[DRY-RUN][TRIP] #025653dc-2555-4bbc-b29b-0a542fa36485 "Самостоятельное путешествие по удивительной Индии" sanity check OK: accommodation totals INR=49234.00
+[debug] QUERY OK source="accommodations" db=0.7ms idle=8.3ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["795e4b94-f100-486b-8a3f-d24f137a9795"]
+[DRY-RUN][TRIP] #795e4b94-f100-486b-8a3f-d24f137a9795 "Курортный городок Сан-Теодоро": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.5ms idle=8.9ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["795e4b94-f100-486b-8a3f-d24f137a9795", [12611, 12612, 12613, 12614, 12615, 12616, 12617]]
+[DRY-RUN][UPDATE] keep accommodation #12611 "OCCASIONI AL SOLE" days 0-0 -> 0-6
+[DRY-RUN][UPDATE] keep expense #55092 (accommodation #12611) price -> Money.new(:EUR, "231.00")
+[DRY-RUN][DELETE] expense #55093
+[DRY-RUN][DELETE] expense #55094
+[DRY-RUN][DELETE] expense #55095
+[DRY-RUN][DELETE] expense #55096
+[DRY-RUN][DELETE] expense #55097
+[DRY-RUN][DELETE] expense #55098
+[DRY-RUN][DELETE] accommodation #12612 "OCCASIONI AL SOLE" days 1-1
+[DRY-RUN][DELETE] accommodation #12613 "OCCASIONI AL SOLE" days 2-2
+[DRY-RUN][DELETE] accommodation #12614 "OCCASIONI AL SOLE" days 3-3
+[DRY-RUN][DELETE] accommodation #12615 "OCCASIONI AL SOLE" days 4-4
+[DRY-RUN][DELETE] accommodation #12616 "OCCASIONI AL SOLE" days 5-5
+[DRY-RUN][DELETE] accommodation #12617 "OCCASIONI AL SOLE" days 6-6
+[DRY-RUN][TRIP] #795e4b94-f100-486b-8a3f-d24f137a9795 "Курортный городок Сан-Теодоро" sanity check OK: accommodation totals EUR=231.00
+[debug] QUERY OK source="accommodations" db=0.2ms idle=9.0ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["2806ec73-a8f9-46d3-a0c6-baf8869c1d62"]
+[DRY-RUN][TRIP] #2806ec73-a8f9-46d3-a0c6-baf8869c1d62 "Солнечная Мальта": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.5ms idle=9.0ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["2806ec73-a8f9-46d3-a0c6-baf8869c1d62", [12633, 12634, 12635, 12636, 12637, 12638, 12639, 12640]]
+[DRY-RUN][UPDATE] keep accommodation #12634 "Sliema Marina Hotel" days 1-1 -> 1-6
+[DRY-RUN][UPDATE] keep expense #55179 (accommodation #12634) price -> Money.new(:EUR, "0.00")
+[DRY-RUN][DELETE] expense #55180
+[DRY-RUN][DELETE] expense #55181
+[DRY-RUN][DELETE] expense #55182
+[DRY-RUN][DELETE] expense #55183
+[DRY-RUN][DELETE] expense #55184
+[DRY-RUN][DELETE] accommodation #12635 "Sliema Marina Hotel" days 2-2
+[DRY-RUN][DELETE] accommodation #12636 "Sliema Marina Hotel" days 3-3
+[DRY-RUN][DELETE] accommodation #12637 "Sliema Marina Hotel" days 4-4
+[DRY-RUN][DELETE] accommodation #12638 "Sliema Marina Hotel" days 5-5
+[DRY-RUN][DELETE] accommodation #12639 "Sliema Marina Hotel" days 6-6
+[DRY-RUN][TRIP] #2806ec73-a8f9-46d3-a0c6-baf8869c1d62 "Солнечная Мальта" sanity check OK: accommodation totals EUR=0.00
+[debug] QUERY OK source="accommodations" db=0.2ms idle=9.2ms
+SELECT a0."id", a0."name", a0."link", a0."address", a0."note", a0."start_day", a0."end_day", a0."trip_id", a0."inserted_at", a0."updated_at" FROM "accommodations" AS a0 WHERE (a0."trip_id" = $1) ORDER BY a0."start_day", a0."end_day", a0."id" ["d2a10b56-7a96-4784-9494-06b6d952afdf"]
+[DRY-RUN][TRIP] #d2a10b56-7a96-4784-9494-06b6d952afdf "Между нами девочками": 1 merge group(s)
+[debug] QUERY OK source="expenses" db=0.4ms idle=9.2ms
+SELECT e0."id", e0."price", e0."name", e0."trip_id", e0."accommodation_id", e0."transfer_id", e0."activity_id", e0."day_expense_id", e0."food_expense_id", e0."inserted_at", e0."updated_at" FROM "expenses" AS e0 WHERE ((e0."trip_id" = $1) AND e0."accommodation_id" = ANY($2)) ORDER BY e0."id" ["d2a10b56-7a96-4784-9494-06b6d952afdf", [12641, 12642, 12643, 12644]]
+[DRY-RUN][UPDATE] keep accommodation #12641 "Apartament Sienna 86" days 0-0 -> 0-2
+[DRY-RUN][UPDATE] keep expense #55249 (accommodation #12641) price -> Money.new(:PLN, "278.34")
+[DRY-RUN][DELETE] expense #55250
+[DRY-RUN][DELETE] expense #55251
+[DRY-RUN][DELETE] accommodation #12642 "Apartament Sienna 86" days 1-1
+[DRY-RUN][DELETE] accommodation #12643 "Apartament Sienna 86" days 2-2
+[DRY-RUN][TRIP] #d2a10b56-7a96-4784-9494-06b6d952afdf "Между нами девочками" sanity check OK: accommodation totals PLN=278.34
+Accommodation squash completed (DRY-RUN)
+  trips_total: 102
+  trips_changed: 80
+  groups_merged: 110
+  accommodations_updated: 110
+  accommodations_deleted: 347
+  expenses_updated: 110
+  expenses_deleted: 347
+  trips_failed: 0

@@ -1,5 +1,37 @@
 # Production Migration Progress
 
+## 2026-05-09 (accommodation range squash with budget sanity check)
+
+### Goal
+Normalize imported legacy accommodations from one-row-per-day into contiguous ranges while preserving accommodation budget totals per trip.
+
+### Completed
+- Added squasher module:
+  - [`lib/hamster_travel/legacy_import/accommodations_squasher.ex`](/Users/marvin/p/hamster-travel/lib/hamster_travel/legacy_import/accommodations_squasher.ex)
+  - merges consecutive same-name accommodations by trip
+  - keeps first row, extends `start_day/end_day`, deletes redundant rows
+  - merges group accommodation expenses into kept row and deletes redundant expense rows
+  - includes per-trip sanity check: accommodation totals by currency must remain unchanged
+  - prints every planned update/delete action.
+- Added mix task:
+  - [`lib/mix/tasks/legacy.squash_accommodations.ex`](/Users/marvin/p/hamster-travel/lib/mix/tasks/legacy.squash_accommodations.ex)
+  - supports `--dry-run`.
+
+### Local Dry-Run Validation
+- Command:
+  - `mix legacy.squash_accommodations --dry-run`
+- Full output log saved to:
+  - [`prod_backup/import_ready_external_participants/accommodation_squash_dry_run.log`](/Users/marvin/p/hamster-travel/prod_backup/import_ready_external_participants/accommodation_squash_dry_run.log)
+- Summary:
+  - `trips_total: 102`
+  - `trips_changed: 80`
+  - `groups_merged: 110`
+  - `accommodations_updated: 110`
+  - `accommodations_deleted: 347`
+  - `expenses_updated: 110`
+  - `expenses_deleted: 347`
+  - `trips_failed: 0`
+
 ## 2026-05-09 (supplemental import for trips omitted by external participants)
 
 ### Goal
