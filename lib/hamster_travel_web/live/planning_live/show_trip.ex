@@ -93,18 +93,29 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           <.status_row :if={!@current_user} trip={@trip} />
         </div>
         <div class="sm:pl-6">
-          <div class="flex flex-col items-end gap-3">
-            <label
-              :if={TripCover.present?(@trip.cover)}
-              for={@can_edit && @uploads.cover.ref}
-              class={["cursor-pointer", !@can_edit && "pointer-events-none"]}
-            >
-              <img
-                class="max-h-80 mb-4 sm:mb-0 sm:h-56 sm:w-auto sm:max-h-full shadow-lg rounded-md"
-                src={TripCover.url({@trip.cover, @trip}, :hero)}
-                data-cover-image
-              />
-            </label>
+          <div class="flex flex-col items-start gap-3 sm:items-end">
+            <div :if={TripCover.present?(@trip.cover)} class="relative w-fit">
+              <label
+                for={@can_edit && @uploads.cover.ref}
+                class={["block", @can_edit && "cursor-pointer", !@can_edit && "pointer-events-none"]}
+              >
+                <img
+                  class="max-h-80 mb-4 sm:mb-0 sm:h-56 sm:w-auto sm:max-h-full shadow-lg rounded-md"
+                  src={TripCover.url({@trip.cover, @trip}, :hero)}
+                  data-cover-image
+                />
+              </label>
+              <button
+                :if={@can_edit}
+                type="button"
+                phx-click="remove_cover"
+                data-confirm={gettext("Remove the cover image?")}
+                class="absolute -right-2 -top-2 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/80 bg-white/90 text-rose-600 shadow-md transition-colors hover:bg-rose-600 hover:text-white dark:border-zinc-950/60 dark:bg-zinc-950/85 dark:text-rose-300 dark:hover:bg-rose-600 dark:hover:text-white"
+                aria-label={gettext("Remove cover")}
+              >
+                <.icon name="hero-trash" class="h-4 w-4" />
+              </button>
+            </div>
             <.cover_upload
               :if={@can_edit}
               trip={@trip}
@@ -1717,22 +1728,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             {gettext("Choose image")}
           </label>
         </div>
-      </div>
-
-      <div :if={TripCover.present?(@trip.cover)} class="flex flex-wrap items-center gap-2 justify-end">
-        <button
-          type="button"
-          class="group inline-flex items-center gap-1"
-          phx-click="remove_cover"
-          data-confirm={gettext("Remove the cover image?")}
-        >
-          <span class="inline-flex h-6 w-6 shrink-0 items-center justify-center text-zinc-500 transition-colors group-hover:text-zinc-700 dark:text-zinc-400 dark:group-hover:text-zinc-200">
-            <.icon name="hero-trash" class="h-4 w-4" />
-          </span>
-          <span class="text-xs font-semibold text-zinc-500 dark:text-zinc-400 leading-4 transition-colors group-hover:text-zinc-700 dark:group-hover:text-zinc-200">
-            {gettext("Remove cover")}
-          </span>
-        </button>
       </div>
 
       <.live_file_input upload={@uploads.cover} class="sr-only" />
