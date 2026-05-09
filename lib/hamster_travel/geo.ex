@@ -98,7 +98,7 @@ defmodule HamsterTravel.Geo do
         c in City,
         where: c.id == ^id,
         preload: [:country],
-        join: r in Region,
+        left_join: r in Region,
         on: c.region_code == r.region_code and c.country_code == r.country_code,
         select: %{c | region_name: r.name, region_name_ru: r.name_ru}
       )
@@ -177,7 +177,7 @@ defmodule HamsterTravel.Geo do
   def city_preloading_query do
     from c in City,
       preload: [:country],
-      join: r in Region,
+      left_join: r in Region,
       on: c.region_code == r.region_code and c.country_code == r.country_code,
       select: %{c | region_name: r.name, region_name_ru: r.name_ru}
   end
