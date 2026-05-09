@@ -90,98 +90,114 @@ defmodule HamsterTravel.LegacyImport.AccommodationsSquasher do
   end
 
   defp process_trip(%{id: trip_id, name: trip_name}, dry_run) do
-    accommodations =
-      from(a in Accommodation,
-        where: a.trip_id == ^trip_id,
-        order_by: [asc: a.start_day, asc: a.end_day, asc: a.id]
-      )
-      |> Repo.all()
+    case fetch_trip_accommodations(trip_id) do
+      [_ | [_ | _]] = accommodations ->
+        process_trip_accommodations(accommodations, trip_id, trip_name, dry_run)
 
-    if length(accommodations) < 2 do
-      {:ok, %{changed?: false}}
+      _ ->
+        {:ok, %{changed?: false}}
+    end
+  end
+
+  defp fetch_trip_accommodations(trip_id) do
+    from(a in Accommodation,
+      where: a.trip_id == ^trip_id,
+      order_by: [asc: a.start_day, asc: a.end_day, asc: a.id]
+    )
+    |> Repo.all()
+  end
+
+  defp process_trip_accommodations(accommodations, trip_id, trip_name, dry_run) do
+    expenses = fetch_accommodation_expenses(trip_id, accommodations)
+    expenses_by_acc_id = Enum.group_by(expenses, & &1.accommodation_id)
+
+    case merge_groups(accommodations) do
+      [] ->
+        {:ok, %{changed?: false}}
+
+      groups ->
+        plans = Enum.map(groups, &build_group_plan(&1, expenses_by_acc_id))
+        process_merge_plans(trip_id, trip_name, expenses, plans, dry_run)
+    end
+  end
+
+  defp fetch_accommodation_expenses(trip_id, accommodations) do
+    acc_ids = Enum.map(accommodations, & &1.id)
+
+    from(e in Expense,
+      where: e.trip_id == ^trip_id and e.accommodation_id in ^acc_ids,
+      order_by: [asc: e.id]
+    )
+    |> Repo.all()
+  end
+
+  defp process_merge_plans(trip_id, trip_name, expenses, plans, dry_run) do
+    before_totals = totals_by_currency(expenses)
+    projected_totals = projected_totals_after_plans(expenses, plans)
+
+    if totals_equal?(before_totals, projected_totals) do
+      log_trip_plan(trip_id, trip_name, plans, dry_run)
+      finish_trip_merge(trip_id, trip_name, before_totals, plans, dry_run)
     else
-      acc_ids = Enum.map(accommodations, & &1.id)
+      {:error,
+       "sanity check failed before applying changes: projected totals differ (before=#{format_totals(before_totals)} projected=#{format_totals(projected_totals)})"}
+    end
+  end
 
-      expenses =
+  defp finish_trip_merge(trip_id, trip_name, before_totals, plans, true) do
+    print_line(
+      "[DRY-RUN][TRIP] #{trip_label(trip_id, trip_name)} sanity check OK: accommodation totals #{format_totals(before_totals)}"
+    )
+
+    {:ok, stats_for_plans(plans)}
+  end
+
+  defp finish_trip_merge(trip_id, trip_name, before_totals, plans, false) do
+    case apply_merge_plans(trip_id, before_totals, plans) do
+      {:ok, after_totals} ->
+        print_line(
+          "[APPLY][TRIP] #{trip_label(trip_id, trip_name)} sanity check OK: accommodation totals #{format_totals(after_totals)}"
+        )
+
+        {:ok, stats_for_plans(plans)}
+
+      {:error, reason} ->
+        {:error, format_error(reason)}
+    end
+  end
+
+  defp apply_merge_plans(trip_id, before_totals, plans) do
+    Repo.transaction(fn ->
+      Enum.each(plans, &apply_plan!/1)
+
+      after_expenses =
         from(e in Expense,
-          where: e.trip_id == ^trip_id and e.accommodation_id in ^acc_ids,
-          order_by: [asc: e.id]
+          where: e.trip_id == ^trip_id and not is_nil(e.accommodation_id),
+          select: e
         )
         |> Repo.all()
 
-      expenses_by_acc_id = Enum.group_by(expenses, & &1.accommodation_id)
-      groups = merge_groups(accommodations)
+      after_totals = totals_by_currency(after_expenses)
 
-      if groups == [] do
-        {:ok, %{changed?: false}}
-      else
-        before_totals = totals_by_currency(expenses)
-        plans = Enum.map(groups, &build_group_plan(&1, expenses_by_acc_id))
-        projected_totals = projected_totals_after_plans(expenses, plans)
-
-        case totals_equal?(before_totals, projected_totals) do
-          false ->
-            {:error,
-             "sanity check failed before applying changes: projected totals differ (before=#{format_totals(before_totals)} projected=#{format_totals(projected_totals)})"}
-
-          true ->
-            log_trip_plan(trip_id, trip_name, plans, dry_run)
-
-            stats = %{
-              changed?: true,
-              groups_merged: length(plans),
-              accommodations_deleted:
-                Enum.sum(Enum.map(plans, &length(&1.delete_accommodation_ids))),
-              accommodations_updated: Enum.sum(Enum.map(plans, fn _ -> 1 end)),
-              expenses_deleted: Enum.sum(Enum.map(plans, &length(&1.delete_expense_ids))),
-              expenses_updated:
-                Enum.sum(Enum.map(plans, fn p -> if p.update_expense?, do: 1, else: 0 end))
-            }
-
-            if dry_run do
-              print_line(
-                "[DRY-RUN][TRIP] #{trip_label(trip_id, trip_name)} sanity check OK: accommodation totals #{format_totals(before_totals)}"
-              )
-
-              {:ok, stats}
-            else
-              apply_result =
-                Repo.transaction(fn ->
-                  Enum.each(plans, &apply_plan!/1)
-
-                  after_expenses =
-                    from(e in Expense,
-                      where: e.trip_id == ^trip_id and not is_nil(e.accommodation_id),
-                      select: e
-                    )
-                    |> Repo.all()
-
-                  after_totals = totals_by_currency(after_expenses)
-
-                  unless totals_equal?(before_totals, after_totals) do
-                    Repo.rollback(
-                      "sanity check failed after apply: before=#{format_totals(before_totals)} after=#{format_totals(after_totals)}"
-                    )
-                  end
-
-                  after_totals
-                end)
-
-              case apply_result do
-                {:ok, after_totals} ->
-                  print_line(
-                    "[APPLY][TRIP] #{trip_label(trip_id, trip_name)} sanity check OK: accommodation totals #{format_totals(after_totals)}"
-                  )
-
-                  {:ok, stats}
-
-                {:error, reason} ->
-                  {:error, format_error(reason)}
-              end
-            end
-        end
+      unless totals_equal?(before_totals, after_totals) do
+        Repo.rollback(
+          "sanity check failed after apply: before=#{format_totals(before_totals)} after=#{format_totals(after_totals)}"
+        )
       end
-    end
+
+      after_totals
+    end)
+  end
+
+  defp stats_for_plans(plans) do
+    %{
+      changed?: true,
+      groups_merged: length(plans),
+      accommodations_deleted: Enum.sum(Enum.map(plans, &length(&1.delete_accommodation_ids))),
+      accommodations_updated: length(plans),
+      expenses_deleted: Enum.sum(Enum.map(plans, &length(&1.delete_expense_ids))),
+      expenses_updated: Enum.count(plans, & &1.update_expense?)
+    }
   end
 
   defp merge_groups(accommodations) do
@@ -365,8 +381,9 @@ defmodule HamsterTravel.LegacyImport.AccommodationsSquasher do
   defp format_totals(totals) do
     totals
     |> Enum.sort_by(fn {currency, _} -> to_string(currency) end)
-    |> Enum.map(fn {currency, amount} -> "#{currency}=#{D.to_string(amount, :normal)}" end)
-    |> Enum.join(", ")
+    |> Enum.map_join(", ", fn {currency, amount} ->
+      "#{currency}=#{D.to_string(amount, :normal)}"
+    end)
   end
 
   defp same_name?(left, right) do

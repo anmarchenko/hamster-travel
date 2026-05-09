@@ -148,8 +148,34 @@ defmodule HamsterTravel.LegacyImport.VisitedCitiesImporter do
   defp do_import(legacy_links, legacy_city_geonames, resolved_users_by_legacy_id, opts) do
     dry_run = Keyword.get(opts, :dry_run, false)
     replace_existing = Keyword.get(opts, :replace_existing, false)
+    initial = initial_import_result(legacy_links)
 
-    initial = %{
+    mapped =
+      map_legacy_links(legacy_links, legacy_city_geonames, resolved_users_by_legacy_id, initial)
+
+    {result_with_city_resolution, resolved_pairs} = resolve_city_pairs(mapped)
+
+    distinct_pairs =
+      resolved_pairs
+      |> Enum.uniq_by(fn pair -> {pair.user_id, pair.city_id} end)
+
+    result = %{result_with_city_resolution | distinct_pairs: length(distinct_pairs)}
+    user_ids_for_scope = distinct_user_ids(distinct_pairs)
+    to_insert_pairs = insertable_pairs(distinct_pairs, replace_existing, user_ids_for_scope)
+    skipped_existing = length(distinct_pairs) - length(to_insert_pairs)
+
+    persist_visited_cities(
+      dry_run,
+      replace_existing,
+      user_ids_for_scope,
+      to_insert_pairs,
+      result,
+      skipped_existing
+    )
+  end
+
+  defp initial_import_result(legacy_links) do
+    %{
       total_links: length(legacy_links),
       mapped_links: 0,
       distinct_pairs: 0,
@@ -160,128 +186,141 @@ defmodule HamsterTravel.LegacyImport.VisitedCitiesImporter do
       skipped_missing_geonames: 0,
       skipped_missing_target_city: 0
     }
+  end
 
-    mapped =
-      Enum.reduce(legacy_links, %{result: initial, pairs: []}, fn link, acc ->
-        legacy_user_id = link.legacy_user_id
-        legacy_city_id = link.legacy_city_id
+  defp map_legacy_links(legacy_links, legacy_city_geonames, resolved_users_by_legacy_id, initial) do
+    Enum.reduce(legacy_links, %{result: initial, pairs: []}, fn link, acc ->
+      map_legacy_link(link, acc, legacy_city_geonames, resolved_users_by_legacy_id)
+    end)
+  end
 
-        case Map.get(resolved_users_by_legacy_id, legacy_user_id) do
-          nil ->
-            put_in(acc.result.skipped_unmapped_user, acc.result.skipped_unmapped_user + 1)
+  defp map_legacy_link(link, acc, legacy_city_geonames, resolved_users_by_legacy_id) do
+    case Map.get(resolved_users_by_legacy_id, link.legacy_user_id) do
+      nil ->
+        put_in(acc.result.skipped_unmapped_user, acc.result.skipped_unmapped_user + 1)
 
-          %User{} = user ->
-            case Map.fetch(legacy_city_geonames, legacy_city_id) do
-              :error ->
-                put_in(
-                  acc.result.skipped_missing_legacy_city,
-                  acc.result.skipped_missing_legacy_city + 1
-                )
+      %User{} = user ->
+        map_legacy_city(link.legacy_city_id, user, acc, legacy_city_geonames)
+    end
+  end
 
-              {:ok, nil} ->
-                put_in(
-                  acc.result.skipped_missing_geonames,
-                  acc.result.skipped_missing_geonames + 1
-                )
+  defp map_legacy_city(legacy_city_id, user, acc, legacy_city_geonames) do
+    case Map.fetch(legacy_city_geonames, legacy_city_id) do
+      :error ->
+        put_in(
+          acc.result.skipped_missing_legacy_city,
+          acc.result.skipped_missing_legacy_city + 1
+        )
 
-              {:ok, geonames_id} ->
-                %{acc | pairs: [%{user_id: user.id, geonames_id: geonames_id} | acc.pairs]}
-                |> put_in([:result, :mapped_links], acc.result.mapped_links + 1)
-            end
-        end
-      end)
+      {:ok, nil} ->
+        put_in(
+          acc.result.skipped_missing_geonames,
+          acc.result.skipped_missing_geonames + 1
+        )
 
+      {:ok, geonames_id} ->
+        %{acc | pairs: [%{user_id: user.id, geonames_id: geonames_id} | acc.pairs]}
+        |> put_in([:result, :mapped_links], acc.result.mapped_links + 1)
+    end
+  end
+
+  defp resolve_city_pairs(mapped) do
+    city_id_by_geonames = fetch_city_ids_by_geonames(mapped.pairs)
+
+    Enum.reduce(mapped.pairs, {mapped.result, []}, fn pair, {result, acc_pairs} ->
+      case Map.get(city_id_by_geonames, pair.geonames_id) do
+        nil ->
+          {%{result | skipped_missing_target_city: result.skipped_missing_target_city + 1},
+           acc_pairs}
+
+        city_id ->
+          {result, [%{user_id: pair.user_id, city_id: city_id} | acc_pairs]}
+      end
+    end)
+  end
+
+  defp fetch_city_ids_by_geonames(pairs) do
     geonames_ids =
-      mapped.pairs
+      pairs
       |> Enum.map(& &1.geonames_id)
       |> Enum.uniq()
 
-    city_id_by_geonames =
-      from(c in City, where: c.geonames_id in ^geonames_ids, select: {c.geonames_id, c.id})
-      |> Repo.all()
-      |> Map.new()
+    from(c in City, where: c.geonames_id in ^geonames_ids, select: {c.geonames_id, c.id})
+    |> Repo.all()
+    |> Map.new()
+  end
 
-    {result_with_city_resolution, resolved_pairs} =
-      Enum.reduce(mapped.pairs, {mapped.result, []}, fn pair, {result, acc_pairs} ->
-        case Map.get(city_id_by_geonames, pair.geonames_id) do
-          nil ->
-            {%{result | skipped_missing_target_city: result.skipped_missing_target_city + 1},
-             acc_pairs}
+  defp distinct_user_ids(pairs) do
+    pairs
+    |> Enum.map(& &1.user_id)
+    |> Enum.uniq()
+  end
 
-          city_id ->
-            {result, [%{user_id: pair.user_id, city_id: city_id} | acc_pairs]}
-        end
-      end)
+  defp insertable_pairs(distinct_pairs, true, _user_ids_for_scope), do: distinct_pairs
 
-    distinct_pairs =
-      resolved_pairs
-      |> Enum.uniq_by(fn pair -> {pair.user_id, pair.city_id} end)
+  defp insertable_pairs(distinct_pairs, false, user_ids_for_scope) do
+    existing_pairs = fetch_existing_pairs(user_ids_for_scope)
 
-    result = %{result_with_city_resolution | distinct_pairs: length(distinct_pairs)}
+    Enum.reject(distinct_pairs, fn pair ->
+      MapSet.member?(existing_pairs, {pair.user_id, pair.city_id})
+    end)
+  end
 
-    user_ids_for_scope =
-      distinct_pairs
-      |> Enum.map(& &1.user_id)
-      |> Enum.uniq()
+  defp persist_visited_cities(
+         true,
+         _replace_existing,
+         _user_ids_for_scope,
+         to_insert_pairs,
+         result,
+         skipped_existing
+       ) do
+    {:ok, %{result | imported: length(to_insert_pairs), skipped_existing: skipped_existing}}
+  end
 
-    existing_pairs =
-      fetch_existing_pairs(user_ids_for_scope)
+  defp persist_visited_cities(
+         false,
+         replace_existing,
+         user_ids_for_scope,
+         to_insert_pairs,
+         result,
+         skipped_existing
+       ) do
+    Repo.transaction(fn ->
+      delete_existing_pairs(replace_existing, user_ids_for_scope)
 
-    to_insert_pairs =
-      if replace_existing do
-        distinct_pairs
-      else
-        Enum.reject(distinct_pairs, fn pair ->
-          MapSet.member?(existing_pairs, {pair.user_id, pair.city_id})
-        end)
-      end
+      {inserted_count, _} =
+        Repo.insert_all(
+          VisitedCity,
+          visited_city_rows(to_insert_pairs),
+          on_conflict: :nothing,
+          conflict_target: [:user_id, :city_id]
+        )
 
-    skipped_existing = length(distinct_pairs) - length(to_insert_pairs)
-
-    if dry_run do
-      {:ok,
-       %{
-         result
-         | imported: length(to_insert_pairs),
-           skipped_existing: skipped_existing
-       }}
-    else
-      Repo.transaction(fn ->
-        if replace_existing and user_ids_for_scope != [] do
-          from(vc in VisitedCity, where: vc.user_id in ^user_ids_for_scope) |> Repo.delete_all()
-        end
-
-        timestamp = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
-
-        rows =
-          Enum.map(to_insert_pairs, fn pair ->
-            %{
-              user_id: pair.user_id,
-              city_id: pair.city_id,
-              inserted_at: timestamp,
-              updated_at: timestamp
-            }
-          end)
-
-        {inserted_count, _} =
-          Repo.insert_all(
-            VisitedCity,
-            rows,
-            on_conflict: :nothing,
-            conflict_target: [:user_id, :city_id]
-          )
-
-        %{
-          result
-          | imported: inserted_count,
-            skipped_existing: skipped_existing
-        }
-      end)
-      |> case do
-        {:ok, summary} -> {:ok, summary}
-        {:error, reason} -> {:error, "failed to import visited cities: #{format_error(reason)}"}
-      end
+      %{result | imported: inserted_count, skipped_existing: skipped_existing}
+    end)
+    |> case do
+      {:ok, summary} -> {:ok, summary}
+      {:error, reason} -> {:error, "failed to import visited cities: #{format_error(reason)}"}
     end
+  end
+
+  defp delete_existing_pairs(true, [_ | _] = user_ids_for_scope) do
+    from(vc in VisitedCity, where: vc.user_id in ^user_ids_for_scope) |> Repo.delete_all()
+  end
+
+  defp delete_existing_pairs(_replace_existing, _user_ids_for_scope), do: nil
+
+  defp visited_city_rows(pairs) do
+    timestamp = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+
+    Enum.map(pairs, fn pair ->
+      %{
+        user_id: pair.user_id,
+        city_id: pair.city_id,
+        inserted_at: timestamp,
+        updated_at: timestamp
+      }
+    end)
   end
 
   defp fetch_existing_pairs([]), do: MapSet.new()
@@ -301,34 +340,34 @@ defmodule HamsterTravel.LegacyImport.VisitedCitiesImporter do
     do: Enum.take(rows, limit)
 
   defp read_csv_as_maps(path) do
-    with true <- File.exists?(path) do
-      lines =
-        path
-        |> File.stream!()
-        |> Stream.map(&String.trim_trailing(&1, "\n"))
-        |> Stream.map(&String.trim_trailing(&1, "\r"))
-        |> Stream.reject(&(&1 == ""))
-        |> Enum.to_list()
-
-      case lines do
-        [header_line | data_lines] ->
-          header = parse_csv_line_simple(header_line)
-
-          rows =
-            Enum.map(data_lines, fn line ->
-              values = parse_csv_line_simple(line)
-              Enum.zip(header, values) |> Map.new()
-            end)
-
-          {:ok, rows}
-
-        [] ->
-          {:error, "CSV file is empty: #{path}"}
-      end
-    else
+    case File.exists?(path) do
+      true -> path |> read_csv_lines() |> csv_lines_to_maps(path)
       false -> {:error, "CSV file not found: #{path}"}
     end
   end
+
+  defp read_csv_lines(path) do
+    path
+    |> File.stream!()
+    |> Stream.map(&String.trim_trailing(&1, "\n"))
+    |> Stream.map(&String.trim_trailing(&1, "\r"))
+    |> Stream.reject(&(&1 == ""))
+    |> Enum.to_list()
+  end
+
+  defp csv_lines_to_maps([header_line | data_lines], _path) do
+    header = parse_csv_line_simple(header_line)
+
+    rows =
+      Enum.map(data_lines, fn line ->
+        values = parse_csv_line_simple(line)
+        Enum.zip(header, values) |> Map.new()
+      end)
+
+    {:ok, rows}
+  end
+
+  defp csv_lines_to_maps([], path), do: {:error, "CSV file is empty: #{path}"}
 
   defp parse_csv_line_simple(line), do: String.split(line, ",")
 

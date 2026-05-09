@@ -277,28 +277,8 @@ defmodule HamsterTravel.LegacyImport.TripCoversImporter do
   end
 
   defp find_target_trip(bundle, %User{} = author) do
-    status = bundle["status"]
-    name = bundle["name"]
-    dates_unknown = bundle["dates_unknown"] || false
-    duration = bundle["duration"]
-    start_date = parse_date(bundle["start_date"])
-    end_date = parse_date(bundle["end_date"])
-    currency = bundle["currency"]
-    people_count = bundle["people_count"]
-
     matches =
-      from(t in Trip,
-        where:
-          t.author_id == ^author.id and
-            t.name == ^name and
-            t.status == ^status and
-            t.dates_unknown == ^dates_unknown and
-            t.duration == ^duration and
-            t.start_date == ^start_date and
-            t.end_date == ^end_date and
-            t.currency == ^currency and
-            t.people_count == ^people_count
-      )
+      from(t in Trip, where: ^target_trip_filters(bundle, author))
       |> Repo.all()
 
     case matches do
@@ -312,6 +292,20 @@ defmodule HamsterTravel.LegacyImport.TripCoversImporter do
         ids = Enum.map_join(trips, ",", & &1.id)
         {:error, :no_trip_match, "multiple trip matches found: #{ids}"}
     end
+  end
+
+  defp target_trip_filters(bundle, %User{} = author) do
+    [
+      author_id: author.id,
+      name: bundle["name"],
+      status: bundle["status"],
+      dates_unknown: bundle["dates_unknown"] || false,
+      duration: bundle["duration"],
+      start_date: parse_date(bundle["start_date"]),
+      end_date: parse_date(bundle["end_date"]),
+      currency: bundle["currency"],
+      people_count: bundle["people_count"]
+    ]
   end
 
   defp maybe_skip_existing_cover(%Trip{} = _trip, true), do: :ok
