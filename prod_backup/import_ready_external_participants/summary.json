@@ -1,0 +1,13 @@
+{
+  "count": 4,
+  "keep_user_ids": [
+    191,
+    192
+  ],
+  "trip_refs": [
+    "legacy_trip_469",
+    "legacy_trip_472",
+    "legacy_trip_474",
+    "legacy_trip_503"
+  ]
+}

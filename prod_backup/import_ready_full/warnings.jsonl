@@ -1,0 +1,122 @@
+{"code": "transfer_missing_departure_time", "trip_id": 450, "entity": "transfer", "entity_id": "1366", "message": "Missing/invalid departure time, fallback to 2014-09-05T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 450, "entity": "transfer", "entity_id": "1366", "message": "Missing/invalid arrival time, fallback to 2014-09-05T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 450, "entity": "transfer", "entity_id": "1245", "message": "Missing/invalid departure time, fallback to 2014-09-07T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 450, "entity": "transfer", "entity_id": "1245", "message": "Missing/invalid arrival time, fallback to 2014-09-07T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 450, "entity": "transfer", "entity_id": "1246", "message": "Missing/invalid departure time, fallback to 2014-09-08T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 450, "entity": "transfer", "entity_id": "1246", "message": "Missing/invalid arrival time, fallback to 2014-09-08T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 450, "entity": "transfer", "entity_id": "1247", "message": "Missing/invalid departure time, fallback to 2014-09-08T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 450, "entity": "transfer", "entity_id": "1247", "message": "Missing/invalid arrival time, fallback to 2014-09-08T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 450, "entity": "transfer", "entity_id": "1249", "message": "Missing/invalid departure time, fallback to 2014-09-11T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 450, "entity": "transfer", "entity_id": "1249", "message": "Missing/invalid arrival time, fallback to 2014-09-11T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 451, "entity": "transfer", "entity_id": "1257", "message": "Missing/invalid departure time, fallback to 2014-12-30T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 451, "entity": "transfer", "entity_id": "1257", "message": "Missing/invalid arrival time, fallback to 2014-12-30T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 451, "entity": "transfer", "entity_id": "1349", "message": "Missing/invalid departure time, fallback to 2015-01-02T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 451, "entity": "transfer", "entity_id": "1349", "message": "Missing/invalid arrival time, fallback to 2015-01-02T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 451, "entity": "transfer", "entity_id": "1350", "message": "Missing/invalid departure time, fallback to 2015-01-02T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 451, "entity": "transfer", "entity_id": "1350", "message": "Missing/invalid arrival time, fallback to 2015-01-02T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 454, "entity": "transfer", "entity_id": "1272", "message": "Missing/invalid departure time, fallback to 2012-05-13T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 454, "entity": "transfer", "entity_id": "1272", "message": "Missing/invalid arrival time, fallback to 2012-05-13T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 454, "entity": "transfer", "entity_id": "1279", "message": "Missing/invalid departure time, fallback to 2012-05-21T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 454, "entity": "transfer", "entity_id": "1279", "message": "Missing/invalid arrival time, fallback to 2012-05-21T00:00:00Z."}
+{"code": "transfer_missing_city", "trip_id": 457, "entity": "transfer", "entity_id": "1288", "message": "Missing departure/arrival city geonames mapping. Transfer skipped."}
+{"code": "transfer_missing_city", "trip_id": 462, "entity": "transfer", "entity_id": "1330", "message": "Missing departure/arrival city geonames mapping. Transfer skipped."}
+{"code": "transfer_missing_departure_time", "trip_id": 463, "entity": "transfer", "entity_id": "1352", "message": "Missing/invalid departure time, fallback to 2015-05-14T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 463, "entity": "transfer", "entity_id": "1352", "message": "Missing/invalid arrival time, fallback to 2015-05-14T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 463, "entity": "transfer", "entity_id": "1353", "message": "Missing/invalid departure time, fallback to 2015-05-14T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 463, "entity": "transfer", "entity_id": "1353", "message": "Missing/invalid arrival time, fallback to 2015-05-14T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 463, "entity": "transfer", "entity_id": "1354", "message": "Missing/invalid departure time, fallback to 2015-05-17T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 463, "entity": "transfer", "entity_id": "1354", "message": "Missing/invalid arrival time, fallback to 2015-05-17T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 463, "entity": "transfer", "entity_id": "1355", "message": "Missing/invalid departure time, fallback to 2015-05-17T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 463, "entity": "transfer", "entity_id": "1355", "message": "Missing/invalid arrival time, fallback to 2015-05-17T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 468, "entity": "transfer", "entity_id": "1362", "message": "Missing/invalid departure time, fallback to 2015-08-31T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 468, "entity": "transfer", "entity_id": "1362", "message": "Missing/invalid arrival time, fallback to 2015-08-31T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 468, "entity": "transfer", "entity_id": "1363", "message": "Missing/invalid departure time, fallback to 2015-09-03T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 468, "entity": "transfer", "entity_id": "1363", "message": "Missing/invalid arrival time, fallback to 2015-09-03T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 469, "entity": "transfer", "entity_id": "1484", "message": "Missing/invalid departure time, fallback to 2015-09-05T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 469, "entity": "transfer", "entity_id": "1484", "message": "Missing/invalid arrival time, fallback to 2015-09-05T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 469, "entity": "transfer", "entity_id": "1485", "message": "Missing/invalid departure time, fallback to 2015-09-05T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 469, "entity": "transfer", "entity_id": "1485", "message": "Missing/invalid arrival time, fallback to 2015-09-05T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 469, "entity": "transfer", "entity_id": "1488", "message": "Missing/invalid departure time, fallback to 2015-09-08T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 469, "entity": "transfer", "entity_id": "1488", "message": "Missing/invalid arrival time, fallback to 2015-09-08T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 469, "entity": "transfer", "entity_id": "1489", "message": "Missing/invalid departure time, fallback to 2015-09-08T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 469, "entity": "transfer", "entity_id": "1489", "message": "Missing/invalid arrival time, fallback to 2015-09-08T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 469, "entity": "transfer", "entity_id": "1486", "message": "Missing/invalid departure time, fallback to 2015-09-12T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 469, "entity": "transfer", "entity_id": "1486", "message": "Missing/invalid arrival time, fallback to 2015-09-12T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 469, "entity": "transfer", "entity_id": "1487", "message": "Missing/invalid departure time, fallback to 2015-09-12T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 469, "entity": "transfer", "entity_id": "1487", "message": "Missing/invalid arrival time, fallback to 2015-09-12T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 471, "entity": "transfer", "entity_id": "1471", "message": "Missing/invalid departure time, fallback to 2013-11-05T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 471, "entity": "transfer", "entity_id": "1471", "message": "Missing/invalid arrival time, fallback to 2013-11-05T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 471, "entity": "transfer", "entity_id": "1472", "message": "Missing/invalid departure time, fallback to 2013-11-05T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 471, "entity": "transfer", "entity_id": "1472", "message": "Missing/invalid arrival time, fallback to 2013-11-05T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 477, "entity": "transfer", "entity_id": "1618", "message": "Missing/invalid departure time, fallback to 2016-07-02T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 477, "entity": "transfer", "entity_id": "1618", "message": "Missing/invalid arrival time, fallback to 2016-07-02T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 491, "entity": "transfer", "entity_id": "1549", "message": "Missing/invalid departure time, fallback to 2016-02-28T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 491, "entity": "transfer", "entity_id": "1549", "message": "Missing/invalid arrival time, fallback to 2016-02-28T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 499, "entity": "transfer", "entity_id": "1613", "message": "Missing/invalid departure time, fallback to 2016-09-03T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 499, "entity": "transfer", "entity_id": "1613", "message": "Missing/invalid arrival time, fallback to 2016-09-03T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 499, "entity": "transfer", "entity_id": "1614", "message": "Missing/invalid departure time, fallback to 2016-09-10T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 499, "entity": "transfer", "entity_id": "1614", "message": "Missing/invalid arrival time, fallback to 2016-09-10T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 506, "entity": "transfer", "entity_id": "1663", "message": "Missing/invalid departure time, fallback to 2017-01-28T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 506, "entity": "transfer", "entity_id": "1663", "message": "Missing/invalid arrival time, fallback to 2017-01-28T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 506, "entity": "transfer", "entity_id": "1664", "message": "Missing/invalid departure time, fallback to 2017-02-04T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 506, "entity": "transfer", "entity_id": "1664", "message": "Missing/invalid arrival time, fallback to 2017-02-04T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 524, "entity": "transfer", "entity_id": "1726", "message": "Missing/invalid departure time, fallback to 2017-11-29T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 524, "entity": "transfer", "entity_id": "1726", "message": "Missing/invalid arrival time, fallback to 2017-11-29T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 526, "entity": "transfer", "entity_id": "1734", "message": "Missing/invalid departure time, fallback to 2019-01-13T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 526, "entity": "transfer", "entity_id": "1734", "message": "Missing/invalid arrival time, fallback to 2019-01-13T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 526, "entity": "transfer", "entity_id": "1732", "message": "Missing/invalid departure time, fallback to 2019-01-25T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 526, "entity": "transfer", "entity_id": "1732", "message": "Missing/invalid arrival time, fallback to 2019-01-25T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 528, "entity": "transfer", "entity_id": "1750", "message": "Missing/invalid departure time, fallback to 2020-02-26T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 528, "entity": "transfer", "entity_id": "1750", "message": "Missing/invalid arrival time, fallback to 2020-02-26T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 528, "entity": "transfer", "entity_id": "1751", "message": "Missing/invalid departure time, fallback to 2020-02-26T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 528, "entity": "transfer", "entity_id": "1751", "message": "Missing/invalid arrival time, fallback to 2020-02-26T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 529, "entity": "transfer", "entity_id": "1815", "message": "Missing/invalid departure time, fallback to 2022-08-12T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 529, "entity": "transfer", "entity_id": "1815", "message": "Missing/invalid arrival time, fallback to 2022-08-12T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 529, "entity": "transfer", "entity_id": "1816", "message": "Missing/invalid departure time, fallback to 2022-08-13T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 529, "entity": "transfer", "entity_id": "1816", "message": "Missing/invalid arrival time, fallback to 2022-08-13T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 529, "entity": "transfer", "entity_id": "1863", "message": "Missing/invalid departure time, fallback to 2022-08-13T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 529, "entity": "transfer", "entity_id": "1863", "message": "Missing/invalid arrival time, fallback to 2022-08-13T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 547, "entity": "transfer", "entity_id": "1829", "message": "Missing/invalid departure time, fallback to 2022-10-02T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 547, "entity": "transfer", "entity_id": "1829", "message": "Missing/invalid arrival time, fallback to 2022-10-02T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 547, "entity": "transfer", "entity_id": "1830", "message": "Missing/invalid departure time, fallback to 2022-10-02T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 547, "entity": "transfer", "entity_id": "1830", "message": "Missing/invalid arrival time, fallback to 2022-10-02T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 547, "entity": "transfer", "entity_id": "1851", "message": "Missing/invalid departure time, fallback to 2022-10-06T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 547, "entity": "transfer", "entity_id": "1851", "message": "Missing/invalid arrival time, fallback to 2022-10-06T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 547, "entity": "transfer", "entity_id": "1853", "message": "Missing/invalid departure time, fallback to 2022-10-07T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 547, "entity": "transfer", "entity_id": "1853", "message": "Missing/invalid arrival time, fallback to 2022-10-07T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 549, "entity": "transfer", "entity_id": "1856", "message": "Missing/invalid departure time, fallback to 2022-12-29T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 549, "entity": "transfer", "entity_id": "1856", "message": "Missing/invalid arrival time, fallback to 2022-12-29T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 550, "entity": "transfer", "entity_id": "1858", "message": "Missing/invalid departure time, fallback to 2022-11-26T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 550, "entity": "transfer", "entity_id": "1858", "message": "Missing/invalid arrival time, fallback to 2022-11-26T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 550, "entity": "transfer", "entity_id": "1859", "message": "Missing/invalid departure time, fallback to 2022-11-28T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 550, "entity": "transfer", "entity_id": "1859", "message": "Missing/invalid arrival time, fallback to 2022-11-28T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 551, "entity": "transfer", "entity_id": "1860", "message": "Missing/invalid departure time, fallback to 2022-08-12T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 551, "entity": "transfer", "entity_id": "1860", "message": "Missing/invalid arrival time, fallback to 2022-08-12T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 551, "entity": "transfer", "entity_id": "1861", "message": "Missing/invalid departure time, fallback to 2022-08-13T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 551, "entity": "transfer", "entity_id": "1861", "message": "Missing/invalid arrival time, fallback to 2022-08-13T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 551, "entity": "transfer", "entity_id": "1862", "message": "Missing/invalid departure time, fallback to 2022-08-14T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 551, "entity": "transfer", "entity_id": "1862", "message": "Missing/invalid arrival time, fallback to 2022-08-14T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 581, "entity": "transfer", "entity_id": "2004", "message": "Missing/invalid departure time, fallback to 2024-10-21T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 581, "entity": "transfer", "entity_id": "2004", "message": "Missing/invalid arrival time, fallback to 2024-10-21T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 581, "entity": "transfer", "entity_id": "2005", "message": "Missing/invalid departure time, fallback to 2024-10-23T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 581, "entity": "transfer", "entity_id": "2005", "message": "Missing/invalid arrival time, fallback to 2024-10-23T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 581, "entity": "transfer", "entity_id": "2006", "message": "Missing/invalid departure time, fallback to 2024-10-24T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 581, "entity": "transfer", "entity_id": "2006", "message": "Missing/invalid arrival time, fallback to 2024-10-24T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 581, "entity": "transfer", "entity_id": "2007", "message": "Missing/invalid departure time, fallback to 2024-10-27T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 581, "entity": "transfer", "entity_id": "2007", "message": "Missing/invalid arrival time, fallback to 2024-10-27T00:00:00Z."}
+{"code": "transfer_missing_departure_time", "trip_id": 581, "entity": "transfer", "entity_id": "2009", "message": "Missing/invalid departure time, fallback to 2024-10-30T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 581, "entity": "transfer", "entity_id": "2009", "message": "Missing/invalid arrival time, fallback to 2024-10-30T00:00:00Z."}
+{"code": "transfer_missing_city", "trip_id": 583, "entity": "transfer", "entity_id": "2107", "message": "Missing departure/arrival city geonames mapping. Transfer skipped."}
+{"code": "transfer_missing_city", "trip_id": 583, "entity": "transfer", "entity_id": "2108", "message": "Missing departure/arrival city geonames mapping. Transfer skipped."}
+{"code": "transfer_missing_departure_time", "trip_id": 583, "entity": "transfer", "entity_id": "2105", "message": "Missing/invalid departure time, fallback to 2026-08-06T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 583, "entity": "transfer", "entity_id": "2105", "message": "Missing/invalid arrival time, fallback to 2026-08-06T00:00:00Z."}
+{"code": "transfer_missing_city", "trip_id": 589, "entity": "transfer", "entity_id": "2022", "message": "Missing departure/arrival city geonames mapping. Transfer skipped."}
+{"code": "transfer_missing_city", "trip_id": 589, "entity": "transfer", "entity_id": "2023", "message": "Missing departure/arrival city geonames mapping. Transfer skipped."}
+{"code": "transfer_missing_departure_time", "trip_id": 598, "entity": "transfer", "entity_id": "2087", "message": "Missing/invalid departure time, fallback to 2026-10-22T00:00:00Z."}
+{"code": "transfer_missing_arrival_time", "trip_id": 598, "entity": "transfer", "entity_id": "2087", "message": "Missing/invalid arrival time, fallback to 2026-10-22T00:00:00Z."}
+{"code": "transfer_missing_city", "trip_id": 606, "entity": "transfer", "entity_id": "2118", "message": "Missing departure/arrival city geonames mapping. Transfer skipped."}
+{"code": "transfer_missing_city", "trip_id": 606, "entity": "transfer", "entity_id": "2119", "message": "Missing departure/arrival city geonames mapping. Transfer skipped."}
+{"code": "transfer_missing_city", "trip_id": 607, "entity": "transfer", "entity_id": "2120", "message": "Missing departure/arrival city geonames mapping. Transfer skipped."}
+{"code": "transfer_missing_city", "trip_id": 607, "entity": "transfer", "entity_id": "2121", "message": "Missing departure/arrival city geonames mapping. Transfer skipped."}
+{"code": "transfer_missing_city", "trip_id": 607, "entity": "transfer", "entity_id": "2126", "message": "Missing departure/arrival city geonames mapping. Transfer skipped."}
+{"code": "transfer_missing_city", "trip_id": 607, "entity": "transfer", "entity_id": "2122", "message": "Missing departure/arrival city geonames mapping. Transfer skipped."}

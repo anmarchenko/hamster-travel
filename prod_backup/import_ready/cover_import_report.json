@@ -1,0 +1,10 @@
+{
+  "total": 98,
+  "failed": 0,
+  "with_cover": 95,
+  "updated": 95,
+  "skipped_no_cover": 3,
+  "skipped_existing_cover": 0,
+  "skipped_no_trip_match": 0,
+  "failures": []
+}

@@ -27,6 +27,8 @@ One JSON object per trip bundle.
 Top-level fields:
 - `trip_ref` (`legacy_trip_<id>`)
 - `legacy_trip_id`
+- `legacy_image_uid` (nullable)
+- `legacy_cover_url` (nullable)
 - `name`, `status`, `dates_unknown`, `start_date`, `end_date`, `duration`
 - `currency`, `people_count`, `private`
 - `author_legacy_user_id`
@@ -53,6 +55,9 @@ Key mapping decisions:
 - Legacy trip short description is not imported.
 - Legacy trip comment is imported as a note with title `Отчет о путешествии`.
 - Legacy food descriptions are imported as a trip-level note with title `Еда`.
+- Legacy trip cover source is exported as:
+  - `legacy_image_uid` from legacy `trips.image_uid`
+  - `legacy_cover_url` = `https://d2fetf4i8a4kn6.cloudfront.net/<legacy_image_uid>`
 
 ### `warnings.jsonl`
 
@@ -121,3 +126,68 @@ Example mapping file (`legacy_user_mapping.json`):
 Mapping values can be either user email or user UUID in the target environment.
 
 Important: importer run starts by deleting existing trip-related data (clean-state import).
+
+## Cover Import Command
+
+After trip data import is complete, import covers with:
+
+```bash
+mix legacy.import_trip_covers \
+  --bundle-dir prod_backup/import_ready \
+  --user-map-file /absolute/path/to/legacy_user_mapping.json \
+  --continue-on-error
+```
+
+Optional flags:
+- `--limit N`
+- `--overwrite`
+- `--dry-run`
+- `--cover-base-url https://d2fetf4i8a4kn6.cloudfront.net/`
+- `--request-timeout-ms 120000`
+- `--report-file /absolute/path/to/cover_import_report.json`
+
+## Visited Cities Import Command
+
+Legacy manual visited cities (`cities_users.csv`) can be imported separately from trips:
+
+```bash
+mix legacy.import_visited_cities \
+  --csv-dir prod_backup/legacy_csv_clean \
+  --user-map-file /absolute/path/to/legacy_user_mapping.json
+```
+
+Optional flags:
+- `--limit N`
+- `--dry-run`
+- `--replace-existing`
+
+## Supplemental External-Participant Trips
+
+When old cleanup logic removed entire trips because they had participants outside
+the keep-user set, generate and import a supplemental bundle:
+
+1. Build full conversion bundle (from uncleaned legacy export):
+
+```bash
+uv run python scripts/convert_legacy_csv_for_import.py \
+  --input-dir prod_backup/legacy_csv \
+  --output-dir prod_backup/import_ready_full
+```
+
+2. Build supplemental bundle with filtered participants (`191/192` only):
+
+```bash
+uv run python scripts/build_external_participant_supplemental_bundle.py \
+  --full-bundle-dir prod_backup/import_ready_full \
+  --baseline-bundle-dir prod_backup/import_ready \
+  --output-dir prod_backup/import_ready_external_participants \
+  --keep-user-ids 191,192
+```
+
+3. Import supplemental trips without deleting existing trips:
+
+```bash
+mix legacy.import_external_participant_trips \
+  --bundle-dir prod_backup/import_ready_external_participants \
+  --user-map-file /absolute/path/to/legacy_user_mapping.json
+```

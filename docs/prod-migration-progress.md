@@ -1,5 +1,109 @@
 # Production Migration Progress
 
+## 2026-05-09 (supplemental import for trips omitted by external participants)
+
+### Goal
+Recover trips that were wrongly excluded by cleanup logic when they had at least one participant outside legacy users `191/192`.
+
+### Completed
+- Built full legacy conversion bundle from uncleaned export:
+  - input: `prod_backup/legacy_csv`
+  - output: `prod_backup/import_ready_full`
+- Added reusable supplemental-bundle builder:
+  - [`scripts/build_external_participant_supplemental_bundle.py`](/Users/marvin/p/hamster-travel/scripts/build_external_participant_supplemental_bundle.py)
+  - selects trips absent from baseline bundle but authored by kept users and linked to external participants
+  - rewrites participants to keep only `191/192`
+  - outputs:
+    - `prod_backup/import_ready_external_participants/trips.jsonl`
+    - `prod_backup/import_ready_external_participants/summary.json`
+    - `prod_backup/import_ready_external_participants/omitted_trips.md`
+- Extended shared trip importer to support append mode:
+  - [`lib/hamster_travel/legacy_import/trips_importer.ex`](/Users/marvin/p/hamster-travel/lib/hamster_travel/legacy_import/trips_importer.ex)
+  - new option `purge_existing` (default `true`)
+- Added dedicated append-only mix task:
+  - [`lib/mix/tasks/legacy.import_external_participant_trips.ex`](/Users/marvin/p/hamster-travel/lib/mix/tasks/legacy.import_external_participant_trips.ex)
+  - always uses `purge_existing: false` (does not delete existing trips)
+- Updated documentation:
+  - [`docs/legacy-import-format.md`](/Users/marvin/p/hamster-travel/docs/legacy-import-format.md)
+
+### Local Validation
+- Supplemental bundle selected `4` trips.
+- Local append-only import run:
+  - `mix legacy.import_external_participant_trips --user-map-file prod_backup/import_ready/legacy_user_mapping.dev.json --continue-on-error`
+  - result: `total=4`, `imported=4`, `failed=0`
+- Trips table count:
+  - before: `98`
+  - after: `102`
+
+## 2026-05-09 (visited cities separate importer)
+
+### Goal
+Migrate legacy user-level visited cities (not tied to trips) independently from trip import.
+
+### Completed
+- Added importer module: [`lib/hamster_travel/legacy_import/visited_cities_importer.ex`](/Users/marvin/p/hamster-travel/lib/hamster_travel/legacy_import/visited_cities_importer.ex)
+  - reads legacy `cities_users.csv` and `cities.csv`
+  - resolves legacy users via existing mapping JSON
+  - maps legacy city IDs to new city IDs via geonames code
+  - inserts into `users_visited_cities` with dedup protection (`on_conflict: :nothing`)
+  - supports `--dry-run`, `--replace-existing`, and `--limit`.
+- Added task: [`lib/mix/tasks/legacy.import_visited_cities.ex`](/Users/marvin/p/hamster-travel/lib/mix/tasks/legacy.import_visited_cities.ex)
+  - command: `mix legacy.import_visited_cities`.
+- Updated format doc:
+  - [`docs/legacy-import-format.md`](/Users/marvin/p/hamster-travel/docs/legacy-import-format.md).
+
+## 2026-05-09 (cover import per-trip logging)
+
+### Goal
+Improve observability during cover migration by logging each successfully processed trip cover with source URL.
+
+### Completed
+- Updated [`lib/hamster_travel/legacy_import/trip_covers_importer.ex`](/Users/marvin/p/hamster-travel/lib/hamster_travel/legacy_import/trip_covers_importer.ex):
+  - Logs a line for each successful `:uploaded` and `:dry_run` result.
+  - Log includes: `trip_ref`, target `trip_id`, `trip_name`, and `original_url` (legacy cover URL).
+
+## 2026-05-09 (legacy trip covers import automation)
+
+### Goal
+Automate migration of legacy trip cover images from old public CloudFront URLs into new trip cover storage for already imported trips.
+
+### Completed
+- Updated converter output in [`scripts/convert_legacy_csv_for_import.py`](/Users/marvin/p/hamster-travel/scripts/convert_legacy_csv_for_import.py):
+  - adds `legacy_image_uid` and `legacy_cover_url` per trip bundle.
+  - cover URL format: `https://d2fetf4i8a4kn6.cloudfront.net/<image_uid>`.
+- Added cover importer module: [`lib/hamster_travel/legacy_import/trip_covers_importer.ex`](/Users/marvin/p/hamster-travel/lib/hamster_travel/legacy_import/trip_covers_importer.ex)
+  - resolves target trip by imported bundle attributes + mapped author
+  - downloads legacy image via HTTP
+  - stores cover through `Planning.update_trip_cover/2` (Waffle pipeline, same as app upload flow)
+  - supports `--overwrite`, `--dry-run`, `--continue-on-error`, report output.
+- Added mix task: [`lib/mix/tasks/legacy.import_trip_covers.ex`](/Users/marvin/p/hamster-travel/lib/mix/tasks/legacy.import_trip_covers.ex)
+  - command: `mix legacy.import_trip_covers`.
+- Updated import format documentation with cover fields and command:
+  - [`docs/legacy-import-format.md`](/Users/marvin/p/hamster-travel/docs/legacy-import-format.md).
+
+### Validation
+- CloudFront URL generation/reachability from current legacy dataset:
+  - `trips.image_uid` non-empty rows: `113`
+  - URL checks: `113/113` returned HTTP 200.
+- Dry-run task check against local imported DB:
+  - `mix legacy.import_trip_covers --bundle-dir prod_backup/import_ready --user-map-file prod_backup/import_ready/legacy_user_mapping.dev.json --limit 5 --dry-run --continue-on-error`
+  - Result: `total=5`, `with_cover=5`, `updated=5`, `failed=0`.
+
+## 2026-05-09 (temporary import timeout override for prod proxy runs)
+
+### Goal
+Prevent legacy import failures over Fly DB proxy caused by default 15s Ecto checkout/query timeout.
+
+### Completed
+- Updated [`config/runtime.exs`](/Users/marvin/p/hamster-travel/config/runtime.exs) (prod Repo config):
+  - `timeout` now reads `LEGACY_IMPORT_DB_TIMEOUT_MS` (default `15000`)
+  - `pool_timeout` now reads `LEGACY_IMPORT_DB_POOL_TIMEOUT_MS` (default `15000`)
+- Updated [`lib/mix/tasks/legacy.import_trips.ex`](/Users/marvin/p/hamster-travel/lib/mix/tasks/legacy.import_trips.ex):
+  - before app start, task now sets defaults when unset:
+    - `LEGACY_IMPORT_DB_TIMEOUT_MS=600000`
+    - `LEGACY_IMPORT_DB_POOL_TIMEOUT_MS=600000`
+- This keeps normal prod behavior unchanged unless running the import task (or explicitly setting the env vars).
+
 ## 2026-05-09 (drop placeholder legacy accommodations)
 
 ### Goal

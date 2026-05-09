@@ -45,6 +45,7 @@ defmodule Mix.Tasks.Legacy.ImportTrips do
 
   @impl true
   def run(args) do
+    ensure_import_repo_timeouts()
     Mix.Task.run("app.start")
 
     {opts, _argv, invalid} = OptionParser.parse(args, strict: @switches)
@@ -86,5 +87,20 @@ defmodule Mix.Tasks.Legacy.ImportTrips do
       {:error, reason} ->
         Mix.raise("Legacy import failed: #{reason}")
     end
+  end
+
+  # The legacy import can execute very heavy DB operations (especially over a Fly proxy).
+  # If caller did not provide explicit values, raise query/pool timeouts to reduce
+  # disconnects caused by the default 15s checkout timeout.
+  defp ensure_import_repo_timeouts do
+    System.put_env(
+      "LEGACY_IMPORT_DB_TIMEOUT_MS",
+      System.get_env("LEGACY_IMPORT_DB_TIMEOUT_MS") || "600000"
+    )
+
+    System.put_env(
+      "LEGACY_IMPORT_DB_POOL_TIMEOUT_MS",
+      System.get_env("LEGACY_IMPORT_DB_POOL_TIMEOUT_MS") || "600000"
+    )
   end
 end

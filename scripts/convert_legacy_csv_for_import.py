@@ -35,6 +35,7 @@ GEONAMES_ID_REMAP = {
     # Map to the existing Ponta Delgada geonames id in the new app DB.
     "3372783": "6941014",
 }
+LEGACY_COVER_BASE_URL = "https://d2fetf4i8a4kn6.cloudfront.net/"
 
 
 @dataclass(frozen=True)
@@ -837,6 +838,12 @@ def main() -> None:
             {
                 "trip_ref": trip_ref,
                 "legacy_trip_id": parse_int(legacy_trip_id),
+                "legacy_image_uid": clean_text(trip.get("image_uid")) or None,
+                "legacy_cover_url": (
+                    f"{LEGACY_COVER_BASE_URL}{clean_text(trip.get('image_uid'))}"
+                    if clean_text(trip.get("image_uid"))
+                    else None
+                ),
                 "name": clean_text(trip.get("name")),
                 "status": status,
                 "dates_unknown": dates_unknown,

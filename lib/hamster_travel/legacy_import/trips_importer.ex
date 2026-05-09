@@ -34,7 +34,8 @@ defmodule HamsterTravel.LegacyImport.TripsImporter do
           user_map_file: String.t(),
           limit: non_neg_integer() | nil,
           skip_missing_cities: boolean(),
-          continue_on_error: boolean()
+          continue_on_error: boolean(),
+          purge_existing: boolean()
         ]
 
   @type import_result :: %{
@@ -53,7 +54,7 @@ defmodule HamsterTravel.LegacyImport.TripsImporter do
          {:ok, legacy_user_map} <- load_user_map(user_map_file),
          {:ok, resolved_users} <- resolve_users(legacy_user_ids, legacy_user_map),
          {:ok, city_id_by_geonames} <- preload_cities_by_geonames_id(bundles),
-         :ok <- purge_existing_trips_data() do
+         :ok <- maybe_purge_existing_trips_data(Keyword.get(opts, :purge_existing, true)) do
       do_import(
         bundles,
         resolved_users,
@@ -63,6 +64,9 @@ defmodule HamsterTravel.LegacyImport.TripsImporter do
       )
     end
   end
+
+  defp maybe_purge_existing_trips_data(false), do: :ok
+  defp maybe_purge_existing_trips_data(true), do: purge_existing_trips_data()
 
   defp fetch_required_path(opts, key) do
     case Keyword.get(opts, key) do
