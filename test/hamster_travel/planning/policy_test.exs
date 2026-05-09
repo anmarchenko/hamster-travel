@@ -96,4 +96,22 @@ defmodule HamsterTravel.Planning.PolicyTest do
 
     assert Enum.map(Repo.all(query), & &1.id) == [trip.id]
   end
+
+  test "user_drafts_scope/2 includes draft trips authored by friends" do
+    user = user_fixture()
+    friend = user_fixture()
+    outsider = user_fixture()
+    {:ok, _} = Social.add_friends(user.id, friend.id)
+
+    user = Repo.preload(user, :friendships, force: true)
+
+    friend_trip = trip_fixture(friend, %{private: true, status: Trip.draft()})
+    _outsider_trip = trip_fixture(outsider, %{private: true, status: Trip.draft()})
+
+    query =
+      from(t in Trip, where: t.status == ^Trip.draft())
+      |> Policy.user_drafts_scope(user)
+
+    assert Enum.map(Repo.all(query), & &1.id) == [friend_trip.id]
+  end
 end

@@ -206,12 +206,13 @@ defmodule HamsterTravel.PlanningTest do
           name: "b"
         })
 
-      %{id: _friend_id} = trip_fixture(%{author_id: friend.id, status: Trip.draft()})
+      %{id: friend_id} = trip_fixture(%{author_id: friend.id, status: Trip.draft()})
       %{id: _plan_id} = trip_fixture(%{author_id: user.id, status: Trip.planned()})
 
       assert [
                %Trip{id: ^first_id},
-               %Trip{id: ^second_id}
+               %Trip{id: ^second_id},
+               %Trip{id: ^friend_id}
              ] =
                Planning.list_drafts(user)
     end

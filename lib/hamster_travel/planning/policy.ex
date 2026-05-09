@@ -57,9 +57,12 @@ defmodule HamsterTravel.Planning.Policy do
   end
 
   def user_drafts_scope(query, %User{} = user) do
+    friends_circle = Social.extract_policy_user_ids(user)
     participant_trip_ids = participant_trip_ids_subquery(user.id)
 
-    from(t in query, where: t.author_id == ^user.id or t.id in subquery(participant_trip_ids))
+    from(t in query,
+      where: t.author_id in ^friends_circle or t.id in subquery(participant_trip_ids)
+    )
   end
 
   def participant?(%Trip{author_id: author_id}, %User{id: user_id}) when author_id == user_id do
