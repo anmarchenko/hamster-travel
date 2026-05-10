@@ -43,8 +43,25 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "a.pc-tab__underline--is-active", "Transfers and hotels")
 
       # Verify that dates are displayed
+      assert html =~ "12.06 - 14.06.2023"
       assert html =~ Cldr.date_with_weekday(trip.start_date)
       assert html =~ Cldr.date_with_weekday(trip.end_date)
+    end
+
+    test "renders full years in header when trip dates cross year", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      trip =
+        trip_fixture(%{
+          author_id: user.id,
+          start_date: ~D[2025-12-31],
+          end_date: ~D[2026-01-02]
+        })
+
+      {:ok, _view, html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      assert html =~ "31.12.2025 - 02.01.2026"
     end
 
     test "shows cover upload dropzone for editors", %{conn: conn} do

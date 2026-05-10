@@ -49,7 +49,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           <.header>
             {@trip.name}
             <:subtitle>
-              {Cldr.year_with_month(@trip.start_date)}
+              {Cldr.date_range(@trip.start_date, @trip.end_date)}
             </:subtitle>
           </.header>
           <.shorts trip={@trip} budget={@budget} display_currency={@display_currency} />

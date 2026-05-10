@@ -24,6 +24,21 @@ defmodule HamsterTravelWeb.Cldr do
     HamsterTravelWeb.Cldr.Date.to_string!(date, format: "dd.MM")
   end
 
+  def date_range(nil, _end_date), do: ""
+  def date_range(_start_date, nil), do: ""
+
+  def date_range(%Date{} = date, %Date{} = date) do
+    date_with_year(date)
+  end
+
+  def date_range(%Date{year: year} = start_date, %Date{year: year} = end_date) do
+    "#{date_without_year(start_date)} - #{date_with_year(end_date)}"
+  end
+
+  def date_range(%Date{} = start_date, %Date{} = end_date) do
+    "#{date_with_year(start_date)} - #{date_with_year(end_date)}"
+  end
+
   def year_with_month(nil), do: ""
 
   def year_with_month(date) do
@@ -112,5 +127,9 @@ defmodule HamsterTravelWeb.Cldr do
       end
 
     {display_money, original_money, is_converted && !conversion_error}
+  end
+
+  defp date_with_year(date) do
+    HamsterTravelWeb.Cldr.Date.to_string!(date, format: "dd.MM.yyyy")
   end
 end
