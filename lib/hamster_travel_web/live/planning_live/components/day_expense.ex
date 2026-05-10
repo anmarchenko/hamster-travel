@@ -35,16 +35,16 @@ defmodule HamsterTravelWeb.Planning.DayExpense do
       class="draggable-day-expense flex flex-col gap-y-1 py-1 sm:ml-[-1.5rem] sm:pl-[1.5rem] cursor-grab active:cursor-grabbing"
       data-day-expense-id={@day_expense.id}
     >
-      <.inline class="2xl:text-lg">
-        <span>{@day_expense.name}</span>
+      <.inline class="w-full 2xl:text-lg sm:w-auto">
+        <span class="min-w-0 flex-1 sm:flex-none">{@day_expense.name}</span>
         <.money_display
           money={@day_expense.expense.price}
           display_currency={@display_currency}
-          class="font-normal"
+          class="ml-auto text-right font-normal tabular-nums sm:ml-0 sm:text-left"
         />
         <.edit_delete_buttons
           :if={@can_edit}
-          class="ml-1"
+          class="ml-1 shrink-0"
           edit_target={@myself}
           delete_target={@myself}
           delete_confirm={

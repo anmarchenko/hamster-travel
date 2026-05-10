@@ -36,9 +36,9 @@ defmodule HamsterTravelWeb.Planning.Activity do
       class="draggable-activity flex flex-col gap-y-1 py-1 sm:ml-[-1.5rem] sm:pl-[1.5rem] sm:hover:bg-zinc-100 sm:dark:hover:bg-zinc-700 cursor-grab active:cursor-grabbing"
       data-activity-id={@activity.id}
     >
-      <.inline class={"2xl:text-lg #{activity_font(@activity.priority)}"}>
+      <.inline class={"w-full 2xl:text-lg sm:w-auto #{activity_font(@activity.priority)}"}>
         <span
-          class="cursor-pointer"
+          class="min-w-0 flex-1 cursor-pointer sm:flex-none"
           phx-click={
             JS.toggle(
               to: "#activity-content-#{@activity.id}",
@@ -53,11 +53,11 @@ defmodule HamsterTravelWeb.Planning.Activity do
         <.money_display
           money={@activity.expense.price}
           display_currency={@display_currency}
-          class="font-normal"
+          class="ml-auto text-right font-normal tabular-nums sm:ml-0 sm:text-left"
         />
         <.edit_delete_buttons
           :if={@can_edit}
-          class="ml-1"
+          class="ml-1 shrink-0"
           edit_target={@myself}
           delete_target={@myself}
           delete_confirm={
