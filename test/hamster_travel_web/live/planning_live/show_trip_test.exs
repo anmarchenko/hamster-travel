@@ -154,6 +154,77 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       refute has_element?(view, "[phx-click='delete_trip']")
     end
 
+    test "does not render trip items as draggable for non-participants", %{conn: conn} do
+      author = user_fixture()
+      other_user = user_fixture()
+      conn = log_in_user(conn, other_user)
+
+      {:ok, trip} =
+        Planning.create_trip(
+          %{
+            name: "Readonly shared trip",
+            dates_unknown: false,
+            start_date: ~D[2023-06-12],
+            end_date: ~D[2023-06-14],
+            currency: "EUR",
+            status: "1_planned",
+            private: false,
+            people_count: 2
+          },
+          author
+        )
+
+      geonames_fixture()
+      berlin = Geo.find_city_by_geonames_id("2950159")
+      hamburg = Geo.find_city_by_geonames_id("2911298")
+
+      {:ok, transfer} =
+        Planning.create_transfer(trip, %{
+          transport_mode: "train",
+          departure_city_id: berlin.id,
+          arrival_city_id: hamburg.id,
+          departure_time: "08:00",
+          arrival_time: "12:00",
+          day_index: 0,
+          expense: %{price: Money.new(:EUR, 8900), name: "Train ticket", trip_id: trip.id}
+        })
+
+      {:ok, _activity} =
+        Planning.create_activity(trip, %{
+          name: "Museum",
+          day_index: 0,
+          priority: 2,
+          expense: %{price: Money.new(:EUR, 2000), name: "Museum ticket", trip_id: trip.id}
+        })
+
+      {:ok, _day_expense} =
+        Planning.create_day_expense(trip, %{
+          name: "Coffee",
+          day_index: 0,
+          expense: %{price: Money.new(:EUR, 500), name: "Coffee", trip_id: trip.id}
+        })
+
+      {:ok, itinerary_view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      assert has_element?(itinerary_view, "#trip-itinerary[data-can-edit='false']")
+      refute has_element?(itinerary_view, ".draggable-transfer")
+
+      html =
+        render_hook(itinerary_view, "move_transfer", %{
+          "transfer_id" => to_string(transfer.id),
+          "new_day_index" => 1
+        })
+
+      assert html =~ "Only trip participants can edit this trip."
+      refute html =~ "Failed to move transfer"
+
+      {:ok, activities_view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      assert has_element?(activities_view, "#activities-#{trip.id}[data-can-edit='false']")
+      refute has_element?(activities_view, ".draggable-activity")
+      refute has_element?(activities_view, ".draggable-day-expense")
+    end
+
     test "renders trip page with empty trip and unknown dates", %{conn: conn} do
       # Arrange
       # Create a user and log them in
@@ -1128,6 +1199,9 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
 
       # Simulate drag and drop via hook event
+      assert has_element?(view, "#activities-#{trip.id}[data-can-edit='true']")
+      assert has_element?(view, ".draggable-activity")
+
       render_hook(view, "move_activity", %{
         "activity_id" => to_string(activity.id),
         "new_day_index" => 1,

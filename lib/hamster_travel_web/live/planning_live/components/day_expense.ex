@@ -32,7 +32,10 @@ defmodule HamsterTravelWeb.Planning.DayExpense do
   def render(%{edit: false} = assigns) do
     ~H"""
     <div
-      class="draggable-day-expense flex flex-col gap-y-1 py-1 sm:ml-[-1.5rem] sm:pl-[1.5rem] cursor-grab active:cursor-grabbing"
+      class={[
+        "flex flex-col gap-y-1 py-1 sm:ml-[-1.5rem] sm:pl-[1.5rem]",
+        @can_edit && "draggable-day-expense cursor-grab active:cursor-grabbing"
+      ]}
       data-day-expense-id={@day_expense.id}
     >
       <.inline class="w-full 2xl:text-lg sm:w-auto">

@@ -31,7 +31,11 @@ defmodule HamsterTravelWeb.Planning.Note do
   def render(%{edit: false} = assigns) do
     ~H"""
     <div
-      class="draggable-note flex flex-col gap-y-2 py-1 sm:ml-[-1.5rem] sm:pl-[1.5rem] sm:hover:bg-zinc-100 sm:dark:hover:bg-zinc-700 cursor-grab active:cursor-grabbing"
+      class={[
+        "flex flex-col gap-y-2 py-1 sm:ml-[-1.5rem] sm:pl-[1.5rem]",
+        @can_edit &&
+          "draggable-note sm:hover:bg-zinc-100 sm:dark:hover:bg-zinc-700 cursor-grab active:cursor-grabbing"
+      ]}
       data-note-id={@note.id}
     >
       <.inline class="2xl:text-lg">

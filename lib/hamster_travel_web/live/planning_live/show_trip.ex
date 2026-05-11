@@ -36,6 +36,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   }
 
   @tabs ["itinerary", "activities", "notes"]
+  @drag_drop_edit_events ~w(move_transfer move_activity reorder_activity move_note reorder_note move_day_expense reorder_day_expense)
   @cover_upload_max_mb 8
   @cover_upload_max_file_size @cover_upload_max_mb * 1_000_000
   @cover_upload_accept ~w(.jpg .jpeg .png .webp)
@@ -680,6 +681,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   @impl true
+  def handle_event(event, _params, %{assigns: %{can_edit: false}} = socket)
+      when event in @drag_drop_edit_events do
+    {:noreply, unauthorized_edit(socket)}
+  end
+
+  @impl true
   def handle_event(
         "move_transfer",
         %{"transfer_id" => transfer_id, "new_day_index" => new_day_index},
@@ -1003,7 +1010,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   def tab_notes(assigns) do
     ~H"""
-    <div id={"notes-#{@trip.id}"} phx-hook="ActivityDragDrop">
+    <div
+      id={"notes-#{@trip.id}"}
+      phx-hook="ActivityDragDrop"
+      data-can-edit={to_string(@can_edit)}
+    >
       <.toggle
         :if={Enum.any?(@notes_outside)}
         label={gettext("Some items are scheduled outside of the trip duration")}
@@ -1086,7 +1097,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   def tab_itinerary(assigns) do
     ~H"""
-    <div phx-hook="TransferDragDrop" id="trip-itinerary">
+    <div phx-hook="TransferDragDrop" id="trip-itinerary" data-can-edit={to_string(@can_edit)}>
       <.budget_display
         budget={@budget}
         display_currency={@display_currency}
@@ -1286,7 +1297,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   def tab_activity(assigns) do
     ~H"""
-    <div id={"activities-#{@trip.id}"} phx-hook="ActivityDragDrop">
+    <div
+      id={"activities-#{@trip.id}"}
+      phx-hook="ActivityDragDrop"
+      data-can-edit={to_string(@can_edit)}
+    >
       <.budget_display
         budget={@budget}
         display_currency={@display_currency}

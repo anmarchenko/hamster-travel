@@ -2,6 +2,13 @@ import Sortable from "sortablejs";
 
 let TransferDragDrop = {
   mounted() {
+    if (
+      this.el.dataset.canEdit === undefined ||
+      this.el.dataset.canEdit === "false"
+    ) {
+      return;
+    }
+
     // Get all transfer drop zones that can accept drops
     const transferDropZones = this.el.querySelectorAll(
       "[data-transfer-drop-zone]",

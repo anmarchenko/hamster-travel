@@ -2,6 +2,13 @@ import Sortable from "sortablejs";
 
 let ActivityDragDrop = {
   mounted() {
+    if (
+      this.el.dataset.canEdit === undefined ||
+      this.el.dataset.canEdit === "false"
+    ) {
+      return;
+    }
+
     const setupSortable = ({
       selector,
       draggable,
@@ -14,19 +21,30 @@ let ActivityDragDrop = {
       const dropZones = this.el.querySelectorAll(selector);
 
       dropZones.forEach((zone) => {
-        const isOutsideZone = zone.dataset.targetDay === "outside";
+        const canDrop = (to, dragEl) => {
+          return (
+            to.dataset.targetDay !== "outside" &&
+            to.matches(selector) &&
+            dragEl.matches(draggable)
+          );
+        };
 
         new Sortable(zone, {
           group: {
             name: groupName,
-            put: !isOutsideZone,
+            put: (to, _from, dragEl) => canDrop(to.el || to, dragEl),
           },
           animation: 150,
           ghostClass: "hamster-drag-ghost",
           chosenClass: "hamster-drag-chosen",
           dragClass: "hamster-drag-item",
           draggable: draggable,
+          onMove: (evt) => canDrop(evt.to, evt.dragged),
           onEnd: (evt) => {
+            if (!canDrop(evt.to, evt.item) && evt.to !== evt.from) {
+              return;
+            }
+
             const entityId = evt.item.dataset[idKey];
             const newDayIndex = evt.to.dataset.targetDay;
             const oldDayIndex = evt.from.dataset.targetDay;

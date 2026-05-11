@@ -33,7 +33,11 @@ defmodule HamsterTravelWeb.Planning.Activity do
   def render(%{edit: false} = assigns) do
     ~H"""
     <div
-      class="draggable-activity flex flex-col gap-y-1 py-1 sm:ml-[-1.5rem] sm:pl-[1.5rem] sm:hover:bg-zinc-100 sm:dark:hover:bg-zinc-700 cursor-grab active:cursor-grabbing"
+      class={[
+        "flex flex-col gap-y-1 py-1 sm:ml-[-1.5rem] sm:pl-[1.5rem]",
+        @can_edit &&
+          "draggable-activity sm:hover:bg-zinc-100 sm:dark:hover:bg-zinc-700 cursor-grab active:cursor-grabbing"
+      ]}
       data-activity-id={@activity.id}
     >
       <.inline class={"w-full 2xl:text-lg sm:w-auto #{activity_font(@activity.priority)}"}>
