@@ -123,5 +123,23 @@ defmodule HamsterTravel.GeoTest do
 
       assert Geo.city_text(city) == "Paris, France"
     end
+
+    test "city_text/1 falls back to country name in russian locale" do
+      Gettext.put_locale(HamsterTravelWeb.Gettext, "ru")
+
+      on_exit(fn ->
+        Gettext.put_locale(HamsterTravelWeb.Gettext, "en")
+      end)
+
+      city = %City{
+        name: "Paris",
+        name_ru: "Париж",
+        region_name: "Ile-de-France",
+        region_name_ru: "Иль-де-Франс",
+        country: %Country{name: "France", name_ru: nil}
+      }
+
+      assert Geo.city_text(city) == "Париж, Иль-де-Франс, France"
+    end
   end
 end

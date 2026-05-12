@@ -142,7 +142,7 @@ defmodule HamsterTravel.Geo do
         [
           city.name_ru || city.name,
           city.region_name_ru || city.region_name,
-          city.country.name_ru
+          country_name(city.country, "ru")
         ]
         |> join_location_parts()
 
