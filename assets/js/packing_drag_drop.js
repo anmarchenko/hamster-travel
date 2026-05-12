@@ -1,4 +1,5 @@
 import Sortable from "sortablejs";
+import { sortableTouchDragOptions } from "./sortable_options";
 
 let PackingDragDrop = {
   mounted() {
@@ -17,6 +18,7 @@ let PackingDragDrop = {
         chosenClass: "hamster-drag-chosen",
         dragClass: "hamster-drag-item",
         draggable: ".draggable-item",
+        ...sortableTouchDragOptions,
         onEnd: (evt) => {
           const itemId = evt.item.dataset.itemId;
           const newListId = evt.to.dataset.targetListId;
@@ -54,6 +56,7 @@ let PackingDragDrop = {
       dragClass: "hamster-drag-list",
       draggable: ".draggable-list",
       handle: ".draggable-list-handle", // Only allow dragging from the header
+      ...sortableTouchDragOptions,
       onEnd: (evt) => {
         const listId = evt.item.dataset.listId;
         const newPosition = evt.newIndex; // 0-based position for backend

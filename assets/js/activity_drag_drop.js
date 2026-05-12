@@ -1,4 +1,5 @@
 import Sortable from "sortablejs";
+import { sortableTouchDragOptions } from "./sortable_options";
 
 let ActivityDragDrop = {
   mounted() {
@@ -39,6 +40,7 @@ let ActivityDragDrop = {
           chosenClass: "hamster-drag-chosen",
           dragClass: "hamster-drag-item",
           draggable: draggable,
+          ...sortableTouchDragOptions,
           onMove: (evt) => canDrop(evt.to, evt.dragged),
           onEnd: (evt) => {
             if (!canDrop(evt.to, evt.item) && evt.to !== evt.from) {

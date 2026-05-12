@@ -1,4 +1,5 @@
 import Sortable from "sortablejs";
+import { sortableTouchDragOptions } from "./sortable_options";
 
 let TransferDragDrop = {
   mounted() {
@@ -16,11 +17,11 @@ let TransferDragDrop = {
 
     transferDropZones.forEach((zone) => {
       const isOutsideZone = zone.dataset.targetDay === "outside";
-      
+
       new Sortable(zone, {
         group: {
           name: "transfers",
-          put: !isOutsideZone // Prevent dropping into outside zone
+          put: !isOutsideZone, // Prevent dropping into outside zone
         },
         sort: false, // Disable sorting within the same zone
         animation: 150,
@@ -28,6 +29,7 @@ let TransferDragDrop = {
         chosenClass: "hamster-drag-chosen",
         dragClass: "hamster-drag-item",
         draggable: ".draggable-transfer",
+        ...sortableTouchDragOptions,
         onEnd: (evt) => {
           const transferId = evt.item.dataset.transferId;
           const newDayIndex = evt.to.dataset.targetDay;
