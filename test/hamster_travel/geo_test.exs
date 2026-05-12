@@ -113,22 +113,13 @@ defmodule HamsterTravel.GeoTest do
     end
 
     test "city_text/1 omits the region segment when the city has no matching region" do
-      country = country_fixture()
-
-      city =
-        %City{}
-        |> City.changeset(%{
-          name: "Paris",
-          name_ru: "Париж",
-          geonames_id: "2988507-test-no-region",
-          country_code: country.iso,
-          region_code: "MISSING",
-          lat: 48.8566,
-          lon: 2.3522,
-          population: 2_100_000
-        })
-        |> Repo.insert!()
-        |> then(&Geo.get_city(&1.id))
+      city = %City{
+        name: "Paris",
+        name_ru: "Париж",
+        region_name: nil,
+        region_name_ru: nil,
+        country: %Country{name: "France", name_ru: "Франция"}
+      }
 
       assert Geo.city_text(city) == "Paris, France"
     end
