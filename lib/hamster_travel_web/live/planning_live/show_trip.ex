@@ -44,7 +44,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   @impl true
   def render(assigns) do
     ~H"""
-    <.container full class="mt-*! mt-4">
+    <.container full nomargin class="px-6 pt-2 pb-2 sm:mt-4 sm:p-6">
       <div class="flex flex-col-reverse sm:flex-row">
         <div class="flex-1 flex flex-col gap-y-4">
           <.header>
@@ -130,7 +130,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
     <.container
       full
-      class="mt-*! p-*! py-4 sm:py-6 px-6 sm:px-10 mb-10 mt-4 bg-white dark:bg-zinc-800 rounded-md"
+      class="mt-*! p-*! py-3 sm:py-6 px-6 sm:px-10 mb-10 mt-0 sm:mt-4 bg-white dark:bg-zinc-800 rounded-md"
     >
       <.planning_tabs trip={@trip} active_tab={@active_tab} />
       <.render_tab
@@ -1101,7 +1101,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       <.budget_display
         budget={@budget}
         display_currency={@display_currency}
-        class="mt-4 sm:mt-8 text-xl"
+        class="mt-0 sm:mt-8 text-xl"
       />
 
       <.toggle
@@ -1190,7 +1190,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         <tbody>
           <tr
             :for={i <- 0..(@trip.duration - 1)}
-            class="flex flex-col gap-y-1 mt-8 sm:table-row sm:gap-y-0 sm:mt-0"
+            class="flex flex-col gap-y-1 mt-4 sm:table-row sm:gap-y-0 sm:mt-0"
           >
             <td class="text-xl font-bold sm:font-normal sm:text-base sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
               <div class="flex flex-col items-start gap-y-2">
@@ -1208,7 +1208,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             </td>
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
               <div class="flex flex-col gap-y-1">
-                <.section_header icon="hero-map-pin" label={gettext("Places")} class="sm:hidden" />
+                <.section_header
+                  :if={Enum.any?(Planning.items_for_day(i, @destinations))}
+                  icon="hero-map-pin"
+                  label={gettext("Places")}
+                  class="mb-2 sm:hidden"
+                />
                 <.destinations_list
                   trip={@trip}
                   destinations={Planning.items_for_day(i, @destinations)}
@@ -1227,9 +1232,10 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             </td>
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
               <.section_header
+                :if={Enum.any?(Planning.transfers_for_day(i, @transfers))}
                 icon="hero-arrows-right-left"
                 label={gettext("Transfers")}
-                class="sm:hidden"
+                class="mb-2 sm:hidden"
               />
               <div
                 class="transfers-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-1"
@@ -1257,7 +1263,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             </td>
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
               <div class="flex flex-col gap-y-1">
-                <.section_header icon="hero-home" label={gettext("Hotel")} class="sm:hidden" />
+                <.section_header
+                  :if={Enum.any?(Planning.items_for_day(i, @accommodations))}
+                  icon="hero-home"
+                  label={gettext("Hotel")}
+                  class="mb-2 sm:hidden"
+                />
                 <.accommodations_list
                   trip={@trip}
                   accommodations={Planning.items_for_day(i, @accommodations)}
@@ -1418,7 +1429,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           <div class="text-xl font-semibold">
             <.day_label day_index={i} start_date={@trip.start_date} />
           </div>
-          <.section_header icon="hero-map-pin" label={gettext("Places")} />
+          <.section_header
+            :if={Enum.any?(Planning.items_for_day(i, @destinations))}
+            icon="hero-map-pin"
+            label={gettext("Places")}
+          />
           <div class="flex flex-row gap-x-4">
             <.destinations_list
               trip={@trip}
@@ -1439,7 +1454,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           </div>
 
           <div class="flex flex-col gap-y-2 min-h-8">
-            <.section_header icon="hero-banknotes" label={gettext("Expenses")} />
+            <.section_header
+              :if={Enum.any?(Planning.day_expenses_for_day(i, @day_expenses))}
+              icon="hero-banknotes"
+              label={gettext("Expenses")}
+            />
             <div class="flex flex-col gap-y-1" data-day-expense-drop-zone data-target-day={i}>
               <.day_expenses_list
                 day_expenses={Planning.day_expenses_for_day(i, @day_expenses)}
@@ -1457,7 +1476,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                 can_edit={@can_edit}
               />
             </div>
-            <.section_header icon="hero-ticket" label={gettext("Activities")} />
+            <.section_header
+              :if={Enum.any?(Planning.activities_for_day(i, @activities))}
+              icon="hero-ticket"
+              label={gettext("Activities")}
+            />
             <div class="flex flex-col gap-y-1" data-activity-drop-zone data-target-day={i}>
               <.activities_list
                 activities={Planning.activities_for_day(i, @activities)}
@@ -1475,7 +1498,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                 can_edit={@can_edit}
               />
             </div>
-            <.section_header icon="hero-document-text" label={gettext("Notes")} />
+            <.section_header
+              :if={Enum.any?(Planning.notes_for_day(i, @notes))}
+              icon="hero-document-text"
+              label={gettext("Notes")}
+            />
             <div class="flex flex-col gap-y-1" data-note-drop-zone data-target-day={i}>
               <.notes_list
                 notes={Planning.notes_for_day(i, @notes)}

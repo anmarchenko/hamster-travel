@@ -64,6 +64,42 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert html =~ "31.12.2025 - 02.01.2026"
     end
 
+    test "hides empty mobile itinerary section headers but keeps add links", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      {:ok, view, html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      section_headers =
+        html
+        |> Floki.parse_document!()
+        |> Floki.find("#trip-itinerary .text-xs.font-semibold.uppercase")
+
+      assert section_headers == []
+      assert has_element?(view, "#trip-itinerary a", "Add city")
+      assert has_element?(view, "#trip-itinerary a", "Add transfer")
+      assert has_element?(view, "#trip-itinerary a", "Add accommodation")
+    end
+
+    test "shows mobile itinerary section header when section has items", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      transfer_fixture(%{trip_id: trip.id, day_index: 0, vessel_number: "ICE 123"})
+
+      {:ok, _view, html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      header_text =
+        html
+        |> Floki.parse_document!()
+        |> Floki.find("#trip-itinerary .text-xs.font-semibold.uppercase")
+        |> Floki.text(sep: " ")
+
+      assert header_text =~ "Transfers"
+    end
+
     test "shows cover upload dropzone for editors", %{conn: conn} do
       user = user_fixture()
       conn = log_in_user(conn, user)
@@ -330,6 +366,47 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       # Assert
       assert has_element?(view, "#activities-#{trip.id}")
+    end
+
+    test "hides empty activities tab section headers but keeps add links", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      {:ok, view, html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      section_headers =
+        html
+        |> Floki.parse_document!()
+        |> Floki.find("#activities-#{trip.id} .text-xs.font-semibold.uppercase")
+        |> Enum.map(&(Floki.text(&1) |> String.trim()))
+
+      refute "Places" in section_headers
+      refute "Expenses" in section_headers
+      refute "Activities" in section_headers
+      refute "Notes" in section_headers
+      assert has_element?(view, "#activities-#{trip.id} a", "Add city")
+      assert has_element?(view, "#activities-#{trip.id} a", "Add expense")
+      assert has_element?(view, "#activities-#{trip.id} a", "Add activity")
+      assert has_element?(view, "#activities-#{trip.id} a", "Add note")
+    end
+
+    test "shows activities tab section header when section has items", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      activity_fixture(%{trip_id: trip.id, day_index: 0, name: "Museum"})
+
+      {:ok, _view, html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      header_text =
+        html
+        |> Floki.parse_document!()
+        |> Floki.find("#activities-#{trip.id} .text-xs.font-semibold.uppercase")
+        |> Floki.text(sep: " ")
+
+      assert header_text =~ "Activities"
     end
 
     test "renders notes tab when selected", %{conn: conn} do

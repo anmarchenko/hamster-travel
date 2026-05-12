@@ -38,7 +38,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
     ~H"""
     <div
       class={[
-        "flex flex-col gap-y-1 rounded p-2 transition-colors duration-200",
+        "flex flex-col gap-y-1 rounded p-0 transition-colors duration-200 sm:p-2",
         @can_edit &&
           "draggable-transfer cursor-grab hover:bg-gray-50 dark:hover:bg-gray-800 active:cursor-grabbing"
       ]}

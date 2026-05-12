@@ -33,7 +33,7 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
     assigns = assign(assigns, :price, Accommodation.price_per_night(assigns.accommodation))
 
     ~H"""
-    <div class="flex flex-col gap-y-2 p-2">
+    <div class="flex flex-col gap-y-2 p-0 sm:p-2">
       <div class="flex items-center justify-between gap-3">
         <div class="min-w-0 flex-1">
           <h2 class="text-md font-bold leading-tight wrap-break-word">
