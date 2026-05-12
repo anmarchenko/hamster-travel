@@ -139,10 +139,16 @@ defmodule HamsterTravel.Geo do
   def city_text(city) do
     case Gettext.get_locale(HamsterTravelWeb.Gettext) do
       "ru" ->
-        "#{city.name_ru || city.name}, #{city.region_name_ru || city.region_name}, #{city.country.name_ru}"
+        [
+          city.name_ru || city.name,
+          city.region_name_ru || city.region_name,
+          country_name(city.country, "ru")
+        ]
+        |> join_location_parts()
 
       _ ->
-        "#{city.name}, #{city.region_name}, #{city.country.name}"
+        [city.name, city.region_name, city.country.name]
+        |> join_location_parts()
     end
   end
 
@@ -180,5 +186,11 @@ defmodule HamsterTravel.Geo do
       left_join: r in Region,
       on: c.region_code == r.region_code and c.country_code == r.country_code,
       select: %{c | region_name: r.name, region_name_ru: r.name_ru}
+  end
+
+  defp join_location_parts(parts) do
+    parts
+    |> Enum.reject(&(&1 in [nil, ""]))
+    |> Enum.join(", ")
   end
 end

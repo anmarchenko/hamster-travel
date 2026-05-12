@@ -111,5 +111,35 @@ defmodule HamsterTravel.GeoTest do
       assert Geo.city_name(%City{name: "Paris", name_ru: nil}, "ru") == "Paris"
       assert Geo.city_name(%City{name: "Paris", name_ru: "Париж"}, "en") == "Paris"
     end
+
+    test "city_text/1 omits the region segment when the city has no matching region" do
+      city = %City{
+        name: "Paris",
+        name_ru: "Париж",
+        region_name: nil,
+        region_name_ru: nil,
+        country: %Country{name: "France", name_ru: "Франция"}
+      }
+
+      assert Geo.city_text(city) == "Paris, France"
+    end
+
+    test "city_text/1 falls back to country name in russian locale" do
+      Gettext.put_locale(HamsterTravelWeb.Gettext, "ru")
+
+      on_exit(fn ->
+        Gettext.put_locale(HamsterTravelWeb.Gettext, "en")
+      end)
+
+      city = %City{
+        name: "Paris",
+        name_ru: "Париж",
+        region_name: "Ile-de-France",
+        region_name_ru: "Иль-де-Франс",
+        country: %Country{name: "France", name_ru: nil}
+      }
+
+      assert Geo.city_text(city) == "Париж, Иль-де-Франс, France"
+    end
   end
 end
