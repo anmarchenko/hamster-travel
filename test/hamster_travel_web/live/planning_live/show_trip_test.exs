@@ -330,6 +330,10 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       # Verify that destination is present
       assert html =~ destination.city.name
+
+      {:ok, _view, activities_html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      assert activities_html =~ "flex flex-col gap-y-1 sm:flex-row sm:gap-x-4 sm:gap-y-0"
     end
 
     test "shows destination form when clicking add destination link", %{conn: conn} do

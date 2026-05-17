@@ -1434,7 +1434,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             icon="hero-map-pin"
             label={gettext("Places")}
           />
-          <div class="flex flex-row gap-x-4">
+          <div class="flex flex-col gap-y-1 sm:flex-row sm:gap-x-4 sm:gap-y-0">
             <.destinations_list
               trip={@trip}
               destinations={Planning.items_for_day(i, @destinations)}
