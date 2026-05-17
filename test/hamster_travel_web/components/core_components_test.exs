@@ -5,6 +5,44 @@ defmodule HamsterTravelWeb.CoreComponentsTest do
 
   alias HamsterTravelWeb.CoreComponents
 
+  describe "money_input/1" do
+    test "uses a decimal mobile keyboard for the amount field" do
+      form = %Phoenix.HTML.Form{
+        source: %{},
+        impl: Phoenix.HTML.FormData.Atom,
+        id: "expense",
+        name: "expense",
+        data: %{},
+        action: nil,
+        hidden: [],
+        params: %{},
+        errors: [],
+        options: [],
+        index: nil
+      }
+
+      field = %Phoenix.HTML.FormField{
+        id: "expense_price",
+        name: "expense[price]",
+        errors: [],
+        field: :price,
+        form: form,
+        value: %{"amount" => "12.34", "currency" => "EUR"}
+      }
+
+      html =
+        render_component(&CoreComponents.money_input/1,
+          id: "expense-price",
+          field: field,
+          label: "Price"
+        )
+
+      assert html =~ ~s|id="expense-price_amount"|
+      assert html =~ ~s|inputmode="decimal"|
+      refute html =~ ~s|inputmode="numeric"|
+    end
+  end
+
   describe "formatted_text/1 sanitization" do
     test "strips unsafe tags and attributes" do
       input =

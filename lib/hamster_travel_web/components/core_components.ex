@@ -798,7 +798,7 @@ defmodule HamsterTravelWeb.CoreComponents do
             name={"#{@name}[amount]"}
             id={"#{@id}_amount"}
             value={@value[:amount]}
-            inputmode="numeric"
+            inputmode="decimal"
             placeholder={@placeholder}
             class="rounded-r-none border-r-0"
             wrapper_class="mb-0"
