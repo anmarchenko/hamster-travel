@@ -946,6 +946,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       trip={@trip}
       notes={@trip.notes}
       notes_outside={notes_outside(@trip)}
+      budget={@budget}
+      display_currency={@display_currency}
       can_edit={@can_edit}
     />
     """
@@ -1006,6 +1008,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:trip, Trip, required: true)
   attr(:notes, :list, required: true)
   attr(:notes_outside, :list, required: true)
+  attr(:budget, Money, required: true)
+  attr(:display_currency, :string, required: true)
   attr(:can_edit, :boolean, required: true)
 
   def tab_notes(assigns) do
@@ -1015,6 +1019,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       phx-hook="ActivityDragDrop"
       data-can-edit={to_string(@can_edit)}
     >
+      <.tab_budget budget={@budget} display_currency={@display_currency} />
+
       <.toggle
         :if={Enum.any?(@notes_outside)}
         label={gettext("Some items are scheduled outside of the trip duration")}
@@ -1057,9 +1063,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         </div>
 
         <div :for={i <- 0..(@trip.duration - 1)} class="flex flex-col gap-y-2">
-          <div class="text-xl font-semibold">
-            <.day_label day_index={i} start_date={@trip.start_date} />
-          </div>
+          <.day_heading day_index={i} start_date={@trip.start_date} />
           <div class="flex flex-col gap-y-1" data-note-drop-zone data-target-day={i}>
             <.notes_list
               notes={Planning.notes_for_day(i, @notes)}
@@ -1098,11 +1102,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   def tab_itinerary(assigns) do
     ~H"""
     <div phx-hook="TransferDragDrop" id="trip-itinerary" data-can-edit={to_string(@can_edit)}>
-      <.budget_display
-        budget={@budget}
-        display_currency={@display_currency}
-        class="mt-0 sm:mt-8 text-xl"
-      />
+      <.tab_budget budget={@budget} display_currency={@display_currency} />
 
       <.toggle
         :if={
@@ -1192,9 +1192,13 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             :for={i <- 0..(@trip.duration - 1)}
             class="flex flex-col gap-y-1 mt-4 sm:table-row sm:gap-y-0 sm:mt-0"
           >
-            <td class="text-xl font-bold sm:font-normal sm:text-base sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
+            <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
               <div class="flex flex-col items-start gap-y-2">
-                <.day_label day_index={i} start_date={@trip.start_date} />
+                <.day_heading
+                  day_index={i}
+                  start_date={@trip.start_date}
+                  class="sm:text-base sm:font-normal"
+                />
                 <button
                   :if={@can_edit && @trip.duration > 1}
                   id={"open-reorder-days-#{i}"}
@@ -1313,11 +1317,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       phx-hook="ActivityDragDrop"
       data-can-edit={to_string(@can_edit)}
     >
-      <.budget_display
-        budget={@budget}
-        display_currency={@display_currency}
-        class="mt-4 sm:mt-8 text-xl"
-      />
+      <.tab_budget budget={@budget} display_currency={@display_currency} />
 
       <.toggle
         :if={
@@ -1426,9 +1426,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
       <div class="flex flex-col gap-y-8 mt-8">
         <div :for={i <- 0..(@trip.duration - 1)} class="flex flex-col gap-y-2">
-          <div class="text-xl font-semibold">
-            <.day_label day_index={i} start_date={@trip.start_date} />
-          </div>
+          <.day_heading day_index={i} start_date={@trip.start_date} />
           <.section_header
             :if={Enum.any?(Planning.items_for_day(i, @destinations))}
             icon="hero-map-pin"
@@ -1543,6 +1541,36 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       day_index={@day_index}
       can_edit={@can_edit}
     />
+    """
+  end
+
+  attr(:budget, Money, required: true)
+  attr(:display_currency, :string, required: true)
+
+  def tab_budget(assigns) do
+    ~H"""
+    <.budget_display
+      budget={@budget}
+      display_currency={@display_currency}
+      class="mt-0 sm:mt-8 text-xl"
+    />
+    """
+  end
+
+  attr(:start_date, Date, default: nil)
+  attr(:day_index, :integer, required: true)
+  attr(:class, :string, default: nil)
+
+  def day_heading(assigns) do
+    ~H"""
+    <div class={
+      CoreComponents.build_class([
+        "text-xl font-semibold text-zinc-900 dark:text-zinc-100",
+        @class
+      ])
+    }>
+      <.day_label day_index={@day_index} start_date={@start_date} />
+    </div>
     """
   end
 
