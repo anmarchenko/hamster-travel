@@ -445,12 +445,12 @@ defmodule HamsterTravelWeb.CoreComponents do
       assign(assigns, :delete_target, assigns.delete_target || assigns.edit_target)
 
     ~H"""
-    <div class={build_class(["flex items-center gap-0 shrink-0", @class])}>
+    <div class={build_class(["flex items-center gap-1 shrink-0", @class])}>
       <.icon_button
         size="xs"
         phx-click={@edit_event}
         phx-target={@edit_target}
-        class="p-0 min-h-0 h-auto bg-transparent hover:bg-transparent text-slate-500 dark:text-slate-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+        class="!h-5 !w-5 !p-0 min-h-0 bg-transparent hover:bg-transparent text-slate-500 dark:text-slate-400 hover:text-zinc-900 dark:hover:text-zinc-100"
       >
         <.icon name="hero-pencil" class="w-4 h-4" />
       </.icon_button>
@@ -460,7 +460,7 @@ defmodule HamsterTravelWeb.CoreComponents do
         phx-click={@delete_event}
         phx-target={@delete_target}
         data-confirm={@delete_confirm}
-        class="p-0 min-h-0 h-auto bg-transparent hover:bg-transparent text-slate-500 dark:text-slate-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+        class="!h-5 !w-5 !p-0 min-h-0 bg-transparent hover:bg-transparent text-slate-500 dark:text-slate-400 hover:text-zinc-900 dark:hover:text-zinc-100"
       >
         <.icon name="hero-trash" class="w-4 h-4" />
       </.icon_button>

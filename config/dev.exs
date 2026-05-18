@@ -67,3 +67,15 @@ config :ex_money,
   # 10 hours
   exchange_rates_retrieve_every: 36_000_000,
   open_exchange_rates_app_id: {:system, "OPEN_EXCHANGE_RATES_APP_ID"}
+
+# Public dev bucket defaults keep imported cover URLs renderable without requiring
+# local S3 environment variables. Uploads still require AWS credentials.
+config :waffle,
+  storage: Waffle.Storage.S3,
+  bucket: System.get_env("AWS_S3_BUCKET") || "hamster-travel-dev-images",
+  asset_host:
+    System.get_env("S3_ASSET_HOST") ||
+      "https://hamster-travel-dev-images.s3.eu-central-1.amazonaws.com"
+
+config :ex_aws,
+  region: System.get_env("AWS_REGION") || "eu-central-1"
