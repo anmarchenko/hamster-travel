@@ -792,7 +792,7 @@ defmodule HamsterTravelWeb.CoreComponents do
     <div>
       <.label class="mb-0" for={@id}>{@label}</.label>
       <div class="flex flex-row">
-        <div class="w-3/4">
+        <div class="min-w-0 flex-1">
           <.field
             type="text"
             name={"#{@name}[amount]"}
@@ -807,7 +807,7 @@ defmodule HamsterTravelWeb.CoreComponents do
             data-user-locale={@locale}
           />
         </div>
-        <div class="w-1/4">
+        <div class="w-36 shrink-0">
           <.field
             type="select"
             id={"#{@id}_currency"}
