@@ -126,11 +126,15 @@ defmodule HamsterTravelWeb.TripPdf do
           h3 {
             font-size: 14px;
             margin: 7px 0 3px;
+            break-after: avoid-page;
+            page-break-after: avoid;
           }
 
           h4 {
             font-size: 12px;
             margin: 8px 0 4px;
+            break-after: avoid-page;
+            page-break-after: avoid;
           }
 
           p {
@@ -155,7 +159,8 @@ defmodule HamsterTravelWeb.TripPdf do
           .section {
             padding: 0;
             margin-bottom: 10px;
-            break-inside: avoid;
+            break-inside: auto;
+            page-break-inside: auto;
           }
 
           .day-section {
@@ -211,10 +216,27 @@ defmodule HamsterTravelWeb.TripPdf do
             border-radius: 8px;
             background: transparent;
             padding: 6px 8px;
-            break-inside: avoid;
+            break-inside: auto;
+            page-break-inside: auto;
+            -webkit-column-break-inside: auto;
+          }
+
+          .transfer-card {
             break-inside: avoid-page;
             page-break-inside: avoid;
             -webkit-column-break-inside: avoid;
+          }
+
+          .activity-card,
+          .note-card,
+          .rich-text,
+          .rich-text p,
+          .rich-text ul,
+          .rich-text ol,
+          .rich-text li {
+            break-inside: auto;
+            page-break-inside: auto;
+            -webkit-column-break-inside: auto;
           }
 
           .card-header {
