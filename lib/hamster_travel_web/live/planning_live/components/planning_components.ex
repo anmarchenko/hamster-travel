@@ -198,6 +198,13 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   attr(:flags_limit, :integer, default: 100)
 
   def status_row(assigns) do
+    countries =
+      assigns.trip
+      |> Planning.countries_by_trip_days()
+      |> Enum.take(assigns.flags_limit)
+
+    assigns = assign(assigns, countries: countries)
+
     ~H"""
     <.inline class={
       CoreComponents.build_class([
@@ -207,7 +214,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
     }>
       <.status_badge status={@trip.status} />
       <.flag
-        :for={country <- Enum.take(@trip.countries, @flags_limit)}
+        :for={country <- @countries}
         size={20}
         country={country.iso}
       />

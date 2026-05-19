@@ -67,6 +67,8 @@ defmodule HamsterTravel.Planning.Trip do
     timestamps()
   end
 
+  @type t :: %__MODULE__{}
+
   @doc false
   def changeset(struct, params \\ %{}) do
     struct

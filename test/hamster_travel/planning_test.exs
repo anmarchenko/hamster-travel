@@ -1839,6 +1839,88 @@ defmodule HamsterTravel.PlanningTest do
       [country] = loaded_trip.countries
       assert country.iso == "DE"
     end
+
+    test "countries_by_trip_days orders countries by unique destination days", %{
+      user: user,
+      city: berlin
+    } do
+      france = country_fixture()
+      spain = country_fixture(%{iso: "ES"})
+      paris = test_city(france, "Paris", "2988507")
+      madrid = test_city(spain, "Madrid", "3117735")
+      trip = trip_fixture(user, %{end_date: ~D[2023-06-19]})
+
+      {:ok, _destination} =
+        Planning.create_destination(trip, %{city_id: berlin.id, start_day: 0, end_day: 0})
+
+      {:ok, _destination} =
+        Planning.create_destination(trip, %{city_id: paris.id, start_day: 1, end_day: 4})
+
+      {:ok, _destination} =
+        Planning.create_destination(trip, %{city_id: madrid.id, start_day: 5, end_day: 7})
+
+      assert ["FR", "ES", "DE"] =
+               trip.id
+               |> Planning.get_trip!()
+               |> Planning.countries_by_trip_days()
+               |> Enum.map(& &1.iso)
+    end
+
+    test "countries_by_trip_days combines same-country destinations and counts overlapping days once",
+         %{user: user} do
+      france = country_fixture()
+      spain = country_fixture(%{iso: "ES"})
+      paris = test_city(france, "Paris", "2988507")
+      lyon = test_city(france, "Lyon", "2996944")
+      madrid = test_city(spain, "Madrid", "3117735")
+      trip = trip_fixture(user, %{end_date: ~D[2023-06-14]})
+
+      {:ok, _destination} =
+        Planning.create_destination(trip, %{city_id: paris.id, start_day: 0, end_day: 1})
+
+      {:ok, _destination} =
+        Planning.create_destination(trip, %{city_id: lyon.id, start_day: 1, end_day: 2})
+
+      {:ok, _destination} =
+        Planning.create_destination(trip, %{city_id: madrid.id, start_day: 0, end_day: 2})
+
+      assert ["ES", "FR"] =
+               trip.id
+               |> Planning.get_trip!()
+               |> Planning.countries_by_trip_days()
+               |> Enum.map(& &1.iso)
+    end
+
+    test "countries_by_trip_days does not query when list plans preloads destination countries",
+         %{user: user, city: berlin} do
+      france = country_fixture()
+      paris = test_city(france, "Paris", "2988507")
+
+      for index <- 1..3 do
+        trip = trip_fixture(user, %{name: "Preloaded country trip #{index}"})
+
+        {:ok, _destination} =
+          Planning.create_destination(trip, %{city_id: berlin.id, start_day: 0, end_day: 0})
+
+        {:ok, _destination} =
+          Planning.create_destination(trip, %{city_id: paris.id, start_day: 1, end_day: 2})
+      end
+
+      trips = Planning.list_plans(user)
+
+      assert Enum.all?(trips, &destinations_with_countries_loaded?/1)
+
+      {_countries, query_count} =
+        count_repo_queries(fn ->
+          Enum.map(trips, fn trip ->
+            trip
+            |> Planning.countries_by_trip_days()
+            |> Enum.map(& &1.iso)
+          end)
+        end)
+
+      assert query_count == 0
+    end
   end
 
   describe "expenses" do
@@ -4259,6 +4341,59 @@ defmodule HamsterTravel.PlanningTest do
       Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
       assert {:ok, _} = Planning.reorder_day_expense(e1, 1, trip, author)
       assert_receive {[:day_expense, :updated], %{value: _}}
+    end
+  end
+
+  defp test_city(country, name, geonames_id) do
+    region =
+      region_fixture(country, %{
+        name: "#{name} Region",
+        name_ru: "#{name} Region",
+        region_code: "R#{geonames_id}",
+        geonames_id: "R#{geonames_id}"
+      })
+
+    city_fixture(country, region, %{
+      name: name,
+      name_ru: name,
+      geonames_id: geonames_id
+    })
+  end
+
+  defp destinations_with_countries_loaded?(trip) do
+    Ecto.assoc_loaded?(trip.destinations) &&
+      Enum.all?(trip.destinations, fn destination ->
+        Ecto.assoc_loaded?(destination.city) && Ecto.assoc_loaded?(destination.city.country)
+      end)
+  end
+
+  defp count_repo_queries(fun) do
+    ref = make_ref()
+    parent = self()
+    handler_id = {__MODULE__, ref}
+
+    :telemetry.attach(
+      handler_id,
+      [:hamster_travel, :repo, :query],
+      fn _event, _measurements, _metadata, _config ->
+        send(parent, {:repo_query, ref})
+      end,
+      nil
+    )
+
+    try do
+      result = fun.()
+      {result, flush_repo_query_count(ref)}
+    after
+      :telemetry.detach(handler_id)
+    end
+  end
+
+  defp flush_repo_query_count(ref, count \\ 0) do
+    receive do
+      {:repo_query, ^ref} -> flush_repo_query_count(ref, count + 1)
+    after
+      0 -> count
     end
   end
 end

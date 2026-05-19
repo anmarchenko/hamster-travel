@@ -8,6 +8,7 @@ defmodule HamsterTravel.Planning do
   alias HamsterTravel.Accounts
   alias HamsterTravel.Accounts.User
   alias HamsterTravel.Geo
+  alias HamsterTravel.Geo.Country
 
   alias HamsterTravel.Planning.{
     Accommodation,
@@ -80,6 +81,24 @@ defmodule HamsterTravel.Planning do
   """
   def list_drafts_paginated(user, page \\ 1, page_size \\ 12, search_query \\ nil) do
     Trips.list_drafts_paginated(user, page, page_size, search_query)
+  end
+
+  @doc """
+  Returns trip countries sorted by the number of unique trip days spent in each country.
+
+  Countries with the same day count are sorted by ISO code for deterministic rendering.
+  The helper only uses already-loaded associations and never preloads data itself.
+  """
+  @spec countries_by_trip_days(Trip.t()) :: list(Country.t())
+  def countries_by_trip_days(%Trip{} = trip) do
+    if Ecto.assoc_loaded?(trip.destinations) do
+      trip.destinations
+      |> Enum.reduce(%{}, &accumulate_destination_country_days/2)
+      |> Enum.sort_by(fn {iso, %{days: days}} -> {-MapSet.size(days), iso} end)
+      |> Enum.map(fn {_iso, %{country: country}} -> country end)
+    else
+      loaded_trip_countries(trip)
+    end
   end
 
   @type profile_stats :: %{
@@ -155,6 +174,43 @@ defmodule HamsterTravel.Planning do
       visited_cities: visited_cities
     }
   end
+
+  defp accumulate_destination_country_days(destination, acc) do
+    with %Country{iso: iso} = country <- destination_country(destination),
+         days when is_list(days) <- destination_days(destination) do
+      Map.update(
+        acc,
+        iso,
+        %{country: country, days: MapSet.new(days)},
+        fn %{days: existing_days} = country_days ->
+          %{country_days | days: MapSet.union(existing_days, MapSet.new(days))}
+        end
+      )
+    else
+      _ -> acc
+    end
+  end
+
+  defp destination_country(%Destination{city: %{country: country} = city}) do
+    if Ecto.assoc_loaded?(city) && Ecto.assoc_loaded?(country) do
+      city.country
+    end
+  end
+
+  defp destination_country(_destination), do: nil
+
+  defp destination_days(%Destination{start_day: start_day, end_day: end_day})
+       when is_integer(start_day) and is_integer(end_day) and start_day <= end_day do
+    Enum.to_list(start_day..end_day)
+  end
+
+  defp destination_days(_destination), do: nil
+
+  defp loaded_trip_countries(%Trip{countries: countries}) when is_list(countries) do
+    Enum.uniq_by(countries, & &1.iso)
+  end
+
+  defp loaded_trip_countries(_trip), do: []
 
   @doc """
   Fetches a trip by id without raising.

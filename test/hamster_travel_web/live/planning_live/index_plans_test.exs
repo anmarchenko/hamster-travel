@@ -122,28 +122,45 @@ defmodule HamsterTravelWeb.Planning.IndexPlansTest do
       assert html =~ "€100.00"
     end
 
-    test "renders at least two country flags for trips with multiple countries", %{conn: conn} do
+    test "renders highest-day country flags first for trips with multiple countries", %{
+      conn: conn
+    } do
       user = user_fixture()
       conn = log_in_user(conn, user)
 
       geonames_fixture()
       berlin = HamsterTravel.Geo.find_city_by_geonames_id("2950159")
       france = country_fixture()
-      region = region_fixture(france)
-      paris = city_fixture(france, region)
+      spain = country_fixture(%{iso: "ES"})
+      paris = test_city(france, "Paris", "2988507")
+      madrid = test_city(spain, "Madrid", "3117735")
 
-      trip = trip_fixture(%{author_id: user.id, status: "1_planned"})
+      trip =
+        trip_fixture(%{
+          author_id: user.id,
+          status: "1_planned",
+          end_date: ~D[2023-06-19]
+        })
 
       {:ok, _destination} =
-        Planning.create_destination(trip, %{city_id: berlin.id, start_day: 0, end_day: 1})
+        Planning.create_destination(trip, %{city_id: berlin.id, start_day: 7, end_day: 7})
 
       {:ok, _destination} =
-        Planning.create_destination(trip, %{city_id: paris.id, start_day: 2, end_day: 3})
+        Planning.create_destination(trip, %{city_id: paris.id, start_day: 0, end_day: 3})
+
+      {:ok, _destination} =
+        Planning.create_destination(trip, %{city_id: madrid.id, start_day: 4, end_day: 6})
 
       {:ok, _view, html} = live(conn, ~p"/plans")
 
-      assert html =~ "Country flag de"
       assert html =~ "Country flag fr"
+      assert html =~ "Country flag es"
+      refute html =~ "Country flag de"
+
+      {fr_position, _length} = :binary.match(html, "Country flag fr")
+      {es_position, _length} = :binary.match(html, "Country flag es")
+
+      assert fr_position < es_position
     end
 
     test "renders plans page when a trip has malformed cover data", %{conn: conn} do
@@ -160,5 +177,21 @@ defmodule HamsterTravelWeb.Planning.IndexPlansTest do
       assert html =~ trip.name
       assert html =~ "Travels"
     end
+  end
+
+  defp test_city(country, name, geonames_id) do
+    region =
+      region_fixture(country, %{
+        name: "#{name} Region",
+        name_ru: "#{name} Region",
+        region_code: "R#{geonames_id}",
+        geonames_id: "R#{geonames_id}"
+      })
+
+    city_fixture(country, region, %{
+      name: name,
+      name_ru: name,
+      geonames_id: geonames_id
+    })
   end
 end

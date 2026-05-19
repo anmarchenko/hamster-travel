@@ -16,6 +16,8 @@ defmodule HamsterTravel.Geo.Country do
     timestamps()
   end
 
+  @type t :: %__MODULE__{}
+
   @doc false
   def changeset(country, attrs) do
     country
