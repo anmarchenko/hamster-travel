@@ -172,6 +172,73 @@ defmodule HamsterTravelWeb.TripPdfTest do
       refute html =~ "✈"
     end
 
+    test "allows long note and activity cards to flow across PDF pages" do
+      geonames_fixture()
+
+      trip = trip_fixture(%{dates_unknown: true, duration: 3})
+      berlin = Geo.find_city_by_geonames_id("2950159")
+      hamburg = Geo.find_city_by_geonames_id("2911298")
+
+      {:ok, _transfer} =
+        Planning.create_transfer(trip, %{
+          transport_mode: "train",
+          departure_city_id: berlin.id,
+          arrival_city_id: hamburg.id,
+          departure_time: "09:00",
+          arrival_time: "11:00",
+          day_index: 0
+        })
+
+      long_note_token = "LONG_NOTE_TOKEN_704c2bb5"
+      long_activity_token = "LONG_ACTIVITY_TOKEN_729f1cef"
+
+      long_paragraph =
+        String.duplicate("PDF page flow should keep filling the current page. ", 80)
+
+      {:ok, _note} =
+        Planning.create_note(trip, %{
+          title: "Long note",
+          text: "<p>#{long_note_token}</p><p>#{long_paragraph}</p>",
+          day_index: 0
+        })
+
+      {:ok, _activity} =
+        Planning.create_activity(trip, %{
+          name: "Long activity",
+          day_index: 0,
+          priority: 2,
+          description: "<p>#{long_activity_token}</p><p>#{long_paragraph}</p>"
+        })
+
+      html = trip_html(trip)
+
+      assert html =~ ~s(class="card transfer-card")
+      assert html =~ ~s(class="card note-card")
+      assert html =~ ~s(class="card activity-card")
+      assert html =~ long_note_token
+      assert html =~ long_activity_token
+
+      card_rule = css_rule(html, ".card")
+      refute card_rule =~ "break-inside: avoid"
+      refute card_rule =~ "page-break-inside: avoid"
+      assert card_rule =~ "break-inside: auto"
+      assert card_rule =~ "page-break-inside: auto"
+
+      section_rule = css_rule(html, ".section")
+      refute section_rule =~ "break-inside: avoid"
+      assert section_rule =~ "break-inside: auto"
+
+      transfer_rule = css_rule(html, ".transfer-card")
+      assert transfer_rule =~ "break-inside: avoid-page"
+      assert transfer_rule =~ "page-break-inside: avoid"
+
+      flowable_rule = css_rule(html, ".activity-card,")
+      assert flowable_rule =~ ".note-card"
+      assert flowable_rule =~ ".rich-text p"
+      assert flowable_rule =~ "break-inside: auto"
+      assert flowable_rule =~ "page-break-inside: auto"
+    end
+
     test "overview prints hotel description only for first appearance of each hotel" do
       trip = trip_fixture(%{dates_unknown: true, duration: 4})
 
@@ -236,6 +303,19 @@ defmodule HamsterTravelWeb.TripPdfTest do
     |> String.split(needle)
     |> length()
     |> Kernel.-(1)
+  end
+
+  defp css_rule(html, selector) do
+    selector
+    |> css_rule_regex()
+    |> Regex.run(html)
+    |> List.first()
+  end
+
+  defp css_rule_regex(selector) do
+    selector
+    |> Regex.escape()
+    |> then(&~r/#{&1}[^{}]*\{([^}]*)\}/)
   end
 
   defp with_renderer(renderer, fun) do
