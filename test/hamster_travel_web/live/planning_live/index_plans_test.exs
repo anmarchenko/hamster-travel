@@ -122,6 +122,30 @@ defmodule HamsterTravelWeb.Planning.IndexPlansTest do
       assert html =~ "€100.00"
     end
 
+    test "renders at least two country flags for trips with multiple countries", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      geonames_fixture()
+      berlin = HamsterTravel.Geo.find_city_by_geonames_id("2950159")
+      france = country_fixture()
+      region = region_fixture(france)
+      paris = city_fixture(france, region)
+
+      trip = trip_fixture(%{author_id: user.id, status: "1_planned"})
+
+      {:ok, _destination} =
+        Planning.create_destination(trip, %{city_id: berlin.id, start_day: 0, end_day: 1})
+
+      {:ok, _destination} =
+        Planning.create_destination(trip, %{city_id: paris.id, start_day: 2, end_day: 3})
+
+      {:ok, _view, html} = live(conn, ~p"/plans")
+
+      assert html =~ "Country flag de"
+      assert html =~ "Country flag fr"
+    end
+
     test "renders plans page when a trip has malformed cover data", %{conn: conn} do
       user = user_fixture()
       conn = log_in_user(conn, user)

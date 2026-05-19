@@ -187,7 +187,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
             icon_class="hidden sm:block"
           />
         </.secondary>
-        <.status_row trip={@trip} flags_limit={1} />
+        <.status_row trip={@trip} flags_limit={2} />
       </div>
     </.card>
     """
