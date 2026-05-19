@@ -57,7 +57,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
           delete_confirm={gettext("Are you sure you want to delete this transfer from your trip?")}
         />
       </.inline>
-      <div class="flex flex-row text-lg mt-2 mb-2">
+      <div class="flex flex-row text-lg mt-2">
         <div class="flex flex-col gap-y-2 pr-6 border-r-2 font-medium">
           <div>{Formatters.format_time(@transfer.departure_time)}</div>
           <div>{Formatters.format_time(@transfer.arrival_time)}</div>
@@ -74,7 +74,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
         </div>
       </div>
 
-      <.note :if={formatted_text_present?(@transfer.note)}>
+      <.note :if={formatted_text_present?(@transfer.note)} class="!mt-1">
         <.formatted_text text={@transfer.note} />
       </.note>
     </div>

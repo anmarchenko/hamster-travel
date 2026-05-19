@@ -1147,7 +1147,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           class="mb-2"
         />
         <div
-          class="transfers-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-1 sm:gap-y-8"
+          class="transfers-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-3 sm:gap-y-8"
           data-transfer-drop-zone
           data-target-day="outside"
         >
@@ -1242,7 +1242,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                 class="mb-2 sm:hidden"
               />
               <div
-                class="transfers-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-1"
+                class="transfers-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-3"
                 data-transfer-drop-zone
                 data-target-day={i}
               >
