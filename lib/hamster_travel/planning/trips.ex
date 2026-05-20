@@ -285,6 +285,7 @@ defmodule HamsterTravel.Planning.Trips do
           updated_trip
           |> Destinations.maybe_adjust_for_duration(trip)
           |> Accommodations.maybe_adjust_for_duration(trip)
+          |> FoodExpenses.maybe_adjust_for_duration(trip)
 
         {:error, changeset} ->
           Repo.rollback(changeset)

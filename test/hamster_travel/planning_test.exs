@@ -814,6 +814,29 @@ defmodule HamsterTravel.PlanningTest do
       assert trip.end_date == ~D[2023-06-13]
     end
 
+    test "update_trip/2 updates food expense days count and total when trip dates change" do
+      trip = trip_fixture()
+      trip = Planning.get_trip!(trip.id)
+
+      assert {:ok, _food_expense} =
+               Planning.update_food_expense(trip.food_expense, %{
+                 price_per_day: Money.new(:EUR, 1000),
+                 days_count: 3,
+                 people_count: 2
+               })
+
+      assert {:ok, %Trip{} = updated_trip} =
+               Planning.update_trip(trip, %{end_date: ~D[2023-06-13]})
+
+      updated_trip = Planning.get_trip!(updated_trip.id)
+
+      assert updated_trip.duration == 2
+      assert updated_trip.food_expense.days_count == 2
+
+      assert updated_trip.food_expense.expense.price ==
+               Money.new(:EUR, 1000) |> Money.mult!(2) |> Money.mult!(2)
+    end
+
     test "update_trip/2 stores a cover image" do
       trip = trip_fixture()
 
