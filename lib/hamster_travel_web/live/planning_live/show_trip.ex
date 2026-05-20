@@ -458,10 +458,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> day_expenses_outside()
       |> Enum.each(&Planning.delete_day_expense/1)
 
-      trip
-      |> notes_outside()
-      |> Enum.each(&Planning.delete_note/1)
-
       {:noreply, socket}
     else
       {:noreply, unauthorized_edit(socket)}
@@ -929,8 +925,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       destinations_outside={destinations_outside(@trip)}
       activities={@trip.activities}
       activities_outside={activities_outside(@trip)}
-      notes={@trip.notes}
-      notes_outside={notes_outside(@trip)}
       day_expenses={@trip.day_expenses}
       day_expenses_outside={day_expenses_outside(@trip)}
       budget={@budget}
@@ -944,6 +938,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     ~H"""
     <.tab_notes
       trip={@trip}
+      destinations={@trip.destinations}
+      destinations_outside={destinations_outside(@trip)}
       notes={@trip.notes}
       notes_outside={notes_outside(@trip)}
       budget={@budget}
@@ -1006,6 +1002,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   attr(:trip, Trip, required: true)
+  attr(:destinations, :list, required: true)
+  attr(:destinations_outside, :list, required: true)
   attr(:notes, :list, required: true)
   attr(:notes_outside, :list, required: true)
   attr(:budget, Money, required: true)
@@ -1022,11 +1020,28 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       <.tab_budget budget={@budget} display_currency={@display_currency} />
 
       <.toggle
-        :if={Enum.any?(@notes_outside)}
+        :if={Enum.any?(@destinations_outside) || Enum.any?(@notes_outside)}
         label={gettext("Some items are scheduled outside of the trip duration")}
         class="mt-4"
       >
-        <div class="flex flex-col gap-y-1" data-note-drop-zone data-target-day="outside">
+        <.destinations_list
+          trip={@trip}
+          destinations={@destinations_outside}
+          day_index={0}
+          can_edit={@can_edit}
+        />
+        <.section_header
+          :if={Enum.any?(@notes_outside)}
+          icon="hero-document-text"
+          label={gettext("Notes")}
+          class="mt-3"
+        />
+        <div
+          :if={Enum.any?(@notes_outside)}
+          class="flex flex-col gap-y-1"
+          data-note-drop-zone
+          data-target-day="outside"
+        >
           <.notes_list notes={@notes_outside} day_index={-1} trip={@trip} can_edit={@can_edit} />
         </div>
         <div :if={@can_edit} class="flex justify-start mt-4">
@@ -1041,9 +1056,9 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         </div>
       </.toggle>
 
-      <div class="flex flex-col gap-y-8 mt-8">
+      <div class="flex flex-col gap-y-8 mt-4">
         <div class="flex flex-col gap-y-2">
-          <.section_header icon="hero-document-text" label={gettext("Trip notes")} />
+          <.section_header icon="hero-document-text" label={gettext("Trip notes")} class="!mt-0" />
           <div class="flex flex-col gap-y-1" data-note-drop-zone data-target-day="unassigned">
             <.notes_list
               notes={Planning.notes_unassigned(@notes)}
@@ -1064,6 +1079,14 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
         <div :for={i <- 0..(@trip.duration - 1)} class="flex flex-col gap-y-2">
           <.day_heading day_index={i} start_date={@trip.start_date} />
+          <div class="flex flex-col gap-y-1 sm:flex-row sm:gap-x-4 sm:gap-y-0">
+            <.destinations_list
+              trip={@trip}
+              destinations={Planning.items_for_day(i, @destinations)}
+              day_index={i}
+              can_edit={@can_edit}
+            />
+          </div>
           <div class="flex flex-col gap-y-1" data-note-drop-zone data-target-day={i}>
             <.notes_list
               notes={Planning.notes_for_day(i, @notes)}
@@ -1174,7 +1197,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         </div>
       </.toggle>
 
-      <table class="sm:mt-8 sm:table-auto sm:border-collapse sm:border sm:border-slate-500 sm:w-full">
+      <table class="sm:mt-4 sm:table-auto sm:border-collapse sm:border sm:border-slate-500 sm:w-full">
         <thead>
           <tr class="hidden sm:table-row">
             <th class="border border-slate-600 px-2 py-4 text-left w-1/12">{gettext("Day")}</th>
@@ -1304,8 +1327,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:destinations_outside, :list, required: true)
   attr(:activities, :list, required: true)
   attr(:activities_outside, :list, required: true)
-  attr(:notes, :list, required: true)
-  attr(:notes_outside, :list, required: true)
   attr(:day_expenses, :list, required: true)
   attr(:day_expenses_outside, :list, required: true)
   attr(:can_edit, :boolean, required: true)
@@ -1322,7 +1343,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       <.toggle
         :if={
           Enum.any?(@destinations_outside) || Enum.any?(@activities_outside) ||
-            Enum.any?(@day_expenses_outside) || Enum.any?(@notes_outside)
+            Enum.any?(@day_expenses_outside)
         }
         label={gettext("Some items are scheduled outside of the trip duration")}
         class="mt-4"
@@ -1340,10 +1361,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         />
 
         <div
-          :if={
-            Enum.any?(@activities_outside) ||
-              Enum.any?(@day_expenses_outside) || Enum.any?(@notes_outside)
-          }
+          :if={Enum.any?(@activities_outside) || Enum.any?(@day_expenses_outside)}
           class="activities-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-2"
         >
           <.section_header
@@ -1384,19 +1402,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               can_edit={@can_edit}
             />
           </div>
-          <.section_header
-            :if={Enum.any?(@notes_outside)}
-            icon="hero-document-text"
-            label={gettext("Notes")}
-          />
-          <div :if={Enum.any?(@notes_outside)} class="flex flex-col gap-y-1">
-            <.notes_list
-              notes={@notes_outside}
-              day_index={-1}
-              trip={@trip}
-              can_edit={@can_edit}
-            />
-          </div>
         </div>
         <div :if={@can_edit} class="flex justify-start mt-4">
           <.button
@@ -1429,7 +1434,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           <.day_heading
             day_index={i}
             start_date={@trip.start_date}
-            class="max-w-3xl rounded-md px-3 py-2 font-bold text-zinc-950 dark:text-zinc-50"
+            class="max-w-3xl rounded-md py-2 text-left font-bold text-zinc-950 dark:text-zinc-50"
           />
           <.section_header
             :if={Enum.any?(Planning.items_for_day(i, @destinations))}
@@ -1441,16 +1446,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               trip={@trip}
               destinations={Planning.items_for_day(i, @destinations)}
               day_index={i}
-              can_edit={@can_edit}
-            />
-          </div>
-          <div :if={@can_edit} class="inline-block">
-            <.live_component
-              module={DestinationNew}
-              id={"destination-new-#{i}"}
-              trip={@trip}
-              day_index={i}
-              class="inline-block"
               can_edit={@can_edit}
             />
           </div>
@@ -1495,27 +1490,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                 :if={@can_edit}
                 module={ActivityNew}
                 id={"activity-new-#{i}"}
-                trip={@trip}
-                day_index={i}
-                can_edit={@can_edit}
-              />
-            </div>
-            <.section_header
-              :if={Enum.any?(Planning.notes_for_day(i, @notes))}
-              icon="hero-document-text"
-              label={gettext("Notes")}
-            />
-            <div class="flex flex-col gap-y-1" data-note-drop-zone data-target-day={i}>
-              <.notes_list
-                notes={Planning.notes_for_day(i, @notes)}
-                day_index={i}
-                trip={@trip}
-                can_edit={@can_edit}
-              />
-              <.live_component
-                :if={@can_edit}
-                module={NoteNew}
-                id={"note-new-#{i}"}
                 trip={@trip}
                 day_index={i}
                 can_edit={@can_edit}

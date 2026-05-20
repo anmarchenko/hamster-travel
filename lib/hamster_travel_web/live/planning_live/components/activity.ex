@@ -54,7 +54,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
             {@index + 1}
           </span>
           <span class="min-w-0 flex-1 leading-snug">
-            <span class="select-text text-sm font-semibold leading-snug text-zinc-900 dark:text-zinc-100 2xl:text-base">
+            <span class="select-text text-sm font-semibold leading-snug text-zinc-900 dark:text-zinc-200 2xl:text-base">
               {@activity.name}
             </span>
             <button

@@ -372,7 +372,8 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "#activities-#{trip.id}")
     end
 
-    test "hides empty activities tab section headers but keeps add links", %{conn: conn} do
+    test "hides empty activities tab section headers and city add link but keeps other add links",
+         %{conn: conn} do
       user = user_fixture()
       conn = log_in_user(conn, user)
       trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
@@ -389,10 +390,10 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       refute "Expenses" in section_headers
       refute "Activities" in section_headers
       refute "Notes" in section_headers
-      assert has_element?(view, "#activities-#{trip.id} a", "Add city")
+      refute has_element?(view, "#activities-#{trip.id} a", "Add city")
       assert has_element?(view, "#activities-#{trip.id} a", "Add expense")
       assert has_element?(view, "#activities-#{trip.id} a", "Add activity")
-      assert has_element?(view, "#activities-#{trip.id} a", "Add note")
+      refute has_element?(view, "#activities-#{trip.id} a", "Add note")
     end
 
     test "shows activities tab section header when section has items", %{conn: conn} do
@@ -419,6 +420,20 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       conn = log_in_user(conn, user)
       trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
 
+      geonames_fixture()
+      berlin = Geo.find_city_by_geonames_id("2950159")
+      hamburg = Geo.find_city_by_geonames_id("2911298")
+
+      {:ok, _day_destination} =
+        Planning.create_destination(trip, %{city_id: berlin.id, start_day: 0, end_day: 0})
+
+      {:ok, _outside_destination} =
+        Planning.create_destination(trip, %{
+          city_id: hamburg.id,
+          start_day: trip.duration + 1,
+          end_day: trip.duration + 1
+        })
+
       {:ok, day_note} = Planning.create_note(trip, %{title: "Day note", day_index: 0})
       {:ok, unassigned_note} = Planning.create_note(trip, %{title: "Trip report", day_index: nil})
 
@@ -427,8 +442,11 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       # Assert
       assert has_element?(view, "#notes-#{trip.id}")
+      assert html =~ berlin.name
+      assert html =~ hamburg.name
       assert html =~ day_note.title
       assert html =~ unassigned_note.title
+      refute has_element?(view, "#notes-#{trip.id} a", "Add city")
     end
 
     test "shows note form when adding an unassigned note", %{conn: conn} do
@@ -490,7 +508,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert note1.id != note2.id
     end
 
-    test "renders day-bound notes on activities tab only", %{conn: conn} do
+    test "renders notes on notes tab and not activities tab", %{conn: conn} do
       # Arrange
       user = user_fixture()
       conn = log_in_user(conn, user)
@@ -503,12 +521,19 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
         Planning.create_note(trip, %{title: "Outside note", day_index: trip.duration + 1})
 
       # Act
-      {:ok, _view, html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+      {:ok, _activities_view, activities_html} =
+        live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      {:ok, _notes_view, notes_html} = live(conn, ~p"/trips/#{trip.slug}?tab=notes")
 
       # Assert
-      assert html =~ day_note.title
-      assert html =~ outside_note.title
-      refute html =~ unassigned_note.title
+      refute activities_html =~ day_note.title
+      refute activities_html =~ outside_note.title
+      refute activities_html =~ unassigned_note.title
+
+      assert notes_html =~ day_note.title
+      assert notes_html =~ outside_note.title
+      assert notes_html =~ unassigned_note.title
     end
 
     test "deletes outside items from activities tab", %{conn: conn} do
@@ -587,7 +612,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert Enum.any?(day_expenses, &(&1.id == inside_day_expense.id))
 
       notes = Planning.list_notes(trip)
-      refute Enum.any?(notes, &(&1.id == outside_note.id))
+      assert Enum.any?(notes, &(&1.id == outside_note.id))
       assert Enum.any?(notes, &(&1.id == inside_note.id))
     end
 
