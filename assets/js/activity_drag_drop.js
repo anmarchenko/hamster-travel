@@ -16,6 +16,7 @@ let ActivityDragDrop = {
       groupName,
       idKey,
       idParam,
+      handle,
       moveEvent,
       reorderEvent,
     }) => {
@@ -40,6 +41,7 @@ let ActivityDragDrop = {
           chosenClass: "hamster-drag-chosen",
           dragClass: "hamster-drag-item",
           draggable: draggable,
+          ...(handle ? { handle } : {}),
           ...sortableTouchDragOptions,
           onMove: (evt) => canDrop(evt.to, evt.dragged),
           onEnd: (evt) => {
@@ -81,6 +83,7 @@ let ActivityDragDrop = {
       groupName: "activities",
       idKey: "activityId",
       idParam: "activity_id",
+      handle: "[data-activity-drag-handle]",
       moveEvent: "move_activity",
       reorderEvent: "reorder_activity",
     });

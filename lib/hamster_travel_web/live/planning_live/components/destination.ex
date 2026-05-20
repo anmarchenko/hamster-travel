@@ -29,13 +29,14 @@ defmodule HamsterTravelWeb.Planning.Destination do
 
   def render(%{edit: false} = assigns) do
     ~H"""
-    <div>
-      <.inline class="gap-0">
-        <.flag size={20} country={@destination.city.country_code} class="mr-2" />
-        <span class="sm:grow">{Geo.city_name(@destination.city)}</span>
+    <div class="inline-flex items-center gap-2 rounded-md py-1.5">
+      <span class="inline-flex h-5 min-w-5 shrink-0 items-center">
+        <.flag size={20} country={@destination.city.country_code} />
+      </span>
+      <.inline class="min-w-0 gap-2">
+        <span class="min-w-0">{Geo.city_name(@destination.city)}</span>
         <.edit_delete_buttons
           :if={@can_edit}
-          class="ml-1"
           edit_target={@myself}
           delete_target={@myself}
           delete_confirm={

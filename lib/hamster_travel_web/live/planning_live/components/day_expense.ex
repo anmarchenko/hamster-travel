@@ -33,27 +33,32 @@ defmodule HamsterTravelWeb.Planning.DayExpense do
     ~H"""
     <div
       class={[
-        "flex flex-col gap-y-1 py-1 sm:ml-[-1.5rem] sm:pl-[1.5rem]",
+        "flex w-full max-w-3xl flex-col gap-y-1 rounded-md py-1.5",
         @can_edit && "draggable-day-expense cursor-grab active:cursor-grabbing"
       ]}
       data-day-expense-id={@day_expense.id}
     >
-      <.inline class="w-full 2xl:text-lg sm:w-auto">
-        <span class="min-w-0 flex-1 sm:flex-none">{@day_expense.name}</span>
-        <.money_display
-          money={@day_expense.expense.price}
-          display_currency={@display_currency}
-          class="ml-auto text-right font-normal tabular-nums sm:ml-0 sm:text-left"
-        />
-        <.edit_delete_buttons
-          :if={@can_edit}
-          class="ml-1 shrink-0"
-          edit_target={@myself}
-          delete_target={@myself}
-          delete_confirm={
-            gettext("Are you sure you want to delete expense \"%{name}\"?", name: @day_expense.name)
-          }
-        />
+      <.inline class="w-full gap-2 2xl:text-lg">
+        <span class="min-w-0 flex-1">{@day_expense.name}</span>
+        <div class="ml-auto flex shrink-0 items-center justify-end gap-2 sm:w-44">
+          <.money_display
+            money={@day_expense.expense.price}
+            display_currency={@display_currency}
+            class="text-right text-base font-normal tabular-nums text-zinc-500 dark:text-zinc-400 2xl:text-lg"
+          />
+          <.edit_delete_buttons
+            :if={@can_edit}
+            class="shrink-0"
+            edit_target={@myself}
+            delete_target={@myself}
+            delete_confirm={
+              gettext(
+                "Are you sure you want to delete expense \"%{name}\"?",
+                name: @day_expense.name
+              )
+            }
+          />
+        </div>
       </.inline>
     </div>
     """

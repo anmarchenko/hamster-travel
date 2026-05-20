@@ -1426,7 +1426,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
       <div class="flex flex-col gap-y-8 mt-8">
         <div :for={i <- 0..(@trip.duration - 1)} class="flex flex-col gap-y-2">
-          <.day_heading day_index={i} start_date={@trip.start_date} />
+          <.day_heading
+            day_index={i}
+            start_date={@trip.start_date}
+            class="max-w-3xl rounded-md px-3 py-2 font-bold text-zinc-950 dark:text-zinc-50"
+          />
           <.section_header
             :if={Enum.any?(Planning.items_for_day(i, @destinations))}
             icon="hero-map-pin"

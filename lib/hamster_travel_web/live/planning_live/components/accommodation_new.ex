@@ -36,10 +36,10 @@ defmodule HamsterTravelWeb.Planning.AccommodationNew do
         href="#"
         phx-click="start_adding"
         phx-target={@myself}
-        class="text-sm text-primary-500 hover:text-primary-800 dark:text-primary-500 dark:hover:text-primary-300"
+        class="inline-flex py-0.5 text-sm font-normal text-zinc-400 transition-colors hover:text-primary-600 focus-visible:text-primary-600 focus-visible:outline-none dark:text-zinc-500 dark:hover:text-primary-300 dark:focus-visible:text-primary-300"
       >
-        <.inline>
-          <.icon name="hero-plus-solid" class="w-5 h-5" />
+        <.inline class="gap-1.5">
+          <.icon name="hero-plus-solid" class="h-4 w-4" />
           {gettext("Add accommodation")}
         </.inline>
       </a>

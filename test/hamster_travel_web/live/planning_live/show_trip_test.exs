@@ -895,7 +895,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       conn = log_in_user(conn, user)
       trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
 
-      _ =
+      activity =
         activity_fixture(%{
           trip_id: trip.id,
           name: "Louvre Museum",
@@ -917,12 +917,50 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert html =~ "Louvre Museum"
       assert html =~ "€2,000.00"
 
-      # Verify priority styling (bold for priority 3)
-      assert has_element?(view, ".font-bold", "Louvre Museum")
+      # Verify activity names stay prominent and priority is shown as an accent.
+      assert has_element?(view, ".font-semibold", "Louvre Museum")
+      assert has_element?(view, ".border-zinc-900", "Louvre Museum")
+      assert has_element?(view, "[data-activity-drag-handle]", "1")
+      assert has_element?(view, ".select-text", "Louvre Museum")
+
+      assert has_element?(
+               view,
+               "[data-activity-toggle][aria-label='Toggle activity details'][aria-expanded='false']"
+             )
+
+      assert has_element?(view, "#activity-chevron-right-#{activity.id}")
+      assert has_element?(view, "#activity-chevron-down-#{activity.id}.hidden")
 
       # Verify edit/delete buttons
       assert has_element?(view, "[phx-click='edit']")
       assert has_element?(view, "[phx-click='delete']")
+    end
+
+    test "renders medium and low priority activities distinctly", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      _medium_priority_activity =
+        activity_fixture(%{
+          trip_id: trip.id,
+          name: "Medium priority activity",
+          priority: 2,
+          day_index: 0
+        })
+
+      _low_priority_activity =
+        activity_fixture(%{
+          trip_id: trip.id,
+          name: "Low priority activity",
+          priority: 1,
+          day_index: 0
+        })
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      assert has_element?(view, ".border-zinc-400", "Medium priority activity")
+      assert has_element?(view, ".border-zinc-200", "Low priority activity")
     end
 
     test "shows activity form when clicking add activity button", %{conn: conn} do
@@ -987,7 +1025,8 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       # Assert
 
       assert has_element?(view, "div", "Eiffel Tower")
-      assert has_element?(view, ".font-bold", "Eiffel Tower")
+      assert has_element?(view, ".font-semibold", "Eiffel Tower")
+      assert has_element?(view, ".border-zinc-900", "Eiffel Tower")
 
       # Verify DB
       activities = Planning.list_activities(trip)
