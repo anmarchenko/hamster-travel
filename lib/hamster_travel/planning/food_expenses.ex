@@ -21,6 +21,31 @@ defmodule HamsterTravel.Planning.FoodExpenses do
     |> PubSub.broadcast([:food_expense, :updated], food_expense.trip_id)
   end
 
+  def maybe_adjust_for_duration(updated_trip, original_trip) do
+    if updated_trip.duration != original_trip.duration do
+      case adjust_for_duration(updated_trip) do
+        {:ok, _food_expense} -> updated_trip
+        {:error, changeset} -> Repo.rollback(changeset)
+        :ok -> updated_trip
+      end
+    end
+
+    updated_trip
+  end
+
+  defp adjust_for_duration(trip) do
+    case Repo.get_by(FoodExpense, trip_id: trip.id) do
+      nil ->
+        :ok
+
+      food_expense ->
+        food_expense
+        |> Repo.preload(:expense)
+        |> FoodExpense.build_food_expense_changeset(trip, %{days_count: trip.duration})
+        |> Repo.update()
+    end
+  end
+
   def change_food_expense(%FoodExpense{} = food_expense, attrs \\ %{}) do
     FoodExpense.changeset(food_expense, attrs)
   end
