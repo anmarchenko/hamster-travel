@@ -1984,6 +1984,18 @@ defmodule HamsterTravel.PlanningTest do
       assert expense.trip_id == trip.id
     end
 
+    test "create_expense/2 preserves whole HUF values from form params" do
+      trip = trip_fixture(%{currency: "HUF"})
+
+      assert {:ok, %Expense{} = expense} =
+               Planning.create_expense(trip, %{
+                 price: %{amount: "4000", currency: "HUF"},
+                 name: "Matthias Church"
+               })
+
+      assert expense.price == Money.new(:HUF, "4000")
+    end
+
     test "create_expense/2 with invalid data returns error changeset" do
       trip = trip_fixture()
       assert {:error, %Ecto.Changeset{}} = Planning.create_expense(trip, %{})

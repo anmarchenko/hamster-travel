@@ -601,7 +601,7 @@ defmodule HamsterTravel.LegacyImport.TripsImporter do
   end
 
   defp money_from_cents(cents, currency) when is_integer(cents) and is_binary(currency) do
-    Money.from_integer(cents, currency)
+    Money.from_integer(cents, currency, currency_digits: :accounting)
   end
 
   defp money_from_cents(_cents, _currency), do: nil
