@@ -21,7 +21,7 @@ msgstr "чел"
 #: lib/hamster_travel_web/live/packing_live/show_backpack.ex:29
 #: lib/hamster_travel_web/live/planning_live/components/food_expense.ex:40
 #: lib/hamster_travel_web/live/planning_live/components/planning_components.ex:136
-#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:113
+#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:114
 #: lib/hamster_travel_web/trip_pdf.ex:867
 #: lib/hamster_travel_web/trip_pdf.ex:918
 #, elixir-format, ex-autogen, elixir-autogen
@@ -58,7 +58,7 @@ msgstr "Сделать копию"
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:986
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1389
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1479
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1695
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1696
 #: lib/hamster_travel_web/trip_pdf.ex:790
 #, elixir-autogen, elixir-format
 msgid "Activities"
@@ -78,7 +78,7 @@ msgstr "Назад"
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1169
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1208
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1264
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1694
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1695
 #: lib/hamster_travel_web/trip_pdf.ex:465
 #: lib/hamster_travel_web/trip_pdf.ex:780
 #, elixir-autogen, elixir-format, fuzzy
@@ -87,8 +87,8 @@ msgstr "Трансферы"
 
 #: lib/hamster_travel_web/live/planning_live/components/day_range_select.ex:50
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1203
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1560
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1692
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1561
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1693
 #: lib/hamster_travel_web/trip_pdf.ex:463
 #, elixir-autogen, elixir-format
 msgid "Day"
@@ -106,7 +106,7 @@ msgstr "Жильё"
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1241
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1354
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1442
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1693
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1694
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Places"
 msgstr "Города"
@@ -118,8 +118,8 @@ msgstr "Города"
 msgid "Delete"
 msgstr "Удалить"
 
-#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:67
-#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:66
+#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:68
+#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:82
 #, elixir-autogen, elixir-format
 msgid "Address"
 msgstr "Адрес"
@@ -237,29 +237,29 @@ msgid "Copy"
 msgstr "Копия"
 
 #: lib/hamster_travel_web/live/packing_live/components/backpack_form.ex:84
-#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:82
-#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:75
-#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:96
-#: lib/hamster_travel_web/live/planning_live/components/day_expense_form.ex:62
-#: lib/hamster_travel_web/live/planning_live/components/destination_form.ex:52
-#: lib/hamster_travel_web/live/planning_live/components/food_expense_form.ex:75
-#: lib/hamster_travel_web/live/planning_live/components/note_form.ex:48
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:152
-#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:144
+#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:83
+#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:91
+#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:112
+#: lib/hamster_travel_web/live/planning_live/components/day_expense_form.ex:63
+#: lib/hamster_travel_web/live/planning_live/components/destination_form.ex:53
+#: lib/hamster_travel_web/live/planning_live/components/food_expense_form.ex:76
+#: lib/hamster_travel_web/live/planning_live/components/note_form.ex:49
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:153
+#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:145
 #, elixir-autogen, elixir-format
 msgid "Save"
 msgstr "Сохранить"
 
 #: lib/hamster_travel_web/live/packing_live/components/backpack_form.ex:81
-#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:79
-#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:72
-#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:93
-#: lib/hamster_travel_web/live/planning_live/components/day_expense_form.ex:59
-#: lib/hamster_travel_web/live/planning_live/components/destination_form.ex:49
-#: lib/hamster_travel_web/live/planning_live/components/food_expense_form.ex:72
-#: lib/hamster_travel_web/live/planning_live/components/note_form.ex:45
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:149
-#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:141
+#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:80
+#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:88
+#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:109
+#: lib/hamster_travel_web/live/planning_live/components/day_expense_form.ex:60
+#: lib/hamster_travel_web/live/planning_live/components/destination_form.ex:50
+#: lib/hamster_travel_web/live/planning_live/components/food_expense_form.ex:73
+#: lib/hamster_travel_web/live/planning_live/components/note_form.ex:46
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:150
+#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:142
 #, elixir-autogen, elixir-format
 msgid "Cancel"
 msgstr "Отмена"
@@ -280,33 +280,33 @@ msgstr "Новое путешествие"
 msgid "close"
 msgstr "Закрыть"
 
-#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:100
+#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:101
 #, elixir-autogen, elixir-format
 msgid "Dates are yet unknown"
 msgstr "Точные даты еще не известны"
 
-#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:113
-#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:122
+#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:114
+#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:123
 #, elixir-autogen, elixir-format
 msgid "Duration"
 msgstr "Продолжительность"
 
-#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:130
+#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:131
 #, elixir-autogen, elixir-format
 msgid "People count"
 msgstr "Количество людей"
 
-#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:135
+#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:136
 #, elixir-autogen, elixir-format
 msgid "Private trip"
 msgstr "Приватный план"
 
-#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:91
+#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:92
 #, elixir-autogen, elixir-format
 msgid "Trip currency"
 msgstr "Валюта"
 
-#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:70
+#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:71
 #, elixir-autogen, elixir-format
 msgid "Trip name"
 msgstr "Название"
@@ -324,7 +324,7 @@ msgstr "Планируемое"
 msgid "2_finished"
 msgstr "Состоявшееся"
 
-#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:78
+#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:79
 #, elixir-autogen, elixir-format
 msgid "Trip status"
 msgstr "Статус путешествия"
@@ -395,13 +395,13 @@ msgid "Welcome back!"
 msgstr "Добро пожаловать!"
 
 #: lib/hamster_travel_web/live/accounts_live/profile.html.heex:294
-#: lib/hamster_travel_web/live/planning_live/components/destination_form.ex:36
+#: lib/hamster_travel_web/live/planning_live/components/destination_form.ex:37
 #, elixir-autogen, elixir-format
 msgid "City"
 msgstr "Город"
 
 #: lib/hamster_travel_web/live/planning_live/components/day_range_select.ex:53
-#: lib/hamster_travel_web/live/planning_live/components/food_expense_form.ex:46
+#: lib/hamster_travel_web/live/planning_live/components/food_expense_form.ex:47
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Days"
 msgstr "Дни"
@@ -411,8 +411,8 @@ msgstr "Дни"
 msgid "Select day"
 msgstr "Выберите день"
 
-#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:43
-#: lib/hamster_travel_web/live/planning_live/components/destination_form.ex:43
+#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:44
+#: lib/hamster_travel_web/live/planning_live/components/destination_form.ex:44
 #, elixir-autogen, elixir-format
 msgid "Date range"
 msgstr "Даты"
@@ -444,7 +444,7 @@ msgstr "Вы уверены, что хотите удалить %{city_name} и�
 msgid "Add accommodation"
 msgstr "Добавить проживание"
 
-#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:74
+#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:75
 #, elixir-autogen, elixir-format
 msgid "Additional notes or details"
 msgstr "Дополнительные детали (время заселения/выселения, нужно ли писать про парковку и тд и тп)"
@@ -459,43 +459,43 @@ msgstr "Вы уверены, что хотите удалить %{accommodation_
 msgid "Failed to delete accommodation"
 msgstr "Какая-то ошибка при удалении проживания"
 
-#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:35
+#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:36
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Hotel name"
 msgstr "Название отеля"
 
-#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:60
-#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:59
-#: lib/hamster_travel_web/live/planning_live/components/day_expense_form.ex:53
+#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:61
+#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:75
+#: lib/hamster_travel_web/live/planning_live/components/day_expense_form.ex:54
 #, elixir-autogen, elixir-format
 msgid "Link"
 msgstr "Ссылка"
 
-#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:33
+#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:34
 #, elixir-autogen, elixir-format
 msgid "Name"
 msgstr "Название"
 
-#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:73
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:141
+#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:74
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:142
 #, elixir-autogen, elixir-format
 msgid "Note"
 msgstr "Заметка"
 
-#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:52
-#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:51
-#: lib/hamster_travel_web/live/planning_live/components/day_expense_form.ex:44
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:94
+#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:53
+#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:67
+#: lib/hamster_travel_web/live/planning_live/components/day_expense_form.ex:45
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:95
 #, elixir-autogen, elixir-format
 msgid "Price"
 msgstr "Стоимость"
 
-#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:68
+#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:69
 #, elixir-autogen, elixir-format
 msgid "Street address"
 msgstr "Улица, номер дома, город"
 
-#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:61
+#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:62
 #, elixir-autogen, elixir-format
 msgid "Website link"
 msgstr "Вебсайт или booking.com"
@@ -505,74 +505,74 @@ msgstr "Вебсайт или booking.com"
 msgid "Add transfer"
 msgstr "Добавить трансфер"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:142
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:143
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Additional transfer details"
 msgstr "Комментарии к этому трансферу"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:62
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:63
 #, elixir-autogen, elixir-format
 msgid "Arrival city"
 msgstr "Куда"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:82
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:83
 #, elixir-autogen, elixir-format
 msgid "Arrival time"
 msgstr "Время прибытия"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:306
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:307
 #: lib/hamster_travel_web/trip_pdf.ex:1039
 #: lib/hamster_travel_web/trip_pdf.ex:1100
 #, elixir-autogen, elixir-format
 msgid "Boat"
 msgstr "Лодка"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:303
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:304
 #: lib/hamster_travel_web/trip_pdf.ex:1036
 #: lib/hamster_travel_web/trip_pdf.ex:1067
 #, elixir-autogen, elixir-format
 msgid "Bus"
 msgstr "Автобус"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:304
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:305
 #: lib/hamster_travel_web/trip_pdf.ex:1037
 #: lib/hamster_travel_web/trip_pdf.ex:1078
 #, elixir-autogen, elixir-format
 msgid "Car"
 msgstr "Машина"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:47
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:48
 #, elixir-autogen, elixir-format
 msgid "Departure city"
 msgstr "Откуда"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:73
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:74
 #, elixir-autogen, elixir-format
 msgid "Departure time"
 msgstr "Время отправления"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:301
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:302
 #: lib/hamster_travel_web/trip_pdf.ex:1034
 #: lib/hamster_travel_web/trip_pdf.ex:1050
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Flight"
 msgstr "Самолёт"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:305
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:306
 #: lib/hamster_travel_web/trip_pdf.ex:1038
 #: lib/hamster_travel_web/trip_pdf.ex:1089
 #, elixir-autogen, elixir-format
 msgid "Taxi"
 msgstr "Такси"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:302
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:303
 #: lib/hamster_travel_web/trip_pdf.ex:1035
 #: lib/hamster_travel_web/trip_pdf.ex:1056
 #, elixir-autogen, elixir-format
 msgid "Train"
 msgstr "Поезд"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:35
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:36
 #, elixir-autogen, elixir-format
 msgid "Transport"
 msgstr "Вид транспорта"
@@ -587,59 +587,59 @@ msgstr "Вы уверены, что хотите удалить этот тра�
 msgid "Failed to delete transfer"
 msgstr "Какая-то ошибка при удалении города"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:88
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:89
 #, elixir-autogen, elixir-format
 msgid "Next day"
 msgstr "+1 день"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:317
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:318
 #, elixir-autogen, elixir-format
 msgid "Airline"
 msgstr "Авиакомпания"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:319
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:320
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Carrier"
 msgstr "Оператор"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:318
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:319
 #, elixir-autogen, elixir-format
 msgid "Railway"
 msgstr "Оператор"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:315
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:316
 #, elixir-autogen, elixir-format
 msgid "Vessel"
 msgstr "Номер"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:313
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:314
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Flight number"
 msgstr "Рейс"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:314
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:315
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Train number"
 msgstr "Поезд"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:325
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:326
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Arrival airport"
 msgstr "Аэропорт прибытия"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:326
 #: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:327
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:328
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Arrival station"
 msgstr "Вокзал прибытия"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:321
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:322
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Departure airport"
 msgstr "Аэропорт отправления"
 
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:322
 #: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:323
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:324
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Departure station"
 msgstr "Вокзал отправления"
@@ -649,7 +649,7 @@ msgstr "Вокзал отправления"
 msgid "Failed to move transfer: %{reason}"
 msgstr "Ошибка при перемещении трансфера: %{reason}"
 
-#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:106
+#: lib/hamster_travel_web/live/planning_live/components/trip_form.ex:107
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Trip dates"
 msgstr "Даты"
@@ -659,27 +659,27 @@ msgstr "Даты"
 msgid "Select date range"
 msgstr "Выберите день"
 
-#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:35
+#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:51
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Activity Name"
 msgstr "Название"
 
-#: lib/hamster_travel_web/live/planning_live/components/activity_new.ex:41
+#: lib/hamster_travel_web/live/planning_live/components/activity_new.ex:43
 #, elixir-autogen, elixir-format
 msgid "Add activity"
 msgstr "Добавить впечатление"
 
-#: lib/hamster_travel_web/live/planning_live/components/activity.ex:94
+#: lib/hamster_travel_web/live/planning_live/components/activity.ex:95
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Are you sure you want to delete activity \"%{name}\"?"
 msgstr "Вы уверены, что хотите удалить \"%{name}\"?"
 
-#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:83
+#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:99
 #, elixir-autogen, elixir-format
 msgid "Description"
 msgstr "Описание"
 
-#: lib/hamster_travel_web/live/planning_live/components/activity.ex:145
+#: lib/hamster_travel_web/live/planning_live/components/activity.ex:146
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Failed to delete activity"
 msgstr "Какая-то ошибка при удалении впечатления"
@@ -709,17 +709,17 @@ msgstr "Ошибка при перемещении"
 msgid "Failed to reorder list"
 msgstr "Ошибка при перемещении"
 
-#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:42
+#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:58
 #, elixir-autogen, elixir-format
 msgid "Priority"
 msgstr "Приоритет"
 
-#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:67
+#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:83
 #, elixir-autogen, elixir-format
 msgid "e.g. Rue de Rivoli, 75001 Paris"
 msgstr "например: Rue de Rivoli, 75001 Paris"
 
-#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:37
+#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:53
 #, elixir-autogen, elixir-format
 msgid "e.g. Visit the Louvre"
 msgstr "например: Лувр"
@@ -734,7 +734,7 @@ msgstr "Добавить расходы"
 msgid "Are you sure you want to delete expense \"%{name}\"?"
 msgstr "Вы уверены, что хотите удалить \"%{name}\"?"
 
-#: lib/hamster_travel_web/live/planning_live/components/day_expense_form.ex:33
+#: lib/hamster_travel_web/live/planning_live/components/day_expense_form.ex:34
 #, elixir-autogen, elixir-format
 msgid "Expense name"
 msgstr "Название"
@@ -761,17 +761,17 @@ msgstr "Ошибка при перемещении: %{reason}"
 msgid "Failed to reorder expense: %{reason}"
 msgstr "Ошибка при перемещении: %{reason}"
 
-#: lib/hamster_travel_web/live/planning_live/components/day_expense_form.ex:35
+#: lib/hamster_travel_web/live/planning_live/components/day_expense_form.ex:36
 #, elixir-autogen, elixir-format, fuzzy
 msgid "e.g. Transport card"
 msgstr "например: проезд в метро"
 
-#: lib/hamster_travel_web/live/planning_live/components/food_expense_form.ex:56
+#: lib/hamster_travel_web/live/planning_live/components/food_expense_form.ex:57
 #, elixir-autogen, elixir-format, fuzzy
 msgid "People"
 msgstr "Количество людей"
 
-#: lib/hamster_travel_web/live/planning_live/components/food_expense_form.ex:62
+#: lib/hamster_travel_web/live/planning_live/components/food_expense_form.ex:63
 #: lib/hamster_travel_web/trip_pdf.ex:834
 #, elixir-autogen, elixir-format
 msgid "Total"
@@ -797,7 +797,7 @@ msgstr[0] "чел"
 msgstr[1] "чел"
 msgstr[2] "чел"
 
-#: lib/hamster_travel_web/live/planning_live/components/food_expense_form.ex:35
+#: lib/hamster_travel_web/live/planning_live/components/food_expense_form.ex:36
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Price per day per person"
 msgstr "Расходы в день на человека"
@@ -817,7 +817,7 @@ msgstr "Вы уверены, что хотите удалить \"%{title}\"?"
 msgid "Failed to delete note"
 msgstr "Какая-то ошибка при удалении города"
 
-#: lib/hamster_travel_web/live/planning_live/components/note_form.ex:31
+#: lib/hamster_travel_web/live/planning_live/components/note_form.ex:32
 #, elixir-autogen, elixir-format
 msgid "Note title"
 msgstr "Заголовок"
@@ -829,12 +829,12 @@ msgstr "Заголовок"
 msgid "Notes"
 msgstr "Заметки"
 
-#: lib/hamster_travel_web/live/planning_live/components/note_form.ex:39
+#: lib/hamster_travel_web/live/planning_live/components/note_form.ex:40
 #, elixir-autogen, elixir-format
 msgid "Text"
 msgstr "Текст заметки"
 
-#: lib/hamster_travel_web/live/planning_live/components/note_form.ex:33
+#: lib/hamster_travel_web/live/planning_live/components/note_form.ex:34
 #, elixir-autogen, elixir-format
 msgid "e.g. Food ideas"
 msgstr "Например, 'Что здесь стоит поесть'"
@@ -891,17 +891,17 @@ msgstr "Не удалось удалить путешествие."
 msgid "Trip deleted."
 msgstr "Путешествие удалено."
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1766
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1767
 #, elixir-autogen, elixir-format
 msgid "Add cover"
 msgstr "Добавить обложку"
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1776
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1777
 #, elixir-autogen, elixir-format
 msgid "Choose image"
 msgstr "Выбрать фото"
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1769
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1770
 #, elixir-autogen, elixir-format
 msgid "Drag and drop or choose a file."
 msgstr "Перетащите изображение или выберите файл."
@@ -939,28 +939,28 @@ msgstr "Точно удалить обложку?"
 
 #: lib/hamster_travel_web/live/accounts_live/profile.html.heex:83
 #: lib/hamster_travel_web/live/accounts_live/profile.html.heex:175
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1811
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1812
 #, elixir-autogen, elixir-format
 msgid "Uploading..."
 msgstr "Загрузка..."
 
 #: lib/hamster_travel_web/live/accounts_live/profile.ex:180
 #: lib/hamster_travel_web/live/accounts_live/profile.ex:188
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2319
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2320
 #, elixir-autogen, elixir-format
 msgid "File is too large. Maximum size is %{size} MB."
 msgstr "Файл слишком большой. Максимальный размер — %{size} МБ."
 
 #: lib/hamster_travel_web/live/accounts_live/profile.ex:182
 #: lib/hamster_travel_web/live/accounts_live/profile.ex:190
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2321
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2322
 #, elixir-autogen, elixir-format
 msgid "Only one image can be uploaded at a time."
 msgstr "Можно загрузить только одно изображение за раз."
 
 #: lib/hamster_travel_web/live/accounts_live/profile.ex:183
 #: lib/hamster_travel_web/live/accounts_live/profile.ex:191
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2322
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2323
 #, elixir-autogen, elixir-format
 msgid "Unsupported file type. Use JPG, PNG, or WebP."
 msgstr "Неподдерживаемый тип файла. Используйте JPG, PNG или WebP."
@@ -969,8 +969,8 @@ msgstr "Неподдерживаемый тип файла. Используйт
 #: lib/hamster_travel_web/live/accounts_live/profile.ex:185
 #: lib/hamster_travel_web/live/accounts_live/profile.ex:192
 #: lib/hamster_travel_web/live/accounts_live/profile.ex:193
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2323
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:2324
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2325
 #, elixir-autogen, elixir-format
 msgid "Upload failed. Please try again."
 msgstr "Загрузка не удалась. Попробуйте еще раз."
@@ -1163,7 +1163,7 @@ msgstr "Отмечайте места, которые вы посетили вн
 msgid "Visited city not found."
 msgstr "Посещенный город не найден."
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1991
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1992
 #, elixir-autogen, elixir-format
 msgid "Failed to add participant."
 msgstr "Не удалось добавить участника."
@@ -1173,23 +1173,23 @@ msgstr "Не удалось добавить участника."
 msgid "Failed to remove participant."
 msgstr "Не удалось удалить участника."
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1861
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1877
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1862
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1878
 #, elixir-autogen, elixir-format
 msgid "Invite friend"
 msgstr "Пригласить друга"
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1979
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1980
 #, elixir-autogen, elixir-format
 msgid "Only author's friends can be added to this trip."
 msgstr "В эту поездку можно добавлять только друзей автора."
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1985
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1986
 #, elixir-autogen, elixir-format
 msgid "Only trip participants can add participants."
 msgstr "Только участники поездки могут добавлять новых участников."
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1973
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1974
 #, elixir-autogen, elixir-format
 msgid "Participant added."
 msgstr "Участник добавлен."
@@ -1210,12 +1210,12 @@ msgstr "Участник удален."
 msgid "Please choose a friend."
 msgstr "Пожалуйста, выберите друга."
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1845
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1846
 #, elixir-autogen, elixir-format
 msgid "Remove participant"
 msgstr "Удалить участника"
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1842
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1843
 #, elixir-autogen, elixir-format
 msgid "Remove this participant from the trip?"
 msgstr "Удалить этого участника из поездки?"
@@ -1225,17 +1225,17 @@ msgstr "Удалить этого участника из поездки?"
 msgid "The trip author cannot be removed."
 msgstr "Автора поездки нельзя удалить."
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1982
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1983
 #, elixir-autogen, elixir-format
 msgid "The trip author is always a participant."
 msgstr "Автор поездки всегда является участником."
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1976
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1977
 #, elixir-autogen, elixir-format
 msgid "This user is already participating in the trip."
 msgstr "Этот пользователь уже участвует в поездке."
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1988
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1989
 #, elixir-autogen, elixir-format
 msgid "User not found."
 msgstr "Пользователь не найден."
@@ -1245,12 +1245,12 @@ msgstr "Пользователь не найден."
 msgid "You are not allowed to remove this participant."
 msgstr "У вас нет прав удалить этого участника."
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1888
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1889
 #, elixir-autogen, elixir-format
 msgid "Search and select friends..."
 msgstr "Найдите и выберите друга..."
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1881
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1882
 #, elixir-autogen, elixir-format
 msgid "Select from friends"
 msgstr "Выберите из друзей"
@@ -1268,31 +1268,31 @@ msgstr "Пока приключений нет"
 
 #: lib/hamster_travel_web/live/planning_live/components/accommodation.ex:101
 #: lib/hamster_travel_web/live/planning_live/components/accommodation.ex:117
-#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:114
+#: lib/hamster_travel_web/live/planning_live/components/accommodation_form.ex:115
 #: lib/hamster_travel_web/live/planning_live/components/accommodation_new.ex:63
-#: lib/hamster_travel_web/live/planning_live/components/activity.ex:132
-#: lib/hamster_travel_web/live/planning_live/components/activity.ex:148
-#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:130
-#: lib/hamster_travel_web/live/planning_live/components/activity_new.ex:57
+#: lib/hamster_travel_web/live/planning_live/components/activity.ex:133
+#: lib/hamster_travel_web/live/planning_live/components/activity.ex:149
+#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:146
+#: lib/hamster_travel_web/live/planning_live/components/activity_new.ex:59
 #: lib/hamster_travel_web/live/planning_live/components/day_expense.ex:96
 #: lib/hamster_travel_web/live/planning_live/components/day_expense.ex:112
-#: lib/hamster_travel_web/live/planning_live/components/day_expense_form.ex:96
+#: lib/hamster_travel_web/live/planning_live/components/day_expense_form.ex:97
 #: lib/hamster_travel_web/live/planning_live/components/day_expense_new.ex:57
 #: lib/hamster_travel_web/live/planning_live/components/destination.ex:69
 #: lib/hamster_travel_web/live/planning_live/components/destination.ex:85
-#: lib/hamster_travel_web/live/planning_live/components/destination_form.ex:86
+#: lib/hamster_travel_web/live/planning_live/components/destination_form.ex:87
 #: lib/hamster_travel_web/live/planning_live/components/destination_new.ex:62
 #: lib/hamster_travel_web/live/planning_live/components/food_expense.ex:73
-#: lib/hamster_travel_web/live/planning_live/components/food_expense_form.ex:109
+#: lib/hamster_travel_web/live/planning_live/components/food_expense_form.ex:110
 #: lib/hamster_travel_web/live/planning_live/components/note.ex:83
 #: lib/hamster_travel_web/live/planning_live/components/note.ex:97
-#: lib/hamster_travel_web/live/planning_live/components/note_form.ex:82
+#: lib/hamster_travel_web/live/planning_live/components/note_form.ex:83
 #: lib/hamster_travel_web/live/planning_live/components/note_new.ex:57
 #: lib/hamster_travel_web/live/planning_live/components/transfer.ex:100
 #: lib/hamster_travel_web/live/planning_live/components/transfer.ex:116
-#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:235
+#: lib/hamster_travel_web/live/planning_live/components/transfer_form.ex:236
 #: lib/hamster_travel_web/live/planning_live/components/transfer_new.ex:65
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1996
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1997
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Only trip participants can edit this trip."
 msgstr "Только участники поездки могут добавлять новых участников."
@@ -1427,17 +1427,17 @@ msgstr "Поиск черновиков"
 msgid "Search trips"
 msgstr "Поиск поездок"
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1683
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1684
 #, elixir-autogen, elixir-format
 msgid "All places, transfers, hotels, activities, expenses, and notes will be moved together."
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1679
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1680
 #, elixir-autogen, elixir-format
 msgid "Change day order"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1696
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1697
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Expenses and notes"
 msgstr "Расходы"
@@ -1448,37 +1448,37 @@ msgid "Failed to move day: %{reason}"
 msgstr "Ошибка при перемещении впечатления: %{reason}"
 
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1232
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1691
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1692
 #, elixir-autogen, elixir-format
 msgid "Move"
 msgstr "Переместить"
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1724
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1725
 #, elixir-autogen, elixir-format
 msgid "Move day down"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1712
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1713
 #, elixir-autogen, elixir-format
 msgid "Move day up"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1939
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1940
 #, elixir-autogen, elixir-format, fuzzy
 msgid "No activities"
 msgstr "Активности"
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1952
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1953
 #, elixir-autogen, elixir-format
 msgid "No expenses or notes"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1927
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1928
 #, elixir-autogen, elixir-format
 msgid "No places"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1933
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1934
 #, elixir-autogen, elixir-format, fuzzy
 msgid "No transfers"
 msgstr "Трансферы"
@@ -1489,8 +1489,13 @@ msgstr "Трансферы"
 msgid "Open expense link"
 msgstr "Открыть ссылку для расходов"
 
-#: lib/hamster_travel_web/live/planning_live/components/activity.ex:63
 #: lib/hamster_travel_web/live/planning_live/components/activity.ex:64
+#: lib/hamster_travel_web/live/planning_live/components/activity.ex:65
 #, elixir-autogen, elixir-format
 msgid "Toggle activity details"
 msgstr "Раскрыть/закрыть подробную информацию о впечатлении"
+
+#: lib/hamster_travel_web/live/planning_live/components/activity_form.ex:183
+#, elixir-autogen, elixir-format
+msgid "Add new activity"
+msgstr "Добавить впечатление"

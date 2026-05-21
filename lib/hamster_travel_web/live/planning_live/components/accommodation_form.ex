@@ -25,6 +25,7 @@ defmodule HamsterTravelWeb.Planning.AccommodationForm do
         as={:accommodation}
         phx-target={@myself}
         phx-submit="form_submit"
+        phx-mounted={JS.focus_first(to: "#accommodation-form-#{@id}")}
         class="space-y-4"
       >
         <.field

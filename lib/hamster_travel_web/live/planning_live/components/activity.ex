@@ -24,6 +24,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
         day_index={@activity.day_index}
         action={:edit}
         can_edit={@can_edit}
+        position={@index + 1}
         on_finish={fn -> send_update(@myself, edit: false) end}
       />
     </div>

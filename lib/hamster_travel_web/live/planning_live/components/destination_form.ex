@@ -26,6 +26,7 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
         as={:destination}
         phx-target={@myself}
         phx-submit="form_submit"
+        phx-mounted={JS.focus_first(to: "#destination-form-#{@id}")}
         class="space-y-4"
       >
         <.live_component

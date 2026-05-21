@@ -1493,6 +1493,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                 trip={@trip}
                 day_index={i}
                 can_edit={@can_edit}
+                position={length(Planning.activities_for_day(i, @activities)) + 1}
               />
             </div>
           </div>

@@ -61,6 +61,7 @@ defmodule HamsterTravelWeb.Planning.TripForm do
           phx-submit="form_submit"
           phx-change="form_changed"
           phx-target={@myself}
+          phx-mounted={JS.focus_first(to: "#trip-form")}
         >
           <div class="grid grid-cols-6 gap-x-6">
             <div class="col-span-6">

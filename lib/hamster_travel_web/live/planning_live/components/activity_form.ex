@@ -12,6 +12,7 @@ defmodule HamsterTravelWeb.Planning.ActivityForm do
   attr :day_index, :integer, required: true
   attr :on_finish, :fun, required: true
   attr :can_edit, :boolean, default: false
+  attr :position, :integer, default: nil
 
   @impl true
   def render(assigns) do
@@ -23,9 +24,24 @@ defmodule HamsterTravelWeb.Planning.ActivityForm do
         as={:activity}
         phx-target={@myself}
         phx-submit="form_submit"
+        phx-mounted={JS.focus_first(to: "#activity-form-#{@id}")}
         class="space-y-4"
       >
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+        <div
+          :if={@position}
+          class="flex items-center gap-3 rounded-md border border-primary-200 bg-primary-50 px-3 py-2 text-primary-950 dark:border-primary-900 dark:bg-primary-950/30 dark:text-primary-100"
+        >
+          <span class="inline-flex h-8 min-w-8 shrink-0 items-center justify-center rounded-md bg-primary-100 px-2 text-sm font-semibold tabular-nums dark:bg-primary-900">
+            {@position}
+          </span>
+          <div class="min-w-0">
+            <p class="text-sm font-semibold leading-snug">
+              {activity_form_title(assigns)}
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-8 items-stretch">
           <div class="space-y-4 md:col-span-1">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
               <div class="grow">
@@ -161,5 +177,13 @@ defmodule HamsterTravelWeb.Planning.ActivityForm do
 
   defp result({:error, changeset}, socket) do
     {:noreply, assign_form(socket, changeset)}
+  end
+
+  defp activity_form_title(%{action: :new}) do
+    gettext("Add new activity")
+  end
+
+  defp activity_form_title(%{action: :edit, activity: activity}) do
+    activity.name
   end
 end

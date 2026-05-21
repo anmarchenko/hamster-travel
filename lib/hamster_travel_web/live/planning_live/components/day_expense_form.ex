@@ -23,6 +23,7 @@ defmodule HamsterTravelWeb.Planning.DayExpenseForm do
         as={:day_expense}
         phx-target={@myself}
         phx-submit="form_submit"
+        phx-mounted={JS.focus_first(to: "#day-expense-form-#{@id}")}
         class="space-y-4 max-w-lg"
       >
         <div class="flex flex-col gap-4 sm:flex-row sm:items-end">

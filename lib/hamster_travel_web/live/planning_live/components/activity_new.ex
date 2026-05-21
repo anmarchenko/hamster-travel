@@ -9,6 +9,7 @@ defmodule HamsterTravelWeb.Planning.ActivityNew do
   attr :edit, :boolean, default: false
   attr :class, :string, default: nil
   attr :can_edit, :boolean, default: false
+  attr :position, :integer, default: nil
 
   def render(%{edit: true} = assigns) do
     ~H"""
@@ -20,6 +21,7 @@ defmodule HamsterTravelWeb.Planning.ActivityNew do
         day_index={@day_index}
         action={:new}
         can_edit={@can_edit}
+        position={@position}
         on_finish={fn -> send(self(), {:finish_adding, "activity"}) end}
       />
     </div>

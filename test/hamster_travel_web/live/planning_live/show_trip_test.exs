@@ -994,6 +994,8 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       user = user_fixture()
       conn = log_in_user(conn, user)
       trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+      activity_fixture(%{trip_id: trip.id, day_index: 0, name: "Museum"})
+      activity_fixture(%{trip_id: trip.id, day_index: 0, name: "Park"})
 
       # Act
       {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
@@ -1007,9 +1009,37 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       # Assert
 
       assert has_element?(view, "form[id*='activity-form-new-activity-new-0']")
+      assert has_element?(view, "p", "Add new activity")
+      assert has_element?(view, "span", "3")
       assert has_element?(view, "label", "Activity Name")
       assert has_element?(view, "label", "Priority")
       assert has_element?(view, "label", "Price")
+    end
+
+    test "shows activity position when editing an activity", %{conn: conn} do
+      # Arrange
+
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      activity_fixture(%{trip_id: trip.id, day_index: 0, name: "Museum"})
+
+      second_activity =
+        activity_fixture(%{trip_id: trip.id, day_index: 0, name: "Park"})
+
+      # Act
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      view
+      |> element("[data-activity-id='#{second_activity.id}'] [phx-click='edit']")
+      |> render_click()
+
+      # Assert
+
+      assert has_element?(view, "p", "Park")
+      assert has_element?(view, "span", "2")
     end
 
     test "can create activity via form", %{conn: conn} do

@@ -25,6 +25,7 @@ defmodule HamsterTravelWeb.Planning.FoodExpenseForm do
         phx-target={@myself}
         phx-change="form_changed"
         phx-submit="form_submit"
+        phx-mounted={JS.focus_first(to: "#food-expense-form-#{@food_expense.id}")}
         class="space-y-4 max-w-2xl"
       >
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-start">

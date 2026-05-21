@@ -27,6 +27,7 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
         phx-target={@myself}
         phx-submit="form_submit"
         phx-change="form_changed"
+        phx-mounted={JS.focus_first(to: "#transfer-form-#{@id}")}
         class="space-y-4"
       >
         <.field
