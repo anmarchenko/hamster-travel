@@ -777,6 +777,7 @@ defmodule HamsterTravel.Planning.Trips do
       %DayExpense{
         trip_id: trip.id,
         name: day_expense.name,
+        link: day_expense.link,
         day_index: day_expense.day_index,
         rank: day_expense.rank
       }

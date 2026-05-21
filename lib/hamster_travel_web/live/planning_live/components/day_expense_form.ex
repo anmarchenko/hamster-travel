@@ -47,6 +47,13 @@ defmodule HamsterTravelWeb.Planning.DayExpenseForm do
           </.inputs_for>
         </div>
 
+        <.field
+          field={@form[:link]}
+          type="text"
+          label={gettext("Link")}
+          placeholder="https://..."
+        />
+
         <div class="flex justify-between mt-2">
           <.button color="light" type="button" phx-click="cancel" phx-target={@myself}>
             {gettext("Cancel")}

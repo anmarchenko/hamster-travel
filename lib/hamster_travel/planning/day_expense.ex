@@ -7,6 +7,7 @@ defmodule HamsterTravel.Planning.DayExpense do
 
   schema "day_expenses" do
     field :name, :string
+    field :link, :string
     field :day_index, :integer
     field :rank, :integer
     field :position, :any, virtual: true
@@ -20,7 +21,7 @@ defmodule HamsterTravel.Planning.DayExpense do
   @doc false
   def changeset(day_expense, attrs) do
     day_expense
-    |> cast(attrs, [:name, :day_index, :trip_id, :position])
+    |> cast(attrs, [:name, :link, :day_index, :trip_id, :position])
     |> cast_assoc(:expense, with: &Expense.changeset/2)
     |> validate_required([:name, :day_index, :trip_id])
     |> validate_number(:day_index, greater_than_or_equal_to: 0)

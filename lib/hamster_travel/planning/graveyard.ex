@@ -153,6 +153,7 @@ defmodule HamsterTravel.Planning.Graveyard do
   defp day_expense_payload(%DayExpense{} = day_expense) do
     %{
       "name" => day_expense.name,
+      "link" => day_expense.link,
       "day_index" => day_expense.day_index,
       "rank" => day_expense.rank,
       "expense" => expense_payload(day_expense.expense),
@@ -317,6 +318,7 @@ defmodule HamsterTravel.Planning.Graveyard do
         %DayExpense{
           trip_id: trip.id,
           name: Map.get(day_expense, "name"),
+          link: Map.get(day_expense, "link"),
           day_index: Map.get(day_expense, "day_index"),
           rank: Map.get(day_expense, "rank")
         }

@@ -212,6 +212,7 @@ defmodule HamsterTravel.PlanningFixtures do
       attrs
       |> Enum.into(%{
         name: "Transport card",
+        link: "https://example.com/metro-pass",
         day_index: 0,
         trip_id: trip_id,
         expense: %{

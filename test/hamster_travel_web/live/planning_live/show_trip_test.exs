@@ -1083,6 +1083,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "form[id*='day-expense-form-new-day-expense-new-0']")
       assert has_element?(view, "label", "Name")
       assert has_element?(view, "label", "Price")
+      assert has_element?(view, "label", "Link")
     end
 
     test "can create day expense via form", %{conn: conn} do
@@ -1106,6 +1107,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       |> form("form[id*='day-expense-form-new-day-expense-new-0']", %{
         day_expense: %{
           name: "Metro card",
+          link: "https://example.com/metro-card",
           day_index: "0",
           expense: %{
             price: %{
@@ -1127,6 +1129,8 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       day_expense = List.first(day_expenses)
       assert day_expense.name == "Metro card"
+      assert day_expense.link == "https://example.com/metro-card"
+      assert has_element?(view, "a[href='https://example.com/metro-card'][target='_blank']")
     end
 
     test "shows food expense summary", %{conn: conn} do

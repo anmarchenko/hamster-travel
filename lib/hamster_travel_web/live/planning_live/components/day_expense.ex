@@ -39,7 +39,20 @@ defmodule HamsterTravelWeb.Planning.DayExpense do
       data-day-expense-id={@day_expense.id}
     >
       <.inline class="w-full gap-2 2xl:text-lg">
-        <span class="min-w-0 flex-1">{@day_expense.name}</span>
+        <span class="flex min-w-0 flex-1 items-center gap-1.5">
+          <span class="min-w-0 truncate">{@day_expense.name}</span>
+          <.link
+            :if={@day_expense.link}
+            href={@day_expense.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={gettext("Open expense link")}
+            title={gettext("Open expense link")}
+            class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-zinc-400 transition-colors hover:text-violet-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:text-zinc-500 dark:hover:text-violet-300"
+          >
+            <.icon name="hero-link" class="h-4 w-4" />
+          </.link>
+        </span>
         <div class="ml-auto flex shrink-0 items-center justify-end gap-2 sm:w-44">
           <.money_display
             money={@day_expense.expense.price}

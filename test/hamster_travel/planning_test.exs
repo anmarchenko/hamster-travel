@@ -555,6 +555,7 @@ defmodule HamsterTravel.PlanningTest do
       {:ok, day_expense} =
         Planning.create_day_expense(trip, %{
           name: "Metro pass",
+          link: "https://example.com/metro-pass",
           day_index: 0,
           expense: %{
             price: Money.new(:EUR, 1_200),
@@ -648,6 +649,7 @@ defmodule HamsterTravel.PlanningTest do
 
       assert [new_day_expense] = new_trip.day_expenses
       assert new_day_expense.name == day_expense.name
+      assert new_day_expense.link == day_expense.link
       assert new_day_expense.day_index == day_expense.day_index
       assert new_day_expense.rank == day_expense.rank
       assert new_day_expense.expense.price == day_expense.expense.price
@@ -1252,6 +1254,7 @@ defmodule HamsterTravel.PlanningTest do
       {:ok, _day_expense} =
         Planning.create_day_expense(trip, %{
           name: "Lunch",
+          link: "https://example.com/lunch",
           day_index: 0,
           expense: %{price: Money.new(:EUR, 1500), name: "Lunch", trip_id: trip.id}
         })
@@ -1280,6 +1283,7 @@ defmodule HamsterTravel.PlanningTest do
       assert length(restored.transfers) == 1
       assert length(restored.activities) == 1
       assert length(restored.day_expenses) == 1
+      assert [%{link: "https://example.com/lunch"}] = restored.day_expenses
       assert length(restored.notes) == 1
 
       standalone_expenses =
@@ -2191,6 +2195,21 @@ defmodule HamsterTravel.PlanningTest do
 
       assert changeset.valid?
       assert %Ecto.Changeset{} = changeset.changes.expense
+    end
+
+    test "changeset casts optional link" do
+      trip = trip_fixture()
+
+      changeset =
+        DayExpense.changeset(%DayExpense{}, %{
+          name: "Transport",
+          link: "https://example.com/ticket",
+          day_index: 0,
+          trip_id: trip.id
+        })
+
+      assert changeset.valid?
+      assert changeset.changes.link == "https://example.com/ticket"
     end
   end
 
@@ -4020,7 +4039,7 @@ defmodule HamsterTravel.PlanningTest do
     alias HamsterTravel.Planning.DayExpense
 
     @invalid_day_expense_attrs %{name: nil, day_index: nil}
-    @update_day_expense_attrs %{name: "Updated expense"}
+    @update_day_expense_attrs %{name: "Updated expense", link: "https://example.com/updated"}
 
     setup do
       trip = trip_fixture()
@@ -4070,6 +4089,7 @@ defmodule HamsterTravel.PlanningTest do
     test "create_day_expense/2 with valid data creates a day expense", %{trip: trip} do
       valid_attrs = %{
         name: "Transport card",
+        link: "https://example.com/metro-pass",
         day_index: 0,
         expense: %{
           price: Money.new(:EUR, 1200),
@@ -4080,6 +4100,7 @@ defmodule HamsterTravel.PlanningTest do
 
       assert {:ok, %DayExpense{} = day_expense} = Planning.create_day_expense(trip, valid_attrs)
       assert day_expense.name == "Transport card"
+      assert day_expense.link == "https://example.com/metro-pass"
       assert day_expense.day_index == 0
       assert day_expense.trip_id == trip.id
       assert day_expense.expense.price == Money.new(:EUR, 1200)
@@ -4112,6 +4133,7 @@ defmodule HamsterTravel.PlanningTest do
                Planning.update_day_expense(day_expense, @update_day_expense_attrs)
 
       assert updated.name == "Updated expense"
+      assert updated.link == "https://example.com/updated"
     end
 
     test "update_day_expense/2 sends pubsub event", %{trip: trip} do
