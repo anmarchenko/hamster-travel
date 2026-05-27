@@ -23,6 +23,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
 
   attr(:trips, :list, required: true)
   attr(:display_currency, :string, required: true)
+  attr(:return_to, :string, default: nil)
 
   def trips_grid(assigns) do
     ~H"""
@@ -36,6 +37,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
         trip={trip}
         id={id}
         display_currency={@display_currency}
+        return_to={@return_to}
       />
     </div>
     """
@@ -146,6 +148,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
   attr(:id, :string, required: true)
   attr(:trip, Trip, required: true)
   attr(:display_currency, :string, required: true)
+  attr(:return_to, :string, default: nil)
 
   def trip_card(assigns) do
     budget = Planning.calculate_budget(assigns.trip)
@@ -162,7 +165,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
     ~H"""
     <.card id={@id}>
       <div class="shrink-0">
-        <.link navigate={trip_url(@trip.slug)}>
+        <.link navigate={trip_url(@trip.slug, :show, @return_to)}>
           <img
             src={@cover_url}
             class="w-32 h-32 object-cover object-center rounded-l-lg"
@@ -171,7 +174,7 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
       </div>
       <div class="p-4 max-w-[calc(100%-theme(width.32))] flex flex-col justify-between">
         <p class="text-base font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
-          <.link navigate={trip_url(@trip.slug)}>
+          <.link navigate={trip_url(@trip.slug, :show, @return_to)}>
             {@trip.name}
             <span class="font-light text-zinc-600 dark:text-zinc-400">
               {Formatter.year_with_month(@trip.start_date)}

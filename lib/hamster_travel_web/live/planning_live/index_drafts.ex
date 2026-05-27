@@ -56,6 +56,7 @@ defmodule HamsterTravelWeb.Planning.IndexDrafts do
         :if={!@empty_state? && @total_entries > 0}
         trips={@streams.plans}
         display_currency={@display_currency}
+        return_to={@return_to}
       />
       <.pagination
         :if={!@empty_state? && @total_entries > 0 && @total_pages > 1}
@@ -84,6 +85,7 @@ defmodule HamsterTravelWeb.Planning.IndexDrafts do
       |> assign(total_entries: 0)
       |> assign(search_query: nil)
       |> assign(pagination_path: pagination_path(nil))
+      |> assign(return_to: current_list_path(nil, 1))
       |> stream(:plans, [])
 
     {:ok, socket}
@@ -105,6 +107,7 @@ defmodule HamsterTravelWeb.Planning.IndexDrafts do
       |> assign(total_entries: paginated_drafts.total_entries)
       |> assign(search_query: search_query)
       |> assign(pagination_path: pagination_path(search_query))
+      |> assign(return_to: current_list_path(search_query, paginated_drafts.page))
       |> stream(:plans, paginated_drafts.entries, reset: true)
 
     {:noreply, socket}
@@ -136,23 +139,17 @@ defmodule HamsterTravelWeb.Planning.IndexDrafts do
   end
 
   defp search_path(search_query) do
-    path_with_query("/drafts", [{"q", search_query}])
+    ~p"/drafts?#{query_params(q: search_query)}"
   end
 
   defp pagination_path(search_query) do
-    path_with_query("/drafts", [{"page", ":page"}, {"q", search_query}])
+    ~p"/drafts?#{query_params(page: ":page", q: search_query)}"
   end
 
-  defp path_with_query(base_path, params) do
-    query =
-      params
-      |> Enum.reject(fn {_key, value} -> is_nil(value) or value == "" end)
-      |> URI.encode_query()
-
-    if query == "" do
-      base_path
-    else
-      "#{base_path}?#{query}"
-    end
+  defp current_list_path(search_query, page) do
+    ~p"/drafts?#{query_params(page: page_param(page), q: search_query)}"
   end
+
+  defp page_param(1), do: nil
+  defp page_param(page), do: page
 end

@@ -32,15 +32,15 @@ defmodule HamsterTravelWeb.CoreComponents do
   def backpacks_nav_item, do: :backpacks
   def home_nav_item, do: :home
 
-  def trip_url(slug), do: ~p"/trips/#{slug}"
-  def trip_url(slug, :show), do: trip_url(slug)
-  def trip_url(slug, :edit), do: ~p"/trips/#{slug}/edit"
-  def trip_url(slug, :itinerary), do: ~p"/trips/#{slug}?tab=itinerary"
-  def trip_url(slug, :activities), do: ~p"/trips/#{slug}?tab=activities"
-  def trip_url(slug, :notes), do: ~p"/trips/#{slug}?tab=notes"
-  def trip_url(slug, :export_pdf), do: ~p"/trips/#{slug}/export.pdf"
-  def trip_url(id, :copy), do: ~p"/trips/new?copy=#{id}"
-  def trip_url(slug, _), do: trip_url(slug)
+  def trip_url(slug, action \\ :show, return_to \\ nil)
+  def trip_url(slug, :show, return_to), do: trip_path(slug, nil, return_to)
+  def trip_url(slug, :edit, _return_to), do: ~p"/trips/#{slug}/edit"
+  def trip_url(slug, :itinerary, return_to), do: trip_path(slug, "itinerary", return_to)
+  def trip_url(slug, :activities, return_to), do: trip_path(slug, "activities", return_to)
+  def trip_url(slug, :notes, return_to), do: trip_path(slug, "notes", return_to)
+  def trip_url(slug, :export_pdf, _return_to), do: ~p"/trips/#{slug}/export.pdf"
+  def trip_url(id, :copy, _return_to), do: ~p"/trips/new?copy=#{id}"
+  def trip_url(slug, _action, _return_to), do: trip_url(slug)
 
   def plans_url, do: ~p"/plans"
 
@@ -69,6 +69,14 @@ defmodule HamsterTravelWeb.CoreComponents do
     |> Enum.filter(fn class -> class != nil && class != "" end)
     |> Enum.uniq()
     |> Enum.join(" ")
+  end
+
+  def query_params(params) do
+    Enum.reject(params, fn {_key, value} -> is_nil(value) or value == "" end)
+  end
+
+  defp trip_path(slug, tab, return_to) do
+    ~p"/trips/#{slug}?#{query_params(tab: tab, return_to: return_to)}"
   end
 
   @doc """

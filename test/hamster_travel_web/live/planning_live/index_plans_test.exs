@@ -107,6 +107,19 @@ defmodule HamsterTravelWeb.Planning.IndexPlansTest do
       assert html =~ "page=2"
     end
 
+    test "keeps current page and search query in trip links", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      for idx <- 1..13 do
+        trip_fixture(%{author_id: user.id, status: "1_planned", name: "Searchable #{idx}"})
+      end
+
+      {:ok, _view, html} = live(conn, ~p"/plans?page=2&q=Searchable")
+
+      assert html =~ "return_to=%2Fplans%3Fpage%3D2%26q%3DSearchable"
+    end
+
     test "uses current user default currency for displayed budget", %{conn: conn} do
       user = user_fixture(%{default_currency: "USD"})
       conn = log_in_user(conn, user)

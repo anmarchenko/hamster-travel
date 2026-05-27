@@ -48,6 +48,8 @@ defmodule HamsterTravelWeb.Layouts do
             mobile_menu={@mobile_menu}
             active_tab={@active_tab}
             active_nav={@active_nav}
+            return_to={@return_to}
+            trip_slug={@trip_slug}
           />
         </div>
       </nav>
@@ -59,7 +61,12 @@ defmodule HamsterTravelWeb.Layouts do
     case assigns.mobile_menu do
       :plan_tabs ->
         ~H"""
-        <.mobile_nav_plan_tabs active_tab={@active_tab} active_nav={@active_nav} />
+        <.mobile_nav_plan_tabs
+          active_tab={@active_tab}
+          active_nav={@active_nav}
+          return_to={@return_to}
+          trip_slug={@trip_slug}
+        />
         """
 
       nil ->
@@ -76,21 +83,21 @@ defmodule HamsterTravelWeb.Layouts do
     </.mobile_nav_link>
     <.mobile_nav_link_tab
       label={gettext("Transfers")}
-      to="?tab=itinerary"
+      to={trip_url(@trip_slug, :itinerary, @return_to)}
       active={@active_tab == "itinerary"}
     >
       <.airplane class="h-6 w-6" />
     </.mobile_nav_link_tab>
     <.mobile_nav_link_tab
       label={gettext("Activities")}
-      to="?tab=activities"
+      to={trip_url(@trip_slug, :activities, @return_to)}
       active={@active_tab == "activities"}
     >
       <.icon name="hero-ticket" class="h-6 w-6" />
     </.mobile_nav_link_tab>
     <.mobile_nav_link_tab
       label={gettext("Notes")}
-      to="?tab=notes"
+      to={trip_url(@trip_slug, :notes, @return_to)}
       active={@active_tab == "notes"}
     >
       <.icon name="hero-document-text" class="h-6 w-6" />
@@ -167,10 +174,15 @@ defmodule HamsterTravelWeb.Layouts do
     do: "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
 
   def back_url(assigns) do
-    if assigns.active_nav == plans_nav_item() do
-      ~p"/plans"
-    else
-      ~p"/drafts"
+    cond do
+      is_binary(assigns[:return_to]) ->
+        assigns.return_to
+
+      assigns.active_nav == plans_nav_item() ->
+        ~p"/plans"
+
+      true ->
+        ~p"/drafts"
     end
   end
 end

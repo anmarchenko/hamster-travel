@@ -64,6 +64,38 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert html =~ "31.12.2025 - 02.01.2026"
     end
 
+    test "uses return_to for mobile back and preserves it in tab links", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "1_planned"})
+
+      return_to = "/plans?page=2&q=Searchable"
+      encoded_return_to = URI.encode_www_form(return_to)
+
+      {:ok, _view, html} = live(conn, "/trips/#{trip.slug}?return_to=#{encoded_return_to}")
+
+      assert html =~ ~s(href="/plans?page=2&amp;q=Searchable")
+
+      assert html =~
+               ~s(href="/trips/#{trip.slug}?tab=activities&amp;return_to=%2Fplans%3Fpage%3D2%26q%3DSearchable")
+
+      assert html =~
+               ~s(href="/trips/#{trip.slug}?tab=activities&amp;return_to=%2Fplans%3Fpage%3D2%26q%3DSearchable")
+    end
+
+    test "ignores unsafe return_to values", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "1_planned"})
+
+      unsafe_return_to = URI.encode_www_form("https://example.com/plans?page=2")
+
+      {:ok, _view, html} = live(conn, "/trips/#{trip.slug}?return_to=#{unsafe_return_to}")
+
+      assert html =~ ~s(href="/plans")
+      refute html =~ "example.com"
+    end
+
     test "hides empty mobile itinerary section headers but keeps add links", %{conn: conn} do
       user = user_fixture()
       conn = log_in_user(conn, user)
@@ -151,14 +183,17 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
         )
 
       # Act
-      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+      return_to = "/plans?page=2&q=Delete"
+
+      {:ok, view, _html} =
+        live(conn, "/trips/#{trip.slug}?return_to=#{URI.encode_www_form(return_to)}")
 
       view
       |> element("[phx-click='delete_trip']")
       |> render_click()
 
       # Assert
-      assert_redirect(view, ~p"/plans")
+      assert_redirect(view, return_to)
       assert Planning.get_trip(trip.id) == nil
     end
 

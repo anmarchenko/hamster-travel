@@ -100,6 +100,19 @@ defmodule HamsterTravelWeb.Planning.IndexDraftsTest do
       assert html =~ "page=2"
     end
 
+    test "keeps current page and search query in draft trip links", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      for idx <- 1..13 do
+        trip_fixture(%{author_id: user.id, status: Trip.draft(), name: "Searchable draft #{idx}"})
+      end
+
+      {:ok, _view, html} = live(conn, ~p"/drafts?page=2&q=Searchable")
+
+      assert html =~ "return_to=%2Fdrafts%3Fpage%3D2%26q%3DSearchable"
+    end
+
     test "redirects if user is not authenticated", %{conn: conn} do
       # Try to visit the drafts page without logging in
       result = live(conn, ~p"/drafts")

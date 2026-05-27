@@ -132,7 +132,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       full
       class="mt-*! p-*! py-3 sm:py-6 px-6 sm:px-10 mb-10 mt-0 sm:mt-4 bg-white dark:bg-zinc-800 rounded-md"
     >
-      <.planning_tabs trip={@trip} active_tab={@active_tab} />
+      <.planning_tabs trip={@trip} active_tab={@active_tab} return_to={@return_to} />
       <.render_tab
         trip={@trip}
         active_tab={@active_tab}
@@ -170,6 +170,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   def mount(%{"trip_slug" => slug} = params, _session, socket) do
     trip = Planning.fetch_trip!(slug, socket.assigns.current_user)
     display_currency = socket.assigns.current_user.default_currency || "EUR"
+    active_nav = active_nav(trip)
+    return_to = return_to(params, active_nav)
 
     socket =
       if connected?(socket) do
@@ -182,10 +184,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     socket =
       socket
       |> assign(mobile_menu: :plan_tabs)
+      |> assign(trip_slug: trip.slug)
       |> assign(active_tab: fetch_tab(params))
-      |> assign(active_nav: active_nav(trip))
+      |> assign(active_nav: active_nav)
       |> assign(page_title: trip.name)
       |> assign(display_currency: display_currency)
+      |> assign(return_to: return_to)
       |> assign(active_destination_adding_component_id: nil)
       |> assign(active_accommodation_adding_component_id: nil)
       |> assign(active_transfer_adding_component_id: nil)
@@ -214,6 +218,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     socket =
       socket
       |> assign(active_tab: fetch_tab(params))
+      |> assign(return_to: return_to(params, socket.assigns.active_nav))
 
     {:noreply, socket}
   end
@@ -474,7 +479,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           {:ok, _trip} ->
             socket
             |> put_flash(:info, gettext("Trip deleted."))
-            |> push_navigate(to: ~p"/plans")
+            |> push_navigate(to: socket.assigns.return_to)
 
           {:error, _reason} ->
             put_flash(socket, :error, gettext("Failed to delete trip."))
@@ -951,6 +956,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   attr(:trip, :map, required: true)
   attr(:active_tab, :string, required: true)
+  attr(:return_to, :string, required: true)
   attr(:class, :string, default: nil)
 
   def planning_tabs(assigns) do
@@ -966,7 +972,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     >
       <.tab
         underline
-        to={trip_url(@trip.slug, :itinerary)}
+        to={trip_url(@trip.slug, :itinerary, @return_to)}
         is_active={@active_tab == "itinerary"}
         link_type="live_patch"
       >
@@ -977,7 +983,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       </.tab>
       <.tab
         underline
-        to={trip_url(@trip.slug, :activities)}
+        to={trip_url(@trip.slug, :activities, @return_to)}
         is_active={@active_tab == "activities"}
         link_type="live_patch"
       >
@@ -988,7 +994,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       </.tab>
       <.tab
         underline
-        to={trip_url(@trip.slug, :notes)}
+        to={trip_url(@trip.slug, :notes, @return_to)}
         is_active={@active_tab == "notes"}
         link_type="live_patch"
       >
@@ -2073,6 +2079,26 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
        do: tab
 
   defp fetch_tab(_), do: "itinerary"
+
+  defp return_to(%{"return_to" => return_to}, active_nav) when is_binary(return_to) do
+    case URI.parse(return_to) do
+      %{scheme: nil, host: nil, path: path, query: query} when path in ["/plans", "/drafts"] ->
+        URI.to_string(%URI{path: path, query: query})
+
+      _uri ->
+        default_return_to(active_nav)
+    end
+  end
+
+  defp return_to(_params, active_nav), do: default_return_to(active_nav)
+
+  defp default_return_to(active_nav) do
+    if active_nav == drafts_nav_item() do
+      ~p"/drafts"
+    else
+      ~p"/plans"
+    end
+  end
 
   defp destinations_outside(trip) do
     trip.destinations
