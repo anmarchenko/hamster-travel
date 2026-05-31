@@ -29,34 +29,42 @@ defmodule HamsterTravelWeb.Planning.FoodExpense do
 
   def render(%{edit: false} = assigns) do
     ~H"""
-    <div id={"food-expense-#{@food_expense.id}"} class="flex flex-col gap-y-1 py-1">
-      <.inline class="items-center gap-2 text-base font-medium flex-wrap">
-        <span class="whitespace-nowrap">
-          <.money_display
-            money={@food_expense.price_per_day}
-            display_currency={@display_currency}
-            class="inline-flex"
+    <div
+      id={"food-expense-#{@food_expense.id}"}
+      class="flex w-full max-w-3xl flex-col gap-y-1 rounded-md py-1.5"
+    >
+      <.inline class="w-full gap-2 2xl:text-lg">
+        <span class="flex min-w-0 flex-1 items-center gap-1.5">
+          <span class="min-w-0 truncate">
+            <.money_display
+              money={@food_expense.price_per_day}
+              display_currency={@display_currency}
+              class="inline-flex"
+            />
+            {gettext("per day")} x {@food_expense.days_count} {ngettext(
+              "day",
+              "days",
+              @food_expense.days_count
+            )} x {@food_expense.people_count} {ngettext(
+              "person",
+              "people",
+              @food_expense.people_count
+            )}
+          </span>
+          <.edit_delete_buttons
+            :if={@can_edit}
+            class="shrink-0"
+            edit_target={@myself}
+            show_delete={false}
           />
-          {gettext("per day")} x {@food_expense.days_count} {ngettext(
-            "day",
-            "days",
-            @food_expense.days_count
-          )} x {@food_expense.people_count} {ngettext("person", "people", @food_expense.people_count)}
         </span>
-        <span class="whitespace-nowrap">
-          =
+        <div class="ml-auto flex shrink-0 items-center justify-end sm:w-44">
           <.money_display
             money={@food_expense.expense.price}
             display_currency={@display_currency}
-            class="inline-flex font-normal"
+            class="text-right text-base font-normal tabular-nums text-zinc-500 dark:text-zinc-400 2xl:text-lg"
           />
-        </span>
-        <.edit_delete_buttons
-          :if={@can_edit}
-          class="ml-1"
-          edit_target={@myself}
-          show_delete={false}
-        />
+        </div>
       </.inline>
     </div>
     """

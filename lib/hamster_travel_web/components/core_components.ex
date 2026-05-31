@@ -37,6 +37,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   def trip_url(slug, :edit, _return_to), do: ~p"/trips/#{slug}/edit"
   def trip_url(slug, :itinerary, return_to), do: trip_path(slug, "itinerary", return_to)
   def trip_url(slug, :activities, return_to), do: trip_path(slug, "activities", return_to)
+  def trip_url(slug, :budget, return_to), do: trip_path(slug, "budget", return_to)
   def trip_url(slug, :notes, return_to), do: trip_path(slug, "notes", return_to)
   def trip_url(slug, :export_pdf, _return_to), do: ~p"/trips/#{slug}/export.pdf"
   def trip_url(id, :copy, _return_to), do: ~p"/trips/new?copy=#{id}"
