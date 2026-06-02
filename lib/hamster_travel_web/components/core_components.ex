@@ -34,12 +34,18 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   def trip_url(slug, action \\ :show, return_to \\ nil)
   def trip_url(slug, :show, return_to), do: trip_path(slug, nil, return_to)
-  def trip_url(slug, :edit, _return_to), do: ~p"/trips/#{slug}/edit"
+
+  def trip_url(slug, :edit, return_to),
+    do: ~p"/trips/#{slug}/edit?#{query_params(return_to: return_to)}"
+
   def trip_url(slug, :itinerary, return_to), do: trip_path(slug, "itinerary", return_to)
   def trip_url(slug, :activities, return_to), do: trip_path(slug, "activities", return_to)
   def trip_url(slug, :notes, return_to), do: trip_path(slug, "notes", return_to)
   def trip_url(slug, :export_pdf, _return_to), do: ~p"/trips/#{slug}/export.pdf"
-  def trip_url(id, :copy, _return_to), do: ~p"/trips/new?copy=#{id}"
+
+  def trip_url(id, :copy, return_to),
+    do: ~p"/trips/new?#{query_params(copy: id, return_to: return_to)}"
+
   def trip_url(slug, _action, _return_to), do: trip_url(slug)
 
   def plans_url, do: ~p"/plans"
