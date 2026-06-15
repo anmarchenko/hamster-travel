@@ -15,6 +15,8 @@ defmodule HamsterTravel.Planning do
     Accommodations,
     Activities,
     Activity,
+    BudgetCategories,
+    BudgetCategory,
     Common,
     DayExpense,
     DayExpenses,
@@ -666,6 +668,89 @@ defmodule HamsterTravel.Planning do
   """
   def calculate_budget(%Trip{} = trip) do
     Expenses.calculate_budget(trip)
+  end
+
+  # Budget category functions
+
+  @doc """
+  Fetches a budget category by id and raises if missing.
+
+  Returns `%BudgetCategory{}` with estimate, actual expenses, food settings, and trip preloaded.
+  """
+  def get_budget_category!(id) do
+    BudgetCategories.get_budget_category!(id)
+  end
+
+  @doc """
+  Lists budget categories for a trip.
+
+  Pass a `%Trip{}` or trip id.
+  Returns categories ordered by name with estimate and actual expenses preloaded.
+  """
+  def list_budget_categories(trip_or_id) do
+    BudgetCategories.list_budget_categories(trip_or_id)
+  end
+
+  @doc """
+  Creates a budget category and its estimated expense.
+
+  Category estimates count toward the budget. Actual category expenses are separate
+  expense rows and are excluded from the budget calculation.
+  """
+  def create_budget_category(%Trip{} = trip, attrs \\ %{}) do
+    BudgetCategories.create_budget_category(trip, attrs)
+  end
+
+  @doc """
+  Updates a budget category and its estimated expense.
+  """
+  def update_budget_category(%BudgetCategory{} = category, attrs) do
+    BudgetCategories.update_budget_category(category, attrs)
+  end
+
+  @doc """
+  Builds a changeset for editing a budget category.
+  """
+  def change_budget_category(%BudgetCategory{} = category, attrs \\ %{}) do
+    BudgetCategories.change_budget_category(category, attrs)
+  end
+
+  @doc """
+  Deletes a budget category and its category expenses.
+  """
+  def delete_budget_category(%BudgetCategory{} = category) do
+    BudgetCategories.delete_budget_category(category)
+  end
+
+  @doc """
+  Creates an actual expense for a budget category.
+
+  Actual expenses are visible real spending records, but they do not count toward
+  the budget while the estimated category expense is still active.
+  """
+  def create_budget_category_actual_expense(%BudgetCategory{} = category, attrs \\ %{}) do
+    BudgetCategories.create_budget_category_actual_expense(category, attrs)
+  end
+
+  @doc """
+  Updates an actual expense for a budget category.
+  """
+  def update_budget_category_actual_expense(%Expense{} = expense, attrs) do
+    BudgetCategories.update_budget_category_actual_expense(expense, attrs)
+  end
+
+  @doc """
+  Deletes an actual expense for a budget category.
+  """
+  def delete_budget_category_actual_expense(%Expense{} = expense) do
+    BudgetCategories.delete_budget_category_actual_expense(expense)
+  end
+
+  @doc """
+  Replaces a category estimate with the sum of its actual expenses.
+  """
+  def recalculate_budget_category_estimate(%BudgetCategory{} = category) do
+    BudgetCategories.recalculate_budget_category_estimate(category)
   end
 
   # Accommodation functions
