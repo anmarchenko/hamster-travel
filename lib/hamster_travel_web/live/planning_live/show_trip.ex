@@ -58,7 +58,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             <.button
               :if={@can_edit}
               link_type="live_redirect"
-              to={trip_url(@trip.slug, :edit)}
+              to={trip_url(@trip.slug, :edit, @return_to)}
               color="secondary"
             >
               <.icon_text icon="hero-pencil" label={gettext("Edit")} />
@@ -66,7 +66,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             <.button
               :if={Policy.authorized?(:copy, @trip, @current_user)}
               link_type="live_redirect"
-              to={trip_url(@trip.id, :copy)}
+              to={trip_url(@trip.id, :copy, @return_to)}
               color="secondary"
             >
               <.icon_text icon="hero-document-duplicate" label={gettext("Make a copy")} />
