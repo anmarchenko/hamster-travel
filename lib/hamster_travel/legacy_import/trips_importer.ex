@@ -18,7 +18,6 @@ defmodule HamsterTravel.LegacyImport.TripsImporter do
     DayExpense,
     Destination,
     Expense,
-    FoodExpense,
     Note,
     Transfer,
     Trip,
@@ -222,7 +221,6 @@ defmodule HamsterTravel.LegacyImport.TripsImporter do
            deleted_transfers = Repo.delete_all(Transfer) |> elem(0)
            deleted_activities = Repo.delete_all(Activity) |> elem(0)
            deleted_day_expenses = Repo.delete_all(DayExpense) |> elem(0)
-           deleted_food_expenses = Repo.delete_all(FoodExpense) |> elem(0)
            deleted_accommodations = Repo.delete_all(Accommodation) |> elem(0)
            deleted_destinations = Repo.delete_all(Destination) |> elem(0)
            deleted_trips = Repo.delete_all(Trip) |> elem(0)
@@ -235,7 +233,6 @@ defmodule HamsterTravel.LegacyImport.TripsImporter do
              transfers: deleted_transfers,
              activities: deleted_activities,
              day_expenses: deleted_day_expenses,
-             food_expenses: deleted_food_expenses,
              accommodations: deleted_accommodations,
              destinations: deleted_destinations,
              trips: deleted_trips,
@@ -291,7 +288,7 @@ defmodule HamsterTravel.LegacyImport.TripsImporter do
                 :ok <- create_activities(trip, bundle),
                 :ok <- create_day_expenses(trip, bundle),
                 :ok <- create_notes(trip, bundle),
-                :ok <- update_food_expense(trip, bundle) do
+                :ok <- update_food_budget_category(trip, bundle) do
              trip
            else
              {:error, reason} -> Repo.rollback(reason)
@@ -543,34 +540,30 @@ defmodule HamsterTravel.LegacyImport.TripsImporter do
     end)
   end
 
-  defp update_food_expense(trip, bundle) do
+  defp update_food_budget_category(trip, bundle) do
     case bundle["food_expense"] do
       nil ->
         :ok
 
       food_expense ->
-        reloaded_trip = Planning.get_trip!(trip.id)
-        record = reloaded_trip.food_expense
+        category = Planning.get_food_budget_category!(trip)
 
-        if record == nil do
-          {:error, "trip #{trip.id} is missing default food_expense"}
-        else
-          attrs =
-            %{
-              "price_per_day" =>
-                money_from_cents(
-                  food_expense["price_per_day_cents"],
-                  food_expense["expense"]["currency"]
-                ),
-              "days_count" => food_expense["days_count"],
-              "people_count" => food_expense["people_count"]
-            }
-            |> drop_nil_values()
+        food_setting =
+          %{
+            "price_per_day" =>
+              money_from_cents(
+                food_expense["price_per_day_cents"],
+                food_expense["expense"]["currency"]
+              ),
+            "days_count" => food_expense["days_count"],
+            "people_count" => food_expense["people_count"],
+            "calculation_mode" => "per_day"
+          }
+          |> drop_nil_values()
 
-          case Planning.update_food_expense(record, attrs) do
-            {:ok, _updated} -> :ok
-            {:error, cs} -> {:error, {:update_food_expense_failed, cs}}
-          end
+        case Planning.update_budget_category(category, %{food_setting: food_setting}) do
+          {:ok, _updated} -> :ok
+          {:error, cs} -> {:error, {:update_food_budget_category_failed, cs}}
         end
     end
   end

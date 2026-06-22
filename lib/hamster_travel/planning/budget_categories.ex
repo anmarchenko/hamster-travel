@@ -1,6 +1,7 @@
 defmodule HamsterTravel.Planning.BudgetCategories do
   @moduledoc false
 
+  import Ecto.Changeset
   import Ecto.Query, warn: false
 
   alias HamsterTravel.Planning.BudgetCategory
@@ -19,22 +20,36 @@ defmodule HamsterTravel.Planning.BudgetCategories do
   def list_budget_categories(%Trip{id: trip_id}), do: list_budget_categories(trip_id)
 
   def list_budget_categories(trip_id) do
-    Repo.all(
-      from category in BudgetCategory,
-        where: category.trip_id == ^trip_id,
-        order_by: [asc: category.name]
-    )
+    BudgetCategory
+    |> ordered_query()
+    |> where([category], category.trip_id == ^trip_id)
+    |> Repo.all()
+    |> preloading()
+  end
+
+  def get_food_budget_category!(%Trip{id: trip_id}), do: get_food_budget_category!(trip_id)
+
+  def get_food_budget_category!(trip_id) do
+    BudgetCategory
+    |> Repo.get_by!(trip_id: trip_id, kind: BudgetCategory.kind_food())
     |> preloading()
   end
 
   def create_budget_category(%Trip{} = trip, attrs \\ %{}) do
-    attrs = normalize_category_attrs(trip, attrs)
+    attrs = normalize_general_category_attrs(trip, attrs)
 
     %BudgetCategory{trip_id: trip.id}
     |> BudgetCategory.changeset(attrs)
     |> Repo.insert()
     |> Common.preload_after_db_call(&preloading(&1))
     |> PubSub.broadcast([:budget_category, :created], trip.id)
+  end
+
+  def new_budget_category(%Trip{} = trip, attrs \\ %{}) do
+    attrs = normalize_general_category_attrs(trip, attrs)
+
+    %BudgetCategory{trip_id: trip.id}
+    |> BudgetCategory.changeset(attrs)
   end
 
   def update_budget_category(%BudgetCategory{} = category, attrs) do
@@ -55,9 +70,36 @@ defmodule HamsterTravel.Planning.BudgetCategories do
     BudgetCategory.changeset(category, attrs)
   end
 
+  def delete_budget_category(%BudgetCategory{} = category)
+      when category.kind == "food",
+      do: {:error, :protected_category}
+
   def delete_budget_category(%BudgetCategory{} = category) do
     Repo.delete(category)
     |> PubSub.broadcast([:budget_category, :deleted], category.trip_id)
+  end
+
+  def create_food_budget_category_with_repo(repo, %Trip{} = trip, attrs \\ %{}) do
+    category = %BudgetCategory{
+      trip_id: trip.id,
+      name: "Food",
+      kind: BudgetCategory.kind_food()
+    }
+
+    attrs =
+      attrs
+      |> stringify_keys()
+      |> put_default_food_setting_attrs(trip)
+
+    attrs = normalize_category_attrs(trip, attrs, category)
+
+    category
+    |> BudgetCategory.changeset(attrs)
+    |> repo.insert()
+    |> case do
+      {:ok, category} -> {:ok, preloading(category)}
+      {:error, changeset} -> {:error, changeset}
+    end
   end
 
   def create_budget_category_actual_expense(%BudgetCategory{} = category, attrs \\ %{}) do
@@ -71,7 +113,7 @@ defmodule HamsterTravel.Planning.BudgetCategories do
         budget_category_id: category.id,
         budget_role: Expense.budget_role_actual()
       }
-      |> Expense.changeset(attrs)
+      |> actual_expense_changeset(attrs)
       |> Repo.insert()
       |> case do
         {:ok, expense} ->
@@ -92,7 +134,7 @@ defmodule HamsterTravel.Planning.BudgetCategories do
          %BudgetCategory{} = category <- get_actual_expense_category(expense) do
       Repo.transaction(fn ->
         expense
-        |> Expense.changeset(attrs)
+        |> actual_expense_changeset(attrs)
         |> Repo.update()
         |> case do
           {:ok, updated_expense} ->
@@ -135,6 +177,20 @@ defmodule HamsterTravel.Planning.BudgetCategories do
     end
   end
 
+  def maybe_adjust_food_category_for_duration(%Trip{} = updated_trip, %Trip{} = original_trip) do
+    if updated_trip.duration != original_trip.duration do
+      updated_trip
+      |> get_food_budget_category!()
+      |> adjust_food_category_duration(updated_trip)
+      |> case do
+        {:ok, _category} -> updated_trip
+        {:error, changeset} -> Repo.rollback(changeset)
+      end
+    else
+      updated_trip
+    end
+  end
+
   def recalculate_trip_category_estimates(%Trip{} = trip, opts \\ []) do
     skip_zero_actuals? = Keyword.get(opts, :skip_zero_actuals, false)
 
@@ -155,17 +211,46 @@ defmodule HamsterTravel.Planning.BudgetCategories do
   end
 
   def preloading_query do
-    [:trip, :estimated_expense, :actual_expenses, :food_setting]
+    [
+      :trip,
+      :estimated_expense,
+      :food_setting,
+      actual_expenses: actual_expenses_preloading_query()
+    ]
+  end
+
+  def trip_preloading_query do
+    {ordered_query(BudgetCategory), preloading_query()}
+  end
+
+  defp ordered_query(query) do
+    food_kind = BudgetCategory.kind_food()
+
+    from category in query,
+      order_by: [
+        asc: fragment("CASE WHEN ? = ? THEN 0 ELSE 1 END", category.kind, ^food_kind),
+        asc: fragment("lower(?)", category.name),
+        asc: category.name,
+        asc: category.id
+      ]
   end
 
   defp normalize_category_attrs(%Trip{} = trip, attrs, category \\ nil) do
     attrs = stringify_keys(attrs)
-    category_name = Map.get(attrs, "name") || category_name(category)
-    kind = Map.get(attrs, "kind") || category_kind(category) || BudgetCategory.kind_general()
+    kind = category_kind(category) || Map.get(attrs, "kind") || BudgetCategory.kind_general()
+
+    category_name =
+      if kind == BudgetCategory.kind_food() do
+        "Food"
+      else
+        Map.get(attrs, "name") || category_name(category)
+      end
+
     food_setting_attrs = Map.get(attrs, "food_setting")
 
     attrs
     |> Map.put("trip_id", trip.id)
+    |> Map.put("name", category_name)
     |> Map.put("kind", kind)
     |> put_existing_food_setting_id(category)
     |> put_default_estimated_expense_attrs(
@@ -175,6 +260,16 @@ defmodule HamsterTravel.Planning.BudgetCategories do
       kind,
       food_setting_attrs
     )
+  end
+
+  defp normalize_general_category_attrs(%Trip{} = trip, attrs) do
+    attrs =
+      attrs
+      |> stringify_keys()
+      |> Map.put("kind", BudgetCategory.kind_general())
+      |> Map.delete("food_setting")
+
+    normalize_category_attrs(trip, attrs)
   end
 
   defp put_default_estimated_expense_attrs(
@@ -271,6 +366,16 @@ defmodule HamsterTravel.Planning.BudgetCategories do
     |> Map.put_new("name", category.name)
   end
 
+  defp actual_expense_changeset(%Expense{} = expense, attrs) do
+    expense
+    |> Expense.changeset(attrs)
+    |> validate_change(:price, fn :price, price ->
+      if Money.positive?(price),
+        do: [],
+        else: [price: {"must be greater than %{number}", number: 0}]
+    end)
+  end
+
   defp raise_estimate_if_actual_sum_exceeds(%BudgetCategory{} = category) do
     category = preloading(category)
     total = actual_expenses_sum(category, category.trip.currency)
@@ -351,6 +456,12 @@ defmodule HamsterTravel.Planning.BudgetCategories do
           expense.budget_role == ^Expense.budget_role_actual()
   end
 
+  defp actual_expenses_preloading_query do
+    from expense in Expense,
+      where: expense.budget_role == ^Expense.budget_role_actual(),
+      order_by: [asc: expense.inserted_at, asc: expense.id]
+  end
+
   defp estimate_price(%BudgetCategory{estimated_expense: %Expense{price: price}}, currency) do
     convert_money_to_currency(price, currency)
   end
@@ -406,6 +517,58 @@ defmodule HamsterTravel.Planning.BudgetCategories do
 
   defp category_kind(%BudgetCategory{kind: kind}), do: kind
   defp category_kind(_category), do: nil
+
+  defp put_default_food_setting_attrs(attrs, trip) do
+    food_setting =
+      attrs
+      |> Map.get("food_setting", %{})
+      |> stringify_keys()
+      |> Map.put_new("price_per_day", Money.new(trip.currency, 0))
+      |> Map.put_new("days_count", trip.duration || 1)
+      |> Map.put_new("people_count", trip.people_count || 1)
+      |> Map.put_new(
+        "calculation_mode",
+        BudgetCategoryFoodSetting.calculation_mode_per_day()
+      )
+
+    Map.put(attrs, "food_setting", food_setting)
+  end
+
+  defp adjust_food_category_duration(
+         %BudgetCategory{
+           estimated_expense: %Expense{price: estimate},
+           food_setting: %BudgetCategoryFoodSetting{} = food_setting
+         } = category,
+         trip
+       ) do
+    if food_setting.calculation_mode == BudgetCategoryFoodSetting.calculation_mode_total() do
+      with {:ok, price_per_day} <-
+             BudgetCategoryFoodSetting.price_per_day_from_total(
+               estimate,
+               trip.duration,
+               food_setting.people_count
+             ) do
+        update_budget_category(category, %{
+          estimated_expense: %{price: estimate},
+          food_setting: %{
+            price_per_day: price_per_day,
+            days_count: trip.duration,
+            people_count: food_setting.people_count,
+            calculation_mode: BudgetCategoryFoodSetting.calculation_mode_total()
+          }
+        })
+      end
+    else
+      update_budget_category(category, %{
+        food_setting: %{
+          price_per_day: food_setting.price_per_day,
+          days_count: trip.duration,
+          people_count: food_setting.people_count,
+          calculation_mode: BudgetCategoryFoodSetting.calculation_mode_per_day()
+        }
+      })
+    end
+  end
 
   defp stringify_keys(attrs) when is_map(attrs) do
     Map.new(attrs, fn {key, value} -> {to_string(key), value} end)

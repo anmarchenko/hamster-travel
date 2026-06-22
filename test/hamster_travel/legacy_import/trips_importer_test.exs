@@ -2,7 +2,7 @@ defmodule HamsterTravel.LegacyImport.TripsImporterTest do
   use HamsterTravel.DataCase
 
   alias HamsterTravel.LegacyImport.TripsImporter
-  alias HamsterTravel.Planning.{Activity, DayExpense, FoodExpense, Trip}
+  alias HamsterTravel.Planning.{Activity, BudgetCategory, DayExpense, Expense, Trip}
 
   import HamsterTravel.AccountsFixtures
 
@@ -95,17 +95,20 @@ defmodule HamsterTravel.LegacyImport.TripsImporterTest do
           preload: [expense: e]
       )
 
-    food_expense =
+    food_category =
       Repo.one!(
-        from f in FoodExpense,
-          join: e in assoc(f, :expense),
-          where: f.trip_id == ^trip.id,
-          preload: [expense: e]
+        from category in BudgetCategory,
+          join: estimate in Expense,
+          on:
+            estimate.budget_category_id == category.id and
+              estimate.budget_role == "category_estimate",
+          where: category.trip_id == ^trip.id and category.kind == "food",
+          preload: [estimated_expense: estimate, food_setting: []]
       )
 
     assert activity.expense.price == Money.new(:HUF, "4000")
     assert day_expense.expense.price == Money.new(:HUF, "9000")
-    assert food_expense.price_per_day == Money.new(:HUF, "6145")
-    assert food_expense.expense.price == Money.new(:HUF, "129045")
+    assert food_category.food_setting.price_per_day == Money.new(:HUF, "6145")
+    assert food_category.estimated_expense.price == Money.new(:HUF, "129045")
   end
 end

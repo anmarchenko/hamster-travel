@@ -16,7 +16,6 @@ defmodule HamsterTravel.Planning.Expense do
     belongs_to(:transfer, HamsterTravel.Planning.Transfer)
     belongs_to(:activity, HamsterTravel.Planning.Activity)
     belongs_to(:day_expense, HamsterTravel.Planning.DayExpense)
-    belongs_to(:food_expense, HamsterTravel.Planning.FoodExpense)
     belongs_to(:budget_category, HamsterTravel.Planning.BudgetCategory)
 
     timestamps()
@@ -41,7 +40,6 @@ defmodule HamsterTravel.Planning.Expense do
       :transfer_id,
       :activity_id,
       :day_expense_id,
-      :food_expense_id,
       :budget_category_id,
       :budget_role
     ])

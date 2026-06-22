@@ -24,8 +24,6 @@ defmodule HamsterTravel.Planning do
     Destinations,
     Expense,
     Expenses,
-    FoodExpense,
-    FoodExpenses,
     Note,
     Notes,
     Transfer,
@@ -685,10 +683,18 @@ defmodule HamsterTravel.Planning do
   Lists budget categories for a trip.
 
   Pass a `%Trip{}` or trip id.
-  Returns categories ordered by name with estimate and actual expenses preloaded.
+  Returns Food first, followed by the remaining categories ordered by name,
+  with estimate and actual expenses preloaded.
   """
   def list_budget_categories(trip_or_id) do
     BudgetCategories.list_budget_categories(trip_or_id)
+  end
+
+  @doc """
+  Returns the protected Food budget category for a trip.
+  """
+  def get_food_budget_category!(trip_or_id) do
+    BudgetCategories.get_food_budget_category!(trip_or_id)
   end
 
   @doc """
@@ -699,6 +705,13 @@ defmodule HamsterTravel.Planning do
   """
   def create_budget_category(%Trip{} = trip, attrs \\ %{}) do
     BudgetCategories.create_budget_category(trip, attrs)
+  end
+
+  @doc """
+  Builds a changeset for a new budget category with a zero estimate.
+  """
+  def new_budget_category(%Trip{} = trip, attrs \\ %{}) do
+    BudgetCategories.new_budget_category(trip, attrs)
   end
 
   @doc """
@@ -1466,51 +1479,5 @@ defmodule HamsterTravel.Planning do
   """
   def day_expenses_for_day(day_index, day_expenses) do
     DayExpenses.day_expenses_for_day(day_index, day_expenses)
-  end
-
-  # Food expense functions
-  @doc """
-  Fetches a food expense by id and raises if missing.
-
-  Pass the food expense id.
-  Returns `%FoodExpense{}` with its expense preloaded.
-
-  ## Examples
-
-      iex> get_food_expense!(food_expense.id)
-      %FoodExpense{}
-  """
-  def get_food_expense!(id) do
-    FoodExpenses.get_food_expense!(id)
-  end
-
-  @doc """
-  Updates a food expense and its underlying expense record.
-
-  Pass the `%FoodExpense{}` and attribute changes.
-  Returns `{:ok, %FoodExpense{}}` or `{:error, %Ecto.Changeset{}}`.
-
-  ## Examples
-
-      iex> update_food_expense(food_expense, %{"people_count" => 2})
-      {:ok, %FoodExpense{}}
-  """
-  def update_food_expense(%FoodExpense{} = food_expense, attrs) do
-    FoodExpenses.update_food_expense(food_expense, attrs)
-  end
-
-  @doc """
-  Builds a changeset for editing a food expense.
-
-  Pass the `%FoodExpense{}` and optional changes.
-  Returns `%Ecto.Changeset{}`.
-
-  ## Examples
-
-      iex> change_food_expense(food_expense, %{"people_count" => 2})
-      %Ecto.Changeset{}
-  """
-  def change_food_expense(%FoodExpense{} = food_expense, attrs \\ %{}) do
-    FoodExpenses.change_food_expense(food_expense, attrs)
   end
 end

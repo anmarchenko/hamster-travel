@@ -40,6 +40,9 @@ defmodule HamsterTravel.Planning.BudgetCategory do
   def kind_food, do: @kind_food
   def kinds, do: @kinds
 
+  def food?(%__MODULE__{kind: @kind_food}), do: true
+  def food?(%__MODULE__{}), do: false
+
   @doc false
   def changeset(category, attrs) do
     category
@@ -49,5 +52,6 @@ defmodule HamsterTravel.Planning.BudgetCategory do
     |> validate_required([:name, :kind, :trip_id])
     |> validate_inclusion(:kind, @kinds)
     |> unique_constraint([:trip_id, :name])
+    |> unique_constraint(:trip_id, name: :budget_categories_trip_food_index)
   end
 end

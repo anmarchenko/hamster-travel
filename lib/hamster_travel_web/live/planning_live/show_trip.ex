@@ -24,12 +24,13 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     AccommodationNew,
     Activity,
     ActivityNew,
+    BudgetCategory,
+    BudgetCategoryNew,
     BudgetExpense,
     DayExpense,
     DayExpenseNew,
     Destination,
     DestinationNew,
-    FoodExpense,
     Note,
     NoteNew,
     Transfer,
@@ -330,8 +331,13 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   @impl true
-  def handle_info({[:food_expense, :updated], %{value: updated_food_expense}}, socket) do
-    handle_food_expense_event(updated_food_expense, socket)
+  def handle_info({[:budget_category, _operation], %{value: _category}}, socket) do
+    handle_budget_category_event(socket)
+  end
+
+  @impl true
+  def handle_info({[:budget_category_actual_expense, _operation], %{value: _expense}}, socket) do
+    handle_budget_category_event(socket)
   end
 
   @impl true
@@ -1456,19 +1462,30 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     <div id={"budget-#{@trip.id}"} class="flex flex-col gap-y-8">
       <.tab_budget budget={@budget} display_currency={@display_currency} />
 
-      <.budget_section :if={@trip.food_expense} icon="hero-shopping-cart" title={gettext("Food")}>
+      <.budget_section
+        :if={@can_edit || Enum.any?(@trip.budget_categories)}
+        icon="hero-tag"
+        title={gettext("Categories")}
+      >
         <.live_component
-          module={FoodExpense}
-          id={"food-expense-#{@trip.food_expense.id}"}
+          :for={category <- @trip.budget_categories}
+          module={BudgetCategory}
+          id={"budget-category-#{category.id}"}
+          category={category}
           trip={@trip}
-          food_expense={@trip.food_expense}
           display_currency={@display_currency}
+          can_edit={@can_edit}
+        />
+        <.live_component
+          module={BudgetCategoryNew}
+          id={"budget-category-new-#{@trip.id}"}
+          trip={@trip}
           can_edit={@can_edit}
         />
       </.budget_section>
 
       <.budget_section
-        :if={Enum.any?(@trip.accommodations)}
+        :if={Enum.any?(budget_accommodations(@trip))}
         icon="hero-home"
         title={gettext("Hotels")}
       >
@@ -2395,10 +2412,9 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     {:noreply, socket}
   end
 
-  defp handle_food_expense_event(food_expense, socket) do
-    food_expense = Repo.preload(food_expense, [:expense])
-
-    trip = Map.put(socket.assigns.trip, :food_expense, food_expense)
+  defp handle_budget_category_event(socket) do
+    categories = Planning.list_budget_categories(socket.assigns.trip)
+    trip = Map.put(socket.assigns.trip, :budget_categories, categories)
 
     socket =
       socket

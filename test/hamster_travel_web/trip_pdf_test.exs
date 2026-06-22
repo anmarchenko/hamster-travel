@@ -107,6 +107,33 @@ defmodule HamsterTravelWeb.TripPdfTest do
       refute html =~ "Hotels we stay in"
     end
 
+    test "renders budget categories in the expense summary" do
+      trip = trip_fixture(%{dates_unknown: true, duration: 3})
+      food_category = Planning.get_food_budget_category!(trip)
+
+      assert {:ok, _food_category} =
+               Planning.update_budget_category(food_category, %{
+                 food_setting: %{
+                   price_per_day: Money.new(:EUR, 10),
+                   days_count: 3,
+                   people_count: 2,
+                   calculation_mode: "per_day"
+                 }
+               })
+
+      assert {:ok, _category} =
+               Planning.create_budget_category(trip, %{
+                 name: "PDF Souvenirs",
+                 estimated_expense: %{price: Money.new(:EUR, 75)}
+               })
+
+      html = trip_html(trip)
+
+      assert html =~ "Food"
+      assert html =~ "PDF Souvenirs"
+      assert html =~ "per day"
+    end
+
     test "renders transfer route with stations and omits transfer notes" do
       geonames_fixture()
 

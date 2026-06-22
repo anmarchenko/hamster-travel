@@ -4,10 +4,15 @@ defmodule HamsterTravel.Planning.BudgetCategoryFoodSetting do
 
   alias HamsterTravel.Planning.BudgetCategory
 
+  @calculation_mode_total "total"
+  @calculation_mode_per_day "per_day"
+  @calculation_modes [@calculation_mode_total, @calculation_mode_per_day]
+
   schema "budget_category_food_settings" do
     field :price_per_day, Money.Ecto.Composite.Type
     field :days_count, :integer
     field :people_count, :integer
+    field :calculation_mode, :string, default: @calculation_mode_per_day
 
     belongs_to(:budget_category, BudgetCategory)
 
@@ -19,12 +24,22 @@ defmodule HamsterTravel.Planning.BudgetCategoryFoodSetting do
   @doc false
   def changeset(food_setting, attrs) do
     food_setting
-    |> cast(attrs, [:price_per_day, :days_count, :people_count, :budget_category_id])
-    |> validate_required([:price_per_day, :days_count, :people_count])
+    |> cast(attrs, [
+      :price_per_day,
+      :days_count,
+      :people_count,
+      :calculation_mode,
+      :budget_category_id
+    ])
+    |> validate_required([:price_per_day, :days_count, :people_count, :calculation_mode])
     |> validate_number(:days_count, greater_than: 0)
     |> validate_number(:people_count, greater_than: 0)
+    |> validate_inclusion(:calculation_mode, @calculation_modes)
     |> unique_constraint(:budget_category_id)
   end
+
+  def calculation_mode_total, do: @calculation_mode_total
+  def calculation_mode_per_day, do: @calculation_mode_per_day
 
   def estimate_total(attrs, currency) do
     price_per_day =

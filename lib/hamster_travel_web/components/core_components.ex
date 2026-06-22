@@ -448,10 +448,15 @@ defmodule HamsterTravelWeb.CoreComponents do
   attr :delete_confirm, :string, default: nil
   attr :show_delete, :boolean, default: true
   attr :class, :string, default: nil
+  attr :edit_label, :string, default: nil
+  attr :delete_label, :string, default: nil
 
   def edit_delete_buttons(assigns) do
     assigns =
-      assign(assigns, :delete_target, assigns.delete_target || assigns.edit_target)
+      assigns
+      |> assign(:delete_target, assigns.delete_target || assigns.edit_target)
+      |> assign(:edit_label, assigns.edit_label || gettext("Edit"))
+      |> assign(:delete_label, assigns.delete_label || gettext("Delete"))
 
     ~H"""
     <div class={build_class(["flex items-center gap-1 shrink-0", @class])}>
@@ -459,6 +464,8 @@ defmodule HamsterTravelWeb.CoreComponents do
         size="xs"
         phx-click={@edit_event}
         phx-target={@edit_target}
+        aria-label={@edit_label}
+        title={@edit_label}
         class="!h-5 !w-5 !p-0 min-h-0 bg-transparent hover:bg-transparent text-slate-500 dark:text-slate-400 hover:text-zinc-900 dark:hover:text-zinc-100"
       >
         <.icon name="hero-pencil" class="w-4 h-4" />
@@ -469,6 +476,8 @@ defmodule HamsterTravelWeb.CoreComponents do
         phx-click={@delete_event}
         phx-target={@delete_target}
         data-confirm={@delete_confirm}
+        aria-label={@delete_label}
+        title={@delete_label}
         class="!h-5 !w-5 !p-0 min-h-0 bg-transparent hover:bg-transparent text-slate-500 dark:text-slate-400 hover:text-zinc-900 dark:hover:text-zinc-100"
       >
         <.icon name="hero-trash" class="w-4 h-4" />
@@ -592,11 +601,12 @@ defmodule HamsterTravelWeb.CoreComponents do
   @doc """
   Generates a generic error message.
   """
+  attr :class, :string, default: nil
   slot :inner_block, required: true
 
   def error(assigns) do
     ~H"""
-    <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600">
+    <p class={["mt-3 flex gap-3 text-sm leading-6 text-rose-600", @class]}>
       {render_slot(@inner_block)}
     </p>
     """
@@ -782,6 +792,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   attr(:label, :string, required: true)
   attr(:field, Phoenix.HTML.FormField, required: true)
   attr(:default_currency, :string, default: "EUR")
+  attr(:reserve_error_space, :boolean, default: false)
 
   def money_input(assigns) do
     field = assigns.field
@@ -829,7 +840,10 @@ defmodule HamsterTravelWeb.CoreComponents do
           />
         </div>
       </div>
-      <.error :for={msg <- @errors}>{msg}</.error>
+      <div :if={@reserve_error_space} class="h-9 pt-3">
+        <.error :for={msg <- @errors} class="!mt-0">{msg}</.error>
+      </div>
+      <.error :for={msg <- @errors} :if={!@reserve_error_space}>{msg}</.error>
     </div>
     """
   end
