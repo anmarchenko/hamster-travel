@@ -96,6 +96,13 @@ defmodule HamsterTravelWeb.Layouts do
       <.icon name="hero-ticket" class="h-6 w-6" />
     </.mobile_nav_link_tab>
     <.mobile_nav_link_tab
+      label={gettext("Budget")}
+      to={trip_url(@trip_slug, :budget, @return_to)}
+      active={@active_tab == "budget"}
+    >
+      <.icon name="hero-banknotes" class="h-6 w-6" />
+    </.mobile_nav_link_tab>
+    <.mobile_nav_link_tab
       label={gettext("Notes")}
       to={trip_url(@trip_slug, :notes, @return_to)}
       active={@active_tab == "notes"}

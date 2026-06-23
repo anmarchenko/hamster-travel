@@ -6,17 +6,19 @@ defmodule HamsterTravel.Planning.Graveyard do
   alias HamsterTravel.Planning.{
     Accommodation,
     Activity,
+    BudgetCategories,
+    BudgetCategory,
+    BudgetCategoryFoodSetting,
     DayExpense,
     Destination,
     Expense,
-    FoodExpense,
     Note,
     Transfer,
     Trip,
     TripTombstone
   }
 
-  @payload_version 1
+  @payload_version 2
 
   def create_trip_tombstone!(%Trip{} = trip) do
     %TripTombstone{}
@@ -29,7 +31,7 @@ defmodule HamsterTravel.Planning.Graveyard do
     |> insert_or_rollback()
   end
 
-  def restore_trip_from_tombstone(%TripTombstone{} = tombstone) do
+  def restore_trip_from_tombstone(%TripTombstone{payload_version: @payload_version} = tombstone) do
     Repo.transaction(fn ->
       trip =
         tombstone
@@ -48,6 +50,9 @@ defmodule HamsterTravel.Planning.Graveyard do
       {:error, reason} -> {:error, reason}
     end
   end
+
+  def restore_trip_from_tombstone(%TripTombstone{}),
+    do: {:error, :unsupported_payload_version}
 
   def restore_trip_from_tombstone(tombstone_id) when is_binary(tombstone_id) do
     tombstone_id
@@ -69,7 +74,7 @@ defmodule HamsterTravel.Planning.Graveyard do
       "activities" => Enum.map(trip.activities, &activity_payload/1),
       "day_expenses" => Enum.map(trip.day_expenses, &day_expense_payload/1),
       "notes" => Enum.map(trip.notes, &note_payload/1),
-      "food_expense" => food_expense_payload(trip.food_expense),
+      "budget_categories" => Enum.map(trip.budget_categories, &budget_category_payload/1),
       "expenses" => standalone_expenses_payload(trip.expenses)
     }
   end
@@ -173,18 +178,28 @@ defmodule HamsterTravel.Planning.Graveyard do
     }
   end
 
-  defp food_expense_payload(%FoodExpense{} = food_expense) do
+  defp budget_category_payload(%BudgetCategory{} = category) do
     %{
-      "price_per_day" => money_to_payload(food_expense.price_per_day),
-      "days_count" => food_expense.days_count,
-      "people_count" => food_expense.people_count,
-      "expense" => expense_payload(food_expense.expense),
-      "inserted_at" => datetime_to_iso(food_expense.inserted_at),
-      "updated_at" => datetime_to_iso(food_expense.updated_at)
+      "name" => category.name,
+      "kind" => category.kind,
+      "estimated_expense" => expense_payload(category.estimated_expense),
+      "actual_expenses" => Enum.map(category.actual_expenses, &expense_payload/1),
+      "food_setting" => food_setting_payload(category.food_setting),
+      "inserted_at" => datetime_to_iso(category.inserted_at),
+      "updated_at" => datetime_to_iso(category.updated_at)
     }
   end
 
-  defp food_expense_payload(_), do: nil
+  defp food_setting_payload(%BudgetCategoryFoodSetting{} = food_setting) do
+    %{
+      "price_per_day" => money_to_payload(food_setting.price_per_day),
+      "days_count" => food_setting.days_count,
+      "people_count" => food_setting.people_count,
+      "calculation_mode" => food_setting.calculation_mode
+    }
+  end
+
+  defp food_setting_payload(_), do: nil
 
   defp expense_payload(%Expense{} = expense) do
     %{
@@ -208,7 +223,7 @@ defmodule HamsterTravel.Planning.Graveyard do
       is_nil(expense.transfer_id) and
       is_nil(expense.activity_id) and
       is_nil(expense.day_expense_id) and
-      is_nil(expense.food_expense_id)
+      is_nil(expense.budget_category_id)
   end
 
   defp build_trip_restore_attrs(%TripTombstone{} = tombstone) do
@@ -236,7 +251,7 @@ defmodule HamsterTravel.Planning.Graveyard do
     restore_activities(trip, Map.get(payload, "activities", []))
     restore_day_expenses(trip, Map.get(payload, "day_expenses", []))
     restore_notes(trip, Map.get(payload, "notes", []))
-    restore_food_expense(trip, Map.get(payload, "food_expense"))
+    restore_budget_categories(trip, Map.fetch!(payload, "budget_categories"))
     restore_standalone_expenses(trip, Map.get(payload, "expenses", []))
   end
 
@@ -341,19 +356,69 @@ defmodule HamsterTravel.Planning.Graveyard do
     end)
   end
 
-  defp restore_food_expense(%Trip{} = trip, food_expense) do
-    if food_expense do
-      record =
-        %FoodExpense{
+  defp restore_budget_categories(%Trip{} = trip, categories) do
+    Enum.each(categories, fn category ->
+      restored_category = restore_budget_category(trip, category)
+
+      Enum.each(Map.get(category, "actual_expenses", []), fn expense ->
+        %Expense{
           trip_id: trip.id,
-          price_per_day: parse_money(Map.get(food_expense, "price_per_day")),
-          days_count: Map.get(food_expense, "days_count"),
-          people_count: Map.get(food_expense, "people_count")
+          budget_category_id: restored_category.id,
+          budget_role: Expense.budget_role_actual(),
+          name: Map.get(expense, "name"),
+          price: parse_money(Map.get(expense, "price"))
         }
         |> insert_or_rollback()
+      end)
+    end)
+  end
 
-      restore_expense_for(trip, record, Map.get(food_expense, "expense"), :food_expense_id)
+  defp restore_budget_category(%Trip{} = trip, %{"kind" => "food"} = category) do
+    attrs = %{
+      estimated_expense: restored_estimate_attrs(trip, category),
+      food_setting: restored_food_setting_attrs(trip, category)
+    }
+
+    case BudgetCategories.create_food_budget_category_with_repo(Repo, trip, attrs) do
+      {:ok, restored_category} -> restored_category
+      {:error, changeset} -> Repo.rollback(changeset)
     end
+  end
+
+  defp restore_budget_category(%Trip{} = trip, category) do
+    %BudgetCategory{trip_id: trip.id}
+    |> BudgetCategory.changeset(%{
+      name: Map.get(category, "name"),
+      kind: BudgetCategory.kind_general(),
+      trip_id: trip.id,
+      estimated_expense: restored_estimate_attrs(trip, category)
+    })
+    |> insert_or_rollback()
+  end
+
+  defp restored_estimate_attrs(trip, category) do
+    expense = Map.get(category, "estimated_expense", %{})
+
+    %{
+      name: Map.get(expense, "name") || Map.get(category, "name"),
+      price: parse_money(Map.get(expense, "price")) || Money.new(trip.currency, 0),
+      trip_id: trip.id,
+      budget_role: Expense.budget_role_estimate()
+    }
+  end
+
+  defp restored_food_setting_attrs(trip, category) do
+    food_setting = Map.get(category, "food_setting") || %{}
+
+    %{
+      price_per_day:
+        parse_money(Map.get(food_setting, "price_per_day")) || Money.new(trip.currency, 0),
+      days_count: Map.get(food_setting, "days_count") || trip.duration,
+      people_count: Map.get(food_setting, "people_count") || trip.people_count,
+      calculation_mode:
+        Map.get(food_setting, "calculation_mode") ||
+          BudgetCategoryFoodSetting.calculation_mode_per_day()
+    }
   end
 
   defp restore_standalone_expenses(%Trip{} = trip, expenses) do

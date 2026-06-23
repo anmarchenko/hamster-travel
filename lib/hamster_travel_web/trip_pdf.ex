@@ -774,7 +774,7 @@ defmodule HamsterTravelWeb.TripPdf do
   end
 
   defp expense_summary_html(trip, display_currency) do
-    category_rows =
+    source_rows =
       [
         %{
           label: gettext("Transfers"),
@@ -795,13 +795,22 @@ defmodule HamsterTravelWeb.TripPdf do
           label: gettext("Day expenses"),
           amount: sum_expense_entities(trip.day_expenses, trip.currency),
           detail: nil
-        },
-        %{
-          label: gettext("Food"),
-          amount: food_total(trip),
-          detail: food_formula_text(trip, display_currency)
         }
       ]
+
+    budget_category_rows =
+      trip.budget_categories
+      |> Enum.sort_by(& &1.name)
+      |> Enum.map(fn category ->
+        %{
+          label: budget_category_label(category),
+          amount: budget_category_total(category, trip.currency),
+          detail: budget_category_formula_text(category, display_currency)
+        }
+      end)
+
+    category_rows =
+      (source_rows ++ budget_category_rows)
       |> Enum.map_join("\n", fn %{label: label, amount: amount, detail: detail} ->
         """
         <tr>
@@ -904,22 +913,27 @@ defmodule HamsterTravelWeb.TripPdf do
     end)
   end
 
-  defp food_total(%Trip{food_expense: nil, currency: currency}), do: Money.new(currency, 0)
+  defp budget_category_label(%{kind: "food"}), do: gettext("Food")
+  defp budget_category_label(category), do: category.name
 
-  defp food_total(%Trip{food_expense: food_expense, currency: currency}) do
-    expense_price(food_expense) || Money.new(currency, 0)
+  defp budget_category_total(%{estimated_expense: %{price: %Money{} = price}}, _currency),
+    do: price
+
+  defp budget_category_total(_category, currency), do: Money.new(currency, 0)
+
+  defp budget_category_formula_text(
+         %{kind: "food", food_setting: %{calculation_mode: "per_day"} = food_setting} = category,
+         display_currency
+       ) do
+    per_day = money_text(food_setting.price_per_day, display_currency)
+    total = money_text(category.estimated_expense.price, display_currency)
+    days_label = ngettext("day", "days", food_setting.days_count)
+    people_label = ngettext("person", "people", food_setting.people_count)
+
+    "#{per_day} #{gettext("per day")} x #{food_setting.days_count} #{days_label} x #{food_setting.people_count} #{people_label} = #{total}"
   end
 
-  defp food_formula_text(%Trip{food_expense: nil}, _display_currency), do: nil
-
-  defp food_formula_text(%Trip{food_expense: food_expense}, display_currency) do
-    per_day = money_text(food_expense.price_per_day, display_currency)
-    total = money_text(expense_price(food_expense), display_currency)
-    days_label = ngettext("day", "days", food_expense.days_count)
-    people_label = ngettext("person", "people", food_expense.people_count)
-
-    "#{per_day} #{gettext("per day")} x #{food_expense.days_count} #{days_label} x #{food_expense.people_count} #{people_label} = #{total}"
-  end
+  defp budget_category_formula_text(_category, _display_currency), do: nil
 
   defp money_text(nil, _display_currency), do: "-"
 

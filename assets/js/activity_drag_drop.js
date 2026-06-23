@@ -89,16 +89,6 @@ let ActivityDragDrop = {
     });
 
     setupSortable({
-      selector: "[data-day-expense-drop-zone]",
-      draggable: ".draggable-day-expense",
-      groupName: "day-expenses",
-      idKey: "dayExpenseId",
-      idParam: "day_expense_id",
-      moveEvent: "move_day_expense",
-      reorderEvent: "reorder_day_expense",
-    });
-
-    setupSortable({
       selector: "[data-note-drop-zone]",
       draggable: ".draggable-note",
       groupName: "notes",

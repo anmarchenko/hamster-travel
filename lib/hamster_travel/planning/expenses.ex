@@ -79,10 +79,18 @@ defmodule HamsterTravel.Planning.Expenses do
   end
 
   defp get_trip_expenses(%Trip{expenses: %Ecto.Association.NotLoaded{}} = trip) do
-    list_expenses(trip.id)
+    Repo.all(
+      from e in Expense,
+        where:
+          e.trip_id == ^trip.id and
+            (is_nil(e.budget_role) or e.budget_role != ^Expense.budget_role_actual()),
+        order_by: [desc: e.inserted_at]
+    )
   end
 
-  defp get_trip_expenses(%Trip{expenses: expenses}), do: expenses
+  defp get_trip_expenses(%Trip{expenses: expenses}) do
+    Enum.reject(expenses, &Expense.budget_role_actual?/1)
+  end
 
   defp convert_expense_to_currency(%Expense{price: price}, target_currency)
        when price.currency == target_currency,

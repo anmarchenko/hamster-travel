@@ -24,19 +24,21 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     AccommodationNew,
     Activity,
     ActivityNew,
+    BudgetCategory,
+    BudgetCategoryNew,
+    BudgetExpense,
     DayExpense,
     DayExpenseNew,
     Destination,
     DestinationNew,
-    FoodExpense,
     Note,
     NoteNew,
     Transfer,
     TransferNew
   }
 
-  @tabs ["itinerary", "activities", "notes"]
-  @drag_drop_edit_events ~w(move_transfer move_activity reorder_activity move_note reorder_note move_day_expense reorder_day_expense)
+  @tabs ["itinerary", "activities", "budget", "notes"]
+  @drag_drop_edit_events ~w(move_transfer move_activity reorder_activity move_note reorder_note)
   @cover_upload_max_mb 8
   @cover_upload_max_file_size @cover_upload_max_mb * 1_000_000
   @cover_upload_accept ~w(.jpg .jpeg .png .webp)
@@ -329,8 +331,13 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   @impl true
-  def handle_info({[:food_expense, :updated], %{value: updated_food_expense}}, socket) do
-    handle_food_expense_event(updated_food_expense, socket)
+  def handle_info({[:budget_category, _operation], %{value: _category}}, socket) do
+    handle_budget_category_event(socket)
+  end
+
+  @impl true
+  def handle_info({[:budget_category_actual_expense, _operation], %{value: _expense}}, socket) do
+    handle_budget_category_event(socket)
   end
 
   @impl true
@@ -458,10 +465,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       trip
       |> activities_outside()
       |> Enum.each(&Planning.delete_activity/1)
-
-      trip
-      |> day_expenses_outside()
-      |> Enum.each(&Planning.delete_day_expense/1)
 
       {:noreply, socket}
     else
@@ -930,8 +933,17 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       destinations_outside={destinations_outside(@trip)}
       activities={@trip.activities}
       activities_outside={activities_outside(@trip)}
-      day_expenses={@trip.day_expenses}
-      day_expenses_outside={day_expenses_outside(@trip)}
+      budget={@budget}
+      display_currency={@display_currency}
+      can_edit={@can_edit}
+    />
+    """
+  end
+
+  def render_tab(%{active_tab: "budget"} = assigns) do
+    ~H"""
+    <.tab_budget_view
+      trip={@trip}
       budget={@budget}
       display_currency={@display_currency}
       can_edit={@can_edit}
@@ -990,6 +1002,17 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         <.inline>
           <.icon name="hero-ticket" class="h-5 w-5" />
           {gettext("Activities")}
+        </.inline>
+      </.tab>
+      <.tab
+        underline
+        to={trip_url(@trip.slug, :budget, @return_to)}
+        is_active={@active_tab == "budget"}
+        link_type="live_patch"
+      >
+        <.inline>
+          <.icon name="hero-banknotes" class="h-5 w-5" />
+          {gettext("Budget")}
         </.inline>
       </.tab>
       <.tab
@@ -1333,8 +1356,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:destinations_outside, :list, required: true)
   attr(:activities, :list, required: true)
   attr(:activities_outside, :list, required: true)
-  attr(:day_expenses, :list, required: true)
-  attr(:day_expenses_outside, :list, required: true)
   attr(:can_edit, :boolean, required: true)
 
   def tab_activity(assigns) do
@@ -1347,18 +1368,10 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       <.tab_budget budget={@budget} display_currency={@display_currency} />
 
       <.toggle
-        :if={
-          Enum.any?(@destinations_outside) || Enum.any?(@activities_outside) ||
-            Enum.any?(@day_expenses_outside)
-        }
+        :if={Enum.any?(@destinations_outside) || Enum.any?(@activities_outside)}
         label={gettext("Some items are scheduled outside of the trip duration")}
         class="mt-4"
       >
-        <.section_header
-          :if={Enum.any?(@destinations_outside)}
-          icon="hero-map-pin"
-          label={gettext("Places")}
-        />
         <.destinations_list
           trip={@trip}
           destinations={@destinations_outside}
@@ -1367,35 +1380,10 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         />
 
         <div
-          :if={Enum.any?(@activities_outside) || Enum.any?(@day_expenses_outside)}
+          :if={Enum.any?(@activities_outside)}
           class="activities-column min-h-0 sm:min-h-[100px] flex flex-col gap-y-2"
         >
-          <.section_header
-            :if={Enum.any?(@day_expenses_outside)}
-            icon="hero-banknotes"
-            label={gettext("Expenses")}
-          />
           <div
-            :if={Enum.any?(@day_expenses_outside)}
-            class="flex flex-col gap-y-1"
-            data-day-expense-drop-zone
-            data-target-day="outside"
-          >
-            <.day_expenses_list
-              day_expenses={@day_expenses_outside}
-              day_index={-1}
-              trip={@trip}
-              display_currency={@display_currency}
-              can_edit={@can_edit}
-            />
-          </div>
-          <.section_header
-            :if={Enum.any?(@activities_outside)}
-            icon="hero-ticket"
-            label={gettext("Activities")}
-          />
-          <div
-            :if={Enum.any?(@activities_outside)}
             class="flex flex-col gap-y-1"
             data-activity-drop-zone
             data-target-day="outside"
@@ -1421,31 +1409,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         </div>
       </.toggle>
 
-      <div :if={@trip.food_expense} class="mt-4">
-        <.section_header icon="hero-shopping-cart" label={gettext("Food expenses")} />
-        <div class="mt-3">
-          <.live_component
-            module={FoodExpense}
-            id={"food-expense-#{@trip.food_expense.id}"}
-            trip={@trip}
-            food_expense={@trip.food_expense}
-            display_currency={@display_currency}
-            can_edit={@can_edit}
-          />
-        </div>
-      </div>
-
       <div class="flex flex-col gap-y-8 mt-8">
         <div :for={i <- 0..(@trip.duration - 1)} class="flex flex-col gap-y-2">
           <.day_heading
             day_index={i}
             start_date={@trip.start_date}
             class="max-w-3xl rounded-md py-2 text-left font-bold text-zinc-950 dark:text-zinc-50"
-          />
-          <.section_header
-            :if={Enum.any?(Planning.items_for_day(i, @destinations))}
-            icon="hero-map-pin"
-            label={gettext("Places")}
           />
           <div class="flex flex-col gap-y-1 sm:flex-row sm:gap-x-4 sm:gap-y-0">
             <.destinations_list
@@ -1457,33 +1426,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           </div>
 
           <div class="flex flex-col gap-y-2 min-h-8">
-            <.section_header
-              :if={Enum.any?(Planning.day_expenses_for_day(i, @day_expenses))}
-              icon="hero-banknotes"
-              label={gettext("Expenses")}
-            />
-            <div class="flex flex-col gap-y-1" data-day-expense-drop-zone data-target-day={i}>
-              <.day_expenses_list
-                day_expenses={Planning.day_expenses_for_day(i, @day_expenses)}
-                day_index={i}
-                trip={@trip}
-                display_currency={@display_currency}
-                can_edit={@can_edit}
-              />
-              <.live_component
-                :if={@can_edit}
-                module={DayExpenseNew}
-                id={"day-expense-new-#{i}"}
-                trip={@trip}
-                day_index={i}
-                can_edit={@can_edit}
-              />
-            </div>
-            <.section_header
-              :if={Enum.any?(Planning.activities_for_day(i, @activities))}
-              icon="hero-ticket"
-              label={gettext("Activities")}
-            />
             <div class="flex flex-col gap-y-1" data-activity-drop-zone data-target-day={i}>
               <.activities_list
                 activities={Planning.activities_for_day(i, @activities)}
@@ -1503,6 +1445,135 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               />
             </div>
           </div>
+          <hr />
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  attr(:trip, Trip, required: true)
+  attr(:budget, Money, required: true)
+  attr(:display_currency, :string, required: true)
+  attr(:can_edit, :boolean, required: true)
+
+  def tab_budget_view(assigns) do
+    ~H"""
+    <div id={"budget-#{@trip.id}"} class="flex flex-col gap-y-8">
+      <.tab_budget budget={@budget} display_currency={@display_currency} />
+
+      <.budget_section
+        :if={@can_edit || Enum.any?(@trip.budget_categories)}
+        icon="hero-tag"
+        title={gettext("Categories")}
+      >
+        <.live_component
+          :for={category <- @trip.budget_categories}
+          module={BudgetCategory}
+          id={"budget-category-#{category.id}"}
+          category={category}
+          trip={@trip}
+          display_currency={@display_currency}
+          can_edit={@can_edit}
+        />
+        <.live_component
+          module={BudgetCategoryNew}
+          id={"budget-category-new-#{@trip.id}"}
+          trip={@trip}
+          can_edit={@can_edit}
+        />
+      </.budget_section>
+
+      <.budget_section
+        :if={Enum.any?(budget_accommodations(@trip))}
+        icon="hero-home"
+        title={gettext("Hotels")}
+      >
+        <.live_component
+          :for={accommodation <- budget_accommodations(@trip)}
+          module={BudgetExpense}
+          id={"budget-expense-hotel-#{accommodation.expense.id}"}
+          trip={@trip}
+          source="hotel"
+          source_item={accommodation}
+          label={accommodation_budget_label(accommodation)}
+          expense={accommodation.expense}
+          display_currency={@display_currency}
+          can_edit={@can_edit}
+        />
+      </.budget_section>
+
+      <div class="flex flex-col gap-y-8">
+        <div :for={day_index <- budget_day_indices(@trip)} class="flex flex-col gap-y-3">
+          <.day_heading
+            day_index={day_index}
+            start_date={@trip.start_date}
+            class="max-w-3xl rounded-md py-2 text-left font-bold text-zinc-950 dark:text-zinc-50"
+          />
+
+          <.budget_day_group
+            :if={Enum.any?(budget_transfers_for_day(day_index, @trip))}
+            icon="hero-arrows-right-left"
+            title={gettext("Transfers")}
+          >
+            <.live_component
+              :for={transfer <- budget_transfers_for_day(day_index, @trip)}
+              module={BudgetExpense}
+              id={"budget-expense-transfer-#{transfer.expense.id}"}
+              trip={@trip}
+              source="transfer"
+              source_item={transfer}
+              label={transfer_budget_label(transfer)}
+              expense={transfer.expense}
+              display_currency={@display_currency}
+              can_edit={@can_edit}
+            />
+          </.budget_day_group>
+
+          <.budget_day_group
+            :if={Enum.any?(budget_activities_for_day(day_index, @trip))}
+            icon="hero-ticket"
+            title={gettext("Activities")}
+          >
+            <.live_component
+              :for={activity <- budget_activities_for_day(day_index, @trip)}
+              module={BudgetExpense}
+              id={"budget-expense-activity-#{activity.expense.id}"}
+              trip={@trip}
+              source="activity"
+              source_item={activity}
+              label={activity.name}
+              expense={activity.expense}
+              display_currency={@display_currency}
+              can_edit={@can_edit}
+            />
+          </.budget_day_group>
+
+          <.budget_day_group
+            :if={
+              day_index < @trip.duration ||
+                Enum.any?(Planning.day_expenses_for_day(day_index, @trip.day_expenses))
+            }
+            icon="hero-banknotes"
+            title={gettext("Day expenses")}
+          >
+            <.day_expenses_list
+              day_expenses={Planning.day_expenses_for_day(day_index, @trip.day_expenses)}
+              day_index={day_index}
+              trip={@trip}
+              display_currency={@display_currency}
+              can_edit={@can_edit}
+            />
+            <.live_component
+              :if={@can_edit && day_index < @trip.duration}
+              module={DayExpenseNew}
+              id={"day-expense-new-#{day_index}"}
+              trip={@trip}
+              day_index={day_index}
+              can_edit={@can_edit}
+            />
+          </.budget_day_group>
+
           <hr />
         </div>
       </div>
@@ -1539,6 +1610,36 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       display_currency={@display_currency}
       class="mt-0 sm:mt-8 text-xl"
     />
+    """
+  end
+
+  attr(:icon, :string, required: true)
+  attr(:title, :string, required: true)
+  attr(:class, :string, default: nil)
+  slot(:inner_block, required: true)
+
+  def budget_section(assigns) do
+    ~H"""
+    <section class={CoreComponents.build_class(["flex flex-col gap-y-1", @class])}>
+      <.section_header icon={@icon} label={@title} class="!mt-0" />
+      <div class="flex flex-col gap-y-1">
+        {render_slot(@inner_block)}
+      </div>
+    </section>
+    """
+  end
+
+  attr(:icon, :string, required: true)
+  attr(:title, :string, required: true)
+  attr(:class, :string, default: nil)
+  slot(:inner_block, required: true)
+
+  def budget_day_group(assigns) do
+    ~H"""
+    <div class={CoreComponents.build_class(["flex max-w-3xl flex-col gap-y-1", @class])}>
+      <.section_header icon={@icon} label={@title} class="!mt-0" />
+      {render_slot(@inner_block)}
+    </div>
     """
   end
 
@@ -1644,6 +1745,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:trip, Trip, required: true)
   attr(:display_currency, :string, required: true)
   attr(:can_edit, :boolean, required: true)
+  attr(:draggable, :boolean, default: false)
 
   def day_expenses_list(assigns) do
     ~H"""
@@ -1655,6 +1757,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       trip={@trip}
       display_currency={@display_currency}
       can_edit={@can_edit}
+      draggable={@draggable}
     />
     """
   end
@@ -1966,6 +2069,79 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   defp join_with_fallback([], fallback), do: fallback
   defp join_with_fallback(values, _fallback), do: Enum.join(values, ", ")
 
+  defp budget_accommodations(trip) do
+    trip.accommodations
+    |> Enum.filter(&non_zero_expense?/1)
+    |> Enum.sort_by(&{&1.start_day, String.downcase(&1.name || "")})
+  end
+
+  defp budget_day_indices(trip) do
+    duration = trip.duration || 0
+    trip_day_indices = if duration > 0, do: Enum.to_list(0..(duration - 1)), else: []
+
+    outside_day_indices =
+      (Enum.map(trip.transfers, & &1.day_index) ++
+         Enum.map(trip.activities, & &1.day_index) ++
+         Enum.map(trip.day_expenses, & &1.day_index))
+      |> Enum.filter(&(is_integer(&1) && &1 >= duration))
+      |> Enum.uniq()
+      |> Enum.sort()
+
+    (trip_day_indices ++ outside_day_indices)
+    |> Enum.uniq()
+    |> Enum.sort()
+    |> Enum.filter(&budget_day_has_items?(&1, trip))
+  end
+
+  defp budget_day_has_items?(day_index, trip) do
+    Enum.any?(budget_transfers_for_day(day_index, trip)) ||
+      Enum.any?(budget_activities_for_day(day_index, trip)) ||
+      Enum.any?(Planning.day_expenses_for_day(day_index, trip.day_expenses))
+  end
+
+  defp budget_transfers_for_day(day_index, trip) do
+    day_index
+    |> Planning.transfers_for_day(trip.transfers)
+    |> Enum.filter(&non_zero_expense?/1)
+  end
+
+  defp budget_activities_for_day(day_index, trip) do
+    day_index
+    |> Planning.activities_for_day(trip.activities)
+    |> Enum.filter(&non_zero_expense?/1)
+  end
+
+  defp non_zero_expense?(%{expense: %{price: %Money{} = price}}) do
+    not Money.equal?(price, Money.new(price.currency, 0))
+  end
+
+  defp non_zero_expense?(_item), do: false
+
+  defp accommodation_budget_label(accommodation) do
+    "#{accommodation.name}, #{budget_day_range_label(accommodation.start_day, accommodation.end_day)}"
+  end
+
+  defp budget_day_range_label(start_day, end_day) when start_day == end_day do
+    gettext("Day %{day}", day: start_day + 1)
+  end
+
+  defp budget_day_range_label(start_day, end_day) do
+    gettext("Day %{first}-%{last}", first: start_day + 1, last: end_day + 1)
+  end
+
+  defp transfer_budget_label(transfer) do
+    route = "#{Geo.city_name(transfer.departure_city)} → #{Geo.city_name(transfer.arrival_city)}"
+
+    details =
+      [transfer.carrier, transfer.vessel_number]
+      |> Enum.reject(&(is_nil(&1) || &1 == ""))
+
+    case details do
+      [] -> route
+      details -> "#{route}, #{Enum.join(details, " ")}"
+    end
+  end
+
   defp active_nav(%{status: "0_draft"}), do: drafts_nav_item()
   defp active_nav(_), do: plans_nav_item()
 
@@ -2128,13 +2304,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     end)
   end
 
-  defp day_expenses_outside(trip) do
-    trip.day_expenses
-    |> Enum.filter(fn day_expense ->
-      day_expense.day_index >= trip.duration
-    end)
-  end
-
   defp notes_outside(trip) do
     trip.notes
     |> Enum.filter(fn note ->
@@ -2243,10 +2412,9 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     {:noreply, socket}
   end
 
-  defp handle_food_expense_event(food_expense, socket) do
-    food_expense = Repo.preload(food_expense, [:expense])
-
-    trip = Map.put(socket.assigns.trip, :food_expense, food_expense)
+  defp handle_budget_category_event(socket) do
+    categories = Planning.list_budget_categories(socket.assigns.trip)
+    trip = Map.put(socket.assigns.trip, :budget_categories, categories)
 
     socket =
       socket

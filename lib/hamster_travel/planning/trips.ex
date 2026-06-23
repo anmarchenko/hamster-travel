@@ -13,11 +13,10 @@ defmodule HamsterTravel.Planning.Trips do
   alias HamsterTravel.Planning.{
     Accommodations,
     Activities,
+    BudgetCategories,
     Common,
     DayExpenses,
     Destinations,
-    FoodExpense,
-    FoodExpenses,
     Graveyard,
     Note,
     Notes,
@@ -33,6 +32,7 @@ defmodule HamsterTravel.Planning.Trips do
   alias HamsterTravel.Planning.{
     Accommodation,
     Activity,
+    BudgetCategory,
     DayExpense,
     Destination,
     Expense
@@ -234,12 +234,8 @@ defmodule HamsterTravel.Planning.Trips do
   def create_trip(attrs \\ %{}, user) do
     Multi.new()
     |> Multi.insert(:trip, Trip.changeset(%Trip{author_id: user.id}, attrs))
-    |> Multi.run(:food_expense, fn repo, %{trip: trip} ->
-      FoodExpenses.create_food_expense_with_repo(
-        repo,
-        trip,
-        FoodExpenses.default_food_expense_attrs(trip)
-      )
+    |> Multi.run(:food_budget_category, fn repo, %{trip: trip} ->
+      BudgetCategories.create_food_budget_category_with_repo(repo, trip)
     end)
     |> Repo.transaction()
     |> case do
@@ -249,7 +245,7 @@ defmodule HamsterTravel.Planning.Trips do
       {:error, :trip, changeset, _} ->
         {:error, changeset}
 
-      {:error, :food_expense, changeset, _} ->
+      {:error, :food_budget_category, changeset, _} ->
         {:error, changeset}
     end
   end
@@ -282,10 +278,16 @@ defmodule HamsterTravel.Planning.Trips do
     Repo.transaction(fn ->
       case Repo.update(Trip.changeset(trip, attrs)) do
         {:ok, updated_trip} ->
-          updated_trip
-          |> Destinations.maybe_adjust_for_duration(trip)
-          |> Accommodations.maybe_adjust_for_duration(trip)
-          |> FoodExpenses.maybe_adjust_for_duration(trip)
+          updated_trip =
+            updated_trip
+            |> Destinations.maybe_adjust_for_duration(trip)
+            |> Accommodations.maybe_adjust_for_duration(trip)
+            |> BudgetCategories.maybe_adjust_food_category_for_duration(trip)
+
+          case BudgetCategories.maybe_recalculate_after_trip_finished(updated_trip, trip) do
+            {:ok, updated_trip} -> updated_trip
+            {:error, changeset} -> Repo.rollback(changeset)
+          end
 
         {:error, changeset} ->
           Repo.rollback(changeset)
@@ -346,9 +348,6 @@ defmodule HamsterTravel.Planning.Trips do
       from(n in Note, where: n.trip_id == ^trip.id)
       |> Repo.delete_all()
 
-      from(fe in FoodExpense, where: fe.trip_id == ^trip.id)
-      |> Repo.delete_all()
-
       Repo.delete(trip)
     end)
     |> case do
@@ -397,6 +396,7 @@ defmodule HamsterTravel.Planning.Trips do
       :author,
       :countries,
       :expenses,
+      budget_categories: BudgetCategories.trip_preloading_query(),
       trip_participants: :user,
       destinations: Destinations.preloading_query()
     ])
@@ -408,8 +408,8 @@ defmodule HamsterTravel.Planning.Trips do
       :author,
       :countries,
       :expenses,
+      budget_categories: BudgetCategories.trip_preloading_query(),
       trip_participants: :user,
-      food_expense: :expense,
       accommodations: :expense,
       day_expenses: DayExpenses.preloading_query(),
       activities: Activities.preloading_query(),
@@ -662,7 +662,8 @@ defmodule HamsterTravel.Planning.Trips do
          :ok <- copy_activities(repo, trip, source_trip.activities),
          :ok <- copy_day_expenses(repo, trip, source_trip.day_expenses),
          :ok <- copy_notes(repo, trip, source_trip.notes),
-         :ok <- copy_food_expense(repo, trip, source_trip.food_expense),
+         :ok <- copy_food_budget_category(repo, trip, source_trip.budget_categories),
+         :ok <- copy_budget_categories(repo, trip, source_trip.budget_categories),
          :ok <- copy_standalone_expenses(repo, trip, source_trip.expenses) do
       :ok
     else
@@ -813,22 +814,77 @@ defmodule HamsterTravel.Planning.Trips do
     end)
   end
 
-  defp copy_food_expense(_repo, _trip, nil), do: :ok
+  defp copy_food_budget_category(repo, trip, source_categories) do
+    attrs =
+      source_categories
+      |> Enum.find(&BudgetCategory.food?/1)
+      |> food_budget_category_copy_attrs()
 
-  defp copy_food_expense(repo, %Trip{} = trip, %FoodExpense{} = food_expense) do
-    %FoodExpense{
-      trip_id: trip.id,
-      price_per_day: food_expense.price_per_day,
-      days_count: food_expense.days_count,
-      people_count: food_expense.people_count
+    case BudgetCategories.create_food_budget_category_with_repo(repo, trip, attrs) do
+      {:ok, _category} -> :ok
+      {:error, changeset} -> {:error, changeset}
+    end
+  end
+
+  defp food_budget_category_copy_attrs(nil), do: %{}
+
+  defp food_budget_category_copy_attrs(%BudgetCategory{} = category) do
+    %{
+      estimated_expense: %{price: category.estimated_expense.price},
+      food_setting: %{
+        price_per_day: category.food_setting.price_per_day,
+        days_count: category.food_setting.days_count,
+        people_count: category.food_setting.people_count,
+        calculation_mode: category.food_setting.calculation_mode
+      }
+    }
+  end
+
+  defp copy_budget_categories(repo, %Trip{} = trip, budget_categories) do
+    budget_categories
+    |> Enum.reject(&BudgetCategory.food?/1)
+    |> Enum.reduce_while(:ok, fn category, :ok ->
+      %BudgetCategory{
+        trip_id: trip.id,
+        name: category.name,
+        kind: category.kind
+      }
+      |> repo.insert()
+      |> case do
+        {:ok, record} ->
+          with :ok <-
+                 copy_expense_for(
+                   repo,
+                   trip,
+                   category.estimated_expense,
+                   :budget_category_id,
+                   record.id
+                 ),
+               :ok <- copy_budget_category_food_setting(repo, category.food_setting, record.id) do
+            {:cont, :ok}
+          else
+            {:error, changeset} -> {:halt, {:error, changeset}}
+          end
+
+        {:error, changeset} ->
+          {:halt, {:error, changeset}}
+      end
+    end)
+  end
+
+  defp copy_budget_category_food_setting(_repo, nil, _budget_category_id), do: :ok
+
+  defp copy_budget_category_food_setting(repo, food_setting, budget_category_id) do
+    %HamsterTravel.Planning.BudgetCategoryFoodSetting{
+      budget_category_id: budget_category_id,
+      price_per_day: food_setting.price_per_day,
+      days_count: food_setting.days_count,
+      people_count: food_setting.people_count
     }
     |> repo.insert()
     |> case do
-      {:ok, record} ->
-        copy_expense_for(repo, trip, food_expense.expense, :food_expense_id, record.id)
-
-      {:error, changeset} ->
-        {:error, changeset}
+      {:ok, _} -> :ok
+      {:error, changeset} -> {:error, changeset}
     end
   end
 
@@ -855,7 +911,8 @@ defmodule HamsterTravel.Planning.Trips do
     %Expense{
       trip_id: trip.id,
       name: expense.name,
-      price: expense.price
+      price: expense.price,
+      budget_role: expense.budget_role
     }
     |> Map.put(foreign_key, parent_id)
     |> repo.insert()
@@ -870,6 +927,6 @@ defmodule HamsterTravel.Planning.Trips do
       is_nil(expense.transfer_id) and
       is_nil(expense.activity_id) and
       is_nil(expense.day_expense_id) and
-      is_nil(expense.food_expense_id)
+      is_nil(expense.budget_category_id)
   end
 end

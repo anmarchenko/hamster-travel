@@ -24,7 +24,7 @@ defmodule HamsterTravel.PlanningTest do
   end
 
   describe "trips" do
-    alias HamsterTravel.Planning.Trip
+    alias HamsterTravel.Planning.{BudgetCategory, Trip}
 
     test "list_plans/1 returns all planned and finished trips including ones from friends", %{
       user: user,
@@ -206,7 +206,9 @@ defmodule HamsterTravel.PlanningTest do
           name: "b"
         })
 
-      %{id: friend_id} = trip_fixture(%{author_id: friend.id, status: Trip.draft()})
+      %{id: friend_id} =
+        trip_fixture(%{author_id: friend.id, status: Trip.draft(), name: "c"})
+
       %{id: _plan_id} = trip_fixture(%{author_id: user.id, status: Trip.planned()})
 
       assert [
@@ -470,10 +472,14 @@ defmodule HamsterTravel.PlanningTest do
       assert trip.author_id == user.id
 
       trip = Planning.get_trip!(trip.id)
-      assert trip.food_expense.days_count == trip.duration
-      assert trip.food_expense.people_count == trip.people_count
-      assert trip.food_expense.price_per_day == Money.new(trip.currency, 0)
-      assert trip.food_expense.expense.price == Money.new(trip.currency, 0)
+
+      assert [food_category] = Planning.list_budget_categories(trip)
+      assert BudgetCategory.food?(food_category)
+      assert food_category.name == "Food"
+      assert food_category.estimated_expense.price == Money.new(trip.currency, 0)
+      assert food_category.food_setting.days_count == trip.duration
+      assert food_category.food_setting.people_count == trip.people_count
+      assert food_category.food_setting.price_per_day == Money.new(trip.currency, 0)
     end
 
     test "create_trip/3 with valid data copies associations from existing trip", %{
@@ -574,11 +580,16 @@ defmodule HamsterTravel.PlanningTest do
       {:ok, standalone_expense} =
         Planning.create_expense(trip, %{price: Money.new(:EUR, 500), name: "Snacks"})
 
-      {:ok, _food_expense} =
-        Planning.update_food_expense(trip.food_expense, %{
-          price_per_day: Money.new(:EUR, 25),
-          days_count: 2,
-          people_count: 3
+      food_category = Planning.get_food_budget_category!(trip)
+
+      {:ok, _food_category} =
+        Planning.update_budget_category(food_category, %{
+          food_setting: %{
+            price_per_day: Money.new(:EUR, 25),
+            days_count: 2,
+            people_count: 3,
+            calculation_mode: "per_day"
+          }
         })
 
       source_trip = Planning.get_trip!(trip.id)
@@ -663,12 +674,23 @@ defmodule HamsterTravel.PlanningTest do
       assert new_note.rank == note.rank
       refute new_note.id == note.id
 
-      assert new_trip.food_expense.price_per_day == source_trip.food_expense.price_per_day
-      assert new_trip.food_expense.days_count == source_trip.food_expense.days_count
-      assert new_trip.food_expense.people_count == source_trip.food_expense.people_count
-      assert new_trip.food_expense.expense.price == source_trip.food_expense.expense.price
-      assert new_trip.food_expense.expense.trip_id == new_trip.id
-      refute new_trip.food_expense.expense.id == source_trip.food_expense.expense.id
+      source_food_category = Planning.get_food_budget_category!(source_trip)
+      new_food_category = Planning.get_food_budget_category!(new_trip)
+
+      assert new_food_category.food_setting.price_per_day ==
+               source_food_category.food_setting.price_per_day
+
+      assert new_food_category.food_setting.days_count ==
+               source_food_category.food_setting.days_count
+
+      assert new_food_category.food_setting.people_count ==
+               source_food_category.food_setting.people_count
+
+      assert new_food_category.estimated_expense.price ==
+               source_food_category.estimated_expense.price
+
+      assert new_food_category.estimated_expense.trip_id == new_trip.id
+      refute new_food_category.estimated_expense.id == source_food_category.estimated_expense.id
 
       new_standalone_expense =
         Enum.find(new_trip.expenses, fn expense ->
@@ -682,11 +704,82 @@ defmodule HamsterTravel.PlanningTest do
       assert is_nil(new_standalone_expense.transfer_id)
       assert is_nil(new_standalone_expense.activity_id)
       assert is_nil(new_standalone_expense.day_expense_id)
-      assert is_nil(new_standalone_expense.food_expense_id)
       refute new_standalone_expense.id == standalone_expense.id
     end
 
-    test "create_trip/2 creates a food expense with trip-based defaults", %{user: user} do
+    test "create_trip/3 copies category estimates and settings without actual expenses", %{
+      user: user
+    } do
+      source_trip = trip_fixture(user, %{name: "Original trip"})
+      source_food_category = Planning.get_food_budget_category!(source_trip)
+
+      assert {:ok, source_food_category} =
+               Planning.update_budget_category(source_food_category, %{
+                 food_setting: %{
+                   price_per_day: Money.new(:EUR, 1000),
+                   days_count: 3,
+                   people_count: 2,
+                   calculation_mode: "per_day"
+                 }
+               })
+
+      assert {:ok, _actual_expense} =
+               Planning.create_budget_category_actual_expense(source_food_category, %{
+                 name: "Restaurant",
+                 price: Money.new(:EUR, 2500)
+               })
+
+      assert {:ok, source_general_category} =
+               Planning.create_budget_category(source_trip, %{
+                 name: "Souvenirs",
+                 estimated_expense: %{price: Money.new(:EUR, 4500)}
+               })
+
+      assert {:ok, _actual_expense} =
+               Planning.create_budget_category_actual_expense(source_general_category, %{
+                 name: "Magnet",
+                 price: Money.new(:EUR, 1000)
+               })
+
+      source_trip = Planning.get_trip!(source_trip.id)
+
+      copy_attrs = %{
+        name: "Copied trip",
+        dates_unknown: source_trip.dates_unknown,
+        start_date: source_trip.start_date,
+        end_date: source_trip.end_date,
+        duration: source_trip.duration,
+        currency: source_trip.currency,
+        status: source_trip.status,
+        private: source_trip.private,
+        people_count: source_trip.people_count
+      }
+
+      assert {:ok, copied_trip} = Planning.create_trip(copy_attrs, user, source_trip)
+      copied_trip = Planning.get_trip!(copied_trip.id)
+
+      copied_categories = Planning.list_budget_categories(copied_trip)
+      assert length(copied_categories) == 2
+
+      copied_food_category = Enum.find(copied_categories, &BudgetCategory.food?/1)
+      copied_general_category = Enum.find(copied_categories, &(&1.name == "Souvenirs"))
+
+      assert copied_food_category.name == "Food"
+      assert copied_food_category.estimated_expense.price == Money.new(:EUR, 6000)
+      assert copied_food_category.food_setting.price_per_day == Money.new(:EUR, 1000)
+      assert copied_food_category.food_setting.days_count == 3
+      assert copied_food_category.food_setting.people_count == 2
+      assert copied_food_category.food_setting.calculation_mode == "per_day"
+      assert copied_food_category.actual_expenses == []
+
+      assert copied_general_category.name == source_general_category.name
+      assert copied_general_category.kind == source_general_category.kind
+      assert copied_general_category.estimated_expense.price == Money.new(:EUR, 4500)
+      assert copied_general_category.food_setting == nil
+      assert copied_general_category.actual_expenses == []
+    end
+
+    test "create_trip/2 creates a food category with trip-based defaults", %{user: user} do
       valid_attrs = %{
         name: "Default food expense",
         dates_unknown: false,
@@ -699,12 +792,12 @@ defmodule HamsterTravel.PlanningTest do
       }
 
       assert {:ok, %Trip{} = trip} = Planning.create_trip(valid_attrs, user)
-      trip = Planning.get_trip!(trip.id)
+      food_category = Planning.get_food_budget_category!(trip)
 
-      assert trip.food_expense.days_count == 3
-      assert trip.food_expense.people_count == 3
-      assert trip.food_expense.price_per_day == Money.new(:USD, 0)
-      assert trip.food_expense.expense.price == Money.new(:USD, 0)
+      assert food_category.food_setting.days_count == 3
+      assert food_category.food_setting.people_count == 3
+      assert food_category.food_setting.price_per_day == Money.new(:USD, 0)
+      assert food_category.estimated_expense.price == Money.new(:USD, 0)
     end
 
     test "create_trip/2 changes slug in case it is occupied", %{user: user} do
@@ -816,27 +909,52 @@ defmodule HamsterTravel.PlanningTest do
       assert trip.end_date == ~D[2023-06-13]
     end
 
-    test "update_trip/2 updates food expense days count and total when trip dates change" do
+    test "update_trip/2 updates food category days count and estimate when trip dates change" do
       trip = trip_fixture()
-      trip = Planning.get_trip!(trip.id)
+      food_category = Planning.get_food_budget_category!(trip)
 
-      assert {:ok, _food_expense} =
-               Planning.update_food_expense(trip.food_expense, %{
-                 price_per_day: Money.new(:EUR, 1000),
-                 days_count: 3,
-                 people_count: 2
+      assert {:ok, _food_category} =
+               Planning.update_budget_category(food_category, %{
+                 food_setting: %{
+                   price_per_day: Money.new(:EUR, 1000),
+                   days_count: 3,
+                   people_count: 2,
+                   calculation_mode: "per_day"
+                 }
+               })
+
+      assert {:ok, %Trip{} = updated_trip} =
+               Planning.update_trip(trip, %{end_date: ~D[2023-06-13]})
+
+      food_category = Planning.get_food_budget_category!(updated_trip)
+
+      assert updated_trip.duration == 2
+      assert food_category.food_setting.days_count == 2
+
+      assert food_category.estimated_expense.price ==
+               Money.new(:EUR, 1000) |> Money.mult!(2) |> Money.mult!(2)
+    end
+
+    test "update_trip/2 preserves a total food estimate when trip dates change" do
+      trip = trip_fixture()
+      food_category = Planning.get_food_budget_category!(trip)
+
+      assert {:ok, _food_category} =
+               Planning.update_budget_category(food_category, %{
+                 estimated_expense: %{price: Money.new(:EUR, 9000)},
+                 food_setting: %{calculation_mode: "total"}
                })
 
       assert {:ok, %Trip{} = updated_trip} =
                Planning.update_trip(trip, %{end_date: ~D[2023-06-13]})
 
       updated_trip = Planning.get_trip!(updated_trip.id)
+      food_category = Planning.get_food_budget_category!(updated_trip)
 
-      assert updated_trip.duration == 2
-      assert updated_trip.food_expense.days_count == 2
-
-      assert updated_trip.food_expense.expense.price ==
-               Money.new(:EUR, 1000) |> Money.mult!(2) |> Money.mult!(2)
+      assert food_category.estimated_expense.price == Money.new(:EUR, 9000)
+      assert food_category.food_setting.calculation_mode == "total"
+      assert food_category.food_setting.days_count == 2
+      assert food_category.food_setting.price_per_day == Money.new(:EUR, 2250)
     end
 
     test "update_trip/2 stores a cover image" do
@@ -1123,15 +1241,14 @@ defmodule HamsterTravel.PlanningTest do
 
     test "delete_trip/1 removes trip expenses" do
       trip = trip_fixture()
-      trip = Planning.get_trip!(trip.id)
-      food_expense_id = trip.food_expense.expense.id
+      food_estimate_id = Planning.get_food_budget_category!(trip).estimated_expense.id
       expense = expense_fixture(%{trip_id: trip.id})
 
       assert {:ok, %Trip{}} = Planning.delete_trip(trip)
 
       assert [] == Repo.all(from e in Planning.Expense, where: e.trip_id == ^trip.id)
       assert_raise Ecto.NoResultsError, fn -> Planning.get_expense!(expense.id) end
-      assert_raise Ecto.NoResultsError, fn -> Planning.get_expense!(food_expense_id) end
+      assert_raise Ecto.NoResultsError, fn -> Planning.get_expense!(food_estimate_id) end
     end
 
     test "delete_trip/1 removes activities, transfers, day expenses, destinations, and notes", %{
@@ -1209,6 +1326,7 @@ defmodule HamsterTravel.PlanningTest do
       assert [%{"city_id" => city_id}] = tombstone.payload["destinations"]
       assert city_id == destination.city_id
       assert [%{"title" => "Keep this"}] = tombstone.payload["notes"]
+      assert [%{"kind" => "food", "name" => "Food"}] = tombstone.payload["budget_categories"]
     end
 
     test "restore_trip_from_tombstone/1 restores trip and associations with new ids", %{
@@ -1264,6 +1382,18 @@ defmodule HamsterTravel.PlanningTest do
       {:ok, _expense} =
         Planning.create_expense(trip, %{price: Money.new(:EUR, 5000), name: "Souvenirs"})
 
+      {:ok, category} =
+        Planning.create_budget_category(trip, %{
+          name: "Shopping",
+          estimated_expense: %{price: Money.new(:EUR, 8000)}
+        })
+
+      {:ok, _actual_expense} =
+        Planning.create_budget_category_actual_expense(category, %{
+          name: "Magnet",
+          price: Money.new(:EUR, 2000)
+        })
+
       assert {:ok, %Trip{}} = Planning.delete_trip(trip)
 
       tombstone =
@@ -1286,11 +1416,22 @@ defmodule HamsterTravel.PlanningTest do
       assert [%{link: "https://example.com/lunch"}] = restored.day_expenses
       assert length(restored.notes) == 1
 
+      restored_categories = Planning.list_budget_categories(restored)
+      assert length(restored_categories) == 2
+
+      restored_food = Enum.find(restored_categories, &BudgetCategory.food?/1)
+      restored_shopping = Enum.find(restored_categories, &(&1.name == "Shopping"))
+
+      assert restored_food.estimated_expense.price == Money.new(:EUR, 0)
+      assert restored_shopping.estimated_expense.price == Money.new(:EUR, 8000)
+      assert [%{name: "Magnet", price: actual_price}] = restored_shopping.actual_expenses
+      assert actual_price == Money.new(:EUR, 2000)
+
       standalone_expenses =
         Enum.filter(restored.expenses, fn expense ->
           is_nil(expense.accommodation_id) and is_nil(expense.transfer_id) and
             is_nil(expense.activity_id) and is_nil(expense.day_expense_id) and
-            is_nil(expense.food_expense_id)
+            is_nil(expense.budget_category_id)
         end)
 
       assert [standalone] = standalone_expenses
@@ -1966,7 +2107,7 @@ defmodule HamsterTravel.PlanningTest do
       assert length(expenses) == 3
       assert expense1.id in expense_ids
       assert expense2.id in expense_ids
-      assert trip.food_expense.expense.id in expense_ids
+      assert Planning.get_food_budget_category!(trip).estimated_expense.id in expense_ids
     end
 
     test "get_expense!/1 returns the expense with given id" do
@@ -2070,104 +2211,593 @@ defmodule HamsterTravel.PlanningTest do
     end
   end
 
-  describe "food_expenses schema" do
-    alias HamsterTravel.Planning.FoodExpense
+  describe "budget_categories" do
+    alias HamsterTravel.Planning.{BudgetCategory, BudgetCategoryFoodSetting, Expense, Trip}
 
-    test "changeset requires price_per_day, days_count, people_count, trip_id" do
-      changeset = FoodExpense.changeset(%FoodExpense{}, %{})
-      refute changeset.valid?
+    test "lists Food first and remaining categories alphabetically by name" do
+      trip = trip_fixture()
 
-      assert %{
-               price_per_day: ["can't be blank"],
-               days_count: ["can't be blank"],
-               people_count: ["can't be blank"],
-               trip_id: ["can't be blank"]
-             } = errors_on(changeset)
+      for name <- ["zebra", "alpha", "Beta"] do
+        assert {:ok, %BudgetCategory{}} = Planning.create_budget_category(trip, %{name: name})
+      end
+
+      expected_names = ["Food", "alpha", "Beta", "zebra"]
+
+      assert Enum.map(Planning.list_budget_categories(trip), & &1.name) == expected_names
+
+      trip = Planning.get_trip!(trip.id)
+      assert Enum.map(trip.budget_categories, & &1.name) == expected_names
     end
 
-    test "changeset validates positive counts" do
+    test "creates a general category with a zero estimate by default" do
+      trip = trip_fixture()
+
+      assert {:ok, category} = Planning.create_budget_category(trip, %{name: "Souvenirs"})
+
+      assert category.kind == BudgetCategory.kind_general()
+      assert category.estimated_expense.price == Money.new(:EUR, 0)
+      assert category.estimated_expense.name == "Souvenirs"
+    end
+
+    test "create_budget_category/2 creates an estimated expense that counts in the budget" do
+      trip = trip_fixture()
+
+      assert {:ok, %BudgetCategory{} = category} =
+               Planning.create_budget_category(trip, %{
+                 name: "Souvenirs",
+                 estimated_expense: %{price: Money.new(:EUR, 5000)}
+               })
+
+      assert category.name == "Souvenirs"
+      assert category.kind == BudgetCategory.kind_general()
+      assert category.estimated_expense.price == Money.new(:EUR, 5000)
+      assert category.estimated_expense.budget_role == Expense.budget_role_estimate()
+      assert category.estimated_expense.budget_category_id == category.id
+
+      budget =
+        trip.id
+        |> Planning.get_trip!()
+        |> Planning.calculate_budget()
+
+      assert Money.equal?(budget, Money.new(:EUR, 5000))
+    end
+
+    test "actual category expenses are excluded from budget while estimates remain active" do
+      trip = trip_fixture()
+
+      assert {:ok, category} =
+               Planning.create_budget_category(trip, %{
+                 name: "Gasoline",
+                 estimated_expense: %{price: Money.new(:EUR, 5000)}
+               })
+
+      assert {:ok, actual_expense} =
+               Planning.create_budget_category_actual_expense(category, %{
+                 name: "First refill",
+                 price: Money.new(:EUR, 3000)
+               })
+
+      assert actual_expense.budget_role == Expense.budget_role_actual()
+      assert actual_expense.budget_category_id == category.id
+
+      assert Money.equal?(Planning.calculate_budget(trip), Money.new(:EUR, 5000))
+
+      budget =
+        trip.id
+        |> Planning.get_trip!()
+        |> Planning.calculate_budget()
+
+      assert Money.equal?(budget, Money.new(:EUR, 5000))
+    end
+
+    test "saving an actual category expense raises the estimate when actual sum is greater" do
+      trip = trip_fixture()
+
+      assert {:ok, category} =
+               Planning.create_budget_category(trip, %{
+                 name: "Gasoline",
+                 estimated_expense: %{price: Money.new(:EUR, 5000)}
+               })
+
+      assert {:ok, first_actual_expense} =
+               Planning.create_budget_category_actual_expense(category, %{
+                 name: "First refill",
+                 price: Money.new(:EUR, 3000)
+               })
+
+      category = Planning.get_budget_category!(category.id)
+      assert category.estimated_expense.price == Money.new(:EUR, 5000)
+
+      assert {:ok, _updated_actual_expense} =
+               Planning.update_budget_category_actual_expense(first_actual_expense, %{
+                 price: Money.new(:EUR, 6000)
+               })
+
+      category = Planning.get_budget_category!(category.id)
+      assert category.estimated_expense.price == Money.new(:EUR, 6000)
+
+      budget =
+        trip.id
+        |> Planning.get_trip!()
+        |> Planning.calculate_budget()
+
+      assert Money.equal?(budget, Money.new(:EUR, 6000))
+    end
+
+    test "creating an actual expense raises the estimate when the accumulated sum exceeds it" do
+      trip = trip_fixture()
+
+      assert {:ok, category} =
+               Planning.create_budget_category(trip, %{
+                 name: "Gasoline",
+                 estimated_expense: %{price: Money.new(:EUR, 5000)}
+               })
+
+      assert {:ok, _first_actual_expense} =
+               Planning.create_budget_category_actual_expense(category, %{
+                 price: Money.new(:EUR, 3000)
+               })
+
+      assert Planning.get_budget_category!(category.id).estimated_expense.price ==
+               Money.new(:EUR, 5000)
+
+      assert {:ok, _second_actual_expense} =
+               Planning.create_budget_category_actual_expense(category, %{
+                 price: Money.new(:EUR, 2500)
+               })
+
+      category = Planning.get_budget_category!(category.id)
+      assert category.estimated_expense.price == Money.new(:EUR, 5500)
+      assert Money.equal?(Planning.calculate_budget(trip), Money.new(:EUR, 5500))
+    end
+
+    test "raising the Food estimate from actual expenses updates its per-person daily cost" do
+      trip = trip_fixture()
+      category = Planning.get_food_budget_category!(trip)
+
+      assert {:ok, category} =
+               Planning.update_budget_category(category, %{
+                 food_setting: %{
+                   price_per_day: Money.new(:EUR, 1000),
+                   days_count: 2,
+                   people_count: 2,
+                   calculation_mode: "per_day"
+                 }
+               })
+
+      assert category.estimated_expense.price == Money.new(:EUR, 4000)
+
+      assert {:ok, _actual_expense} =
+               Planning.create_budget_category_actual_expense(category, %{
+                 price: Money.new(:EUR, 5000)
+               })
+
+      category = Planning.get_food_budget_category!(trip)
+      assert category.estimated_expense.price == Money.new(:EUR, 5000)
+      assert category.food_setting.price_per_day == Money.new(:EUR, 1250)
+    end
+
+    test "updates the protected food category estimate and calculation settings" do
+      trip = trip_fixture()
+      category = Planning.get_food_budget_category!(trip)
+
+      estimate_id = category.estimated_expense.id
+      food_setting_id = category.food_setting.id
+
+      assert {:ok, updated_category} =
+               Planning.update_budget_category(category, %{
+                 name: "Meals",
+                 food_setting: %{
+                   price_per_day: Money.new(:EUR, 1500),
+                   days_count: 3,
+                   people_count: 2,
+                   calculation_mode: "per_day"
+                 }
+               })
+
+      assert updated_category.name == "Food"
+      assert updated_category.estimated_expense.id == estimate_id
+      assert updated_category.estimated_expense.name == "Food"
+      assert updated_category.estimated_expense.price == Money.new(:EUR, 9000)
+      assert updated_category.food_setting.id == food_setting_id
+      assert updated_category.food_setting.price_per_day == Money.new(:EUR, 1500)
+      assert updated_category.food_setting.days_count == 3
+      assert updated_category.food_setting.people_count == 2
+
+      assert {:ok, total_category} =
+               Planning.update_budget_category(updated_category, %{
+                 estimated_expense: %{price: Money.new(:EUR, 12_000)},
+                 food_setting: %{calculation_mode: "total"}
+               })
+
+      assert total_category.name == "Food"
+      assert total_category.estimated_expense.id == estimate_id
+      assert total_category.estimated_expense.price == Money.new(:EUR, 12_000)
+      assert total_category.food_setting.calculation_mode == "total"
+    end
+
+    test "ordinary category creation ignores subtype attributes and validates expenses" do
+      trip = trip_fixture()
+
+      assert {:error, %Ecto.Changeset{} = category_changeset} =
+               Planning.create_budget_category(trip, %{name: nil, kind: "unknown"})
+
+      assert %{name: ["can't be blank"]} = errors_on(category_changeset)
+
+      assert {:ok, ordinary_category} =
+               Planning.create_budget_category(trip, %{
+                 name: "Meals",
+                 kind: BudgetCategory.kind_food(),
+                 food_setting: %{
+                   price_per_day: Money.new(:EUR, 1000),
+                   days_count: 2,
+                   people_count: 2
+                 }
+               })
+
+      assert ordinary_category.kind == BudgetCategory.kind_general()
+      assert ordinary_category.food_setting == nil
+
+      food_category = Planning.get_food_budget_category!(trip)
+
+      assert {:error, %Ecto.Changeset{} = food_changeset} =
+               Planning.update_budget_category(food_category, %{
+                 food_setting: %{
+                   price_per_day: Money.new(:EUR, 1000),
+                   days_count: 0,
+                   people_count: -1,
+                   calculation_mode: "per_day"
+                 }
+               })
+
+      assert %{
+               food_setting: %{
+                 days_count: ["must be greater than 0"],
+                 people_count: ["must be greater than 0"]
+               }
+             } = errors_on(food_changeset)
+
+      assert {:ok, category} = Planning.create_budget_category(trip, %{name: "Gasoline"})
+
+      assert {:error, %Ecto.Changeset{} = actual_changeset} =
+               Planning.create_budget_category_actual_expense(category, %{name: "Refill"})
+
+      assert %{price: ["can't be blank"]} = errors_on(actual_changeset)
+    end
+
+    test "enforces one food category per trip at the database boundary" do
       trip = trip_fixture()
 
       changeset =
-        FoodExpense.changeset(%FoodExpense{}, %{
-          price_per_day: Money.new(:EUR, 1000),
-          days_count: 0,
-          people_count: -1,
-          trip_id: trip.id
-        })
+        BudgetCategory.changeset(
+          %BudgetCategory{trip_id: trip.id},
+          %{name: "Second food", kind: BudgetCategory.kind_food(), trip_id: trip.id}
+        )
 
-      assert %{
-               days_count: ["must be greater than 0"],
-               people_count: ["must be greater than 0"]
-             } = errors_on(changeset)
+      assert {:error, duplicate_changeset} = Repo.insert(changeset)
+      assert %{trip_id: ["has already been taken"]} = errors_on(duplicate_changeset)
     end
-  end
 
-  describe "food_expenses" do
-    alias HamsterTravel.Planning.FoodExpense
-
-    test "update_food_expense/2 recalculates total expense" do
+    test "enforces unique category names and builds category changesets" do
       trip = trip_fixture()
-      trip = Planning.get_trip!(trip.id)
-      food_expense = trip.food_expense
 
-      assert {:ok, updated} =
-               Planning.update_food_expense(food_expense, %{
-                 price_per_day: Money.new(:EUR, 1200),
-                 days_count: 2,
-                 people_count: 3
+      assert {:ok, category} = Planning.create_budget_category(trip, %{name: "Souvenirs"})
+      assert %Ecto.Changeset{} = Planning.change_budget_category(category, %{name: "Shopping"})
+
+      assert {:error, %Ecto.Changeset{} = duplicate_changeset} =
+               Planning.create_budget_category(trip, %{name: "Souvenirs"})
+
+      assert %{trip_id: ["has already been taken"]} = errors_on(duplicate_changeset)
+    end
+
+    test "rejects actual-expense operations for ordinary expenses and invalid updates" do
+      trip = trip_fixture()
+
+      assert {:ok, ordinary_expense} =
+               Planning.create_expense(trip, %{
+                 name: "Hotel",
+                 price: Money.new(:EUR, 5000)
                })
 
-      expected =
-        Money.new(:EUR, 1200)
-        |> Money.mult!(2)
-        |> Money.mult!(3)
+      assert {:error, :not_budget_category_actual_expense} =
+               Planning.update_budget_category_actual_expense(ordinary_expense, %{
+                 price: Money.new(:EUR, 6000)
+               })
 
-      assert updated.expense.price == expected
-    end
+      assert {:error, :not_budget_category_actual_expense} =
+               Planning.delete_budget_category_actual_expense(ordinary_expense)
 
-    test "update_food_expense/2 with invalid data returns error changeset" do
-      trip = trip_fixture()
-      trip = Planning.get_trip!(trip.id)
-      food_expense = trip.food_expense
+      assert {:ok, category} = Planning.create_budget_category(trip, %{name: "Gasoline"})
+
+      assert {:ok, actual_expense} =
+               Planning.create_budget_category_actual_expense(category, %{
+                 name: "Refill",
+                 price: Money.new(:EUR, 1000)
+               })
 
       assert {:error, %Ecto.Changeset{} = changeset} =
-               Planning.update_food_expense(food_expense, %{days_count: 0})
+               Planning.update_budget_category_actual_expense(actual_expense, %{price: nil})
 
-      assert %{days_count: ["must be greater than 0"]} = errors_on(changeset)
+      assert %{price: ["can't be blank"]} = errors_on(changeset)
+      assert Planning.get_expense!(actual_expense.id).price == Money.new(:EUR, 1000)
     end
 
-    test "get_food_expense!/1 returns the food expense with expense preloaded" do
+    test "rejects zero-valued actual expenses when creating and updating" do
       trip = trip_fixture()
-      trip = Planning.get_trip!(trip.id)
+      assert {:ok, category} = Planning.create_budget_category(trip, %{name: "Gasoline"})
 
-      food_expense = Planning.get_food_expense!(trip.food_expense.id)
-      assert food_expense.id == trip.food_expense.id
-      assert %HamsterTravel.Planning.Expense{} = food_expense.expense
-    end
-
-    test "change_food_expense/1 returns a changeset" do
-      trip = trip_fixture()
-      trip = Planning.get_trip!(trip.id)
-
-      assert %Ecto.Changeset{} = Planning.change_food_expense(trip.food_expense)
-    end
-
-    test "update_food_expense/2 updates existing expense association" do
-      trip = trip_fixture()
-      trip = Planning.get_trip!(trip.id)
-      food_expense = trip.food_expense
-      expense_id = food_expense.expense.id
-
-      assert {:ok, updated} =
-               Planning.update_food_expense(food_expense, %{
-                 price_per_day: Money.new(:EUR, 250),
-                 days_count: 1,
-                 people_count: 2
+      assert {:error, %Ecto.Changeset{} = create_changeset} =
+               Planning.create_budget_category_actual_expense(category, %{
+                 price: Money.new(:EUR, 0)
                })
 
-      assert updated.expense.id == expense_id
-      assert updated.expense.price == Money.new(:EUR, 250) |> Money.mult!(2)
+      assert %{price: ["must be greater than 0"]} = errors_on(create_changeset)
+      assert Planning.get_budget_category!(category.id).actual_expenses == []
+
+      assert {:ok, actual_expense} =
+               Planning.create_budget_category_actual_expense(category, %{
+                 price: Money.new(:EUR, 1000)
+               })
+
+      assert {:error, %Ecto.Changeset{} = update_changeset} =
+               Planning.update_budget_category_actual_expense(actual_expense, %{
+                 price: Money.new(:EUR, 0)
+               })
+
+      assert %{price: ["must be greater than 0"]} = errors_on(update_changeset)
+      assert Planning.get_expense!(actual_expense.id).price == Money.new(:EUR, 1000)
+    end
+
+    test "lists actual expenses from oldest to newest" do
+      trip = trip_fixture()
+      assert {:ok, category} = Planning.create_budget_category(trip, %{name: "Gasoline"})
+
+      actual_expenses =
+        for amount <- [3000, 1000, 2000] do
+          assert {:ok, actual_expense} =
+                   Planning.create_budget_category_actual_expense(category, %{
+                     price: Money.new(:EUR, amount)
+                   })
+
+          actual_expense
+        end
+
+      expected_ids = Enum.map(actual_expenses, & &1.id)
+
+      category = Planning.get_budget_category!(category.id)
+      assert Enum.map(category.actual_expenses, & &1.id) == expected_ids
+
+      trip = Planning.get_trip!(trip.id)
+      category = Enum.find(trip.budget_categories, &(&1.id == category.id))
+      assert Enum.map(category.actual_expenses, & &1.id) == expected_ids
+    end
+
+    test "deletes actual expenses without changing the estimate" do
+      trip = trip_fixture()
+
+      assert {:ok, category} =
+               Planning.create_budget_category(trip, %{
+                 name: "Gasoline",
+                 estimated_expense: %{price: Money.new(:EUR, 5000)}
+               })
+
+      assert {:ok, actual_expense} =
+               Planning.create_budget_category_actual_expense(category, %{
+                 name: "Refill",
+                 price: Money.new(:EUR, 3000)
+               })
+
+      assert {:ok, deleted_expense} =
+               Planning.delete_budget_category_actual_expense(actual_expense)
+
+      assert deleted_expense.id == actual_expense.id
+      assert Repo.get(Expense, actual_expense.id) == nil
+
+      category = Planning.get_budget_category!(category.id)
+      assert category.actual_expenses == []
+      assert category.estimated_expense.price == Money.new(:EUR, 5000)
+    end
+
+    test "deletes an ordinary category with its estimate and actual expenses" do
+      trip = trip_fixture()
+
+      assert {:ok, category} =
+               Planning.create_budget_category(trip, %{
+                 name: "Gasoline",
+                 estimated_expense: %{price: Money.new(:EUR, 4000)}
+               })
+
+      assert {:ok, actual_expense} =
+               Planning.create_budget_category_actual_expense(category, %{
+                 name: "Refill",
+                 price: Money.new(:EUR, 2000)
+               })
+
+      estimate_id = category.estimated_expense.id
+
+      assert {:ok, deleted_category} = Planning.delete_budget_category(category)
+      assert deleted_category.id == category.id
+      assert Repo.get(BudgetCategory, category.id) == nil
+      assert Repo.get(Expense, estimate_id) == nil
+      assert Repo.get(Expense, actual_expense.id) == nil
+    end
+
+    test "does not delete the protected food category" do
+      trip = trip_fixture()
+      food_category = Planning.get_food_budget_category!(trip)
+
+      assert {:error, :protected_category} =
+               Planning.delete_budget_category(food_category)
+
+      assert Planning.get_food_budget_category!(trip).id == food_category.id
+    end
+
+    test "manual recalculation sets the estimate to zero when there are no actual expenses" do
+      trip = trip_fixture()
+
+      assert {:ok, category} =
+               Planning.create_budget_category(trip, %{
+                 name: "Souvenirs",
+                 estimated_expense: %{price: Money.new(:EUR, 5000)}
+               })
+
+      assert {:ok, updated_category} = Planning.recalculate_budget_category_estimate(category)
+      assert updated_category.estimated_expense.price == Money.new(:EUR, 0)
+    end
+
+    test "category and actual expense operations broadcast PubSub events" do
+      trip = trip_fixture()
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
+
+      assert {:ok, category} = Planning.create_budget_category(trip, %{name: "Gasoline"})
+      assert_receive {[:budget_category, :created], %{value: ^category}}
+
+      assert {:ok, updated_category} =
+               Planning.update_budget_category(category, %{
+                 estimated_expense: %{price: Money.new(:EUR, 5000)}
+               })
+
+      assert_receive {[:budget_category, :updated], %{value: ^updated_category}}
+
+      assert {:ok, actual_expense} =
+               Planning.create_budget_category_actual_expense(updated_category, %{
+                 name: "Refill",
+                 price: Money.new(:EUR, 1000)
+               })
+
+      assert_receive {[:budget_category_actual_expense, :created], %{value: ^actual_expense}}
+
+      assert {:ok, updated_actual_expense} =
+               Planning.update_budget_category_actual_expense(actual_expense, %{
+                 price: Money.new(:EUR, 2000)
+               })
+
+      assert_receive {[:budget_category_actual_expense, :updated],
+                      %{value: ^updated_actual_expense}}
+
+      assert {:ok, deleted_actual_expense} =
+               Planning.delete_budget_category_actual_expense(updated_actual_expense)
+
+      assert_receive {[:budget_category_actual_expense, :deleted],
+                      %{value: ^deleted_actual_expense}}
+
+      assert {:ok, deleted_category} = Planning.delete_budget_category(updated_category)
+      assert_receive {[:budget_category, :deleted], %{value: ^deleted_category}}
+    end
+
+    test "food setting helpers accept form-shaped values and avoid division by zero" do
+      total =
+        BudgetCategoryFoodSetting.estimate_total(
+          %{
+            "price_per_day" => %{"amount" => "12.50", "currency" => "EUR"},
+            "days_count" => "3",
+            "people_count" => "2"
+          },
+          "EUR"
+        )
+
+      assert Money.equal?(total, Money.new(:EUR, "75.00"))
+
+      assert {:ok, price_per_day} =
+               BudgetCategoryFoodSetting.price_per_day_from_total(
+                 Money.new(:EUR, 5000),
+                 0,
+                 2
+               )
+
+      assert Money.equal?(price_per_day, Money.new(:EUR, 0))
+    end
+
+    test "food category estimate can be calculated from food settings and recalculated from actuals" do
+      trip = trip_fixture()
+      category = Planning.get_food_budget_category!(trip)
+
+      assert {:ok, category} =
+               Planning.update_budget_category(category, %{
+                 food_setting: %{
+                   price_per_day: Money.new(:EUR, 1000),
+                   days_count: 2,
+                   people_count: 2,
+                   calculation_mode: "per_day"
+                 }
+               })
+
+      assert category.estimated_expense.price == Money.new(:EUR, 4000)
+      assert %BudgetCategoryFoodSetting{} = category.food_setting
+
+      assert {:ok, _actual_expense} =
+               Planning.create_budget_category_actual_expense(category, %{
+                 name: "Groceries",
+                 price: Money.new(:EUR, 3000)
+               })
+
+      assert {:ok, updated_category} = Planning.recalculate_budget_category_estimate(category)
+
+      assert updated_category.estimated_expense.price == Money.new(:EUR, 3000)
+      assert updated_category.food_setting.price_per_day == Money.new(:EUR, 750)
+    end
+
+    test "update_trip/2 recalculates non-empty categories when trip becomes finished" do
+      trip = trip_fixture(%{status: Trip.planned()})
+      food = Planning.get_food_budget_category!(trip)
+
+      assert {:ok, food} =
+               Planning.update_budget_category(food, %{
+                 food_setting: %{
+                   price_per_day: Money.new(:EUR, 1500),
+                   days_count: 3,
+                   people_count: 2,
+                   calculation_mode: "per_day"
+                 }
+               })
+
+      assert {:ok, gasoline} =
+               Planning.create_budget_category(trip, %{
+                 name: "Gasoline",
+                 estimated_expense: %{price: Money.new(:EUR, 10_000)}
+               })
+
+      assert {:ok, souvenirs} =
+               Planning.create_budget_category(trip, %{
+                 name: "Souvenirs",
+                 estimated_expense: %{price: Money.new(:EUR, 7000)}
+               })
+
+      assert {:ok, _actual_expense} =
+               Planning.create_budget_category_actual_expense(gasoline, %{
+                 name: "Refill",
+                 price: Money.new(:EUR, 6000)
+               })
+
+      assert {:ok, _actual_expense} =
+               Planning.create_budget_category_actual_expense(food, %{
+                 name: "Groceries",
+                 price: Money.new(:EUR, 6000)
+               })
+
+      assert {:ok, %Trip{} = updated_trip} =
+               Planning.update_trip(trip, %{status: Trip.finished()})
+
+      assert updated_trip.status == Trip.finished()
+
+      gasoline = Planning.get_budget_category!(gasoline.id)
+      souvenirs = Planning.get_budget_category!(souvenirs.id)
+      food = Planning.get_food_budget_category!(trip)
+
+      assert gasoline.estimated_expense.price == Money.new(:EUR, 6000)
+      assert souvenirs.estimated_expense.price == Money.new(:EUR, 7000)
+      assert food.estimated_expense.price == Money.new(:EUR, 6000)
+      assert food.food_setting.price_per_day == Money.new(:EUR, 1000)
+
+      assert {:ok, gasoline} =
+               Planning.update_budget_category(gasoline, %{
+                 estimated_expense: %{price: Money.new(:EUR, 8000)}
+               })
+
+      assert {:ok, %Trip{}} = Planning.update_trip(updated_trip, %{name: "Finished trip"})
+
+      assert Planning.get_budget_category!(gasoline.id).estimated_expense.price ==
+               Money.new(:EUR, 8000)
     end
   end
 

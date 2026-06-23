@@ -8,7 +8,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
   alias HamsterTravel.Geo
   alias HamsterTravel.Planning
-  alias HamsterTravel.Planning.TripCover
+  alias HamsterTravel.Planning.{Trip, TripCover}
   alias HamsterTravel.Repo
   alias HamsterTravelWeb.Cldr
 
@@ -37,6 +37,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       # Verify that the tabs are rendered
       assert has_element?(view, "a", "Transfers and hotels")
       assert has_element?(view, "a", "Activities")
+      assert has_element?(view, "a", "Budget")
       assert has_element?(view, "a", "Notes")
 
       # Verify that the itinerary tab is active by default
@@ -78,6 +79,9 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       assert html =~
                ~s(href="/trips/#{trip.slug}?tab=activities&amp;return_to=%2Fplans%3Fpage%3D2%26q%3DSearchable")
+
+      assert html =~
+               ~s(href="/trips/#{trip.slug}?tab=budget&amp;return_to=%2Fplans%3Fpage%3D2%26q%3DSearchable")
 
       assert html =~
                ~s(href="/trips/#{trip.slug}/edit?return_to=%2Fplans%3Fpage%3D2%26q%3DSearchable")
@@ -328,6 +332,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       # Verify that the tabs are rendered
       assert has_element?(view, "a", "Transfers and hotels")
       assert has_element?(view, "a", "Activities")
+      assert has_element?(view, "a", "Budget")
       assert has_element?(view, "a", "Notes")
 
       # Verify that the itinerary tab is active by default
@@ -361,6 +366,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       # Verify that the tabs are rendered
       assert has_element?(view, "a", "Transfers and hotels")
       assert has_element?(view, "a", "Activities")
+      assert has_element?(view, "a", "Budget")
       assert has_element?(view, "a", "Notes")
 
       # Verify that the itinerary tab is active by default
@@ -410,46 +416,535 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "#activities-#{trip.id}")
     end
 
-    test "hides empty activities tab section headers and city add link but keeps other add links",
-         %{conn: conn} do
+    test "budget tab groups existing source expenses and edits source amounts only", %{
+      conn: conn
+    } do
       user = user_fixture()
       conn = log_in_user(conn, user)
-      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft", currency: "EUR"})
 
-      {:ok, view, html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+      {:ok, accommodation} =
+        Planning.create_accommodation(trip, %{
+          name: "Grand Hotel Vienna",
+          start_day: 0,
+          end_day: 1,
+          expense: %{price: Money.new(:EUR, 20), name: "Hotel", trip_id: trip.id}
+        })
 
-      section_headers =
+      {:ok, zero_accommodation} =
+        Planning.create_accommodation(trip, %{
+          name: "Free couch",
+          start_day: 1,
+          end_day: 1,
+          expense: %{price: Money.new(:EUR, 0), name: "Free couch", trip_id: trip.id}
+        })
+
+      geonames_fixture()
+      berlin = Geo.find_city_by_geonames_id("2950159")
+      hamburg = Geo.find_city_by_geonames_id("2911298")
+
+      {:ok, transfer} =
+        Planning.create_transfer(trip, %{
+          transport_mode: "train",
+          departure_city_id: berlin.id,
+          arrival_city_id: hamburg.id,
+          departure_time: "08:00",
+          arrival_time: "12:00",
+          vessel_number: "ICE 123",
+          carrier: "DB",
+          day_index: 1,
+          expense: %{price: Money.new(:EUR, 30), name: "Train", trip_id: trip.id}
+        })
+
+      {:ok, zero_transfer} =
+        Planning.create_transfer(trip, %{
+          transport_mode: "bus",
+          departure_city_id: hamburg.id,
+          arrival_city_id: berlin.id,
+          departure_time: "14:00",
+          arrival_time: "18:00",
+          vessel_number: "FREE 1",
+          carrier: "ZeroBus",
+          day_index: 1,
+          expense: %{price: Money.new(:EUR, 0), name: "Free bus", trip_id: trip.id}
+        })
+
+      {:ok, activity} =
+        Planning.create_activity(trip, %{
+          name: "Museum",
+          day_index: 1,
+          priority: 2,
+          expense: %{price: Money.new(:EUR, 40), name: "Museum", trip_id: trip.id}
+        })
+
+      {:ok, zero_activity} =
+        Planning.create_activity(trip, %{
+          name: "Free walking tour",
+          day_index: 1,
+          priority: 2,
+          expense: %{price: Money.new(:EUR, 0), name: "Free walking tour", trip_id: trip.id}
+        })
+
+      {:ok, day_expense} =
+        Planning.create_day_expense(trip, %{
+          name: "Snacks",
+          day_index: 1,
+          expense: %{price: Money.new(:EUR, 50), name: "Snacks", trip_id: trip.id}
+        })
+
+      {:ok, view, html} = live(conn, ~p"/trips/#{trip.slug}?tab=budget")
+
+      assert has_element?(view, "#budget-#{trip.id}")
+
+      budget_section_headers =
         html
         |> Floki.parse_document!()
-        |> Floki.find("#activities-#{trip.id} .text-xs.font-semibold.uppercase")
-        |> Enum.map(&(Floki.text(&1) |> String.trim()))
-
-      refute "Places" in section_headers
-      refute "Expenses" in section_headers
-      refute "Activities" in section_headers
-      refute "Notes" in section_headers
-      refute has_element?(view, "#activities-#{trip.id} a", "Add city")
-      assert has_element?(view, "#activities-#{trip.id} a", "Add expense")
-      assert has_element?(view, "#activities-#{trip.id} a", "Add activity")
-      refute has_element?(view, "#activities-#{trip.id} a", "Add note")
-    end
-
-    test "shows activities tab section header when section has items", %{conn: conn} do
-      user = user_fixture()
-      conn = log_in_user(conn, user)
-      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
-
-      activity_fixture(%{trip_id: trip.id, day_index: 0, name: "Museum"})
-
-      {:ok, _view, html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
-
-      header_text =
-        html
-        |> Floki.parse_document!()
-        |> Floki.find("#activities-#{trip.id} .text-xs.font-semibold.uppercase")
+        |> Floki.find("#budget-#{trip.id} .text-xs.font-semibold.uppercase")
         |> Floki.text(sep: " ")
 
-      assert header_text =~ "Activities"
+      assert budget_section_headers =~ "Hotels"
+      assert budget_section_headers =~ "Transfers"
+      assert budget_section_headers =~ "Activities"
+      assert budget_section_headers =~ "Day expenses"
+      assert html =~ "Hotels"
+      assert html =~ "Grand Hotel Vienna, Day 1-2"
+      refute html =~ "Free couch"
+      assert html =~ "Transfers"
+      assert html =~ "Berlin → Hamburg, DB ICE 123"
+      assert html =~ "Activities"
+      assert html =~ "Museum"
+      refute html =~ "Hamburg → Berlin, ZeroBus FREE 1"
+      refute html =~ "Free walking tour"
+      assert html =~ "Day expenses"
+      assert html =~ "Snacks"
+      refute has_element?(view, "#day-expense-new-0")
+      assert has_element?(view, "#day-expense-new-1")
+      refute has_element?(view, "#day-expense-new-2")
+      refute has_element?(view, "#budget-#{trip.id} a", "Add accommodation")
+      refute has_element?(view, "#budget-#{trip.id} a", "Add transfer")
+      refute has_element?(view, "#budget-#{trip.id} a", "Add activity")
+
+      refute has_element?(
+               view,
+               "#budget-expense-hotel-#{accommodation.expense.id} [phx-click='delete']"
+             )
+
+      refute has_element?(view, "#budget-expense-hotel-#{zero_accommodation.expense.id}")
+
+      assert has_element?(
+               view,
+               "#budget-expense-hotel-#{accommodation.expense.id} [class*='flex-1'] [phx-click='edit']"
+             )
+
+      refute has_element?(
+               view,
+               "#budget-expense-hotel-#{accommodation.expense.id} [class*='sm:w-44'] [phx-click='edit']"
+             )
+
+      refute has_element?(
+               view,
+               "#budget-expense-transfer-#{transfer.expense.id} [phx-click='delete']"
+             )
+
+      refute has_element?(view, "#budget-expense-transfer-#{zero_transfer.expense.id}")
+
+      refute has_element?(
+               view,
+               "#budget-expense-activity-#{activity.expense.id} [phx-click='delete']"
+             )
+
+      refute has_element?(view, "#budget-expense-activity-#{zero_activity.expense.id}")
+
+      assert has_element?(view, "[data-day-expense-id='#{day_expense.id}'] [phx-click='delete']")
+
+      assert has_element?(
+               view,
+               "[data-day-expense-id='#{day_expense.id}'] [class*='flex-1'] [phx-click='delete']"
+             )
+
+      refute has_element?(
+               view,
+               "[data-day-expense-id='#{day_expense.id}'] [class*='sm:w-44'] [phx-click='delete']"
+             )
+
+      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
+
+      view
+      |> element("#budget-expense-hotel-#{accommodation.expense.id} [phx-click='edit']")
+      |> render_click()
+
+      assert has_element?(view, "form#budget-expense-form-hotel-#{accommodation.expense.id}")
+      refute render(view) =~ "Address"
+
+      view
+      |> form("form#budget-expense-form-hotel-#{accommodation.expense.id}", %{
+        expense: %{price: %{amount: "25.00", currency: "EUR"}}
+      })
+      |> render_submit()
+
+      assert_receive {[:accommodation, :updated], %{value: updated_accommodation}}
+      assert updated_accommodation.id == accommodation.id
+      assert updated_accommodation.expense.price == Money.new(:EUR, "25.00")
+
+      updated_expense = Planning.get_expense!(accommodation.expense.id)
+      assert updated_expense.price == Money.new(:EUR, "25.00")
+      assert_eventually_contains(view, "€145.00")
+
+      view
+      |> element("#budget-expense-transfer-#{transfer.expense.id} [phx-click='edit']")
+      |> render_click()
+
+      view
+      |> form("form#budget-expense-form-transfer-#{transfer.expense.id}", %{
+        expense: %{price: %{amount: "35.00", currency: "EUR"}}
+      })
+      |> render_submit()
+
+      assert_receive {[:transfer, :updated], %{value: updated_transfer}}
+      assert updated_transfer.id == transfer.id
+      assert updated_transfer.expense.price == Money.new(:EUR, "35.00")
+      assert_eventually_contains(view, "€150.00")
+
+      view
+      |> element("#budget-expense-activity-#{activity.expense.id} [phx-click='edit']")
+      |> render_click()
+
+      view
+      |> form("form#budget-expense-form-activity-#{activity.expense.id}", %{
+        expense: %{price: %{amount: "45.00", currency: "EUR"}}
+      })
+      |> render_submit()
+
+      assert_receive {[:activity, :updated], %{value: updated_activity}}
+      assert updated_activity.id == activity.id
+      assert updated_activity.expense.price == Money.new(:EUR, "45.00")
+      assert_eventually_contains(view, "€155.00")
+
+      view
+      |> element("[data-day-expense-id='#{day_expense.id}'] [phx-click='edit']")
+      |> render_click()
+
+      view
+      |> form("form[id*='day-expense-form-#{day_expense.id}']", %{
+        day_expense: %{
+          name: "Snacks",
+          day_index: "1",
+          expense: %{
+            id: day_expense.expense.id,
+            price: %{amount: "55.00", currency: "EUR"}
+          }
+        }
+      })
+      |> render_submit()
+
+      assert_receive {[:day_expense, :updated], %{value: updated_day_expense}}
+      assert updated_day_expense.id == day_expense.id
+      assert updated_day_expense.expense.price == Money.new(:EUR, "55.00")
+      assert_eventually_contains(view, "€160.00")
+    end
+
+    test "creates, edits, and deletes budget categories from the budget tab", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft", currency: "EUR"})
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=budget")
+
+      view
+      |> element("#budget-category-new-#{trip.id} button", "Add category")
+      |> render_click()
+
+      assert has_element?(view, "form[id^='budget-category-form-']")
+
+      view
+      |> form("form[id^='budget-category-form-']", %{
+        budget_category: %{
+          name: "Souvenirs",
+          estimated_expense: %{price: %{amount: "75.00", currency: "EUR"}}
+        }
+      })
+      |> render_submit()
+
+      category =
+        trip
+        |> Planning.list_budget_categories()
+        |> Enum.find(&(&1.name == "Souvenirs"))
+
+      assert category.name == "Souvenirs"
+      assert category.estimated_expense.price == Money.new(:EUR, "75.00")
+      assert has_element?(view, "#budget-category-#{category.id}", "Souvenirs")
+      assert_eventually_contains(view, "€75.00")
+
+      view
+      |> element("#budget-category-#{category.id} [phx-click='edit']")
+      |> render_click()
+
+      view
+      |> form("#budget-category-form-budget-category-form-#{category.id}", %{
+        budget_category: %{
+          name: "Shopping",
+          estimated_expense: %{price: %{amount: "90.00", currency: "EUR"}}
+        }
+      })
+      |> render_submit()
+
+      category = Planning.get_budget_category!(category.id)
+      assert category.name == "Shopping"
+      assert category.estimated_expense.price == Money.new(:EUR, "90.00")
+      assert has_element?(view, "#budget-category-#{category.id}", "Shopping")
+      assert_eventually_contains(view, "€90.00")
+
+      view
+      |> element("#budget-category-#{category.id} [phx-click='delete']")
+      |> render_click()
+
+      assert [food_category] = Planning.list_budget_categories(trip)
+      assert food_category.name == "Food"
+      refute has_element?(view, "#budget-category-#{category.id}")
+    end
+
+    test "edits the precreated food category and records actual expenses inline", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft", currency: "EUR"})
+      category = Planning.get_food_budget_category!(trip)
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=budget")
+
+      view
+      |> element("#budget-category-#{category.id} [phx-click='edit']")
+      |> render_click()
+
+      assert has_element?(view, "label", "Price per day per person")
+      assert has_element?(view, "label", "Days")
+      assert has_element?(view, "label", "People")
+
+      assert has_element?(
+               view,
+               "input[name='budget_category[food_setting][days_count]'][value='3']"
+             )
+
+      assert has_element?(
+               view,
+               "input[name='budget_category[food_setting][people_count]'][value='2']"
+             )
+
+      view
+      |> form("#budget-category-form-budget-category-form-#{category.id}", %{
+        budget_category: %{
+          estimation_mode: "per_day",
+          food_setting: %{
+            price_per_day: %{amount: "10.00", currency: "EUR"},
+            days_count: "3",
+            people_count: "2"
+          }
+        }
+      })
+      |> render_submit()
+
+      category = Planning.get_food_budget_category!(trip)
+
+      assert category.estimated_expense.price == Money.new(:EUR, "60.00")
+      assert category.food_setting.price_per_day == Money.new(:EUR, "10.00")
+      assert_eventually_contains(view, "€60.00")
+
+      view
+      |> element("#budget-category-#{category.id} [phx-click='add_actual']")
+      |> render_click()
+
+      assert has_element?(view, "form[id^='budget-category-actual-new-form-#{category.id}-']")
+
+      view
+      |> form("form[id^='budget-category-actual-new-form-#{category.id}-']", %{
+        expense: %{price: %{amount: "30.00", currency: "EUR"}}
+      })
+      |> render_submit()
+
+      category = Planning.get_budget_category!(category.id)
+      assert [actual_expense] = category.actual_expenses
+      assert actual_expense.price == Money.new(:EUR, "30.00")
+      assert category.estimated_expense.price == Money.new(:EUR, "60.00")
+      assert_eventually_contains(view, "€30.00")
+      assert has_element?(view, "form[id^='budget-category-actual-new-form-#{category.id}-']")
+
+      view
+      |> element("#budget-category-#{category.id} [phx-click='recalculate']")
+      |> render_click()
+
+      category = Planning.get_budget_category!(category.id)
+      assert category.estimated_expense.price == Money.new(:EUR, "30.00")
+      assert category.food_setting.price_per_day == Money.new(:EUR, "5.00")
+
+      view
+      |> element("#budget-category-actual-#{actual_expense.id} [phx-click='edit']")
+      |> render_click()
+
+      view
+      |> form("#budget-category-actual-form-#{actual_expense.id}", %{
+        expense: %{price: %{amount: "80.00", currency: "EUR"}}
+      })
+      |> render_submit()
+
+      category = Planning.get_budget_category!(category.id)
+      assert [updated_actual_expense] = category.actual_expenses
+      assert updated_actual_expense.price == Money.new(:EUR, "80.00")
+      assert category.estimated_expense.price == Money.new(:EUR, "80.00")
+      assert_eventually_contains(view, "€80.00")
+
+      view
+      |> element("#budget-category-actual-#{actual_expense.id} [phx-click='edit']")
+      |> render_click()
+
+      view
+      |> element("#budget-category-actual-#{actual_expense.id} [phx-click='delete']")
+      |> render_click()
+
+      assert Planning.get_budget_category!(category.id).actual_expenses == []
+      refute has_element?(view, "#budget-category-actual-#{actual_expense.id}")
+
+      view
+      |> element("#budget-category-#{category.id} [phx-click='edit']")
+      |> render_click()
+
+      food_form = form(view, "#budget-category-form-budget-category-form-#{category.id}")
+
+      render_change(food_form, %{
+        budget_category: %{
+          estimation_mode: "total"
+        }
+      })
+
+      assert has_element?(view, "label", "Estimated cost")
+
+      view
+      |> form("#budget-category-form-budget-category-form-#{category.id}", %{
+        budget_category: %{
+          estimation_mode: "total",
+          estimated_expense: %{price: %{amount: "120.00", currency: "EUR"}}
+        }
+      })
+      |> render_submit()
+
+      category = Planning.get_food_budget_category!(trip)
+      assert category.estimated_expense.price == Money.new(:EUR, "120.00")
+      assert category.food_setting.calculation_mode == "total"
+    end
+
+    test "adds actual expenses continuously from the bottom of their category", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft", currency: "EUR"})
+
+      {:ok, category} =
+        Planning.create_budget_category(trip, %{
+          name: "Souvenirs",
+          estimated_expense: %{price: Money.new(:EUR, "100.00")}
+        })
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=budget")
+
+      add_button =
+        "#budget-category-#{category.id} button[phx-click='add_actual']"
+
+      assert has_element?(view, add_button, "Add actual expense for Souvenirs")
+
+      view
+      |> element(add_button)
+      |> render_click()
+
+      actual_form = "form[id^='budget-category-actual-new-form-#{category.id}-']"
+      assert has_element?(view, "#budget-category-actual-new-form-#{category.id}-0")
+
+      assert has_element?(
+               view,
+               "#{actual_form}[phx-window-keydown='cancel_actual'][phx-key='escape']"
+             )
+
+      view
+      |> form(actual_form, %{
+        expense: %{price: %{amount: "0", currency: "EUR"}}
+      })
+      |> render_submit()
+
+      assert has_element?(view, actual_form, "must be greater than 0")
+      assert Planning.get_budget_category!(category.id).actual_expenses == []
+
+      view
+      |> form(actual_form, %{
+        expense: %{price: %{amount: "25.00", currency: "EUR"}}
+      })
+      |> render_submit()
+
+      assert has_element?(
+               view,
+               "#budget-category-actual-new-form-#{category.id}-1 input[name='expense[price][amount]'][value='0']"
+             )
+
+      view
+      |> form(actual_form, %{
+        expense: %{price: %{amount: "15.00", currency: "EUR"}}
+      })
+      |> render_submit()
+
+      assert has_element?(view, "#budget-category-actual-new-form-#{category.id}-2")
+
+      category = Planning.get_budget_category!(category.id)
+
+      assert category.actual_expenses
+             |> Enum.map(& &1.price)
+             |> Enum.sort() == Enum.sort([Money.new(:EUR, "25.00"), Money.new(:EUR, "15.00")])
+
+      actual_expenses_grid = "#budget-category-actual-expenses-#{category.id}"
+      assert has_element?(view, actual_expenses_grid)
+
+      assert has_element?(
+               view,
+               "#{actual_expenses_grid} #budget-category-actual-#{Enum.at(category.actual_expenses, 0).id}"
+             )
+
+      assert has_element?(
+               view,
+               "#{actual_expenses_grid} #budget-category-actual-#{Enum.at(category.actual_expenses, 1).id}"
+             )
+
+      view
+      |> element(actual_form)
+      |> render_keydown(%{"key" => "Escape"})
+
+      refute has_element?(view, actual_form)
+
+      html = render(view)
+      {last_expense_position, _length} = :binary.match(html, "budget-category-actual-")
+      {add_button_position, _length} = :binary.match(html, "Add actual expense for Souvenirs")
+
+      assert last_expense_position < add_button_position
+    end
+
+    test "manually reconciles a zero-actual category after the trip is finished", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: Trip.finished(), currency: "EUR"})
+
+      {:ok, category} =
+        Planning.create_budget_category(trip, %{
+          name: "Souvenirs",
+          estimated_expense: %{price: Money.new(:EUR, "100.00")}
+        })
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=budget")
+
+      recalculate_button =
+        "#budget-category-#{category.id} button[phx-click='recalculate']"
+
+      assert has_element?(view, recalculate_button)
+
+      view
+      |> element(recalculate_button)
+      |> render_click()
+
+      category = Planning.get_budget_category!(category.id)
+      assert category.estimated_expense.price == Money.new(:EUR, 0)
+      assert_eventually_contains(view, "€0.00")
     end
 
     test "renders notes tab when selected", %{conn: conn} do
@@ -646,7 +1141,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert Enum.any?(activities, &(&1.id == inside_activity.id))
 
       day_expenses = Planning.list_day_expenses(trip)
-      refute Enum.any?(day_expenses, &(&1.id == outside_day_expense.id))
+      assert Enum.any?(day_expenses, &(&1.id == outside_day_expense.id))
       assert Enum.any?(day_expenses, &(&1.id == inside_day_expense.id))
 
       notes = Planning.list_notes(trip)
@@ -1137,9 +1632,17 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       conn = log_in_user(conn, user)
       trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
 
+      {:ok, _activity} =
+        Planning.create_activity(trip, %{
+          name: "Anchor activity",
+          day_index: 0,
+          priority: 2,
+          expense: %{price: Money.new(:EUR, 1), name: "Anchor activity", trip_id: trip.id}
+        })
+
       # Act
 
-      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=budget")
 
       # Click the add expense button for day 0
       view
@@ -1161,9 +1664,17 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       conn = log_in_user(conn, user)
       trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
 
+      {:ok, _activity} =
+        Planning.create_activity(trip, %{
+          name: "Anchor activity",
+          day_index: 0,
+          priority: 2,
+          expense: %{price: Money.new(:EUR, 1), name: "Anchor activity", trip_id: trip.id}
+        })
+
       # Act
 
-      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=budget")
 
       # Open form
       view
@@ -1201,74 +1712,56 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "a[href='https://example.com/metro-card'][target='_blank']")
     end
 
-    test "shows food expense summary", %{conn: conn} do
+    test "can delete day expense from budget tab", %{conn: conn} do
       user = user_fixture()
       conn = log_in_user(conn, user)
       trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
-      trip = Planning.get_trip!(trip.id)
 
-      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+      {:ok, day_expense} =
+        Planning.create_day_expense(trip, %{
+          name: "Metro card",
+          day_index: 0,
+          expense: %{price: Money.new(:EUR, 12), name: "Metro card", trip_id: trip.id}
+        })
 
-      assert has_element?(view, "#food-expense-#{trip.food_expense.id}")
-      assert render(view) =~ "Food expenses"
-    end
-
-    test "can edit food expense via form", %{conn: conn} do
-      user = user_fixture()
-      conn = log_in_user(conn, user)
-      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
-      trip = Planning.get_trip!(trip.id)
-
-      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=budget")
 
       view
-      |> element("#food-expense-#{trip.food_expense.id} [phx-click='edit']")
+      |> element("[data-day-expense-id='#{day_expense.id}'] [phx-click='delete']")
       |> render_click()
 
-      assert has_element?(view, "form#food-expense-form-#{trip.food_expense.id}")
-
-      view
-      |> form("form#food-expense-form-#{trip.food_expense.id}", %{
-        food_expense: %{
-          price_per_day: %{amount: "10.00", currency: "EUR"},
-          days_count: "2",
-          people_count: "3"
-        }
-      })
-      |> render_submit()
-
-      updated = Planning.get_food_expense!(trip.food_expense.id)
-
-      expected =
-        Money.new(:EUR, "10.00")
-        |> Money.mult!(2)
-        |> Money.mult!(3)
-
-      assert updated.expense.price == expected
+      day_expenses = Planning.list_day_expenses(trip)
+      refute Enum.any?(day_expenses, &(&1.id == day_expense.id))
     end
 
-    test "recalculates budget when food expense changes", %{conn: conn} do
+    test "recalculates budget when the food category changes", %{conn: conn} do
       user = user_fixture()
       conn = log_in_user(conn, user)
       trip = trip_fixture(%{author_id: user.id, status: "0_draft", currency: "EUR"})
+      food_category = Planning.get_food_budget_category!(trip)
 
       {:ok, _expense} =
         Planning.create_expense(trip, %{price: Money.new(:EUR, 40), name: "Souvenirs"})
 
       trip = Planning.get_trip!(trip.id)
 
-      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=budget")
 
       assert render(view) =~ "€40.00"
 
-      {:ok, updated_food_expense} =
-        Planning.update_food_expense(trip.food_expense, %{
-          price_per_day: Money.new(:EUR, 10),
-          days_count: 2,
-          people_count: 3
+      {:ok, updated_food_category} =
+        Planning.update_budget_category(food_category, %{
+          food_setting: %{
+            price_per_day: Money.new(:EUR, 10),
+            days_count: 2,
+            people_count: 3,
+            calculation_mode: "per_day"
+          }
         })
 
-      assert updated_food_expense.expense.price == Money.new(:EUR, 60)
+      assert updated_food_category.estimated_expense.price == Money.new(:EUR, 60)
+
+      assert has_element?(view, "#budget-category-#{food_category.id}", "Food")
       assert_eventually_contains(view, "€100.00")
     end
 
@@ -1345,7 +1838,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
           expense: %{price: Money.new(:EUR, 50), name: "Snacks", trip_id: trip.id}
         })
 
-      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=budget")
 
       assert render(view) =~ "€150.00"
 

@@ -11,6 +11,7 @@ defmodule HamsterTravelWeb.Planning.DayExpense do
   attr(:trip, Trip, required: true)
   attr(:display_currency, :string, required: true)
   attr(:can_edit, :boolean, default: false)
+  attr(:draggable, :boolean, default: false)
 
   def render(%{edit: true} = assigns) do
     ~H"""
@@ -34,7 +35,7 @@ defmodule HamsterTravelWeb.Planning.DayExpense do
     <div
       class={[
         "flex w-full max-w-3xl flex-col gap-y-1 rounded-md py-1.5",
-        @can_edit && "draggable-day-expense cursor-grab active:cursor-grabbing"
+        @can_edit && @draggable && "draggable-day-expense cursor-grab active:cursor-grabbing"
       ]}
       data-day-expense-id={@day_expense.id}
     >
@@ -52,13 +53,6 @@ defmodule HamsterTravelWeb.Planning.DayExpense do
           >
             <.icon name="hero-link" class="h-4 w-4" />
           </.link>
-        </span>
-        <div class="ml-auto flex shrink-0 items-center justify-end gap-2 sm:w-44">
-          <.money_display
-            money={@day_expense.expense.price}
-            display_currency={@display_currency}
-            class="text-right text-base font-normal tabular-nums text-zinc-500 dark:text-zinc-400 2xl:text-lg"
-          />
           <.edit_delete_buttons
             :if={@can_edit}
             class="shrink-0"
@@ -70,6 +64,13 @@ defmodule HamsterTravelWeb.Planning.DayExpense do
                 name: @day_expense.name
               )
             }
+          />
+        </span>
+        <div class="ml-auto flex shrink-0 items-center justify-end sm:w-44">
+          <.money_display
+            money={@day_expense.expense.price}
+            display_currency={@display_currency}
+            class="text-right text-base font-normal tabular-nums text-zinc-500 dark:text-zinc-400 2xl:text-lg"
           />
         </div>
       </.inline>
