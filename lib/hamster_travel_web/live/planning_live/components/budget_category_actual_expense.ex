@@ -30,7 +30,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryActualExpense do
   @impl true
   def render(%{edit: true} = assigns) do
     ~H"""
-    <div id={"budget-category-actual-#{@expense.id}"}>
+    <div id={"budget-category-actual-#{@expense.id}"} class="col-span-full">
       <.form
         id={"budget-category-actual-form-#{@expense.id}"}
         for={@form}
@@ -38,7 +38,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryActualExpense do
         phx-target={@myself}
         phx-submit="save"
         phx-mounted={JS.focus_first(to: "#budget-category-actual-form-#{@expense.id}")}
-        class="ml-4 flex max-w-2xl flex-col gap-3 border-l border-zinc-200 py-2 pl-4 sm:flex-row sm:items-start dark:border-zinc-700"
+        class="flex max-w-2xl flex-col gap-3 py-2 sm:flex-row sm:items-start"
       >
         <div class="grow">
           <.money_input
@@ -80,7 +80,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryActualExpense do
     ~H"""
     <div
       id={"budget-category-actual-#{@expense.id}"}
-      class="ml-4 flex min-h-8 max-w-3xl items-center border-l border-zinc-200 py-1 pl-4 text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400"
+      class="min-w-0 text-sm text-zinc-500 dark:text-zinc-400"
     >
       <button
         :if={@can_edit}
@@ -89,7 +89,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryActualExpense do
         phx-target={@myself}
         aria-label={gettext("Edit")}
         title={gettext("Edit")}
-        class="group ml-auto flex min-h-8 shrink-0 items-center justify-end rounded-sm px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 sm:w-44"
+        class="group flex min-h-8 w-full items-center justify-end rounded-sm px-2 py-1 transition-colors hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:hover:bg-zinc-800/60"
       >
         <.money_display
           money={@expense.price}
@@ -97,7 +97,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryActualExpense do
           class="text-right text-sm font-normal tabular-nums text-zinc-500 transition-colors group-hover:text-primary-600 group-hover:underline group-hover:decoration-dotted group-hover:underline-offset-4 dark:text-zinc-400 dark:group-hover:text-primary-300"
         />
       </button>
-      <div :if={!@can_edit} class="ml-auto flex shrink-0 justify-end sm:w-44">
+      <div :if={!@can_edit} class="flex min-h-8 w-full items-center justify-end px-2 py-1">
         <.money_display
           money={@expense.price}
           display_currency={@display_currency}

@@ -888,6 +888,19 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
              |> Enum.map(& &1.price)
              |> Enum.sort() == Enum.sort([Money.new(:EUR, "25.00"), Money.new(:EUR, "15.00")])
 
+      actual_expenses_grid = "#budget-category-actual-expenses-#{category.id}"
+      assert has_element?(view, actual_expenses_grid)
+
+      assert has_element?(
+               view,
+               "#{actual_expenses_grid} #budget-category-actual-#{Enum.at(category.actual_expenses, 0).id}"
+             )
+
+      assert has_element?(
+               view,
+               "#{actual_expenses_grid} #budget-category-actual-#{Enum.at(category.actual_expenses, 1).id}"
+             )
+
       view
       |> element(actual_form)
       |> render_keydown(%{"key" => "Escape"})

@@ -113,20 +113,26 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
         )}
       </div>
 
-      <.live_component
-        :for={expense <- @category.actual_expenses}
-        module={HamsterTravelWeb.Planning.BudgetCategoryActualExpense}
-        id={"budget-category-actual-#{expense.id}"}
-        expense={expense}
-        trip={@trip}
-        display_currency={@display_currency}
-        can_edit={@can_edit}
-      />
-
       <div
-        :if={@can_edit}
-        class="ml-4 border-l border-zinc-200 py-2 pl-4 dark:border-zinc-700"
+        :if={@can_edit || Enum.any?(@category.actual_expenses)}
+        class="ml-4 max-w-3xl border-l border-zinc-200 py-1 pl-4 dark:border-zinc-700"
       >
+        <div
+          :if={Enum.any?(@category.actual_expenses)}
+          id={"budget-category-actual-expenses-#{@category.id}"}
+          class="grid grid-cols-2 gap-x-3 gap-y-1 sm:grid-cols-3 lg:grid-cols-4"
+        >
+          <.live_component
+            :for={expense <- @category.actual_expenses}
+            module={HamsterTravelWeb.Planning.BudgetCategoryActualExpense}
+            id={"budget-category-actual-#{expense.id}"}
+            expense={expense}
+            trip={@trip}
+            display_currency={@display_currency}
+            can_edit={@can_edit}
+          />
+        </div>
+
         <.form
           :if={@add_actual}
           id={"budget-category-actual-new-form-#{@category.id}-#{@actual_form_version}"}
@@ -141,7 +147,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
               to: "#budget-category-actual-new-form-#{@category.id}-#{@actual_form_version}"
             )
           }
-          class="flex max-w-2xl flex-col gap-3 sm:flex-row sm:items-start"
+          class="mt-2 flex max-w-2xl flex-col gap-3 sm:flex-row sm:items-start"
         >
           <div class="grow">
             <.money_input
@@ -171,7 +177,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
           type="button"
           phx-click="add_actual"
           phx-target={@myself}
-          class="ml-auto flex w-fit items-center gap-1.5 py-0.5 text-sm font-normal text-zinc-400 transition-colors hover:text-primary-600 focus-visible:text-primary-600 focus-visible:outline-none dark:text-zinc-500 dark:hover:text-primary-300"
+          class="mt-1 inline-flex items-center gap-1.5 py-0.5 text-sm font-normal text-zinc-400 transition-colors hover:text-primary-600 focus-visible:text-primary-600 focus-visible:outline-none dark:text-zinc-500 dark:hover:text-primary-300"
         >
           <.icon name="hero-plus-solid" class="h-4 w-4" />
           <span>
