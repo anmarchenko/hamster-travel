@@ -273,7 +273,7 @@ defmodule HamsterTravelWeb.Planning.TripForm do
   def result({:ok, trip}, socket) do
     socket =
       socket
-      |> push_navigate(to: ~p"/trips/#{trip.slug}")
+      |> push_navigate(to: trip_url(trip.slug, :show, socket.assigns[:return_to]))
 
     {:noreply, socket}
   end

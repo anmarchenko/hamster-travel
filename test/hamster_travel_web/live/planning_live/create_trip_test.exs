@@ -35,10 +35,14 @@ defmodule HamsterTravelWeb.Planning.CreateTripTest do
       {:ok, destination} =
         Planning.create_destination(trip, %{city_id: city.id, start_day: 0, end_day: 1})
 
-      {:ok, view, html} = live(conn, ~p"/trips/new?copy=#{trip.id}")
+      return_to = "/plans?page=2&q=Searchable"
+
+      {:ok, view, html} =
+        live(conn, "/trips/new?copy=#{trip.id}&return_to=#{URI.encode_www_form(return_to)}")
 
       assert html =~ "Create a new trip"
       assert html =~ ~r/Duration:\s*3\s*days/
+      assert html =~ ~s(href="/trips/#{trip.slug}?return_to=%2Fplans%3Fpage%3D2%26q%3DSearchable")
 
       assert view |> element("input[name='trip[name]']") |> render() =~
                "Original trip (Copy)"
@@ -64,7 +68,7 @@ defmodule HamsterTravelWeb.Planning.CreateTripTest do
       )
       |> render_submit()
 
-      assert_redirect(view, "/trips/copied-trip")
+      assert_redirect(view, "/trips/copied-trip?return_to=%2Fplans%3Fpage%3D2%26q%3DSearchable")
 
       copied_trip = Planning.fetch_trip!("copied-trip", user)
 

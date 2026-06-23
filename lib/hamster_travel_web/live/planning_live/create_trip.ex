@@ -19,6 +19,7 @@ defmodule HamsterTravelWeb.Planning.CreateTrip do
       copy_from={@copy_from}
       back_url={@back_url}
       is_draft={@is_draft}
+      return_to={@return_to}
     />
     """
   end
@@ -26,6 +27,7 @@ defmodule HamsterTravelWeb.Planning.CreateTrip do
   @impl true
   def mount(params, _session, socket) do
     is_draft = Map.get(params, "draft", false)
+    return_to = return_to(params)
 
     socket =
       with %{"copy" => trip_id} <- params,
@@ -33,7 +35,7 @@ defmodule HamsterTravelWeb.Planning.CreateTrip do
            true <- Policy.authorized?(:copy, trip, socket.assigns.current_user) do
         socket
         |> assign(copy_from: trip)
-        |> assign(back_url: trip_url(trip.slug))
+        |> assign(back_url: trip_url(trip.slug, :show, return_to))
       else
         _ ->
           socket
@@ -45,8 +47,21 @@ defmodule HamsterTravelWeb.Planning.CreateTrip do
       socket
       |> assign(active_nav: plans_nav_item())
       |> assign(page_title: gettext("Create a new trip"))
+      |> assign(return_to: return_to)
       |> assign(is_draft: is_draft)
 
     {:ok, socket}
   end
+
+  defp return_to(%{"return_to" => return_to}) when is_binary(return_to) do
+    case URI.parse(return_to) do
+      %{scheme: nil, host: nil, path: path, query: query} when path in ["/plans", "/drafts"] ->
+        URI.to_string(%URI{path: path, query: query})
+
+      _uri ->
+        nil
+    end
+  end
+
+  defp return_to(_params), do: nil
 end

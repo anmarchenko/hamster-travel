@@ -82,6 +82,12 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       assert html =~
                ~s(href="/trips/#{trip.slug}?tab=budget&amp;return_to=%2Fplans%3Fpage%3D2%26q%3DSearchable")
+
+      assert html =~
+               ~s(href="/trips/#{trip.slug}/edit?return_to=%2Fplans%3Fpage%3D2%26q%3DSearchable")
+
+      assert html =~
+               ~s(href="/trips/new?copy=#{trip.id}&amp;return_to=%2Fplans%3Fpage%3D2%26q%3DSearchable")
     end
 
     test "ignores unsafe return_to values", %{conn: conn} do
