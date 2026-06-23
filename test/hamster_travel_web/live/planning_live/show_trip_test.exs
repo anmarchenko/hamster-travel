@@ -8,7 +8,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
   alias HamsterTravel.Geo
   alias HamsterTravel.Planning
-  alias HamsterTravel.Planning.TripCover
+  alias HamsterTravel.Planning.{Trip, TripCover}
   alias HamsterTravel.Repo
   alias HamsterTravelWeb.Cldr
 
@@ -899,6 +899,33 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       {add_button_position, _length} = :binary.match(html, "Add actual expense for Souvenirs")
 
       assert last_expense_position < add_button_position
+    end
+
+    test "manually reconciles a zero-actual category after the trip is finished", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: Trip.finished(), currency: "EUR"})
+
+      {:ok, category} =
+        Planning.create_budget_category(trip, %{
+          name: "Souvenirs",
+          estimated_expense: %{price: Money.new(:EUR, "100.00")}
+        })
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=budget")
+
+      recalculate_button =
+        "#budget-category-#{category.id} button[phx-click='recalculate']"
+
+      assert has_element?(view, recalculate_button)
+
+      view
+      |> element(recalculate_button)
+      |> render_click()
+
+      category = Planning.get_budget_category!(category.id)
+      assert category.estimated_expense.price == Money.new(:EUR, 0)
+      assert_eventually_contains(view, "€0.00")
     end
 
     test "renders notes tab when selected", %{conn: conn} do

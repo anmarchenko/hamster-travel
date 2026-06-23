@@ -7,6 +7,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
 
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.BudgetCategory, as: Category
+  alias HamsterTravel.Planning.Trip
 
   @impl true
   def mount(socket) do
@@ -66,7 +67,10 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
             }
           />
           <button
-            :if={@can_edit && Enum.any?(@category.actual_expenses)}
+            :if={
+              @can_edit &&
+                (@trip.status == Trip.finished() || Enum.any?(@category.actual_expenses))
+            }
             type="button"
             phx-click="recalculate"
             phx-target={@myself}
