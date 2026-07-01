@@ -1409,12 +1409,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         </div>
       </.toggle>
 
-      <div class="flex flex-col gap-y-8 mt-8">
-        <div :for={i <- 0..(@trip.duration - 1)} class="flex flex-col gap-y-2">
+      <div class="flex flex-col gap-y-4 mt-4">
+        <div :for={i <- 0..(@trip.duration - 1)} class="flex flex-col gap-y-1">
           <.day_heading
             day_index={i}
             start_date={@trip.start_date}
-            class="max-w-3xl rounded-md py-2 text-left font-bold text-zinc-950 dark:text-zinc-50"
+            class="max-w-3xl rounded-md py-1 text-left font-bold text-zinc-950 dark:text-zinc-50"
           />
           <div class="flex flex-col gap-y-1 sm:flex-row sm:gap-x-4 sm:gap-y-0">
             <.destinations_list
@@ -1425,7 +1425,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             />
           </div>
 
-          <div class="flex flex-col gap-y-2 min-h-8">
+          <div class="flex flex-col gap-y-1 min-h-8">
             <div class="flex flex-col gap-y-1" data-activity-drop-zone data-target-day={i}>
               <.activities_list
                 activities={Planning.activities_for_day(i, @activities)}
@@ -1445,7 +1445,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               />
             </div>
           </div>
-          <hr />
+          <hr class="my-0" />
         </div>
       </div>
     </div>
