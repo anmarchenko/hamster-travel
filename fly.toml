@@ -13,6 +13,7 @@ processes = []
   AWS_REGION = "eu-central-1"
   AWS_S3_BUCKET = "hamster-travel-prod-images"
   S3_ASSET_HOST = "https://hamster-travel-prod-images.s3.eu-central-1.amazonaws.com"
+  CHROMIC_PDF_ON_DEMAND = "true"
   MAGICK_MEMORY_LIMIT = "128MiB"
   MAGICK_MAP_LIMIT = "128MiB"
   MAGICK_DISK_LIMIT = "1GiB"
@@ -28,8 +29,8 @@ processes = []
   protocol = "tcp"
   script_checks = []
   [services.concurrency]
-    hard_limit = 25
-    soft_limit = 20
+    hard_limit = 250
+    soft_limit = 200
     type = "connections"
 
   [[services.ports]]
