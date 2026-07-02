@@ -1,8 +1,28 @@
 @import "tailwindcss/base";
 @import "../../deps/petal_components/assets/default.css";
+@import "../node_modules/flatpickr/dist/themes/light.css";
+@import "../node_modules/flatpickr/dist/themes/dark.css" (prefers-color-scheme: dark);
 @import "../node_modules/mapbox-gl/dist/mapbox-gl.css";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+
+@media (prefers-color-scheme: dark) {
+    .flatpickr-innerContainer,
+    .flatpickr-rContainer,
+    .flatpickr-days,
+    .dayContainer {
+        background: #3f4458;
+    }
+
+    .flatpickr-time {
+        background: #3f4458;
+        border-color: #20222c;
+    }
+
+    .flatpickr-weekwrapper .flatpickr-weeks {
+        border-left: 0;
+    }
+}
 
 [x-cloak] {
     display: none !important;
