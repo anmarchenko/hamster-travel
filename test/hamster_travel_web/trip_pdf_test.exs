@@ -6,6 +6,7 @@ defmodule HamsterTravelWeb.TripPdfTest do
   alias HamsterTravelWeb.Gettext, as: HTGettext
   alias HamsterTravelWeb.TripPdf
 
+  import ExUnit.CaptureLog
   import HamsterTravel.GeoFixtures
   import HamsterTravel.PlanningFixtures
 
@@ -24,6 +25,16 @@ defmodule HamsterTravelWeb.TripPdfTest do
 
     @impl true
     def render(_html, _opts), do: {:error, :renderer_failed}
+  end
+
+  defmodule FallbackRenderer do
+    @behaviour HamsterTravelWeb.TripPdf.Renderer
+
+    @impl true
+    def render(_html, opts) do
+      send(self(), {:fallback_renderer_called, opts})
+      {:ok, "<<fallback-pdf>>"}
+    end
   end
 
   setup do
@@ -325,6 +336,44 @@ defmodule HamsterTravelWeb.TripPdfTest do
     end
   end
 
+  describe "FlameChromicRenderer.render/2" do
+    test "falls back locally when FLAME call raises and redacts token-bearing errors" do
+      fly_token = "fm2_sensitive-token-that-must-not-appear"
+
+      flame_call = fn _pool, _fun, opts ->
+        send(self(), {:flame_call_opts, opts})
+        raise "failed POST https://api.machines.dev with 403: Authorization Bearer #{fly_token}"
+      end
+
+      log =
+        capture_log(fn ->
+          with_flame_renderer_config([flame_call: flame_call, fallback: true], fn ->
+            assert {:ok, "<<fallback-pdf>>"} =
+                     TripPdf.FlameChromicRenderer.render("<html></html>", print_to_pdf: %{})
+          end)
+        end)
+
+      assert_received {:flame_call_opts, opts}
+      assert Keyword.fetch!(opts, :link) == false
+      assert Keyword.fetch!(opts, :timeout) == 120_000
+      assert_received {:fallback_renderer_called, [print_to_pdf: %{}]}
+      assert log =~ "falling back to local ChromicPDF"
+      assert log =~ "Bearer [REDACTED]"
+      refute log =~ fly_token
+    end
+
+    test "returns FLAME error when local fallback is disabled" do
+      flame_call = fn _pool, _fun, _opts -> exit(:fly_unauthorized) end
+
+      with_flame_renderer_config([flame_call: flame_call, fallback: false], fn ->
+        assert {:error, {:flame_exit, :fly_unauthorized}} =
+                 TripPdf.FlameChromicRenderer.render("<html></html>", [])
+      end)
+
+      refute_received {:fallback_renderer_called, _opts}
+    end
+  end
+
   defp count_occurrences(text, needle) do
     text
     |> String.split(needle)
@@ -355,6 +404,33 @@ defmodule HamsterTravelWeb.TripPdfTest do
       Application.put_env(:hamster_travel, :trip_pdf_renderer, original)
     end
   end
+
+  defp with_flame_renderer_config(opts, fun) do
+    original_flame_call = Application.get_env(:hamster_travel, :trip_pdf_flame_call)
+    original_fallback = Application.get_env(:hamster_travel, :trip_pdf_flame_fallback)
+    original_chromic_renderer = Application.get_env(:hamster_travel, :trip_pdf_chromic_renderer)
+
+    Application.put_env(:hamster_travel, :trip_pdf_flame_call, Keyword.fetch!(opts, :flame_call))
+
+    Application.put_env(
+      :hamster_travel,
+      :trip_pdf_flame_fallback,
+      Keyword.fetch!(opts, :fallback)
+    )
+
+    Application.put_env(:hamster_travel, :trip_pdf_chromic_renderer, FallbackRenderer)
+
+    try do
+      fun.()
+    after
+      restore_env(:trip_pdf_flame_call, original_flame_call)
+      restore_env(:trip_pdf_flame_fallback, original_fallback)
+      restore_env(:trip_pdf_chromic_renderer, original_chromic_renderer)
+    end
+  end
+
+  defp restore_env(key, nil), do: Application.delete_env(:hamster_travel, key)
+  defp restore_env(key, value), do: Application.put_env(:hamster_travel, key, value)
 
   defp trip_html(trip) do
     trip
