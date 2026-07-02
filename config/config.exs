@@ -78,6 +78,17 @@ config :hamster_travel, HamsterTravelWeb.Telemetry,
 config :hamster_travel, :geonames_req_options, []
 
 config :hamster_travel, :trip_pdf_renderer, HamsterTravelWeb.TripPdf.ChromicRenderer
+config :hamster_travel, :trip_pdf_flame_fallback, true
+config :hamster_travel, :trip_pdf_flame_timeout, 120_000
+
+config :hamster_travel, HamsterTravelWeb.TripPdf.FlameRunner,
+  name: HamsterTravelWeb.TripPdf.FlameRunner,
+  min: 0,
+  max: 1,
+  max_concurrency: 1,
+  idle_shutdown_after: 30_000,
+  timeout: 120_000,
+  boot_timeout: 60_000
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

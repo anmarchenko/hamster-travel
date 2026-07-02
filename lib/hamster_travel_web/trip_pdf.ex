@@ -19,6 +19,10 @@ defmodule HamsterTravelWeb.TripPdf do
     @callback render(String.t(), keyword()) :: {:ok, binary()} | {:error, term()}
   end
 
+  defmodule FlameRunner do
+    @moduledoc false
+  end
+
   defmodule ChromicRenderer do
     @moduledoc false
     @behaviour HamsterTravelWeb.TripPdf.Renderer
@@ -35,6 +39,69 @@ defmodule HamsterTravelWeb.TripPdf do
           {:error, reason} -> {:error, reason}
         end
       end)
+    end
+  end
+
+  defmodule FlameChromicRenderer do
+    @moduledoc false
+    @behaviour HamsterTravelWeb.TripPdf.Renderer
+
+    require Logger
+
+    alias HamsterTravelWeb.TripPdf.{ChromicRenderer, FlameRunner}
+
+    @impl true
+    def render(html, opts \\ []) do
+      case render_with_flame(html, opts) do
+        {:ok, pdf_binary} ->
+          {:ok, pdf_binary}
+
+        {:error, reason} = error ->
+          maybe_render_locally(html, opts, reason, error)
+      end
+    end
+
+    defp render_with_flame(html, opts) do
+      result =
+        try do
+          FLAME.call(
+            FlameRunner,
+            fn -> ChromicRenderer.render(html, opts) end,
+            timeout: flame_timeout()
+          )
+        catch
+          kind, reason -> {:error, {:flame_failed, kind, reason}}
+        end
+
+      case result do
+        {:ok, pdf_binary} when is_binary(pdf_binary) -> {:ok, pdf_binary}
+        {:error, reason} -> {:error, reason}
+        other -> {:error, {:unexpected_flame_result, other}}
+      end
+    end
+
+    defp maybe_render_locally(html, opts, reason, error) do
+      if flame_fallback?() do
+        Logger.warning(
+          "FLAME PDF render failed; falling back to local ChromicPDF: #{inspect(reason)}"
+        )
+
+        ChromicRenderer.render(html, opts)
+      else
+        Logger.warning(
+          "FLAME PDF render failed and local fallback is disabled: #{inspect(reason)}"
+        )
+
+        error
+      end
+    end
+
+    defp flame_fallback? do
+      Application.get_env(:hamster_travel, :trip_pdf_flame_fallback, true)
+    end
+
+    defp flame_timeout do
+      Application.get_env(:hamster_travel, :trip_pdf_flame_timeout, 120_000)
     end
   end
 
