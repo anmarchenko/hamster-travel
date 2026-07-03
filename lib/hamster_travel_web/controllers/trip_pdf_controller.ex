@@ -12,7 +12,7 @@ defmodule HamsterTravelWeb.TripPdfController do
     set_locale(conn.assigns.current_user.locale || "en")
     trip = Planning.fetch_trip!(trip_slug, conn.assigns.current_user)
     display_currency = conn.assigns.current_user.default_currency || trip.currency
-    filename = build_pdf_filename(trip.slug)
+    filename = TripPdf.filename(trip.slug)
 
     case TripPdf.render(trip, display_currency) do
       {:ok, pdf_binary} ->
@@ -38,13 +38,5 @@ defmodule HamsterTravelWeb.TripPdfController do
     Gettext.put_locale(HamsterTravelWeb.Gettext, locale)
     {:ok, _} = Cldr.put_locale(HamsterTravelWeb.Cldr, locale)
     :ok
-  end
-
-  defp build_pdf_filename(trip_slug) do
-    timestamp =
-      DateTime.utc_now()
-      |> Calendar.strftime("%Y%m%d-%H%M%S")
-
-    "#{trip_slug}-plan-#{timestamp}.pdf"
   end
 end

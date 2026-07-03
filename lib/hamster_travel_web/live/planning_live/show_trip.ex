@@ -18,6 +18,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   alias HamsterTravel.Social
   alias HamsterTravelWeb.Cldr
   alias HamsterTravelWeb.CoreComponents
+  alias HamsterTravelWeb.TripPdf
 
   alias HamsterTravelWeb.Planning.{
     Accommodation,
@@ -73,8 +74,16 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             >
               <.icon_text icon="hero-document-duplicate" label={gettext("Make a copy")} />
             </.button>
-            <.button link_type="a" to={trip_url(@trip.slug, :export_pdf)} color="secondary">
-              <.icon_text icon="hero-arrow-down-tray" label={gettext("Export to PDF")} />
+            <.button
+              phx-click="export_pdf"
+              phx-disable-with={gettext("Preparing PDF")}
+              disabled={@pdf_export_status == :running}
+              color="secondary"
+            >
+              <.icon_text
+                icon={pdf_export_icon(@pdf_export_status)}
+                label={pdf_export_label(@pdf_export_status)}
+              />
             </.button>
             <.button
               :if={Policy.authorized?(:delete, @trip, @current_user)}
@@ -201,6 +210,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> assign(cover_upload_errors: [])
       |> assign(show_invite_participant_modal: false)
       |> assign(show_reorder_days_modal: false)
+      |> assign(pdf_export_status: :idle)
       |> assign_trip_state(trip)
 
     socket =
@@ -369,6 +379,48 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     {:noreply, socket}
   end
 
+  @impl true
+  def handle_async(:trip_pdf_export, {:ok, {:ok, filename, pdf_binary}}, socket) do
+    socket =
+      socket
+      |> assign(pdf_export_status: :idle)
+      |> push_event("download-pdf", %{
+        filename: filename,
+        content_type: "application/pdf",
+        data: Base.encode64(pdf_binary)
+      })
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_async(:trip_pdf_export, {:ok, {:error, reason}}, socket) do
+    Logger.error(
+      "Trip PDF async export failed for trip=#{socket.assigns.trip.id}: #{inspect(reason)}"
+    )
+
+    socket =
+      socket
+      |> assign(pdf_export_status: :idle)
+      |> put_flash(:error, gettext("Failed to export trip to PDF."))
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_async(:trip_pdf_export, {:exit, reason}, socket) do
+    Logger.error(
+      "Trip PDF async export exited for trip=#{socket.assigns.trip.id}: #{inspect(reason)}"
+    )
+
+    socket =
+      socket
+      |> assign(pdf_export_status: :idle)
+      |> put_flash(:error, gettext("Failed to export trip to PDF."))
+
+    {:noreply, socket}
+  end
+
   def handle_progress(:cover, entry, socket) do
     %{trip: trip, can_edit: can_edit, uploads: uploads} = socket.assigns
     entry_errors = upload_errors(uploads.cover, entry)
@@ -492,6 +544,30 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       end
 
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("export_pdf", _params, socket) do
+    if socket.assigns.pdf_export_status == :running do
+      {:noreply, socket}
+    else
+      %{
+        current_user: current_user,
+        display_currency: display_currency,
+        trip: trip
+      } = socket.assigns
+
+      locale = current_user.locale || "en"
+
+      socket =
+        socket
+        |> assign(pdf_export_status: :running)
+        |> start_async(:trip_pdf_export, fn ->
+          render_trip_pdf(trip, display_currency, locale)
+        end)
+
+      {:noreply, socket}
+    end
   end
 
   @impl true
@@ -2509,6 +2585,28 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   defp ensure_int(val) when is_binary(val), do: String.to_integer(val)
   defp ensure_int(val), do: val
+
+  defp render_trip_pdf(%Trip{} = trip, display_currency, locale) do
+    set_locale(locale)
+    filename = TripPdf.filename(trip.slug)
+
+    case TripPdf.render(trip, display_currency) do
+      {:ok, pdf_binary} -> {:ok, filename, pdf_binary}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  defp set_locale(locale) do
+    Gettext.put_locale(HamsterTravelWeb.Gettext, locale)
+    {:ok, _} = Elixir.Cldr.put_locale(HamsterTravelWeb.Cldr, locale)
+    :ok
+  end
+
+  defp pdf_export_icon(:running), do: "hero-arrow-path"
+  defp pdf_export_icon(_status), do: "hero-arrow-down-tray"
+
+  defp pdf_export_label(:running), do: gettext("Preparing PDF")
+  defp pdf_export_label(_status), do: gettext("Export to PDF")
 
   defp cover_error(:too_large),
     do: gettext("File is too large. Maximum size is %{size} MB.", size: @cover_upload_max_mb)
