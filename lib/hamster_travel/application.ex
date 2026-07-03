@@ -8,7 +8,6 @@ defmodule HamsterTravel.Application do
 
   @impl true
   def start(_type, _args) do
-    flame_parent = FLAME.Parent.get()
     chromic_pdf_opts = Application.get_env(:hamster_travel, ChromicPDF, [])
     log_chromic_pdf_startup_config(chromic_pdf_opts)
 
@@ -21,13 +20,11 @@ defmodule HamsterTravel.Application do
         HamsterTravelWeb.Telemetry,
         # Start the PubSub system
         {Phoenix.PubSub, name: HamsterTravel.PubSub},
-        trip_pdf_flame_pool_child(flame_parent),
         # Start the Endpoint (http/https)
-        endpoint_child(flame_parent)
+        HamsterTravelWeb.Endpoint
         # Start a worker by calling: HamsterTravel.Worker.start_link(arg)
         # {HamsterTravel.Worker, arg}
       ]
-      |> Enum.reject(&is_nil/1)
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
@@ -96,18 +93,6 @@ defmodule HamsterTravel.Application do
 
     Logger.info("ChromicPDF startup config: #{inspect(effective_opts)}")
   end
-
-  defp trip_pdf_flame_pool_child(nil) do
-    if Application.get_env(:hamster_travel, :trip_pdf_renderer) ==
-         HamsterTravelWeb.TripPdf.FlameChromicRenderer do
-      {FLAME.Pool, Application.fetch_env!(:hamster_travel, HamsterTravelWeb.TripPdf.FlameRunner)}
-    end
-  end
-
-  defp trip_pdf_flame_pool_child(_flame_parent), do: nil
-
-  defp endpoint_child(nil), do: HamsterTravelWeb.Endpoint
-  defp endpoint_child(_flame_parent), do: nil
 
   defp maybe_add_missing(missing, nil, key), do: missing ++ [key]
   defp maybe_add_missing(missing, "MISSING", key), do: missing ++ [key]

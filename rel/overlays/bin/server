@@ -1,14 +1,4 @@
 #!/bin/sh
 cd -P -- "$(dirname -- "$0")"
 
-if [ -n "${FLY_PRIVATE_IP:-}" ]; then
-  export RELEASE_DISTRIBUTION="${RELEASE_DISTRIBUTION:-name}"
-
-  if [ -z "${RELEASE_NODE:-}" ]; then
-    release_name="${FLY_APP_NAME:-hamster_travel}-${FLY_MACHINE_ID:-machine}"
-    release_name="$(printf '%s' "$release_name" | tr -c 'A-Za-z0-9_' '_')"
-    export RELEASE_NODE="${release_name}@${FLY_PRIVATE_IP}"
-  fi
-fi
-
 PHX_SERVER=true exec ./hamster_travel start

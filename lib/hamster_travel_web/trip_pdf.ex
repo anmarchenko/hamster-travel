@@ -19,10 +19,6 @@ defmodule HamsterTravelWeb.TripPdf do
     @callback render(String.t(), keyword()) :: {:ok, binary()} | {:error, term()}
   end
 
-  defmodule FlameRunner do
-    @moduledoc false
-  end
-
   defmodule ChromicRenderer do
     @moduledoc false
     @behaviour HamsterTravelWeb.TripPdf.Renderer
@@ -39,104 +35,6 @@ defmodule HamsterTravelWeb.TripPdf do
           {:error, reason} -> {:error, reason}
         end
       end)
-    end
-  end
-
-  defmodule FlameChromicRenderer do
-    @moduledoc false
-    @behaviour HamsterTravelWeb.TripPdf.Renderer
-
-    require Logger
-
-    alias HamsterTravelWeb.TripPdf.{ChromicRenderer, FlameRunner}
-
-    @impl true
-    def render(html, opts \\ []) do
-      chromic_renderer = chromic_renderer()
-
-      case render_with_flame(html, opts) do
-        {:ok, pdf_binary} ->
-          {:ok, pdf_binary}
-
-        {:error, reason} = error ->
-          maybe_render_locally(chromic_renderer, html, opts, reason, error)
-      end
-    end
-
-    defp render_with_flame(html, opts) do
-      chromic_renderer = chromic_renderer()
-
-      result =
-        try do
-          flame_call().(
-            FlameRunner,
-            fn -> chromic_renderer.render(html, opts) end,
-            timeout: flame_timeout(),
-            link: false
-          )
-        rescue
-          exception -> {:error, {:flame_exception, exception}}
-        catch
-          :exit, reason -> {:error, {:flame_exit, reason}}
-          kind, reason -> {:error, {:flame_failed, kind, reason}}
-        end
-
-      case result do
-        {:ok, pdf_binary} when is_binary(pdf_binary) -> {:ok, pdf_binary}
-        {:error, reason} -> {:error, reason}
-        other -> {:error, {:unexpected_flame_result, other}}
-      end
-    end
-
-    defp maybe_render_locally(chromic_renderer, html, opts, reason, error) do
-      if flame_fallback?() do
-        Logger.warning(
-          "FLAME PDF render failed; falling back to local ChromicPDF: #{format_flame_failure(reason)}"
-        )
-
-        chromic_renderer.render(html, opts)
-      else
-        Logger.warning(
-          "FLAME PDF render failed and local fallback is disabled: #{format_flame_failure(reason)}"
-        )
-
-        error
-      end
-    end
-
-    defp flame_fallback? do
-      Application.get_env(:hamster_travel, :trip_pdf_flame_fallback, true)
-    end
-
-    defp flame_timeout do
-      Application.get_env(:hamster_travel, :trip_pdf_flame_timeout, 120_000)
-    end
-
-    defp flame_call do
-      Application.get_env(:hamster_travel, :trip_pdf_flame_call, &FLAME.call/3)
-    end
-
-    defp chromic_renderer do
-      Application.get_env(:hamster_travel, :trip_pdf_chromic_renderer, ChromicRenderer)
-    end
-
-    defp format_flame_failure({:flame_exception, exception}) do
-      exception
-      |> Exception.message()
-      |> redact_secrets()
-      |> then(&"#{inspect(exception.__struct__)}: #{&1}")
-    end
-
-    defp format_flame_failure(reason) do
-      reason
-      |> inspect(limit: 20, printable_limit: 500)
-      |> redact_secrets()
-    end
-
-    defp redact_secrets(message) do
-      message
-      |> String.replace(~r/Bearer\s+[^"'\]\}\)\s]+/, "Bearer [REDACTED]")
-      |> String.replace(~r/\b(?:fm2|fo1)_[A-Za-z0-9+\/_=,-]+/, "[REDACTED_FLY_TOKEN]")
     end
   end
 

@@ -11,28 +11,7 @@ env_true? = fn value ->
   |> then(&(&1 in ["1", "true", "yes", "on"]))
 end
 
-trip_pdf_renderer =
-  case System.get_env("TRIP_PDF_RENDERER", "chromic") |> String.trim() |> String.downcase() do
-    "chromic" ->
-      HamsterTravelWeb.TripPdf.ChromicRenderer
-
-    "flame" ->
-      HamsterTravelWeb.TripPdf.FlameChromicRenderer
-
-    value ->
-      raise """
-      unsupported TRIP_PDF_RENDERER=#{inspect(value)}.
-      Expected "chromic" or "flame".
-      """
-  end
-
-config :hamster_travel, :trip_pdf_renderer, trip_pdf_renderer
-
-config :hamster_travel,
-  trip_pdf_flame_fallback:
-    System.get_env("TRIP_PDF_FLAME_FALLBACK", "true")
-    |> env_true?.(),
-  trip_pdf_flame_timeout: String.to_integer(System.get_env("TRIP_PDF_FLAME_TIMEOUT") || "120000")
+config :hamster_travel, :trip_pdf_renderer, HamsterTravelWeb.TripPdf.ChromicRenderer
 
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
@@ -41,8 +20,6 @@ config :hamster_travel,
 # any compile-time configuration in here, as it won't be applied.
 # The block below contains prod specific runtime configuration.
 if config_env() == :prod do
-  flame_parent = FLAME.Parent.get()
-
   database_url =
     System.get_env("DATABASE_URL") ||
       raise """
@@ -50,12 +27,7 @@ if config_env() == :prod do
       For example: ecto://USER:PASS@HOST/DATABASE
       """
 
-  pool_size =
-    if flame_parent do
-      1
-    else
-      String.to_integer(System.get_env("POOL_SIZE") || "10")
-    end
+  pool_size = String.to_integer(System.get_env("POOL_SIZE") || "10")
 
   config :hamster_travel, HamsterTravel.Repo,
     ssl: false,
@@ -133,42 +105,4 @@ if config_env() == :prod do
     # 2 hours
     exchange_rates_retrieve_every: 7_200_000,
     open_exchange_rates_app_id: open_exchange_rates_app_id
-
-  fly_api_token =
-    case {trip_pdf_renderer, System.get_env("FLY_API_TOKEN")} do
-      {HamsterTravelWeb.TripPdf.FlameChromicRenderer, nil} ->
-        raise """
-        environment variable FLY_API_TOKEN is missing.
-        It is required when TRIP_PDF_RENDERER=flame.
-        """
-
-      {_renderer, token} ->
-        token
-    end
-
-  fly_backend_opts = [
-    cpu_kind: "shared",
-    cpus: 1,
-    memory_mb: 1024,
-    services: [],
-    env: %{
-      "DATABASE_URL" => database_url,
-      "SECRET_KEY_BASE" => secret_key_base,
-      "PHX_HOST" => phx_host || "",
-      "OPEN_EXCHANGE_RATES_APP_ID" => open_exchange_rates_app_id,
-      "CHROME_BIN" => System.get_env("CHROME_BIN", "/usr/bin/chromium"),
-      "POOL_SIZE" => "1",
-      "CHROMIC_PDF_ON_DEMAND" => "false"
-    }
-  ]
-
-  fly_backend_opts =
-    if fly_api_token do
-      Keyword.put(fly_backend_opts, :token, fly_api_token)
-    else
-      fly_backend_opts
-    end
-
-  config :flame, :backend, FLAME.FlyBackend
-  config :flame, FLAME.FlyBackend, fly_backend_opts
 end
