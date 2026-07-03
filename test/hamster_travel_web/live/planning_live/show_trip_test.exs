@@ -12,6 +12,13 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
   alias HamsterTravel.Repo
   alias HamsterTravelWeb.Cldr
 
+  defmodule PdfRenderer do
+    @behaviour HamsterTravelWeb.TripPdf.Renderer
+
+    @impl true
+    def render(_html, _opts), do: {:ok, "%PDF-async-test"}
+  end
+
   describe "Show trip page" do
     test "renders trip page with empty trip and known dates", %{conn: conn} do
       # Arrange
@@ -32,7 +39,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       # Verify copy button is displayed
       assert html =~ "Make a copy"
-      assert has_element?(view, "a[href=\"/trips/#{trip.slug}/export.pdf\"]", "Export to PDF")
+      assert has_element?(view, "button[phx-click='export_pdf']", "Export to PDF")
 
       # Verify that the tabs are rendered
       assert has_element?(view, "a", "Transfers and hotels")
@@ -47,6 +54,38 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert html =~ "12.06 - 14.06.2023"
       assert html =~ Cldr.date_with_weekday(trip.start_date)
       assert html =~ Cldr.date_with_weekday(trip.end_date)
+    end
+
+    test "exports trip PDF asynchronously and pushes a browser download", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+      encoded_pdf = Base.encode64("%PDF-async-test")
+
+      with_pdf_renderer(PdfRenderer, fn ->
+        {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+        html =
+          view
+          |> element("button[phx-click='export_pdf']", "Export to PDF")
+          |> render_click()
+
+        assert html =~ "Preparing PDF"
+
+        assert_push_event(
+          view,
+          "download-pdf",
+          %{
+            filename: filename,
+            content_type: "application/pdf",
+            data: ^encoded_pdf
+          },
+          2_000
+        )
+
+        assert filename =~ "#{trip.slug}-plan-"
+        assert filename =~ ".pdf"
+      end)
     end
 
     test "renders full years in header when trip dates cross year", %{conn: conn} do
@@ -1971,5 +2010,16 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
   defp assert_eventually_contains(_view, expected_text, 0) do
     flunk("expected rendered LiveView to include #{inspect(expected_text)}")
+  end
+
+  defp with_pdf_renderer(renderer, fun) do
+    original = Application.get_env(:hamster_travel, :trip_pdf_renderer)
+    Application.put_env(:hamster_travel, :trip_pdf_renderer, renderer)
+
+    try do
+      fun.()
+    after
+      Application.put_env(:hamster_travel, :trip_pdf_renderer, original)
+    end
   end
 end

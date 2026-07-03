@@ -147,6 +147,15 @@ defmodule HamsterTravelWeb.TripPdf do
     |> renderer().render(pdf_options())
   end
 
+  @spec filename(String.t()) :: String.t()
+  def filename(trip_slug) when is_binary(trip_slug) do
+    timestamp =
+      DateTime.utc_now()
+      |> Calendar.strftime("%Y%m%d-%H%M%S")
+
+    "#{trip_slug}-plan-#{timestamp}.pdf"
+  end
+
   @spec to_html(Trip.t(), String.t()) :: String.t()
   def to_html(%Trip{} = trip, display_currency) do
     day_sections =

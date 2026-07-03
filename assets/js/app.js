@@ -23,6 +23,7 @@ import ActivityDragDrop from './activity_drag_drop';
 import PackingDragDrop from './packing_drag_drop';
 import FormattedTextArea from './formatted_text_area';
 import UserMap from './user_map';
+import { registerPdfDownloadHandler } from './pdf_download';
 
 Alpine.plugin(persist);
 Alpine.plugin(collapse);
@@ -73,6 +74,8 @@ window.addEventListener('phx:page-loading-stop', () => {
   topBarScheduled = undefined;
   topbar.hide();
 });
+
+registerPdfDownloadHandler();
 
 // connect if there are any LiveViews on the page
 liveSocket.connect();
