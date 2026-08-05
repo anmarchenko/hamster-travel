@@ -10,6 +10,34 @@ defmodule HamsterTravelWeb.Planning.CreateTripTest do
   alias HamsterTravel.Repo
 
   describe "Create trip page" do
+    test "rebuilds conditional fields from the recovery change payload", %{conn: conn} do
+      conn = log_in_user(conn, user_fixture())
+      {:ok, view, _html} = live(conn, ~p"/trips/new")
+
+      assert has_element?(view, "#trip-form[phx-change='form_changed']")
+
+      view
+      |> element("#trip-form")
+      |> render_change(%{
+        "_target" => ["trip", "name"],
+        "trip" => %{
+          "name" => "Recovered trip",
+          "status" => Trip.planned(),
+          "currency" => "USD",
+          "dates_unknown" => "true",
+          "duration" => "6",
+          "people_count" => "4",
+          "private" => "true"
+        }
+      })
+
+      assert has_element?(view, "#trip-form input[name='trip[name]'][value='Recovered trip']")
+      assert has_element?(view, "#trip-form option[value='USD'][selected]")
+      assert has_element?(view, "#trip-form input[name='trip[duration]'][value='6']")
+      assert has_element?(view, "#trip-form input[name='trip[private]'][value='true'][checked]")
+      refute has_element?(view, "#trip-form input[name='trip[start_date]']")
+    end
+
     test "creates a trip from a copy", %{conn: conn} do
       user = user_fixture() |> Repo.preload(:friendships)
       conn = log_in_user(conn, user)

@@ -6,10 +6,28 @@ defmodule HamsterTravelWeb.UserLoginLiveTest do
 
   describe "Log in page" do
     test "renders log in page", %{conn: conn} do
-      {:ok, _lv, html} = live(conn, ~p"/users/log_in")
+      {:ok, lv, html} = live(conn, ~p"/users/log_in")
 
       assert html =~ "Log in"
       assert html =~ "Forgot your password?"
+      assert has_element?(lv, "#login-form[phx-change='form_changed']")
+    end
+
+    test "accepts the complete recovery change payload", %{conn: conn} do
+      {:ok, lv, _html} = live(conn, ~p"/users/log_in")
+
+      html =
+        lv
+        |> element("#login-form")
+        |> render_change(%{
+          "_target" => ["user", "email"],
+          "user" => %{"email" => "recover@example.com", "password" => "unsaved-password"}
+        })
+
+      assert html =~ ~s(id="login-form")
+      assert html =~ ~s(phx-change="form_changed")
+      assert html =~ "recover@example.com"
+      assert html =~ "unsaved-password"
     end
 
     test "redirects if already logged in", %{conn: conn} do

@@ -290,8 +290,18 @@ defmodule HamsterTravelWeb.Planning.TripForm do
   end
 
   defp assign_form(socket, trip_params) when is_map(trip_params) do
-    assign_form(socket, Planning.trip_changeset(trip_params))
+    changeset = form_changeset(socket, trip_params)
+
+    socket
+    |> assign_trip_fields(trip_params)
+    |> assign_form(changeset)
   end
+
+  defp form_changeset(%{assigns: %{action: :edit, trip: trip}}, trip_params) do
+    Planning.change_trip(trip, trip_params)
+  end
+
+  defp form_changeset(_socket, trip_params), do: Planning.trip_changeset(trip_params)
 
   defp normalize_trip_params(socket, trip_params) do
     status = Map.get(trip_params, "status", socket.assigns.status)
@@ -303,12 +313,27 @@ defmodule HamsterTravelWeb.Planning.TripForm do
     end
   end
 
-  defp assign_trip_fields(socket, changeset) do
+  defp assign_trip_fields(socket, %Ecto.Changeset{} = changeset) do
     socket
     |> assign(:dates_unknown, Changeset.get_field(changeset, :dates_unknown))
     |> assign(:start_date, Changeset.get_field(changeset, :start_date))
     |> assign(:end_date, Changeset.get_field(changeset, :end_date))
     |> assign(:status, Changeset.get_field(changeset, :status))
+  end
+
+  defp assign_trip_fields(socket, trip_params) when is_map(trip_params) do
+    socket =
+      case Map.fetch(trip_params, "dates_unknown") do
+        {:ok, dates_unknown} -> assign(socket, :dates_unknown, dates_unknown in [true, "true"])
+        :error -> socket
+      end
+
+    Enum.reduce([:start_date, :end_date, :status], socket, fn field, socket ->
+      case Map.fetch(trip_params, Atom.to_string(field)) do
+        {:ok, value} -> assign(socket, field, value)
+        :error -> socket
+      end
+    end)
   end
 
   defp selected_duration(form) do

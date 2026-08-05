@@ -31,6 +31,7 @@ defmodule HamsterTravelWeb.Packing.BackpackForm do
     <div>
       <.form_container>
         <.form
+          id="backpack-form"
           for={@form}
           as={:backpack}
           phx-submit="form_submit"
@@ -132,10 +133,10 @@ defmodule HamsterTravelWeb.Packing.BackpackForm do
   @impl true
   def handle_event(
         "form_changed",
-        _,
+        %{"backpack" => backpack_params},
         socket
       ) do
-    {:noreply, socket}
+    replace_form_from_params(backpack_params, socket)
   end
 
   @impl true
@@ -179,9 +180,15 @@ defmodule HamsterTravelWeb.Packing.BackpackForm do
   end
 
   defp replace_form_from_params(params, socket) do
-    changeset = Packing.backpack_changeset(params)
+    changeset = form_changeset(socket, params)
     {:noreply, assign_form(socket, changeset)}
   end
+
+  defp form_changeset(%{assigns: %{action: :edit, backpack: backpack}}, params) do
+    Packing.change_backpack(backpack, params)
+  end
+
+  defp form_changeset(_socket, params), do: Packing.backpack_changeset(params)
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
     assign(socket, :form, to_form(changeset))
