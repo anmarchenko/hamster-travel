@@ -6,6 +6,8 @@ defmodule HamsterTravelWeb.Planning.BudgetExpense do
 
   alias HamsterTravel.Planning
 
+  attr :edit, :boolean, default: false
+
   @impl true
   def mount(socket) do
     {:ok, assign(socket, edit: false)}
@@ -33,6 +35,7 @@ defmodule HamsterTravelWeb.Planning.BudgetExpense do
         as={:expense}
         phx-target={@myself}
         phx-submit="form_submit"
+        phx-change="form_changed"
         phx-mounted={JS.focus_first(to: "#budget-expense-form-#{@source}-#{@expense.id}")}
         class="flex flex-col gap-3 sm:flex-row sm:items-end"
       >
@@ -89,16 +92,28 @@ defmodule HamsterTravelWeb.Planning.BudgetExpense do
   end
 
   @impl true
+  def handle_event("form_changed", %{"expense" => expense_params}, socket) do
+    {:noreply,
+     assign_form(socket, Planning.change_expense(socket.assigns.expense, expense_params))}
+  end
+
+  @impl true
   def handle_event("edit", _params, socket) do
     if socket.assigns.can_edit do
-      {:noreply, assign(socket, :edit, true)}
+      send(
+        self(),
+        {:open_form, "edit", "budget-expense", socket.assigns.source, socket.assigns.expense.id}
+      )
+
+      {:noreply, socket}
     else
       {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
     end
   end
 
   def handle_event("cancel", _params, socket) do
-    {:noreply, assign(socket, :edit, false)}
+    send(self(), :close_form)
+    {:noreply, socket}
   end
 
   def handle_event("form_submit", %{"expense" => expense_params}, socket) do
@@ -124,6 +139,7 @@ defmodule HamsterTravelWeb.Planning.BudgetExpense do
 
   defp result({:ok, source_item}, socket) do
     expense = source_item.expense
+    send(self(), :close_form)
 
     {:noreply,
      socket

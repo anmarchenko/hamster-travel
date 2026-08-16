@@ -4,6 +4,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   """
   use HamsterTravelWeb, :live_view
 
+  use LiveStash,
+    adapter: LiveStash.Adapters.BrowserMemory,
+    security_mode: :encrypt,
+    stored_keys: [:open_form]
+
   require Logger
 
   import HamsterTravelWeb.Planning.PlanningComponents
@@ -39,6 +44,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   }
 
   @tabs ["itinerary", "activities", "budget", "notes"]
+  @open_form_types ~w(destination accommodation transfer activity day-expense note budget-category budget-category-actual-expense budget-expense)
+  @budget_expense_sources ~w(hotel transfer activity)
   @drag_drop_edit_events ~w(move_transfer move_activity reorder_activity move_note reorder_note)
   @cover_upload_max_mb 8
   @cover_upload_max_file_size @cover_upload_max_mb * 1_000_000
@@ -151,6 +158,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         display_currency={@display_currency}
         current_user={@current_user}
         can_edit={@can_edit}
+        open_form={@open_form}
       />
     </.container>
 
@@ -201,17 +209,13 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> assign(page_title: trip.name)
       |> assign(display_currency: display_currency)
       |> assign(return_to: return_to)
-      |> assign(active_destination_adding_component_id: nil)
-      |> assign(active_accommodation_adding_component_id: nil)
-      |> assign(active_transfer_adding_component_id: nil)
-      |> assign(active_activity_adding_component_id: nil)
-      |> assign(active_day_expense_adding_component_id: nil)
-      |> assign(active_note_adding_component_id: nil)
+      |> assign(open_form: nil)
       |> assign(cover_upload_errors: [])
       |> assign(show_invite_participant_modal: false)
       |> assign(show_reorder_days_modal: false)
       |> assign(pdf_export_status: :idle)
       |> assign_trip_state(trip)
+      |> recover_open_form()
 
     socket =
       allow_upload(socket, :cover,
@@ -227,9 +231,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   @impl true
   def handle_params(params, _url, socket) do
+    active_tab = fetch_tab(params)
+
     socket =
       socket
-      |> assign(active_tab: fetch_tab(params))
+      |> maybe_clear_open_form_for_tab(active_tab)
+      |> assign(active_tab: active_tab)
       |> assign(return_to: return_to(params, socket.assigns.active_nav))
 
     {:noreply, socket}
@@ -357,26 +364,32 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   @impl true
   def handle_info({:start_adding, component_type, component_id}, socket) do
-    assign_key = get_key_for_component_adding_active_state_assign(component_type)
-
-    socket =
-      socket
-      |> assign(assign_key, component_id)
-      |> send_edit_state_to_entity_creation_components(component_type)
-
-    {:noreply, socket}
+    {:noreply, open_form(socket, "new", component_type, component_id)}
   end
 
   @impl true
-  def handle_info({:finish_adding, component_type}, socket) do
-    assign_key = get_key_for_component_adding_active_state_assign(component_type)
+  def handle_info({:finish_adding, _component_type}, socket) do
+    {:noreply, close_form(socket)}
+  end
 
-    socket =
-      socket
-      |> assign(assign_key, nil)
-      |> send_edit_state_to_entity_creation_components(component_type)
+  @impl true
+  def handle_info({:open_form, mode, component_type, component_id}, socket) do
+    {:noreply, open_form(socket, mode, component_type, component_id)}
+  end
 
-    {:noreply, socket}
+  @impl true
+  def handle_info({:open_form, "edit", "budget-expense", source, component_id}, socket) do
+    {:noreply, open_form(socket, "edit", "budget-expense", "#{source}:#{component_id}")}
+  end
+
+  @impl true
+  def handle_info(:close_form, socket) do
+    {:noreply, close_form(socket)}
+  end
+
+  @impl true
+  def handle_info(:clear_form_stash, socket) do
+    {:noreply, LiveStash.reset_stash(socket)}
   end
 
   @impl true
@@ -997,6 +1010,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       display_currency={@display_currency}
       current_user={@current_user}
       can_edit={@can_edit}
+      open_form={@open_form}
     />
     """
   end
@@ -1012,6 +1026,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       budget={@budget}
       display_currency={@display_currency}
       can_edit={@can_edit}
+      open_form={@open_form}
     />
     """
   end
@@ -1023,6 +1038,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       budget={@budget}
       display_currency={@display_currency}
       can_edit={@can_edit}
+      open_form={@open_form}
     />
     """
   end
@@ -1038,6 +1054,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       budget={@budget}
       display_currency={@display_currency}
       can_edit={@can_edit}
+      open_form={@open_form}
     />
     """
   end
@@ -1114,6 +1131,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:budget, Money, required: true)
   attr(:display_currency, :string, required: true)
   attr(:can_edit, :boolean, required: true)
+  attr(:open_form, :map, default: nil)
 
   def tab_notes(assigns) do
     ~H"""
@@ -1134,6 +1152,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           destinations={@destinations_outside}
           day_index={0}
           can_edit={@can_edit}
+          open_form={@open_form}
         />
         <.section_header
           :if={Enum.any?(@notes_outside)}
@@ -1147,7 +1166,13 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           data-note-drop-zone
           data-target-day="outside"
         >
-          <.notes_list notes={@notes_outside} day_index={-1} trip={@trip} can_edit={@can_edit} />
+          <.notes_list
+            notes={@notes_outside}
+            day_index={-1}
+            trip={@trip}
+            can_edit={@can_edit}
+            open_form={@open_form}
+          />
         </div>
         <div :if={@can_edit} class="flex justify-start mt-4">
           <.button
@@ -1170,6 +1195,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               day_index={-1}
               trip={@trip}
               can_edit={@can_edit}
+              open_form={@open_form}
             />
             <.live_component
               :if={@can_edit}
@@ -1178,6 +1204,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               trip={@trip}
               day_index={nil}
               can_edit={@can_edit}
+              edit={open_form_matches?(@open_form, "new", "note", "note-new-unassigned")}
             />
           </div>
         </div>
@@ -1190,6 +1217,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               destinations={Planning.items_for_day(i, @destinations)}
               day_index={i}
               can_edit={@can_edit}
+              open_form={@open_form}
             />
           </div>
           <div class="flex flex-col gap-y-1" data-note-drop-zone data-target-day={i}>
@@ -1198,6 +1226,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               day_index={i}
               trip={@trip}
               can_edit={@can_edit}
+              open_form={@open_form}
             />
             <.live_component
               :if={@can_edit}
@@ -1206,6 +1235,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               trip={@trip}
               day_index={i}
               can_edit={@can_edit}
+              edit={open_form_matches?(@open_form, "new", "note", "note-new-#{i}")}
             />
           </div>
           <hr />
@@ -1226,6 +1256,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:accommodations_outside, :list, required: true)
   attr(:current_user, HamsterTravel.Accounts.User, default: nil)
   attr(:can_edit, :boolean, required: true)
+  attr(:open_form, :map, default: nil)
 
   def tab_itinerary(assigns) do
     ~H"""
@@ -1252,6 +1283,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           destinations={@destinations_outside}
           day_index={0}
           can_edit={@can_edit}
+          open_form={@open_form}
         />
 
         <.section_header
@@ -1266,6 +1298,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           display_currency={@display_currency}
           day_index={0}
           can_edit={@can_edit}
+          open_form={@open_form}
         />
 
         <.section_header
@@ -1286,6 +1319,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             display_currency={@display_currency}
             day_index={-1}
             can_edit={@can_edit}
+            open_form={@open_form}
           />
         </div>
         <div :if={@can_edit} class="flex justify-start mt-4">
@@ -1351,6 +1385,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                   destinations={Planning.items_for_day(i, @destinations)}
                   day_index={i}
                   can_edit={@can_edit}
+                  open_form={@open_form}
                 />
                 <.live_component
                   :if={@can_edit}
@@ -1359,6 +1394,14 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                   trip={@trip}
                   day_index={i}
                   can_edit={@can_edit}
+                  edit={
+                    open_form_matches?(
+                      @open_form,
+                      "new",
+                      "destination",
+                      "destination-new-#{i}"
+                    )
+                  }
                 />
               </div>
             </td>
@@ -1381,6 +1424,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                   display_currency={@display_currency}
                   day_index={i}
                   can_edit={@can_edit}
+                  open_form={@open_form}
                 />
                 <.live_component
                   :if={@can_edit}
@@ -1390,6 +1434,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                   current_user={@current_user}
                   day_index={i}
                   can_edit={@can_edit}
+                  edit={open_form_matches?(@open_form, "new", "transfer", "transfer-new-#{i}")}
                 />
               </div>
             </td>
@@ -1407,6 +1452,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                   display_currency={@display_currency}
                   day_index={i}
                   can_edit={@can_edit}
+                  open_form={@open_form}
                 />
                 <.live_component
                   :if={@can_edit}
@@ -1415,6 +1461,14 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                   trip={@trip}
                   day_index={i}
                   can_edit={@can_edit}
+                  edit={
+                    open_form_matches?(
+                      @open_form,
+                      "new",
+                      "accommodation",
+                      "accommodation-new-#{i}"
+                    )
+                  }
                 />
               </div>
             </td>
@@ -1433,6 +1487,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:activities, :list, required: true)
   attr(:activities_outside, :list, required: true)
   attr(:can_edit, :boolean, required: true)
+  attr(:open_form, :map, default: nil)
 
   def tab_activity(assigns) do
     ~H"""
@@ -1453,6 +1508,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           destinations={@destinations_outside}
           day_index={0}
           can_edit={@can_edit}
+          open_form={@open_form}
         />
 
         <div
@@ -1470,6 +1526,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               trip={@trip}
               display_currency={@display_currency}
               can_edit={@can_edit}
+              open_form={@open_form}
             />
           </div>
         </div>
@@ -1498,6 +1555,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               destinations={Planning.items_for_day(i, @destinations)}
               day_index={i}
               can_edit={@can_edit}
+              open_form={@open_form}
             />
           </div>
 
@@ -1509,6 +1567,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                 trip={@trip}
                 display_currency={@display_currency}
                 can_edit={@can_edit}
+                open_form={@open_form}
               />
               <.live_component
                 :if={@can_edit}
@@ -1518,6 +1577,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                 day_index={i}
                 can_edit={@can_edit}
                 position={length(Planning.activities_for_day(i, @activities)) + 1}
+                edit={open_form_matches?(@open_form, "new", "activity", "activity-new-#{i}")}
               />
             </div>
           </div>
@@ -1532,6 +1592,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:budget, Money, required: true)
   attr(:display_currency, :string, required: true)
   attr(:can_edit, :boolean, required: true)
+  attr(:open_form, :map, default: nil)
 
   def tab_budget_view(assigns) do
     ~H"""
@@ -1551,12 +1612,32 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           trip={@trip}
           display_currency={@display_currency}
           can_edit={@can_edit}
+          edit={open_form_matches?(@open_form, "edit", "budget-category", category.id)}
+          add_actual={
+            open_form_matches?(
+              @open_form,
+              "new",
+              "budget-category-actual-expense",
+              category.id
+            )
+          }
+          editing_actual_expense_id={
+            open_form_id(@open_form, "edit", "budget-category-actual-expense")
+          }
         />
         <.live_component
           module={BudgetCategoryNew}
           id={"budget-category-new-#{@trip.id}"}
           trip={@trip}
           can_edit={@can_edit}
+          edit={
+            open_form_matches?(
+              @open_form,
+              "new",
+              "budget-category",
+              "budget-category-new-#{@trip.id}"
+            )
+          }
         />
       </.budget_section>
 
@@ -1576,6 +1657,14 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           expense={accommodation.expense}
           display_currency={@display_currency}
           can_edit={@can_edit}
+          edit={
+            open_form_matches?(
+              @open_form,
+              "edit",
+              "budget-expense",
+              "hotel:#{accommodation.expense.id}"
+            )
+          }
         />
       </.budget_section>
 
@@ -1603,6 +1692,14 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               expense={transfer.expense}
               display_currency={@display_currency}
               can_edit={@can_edit}
+              edit={
+                open_form_matches?(
+                  @open_form,
+                  "edit",
+                  "budget-expense",
+                  "transfer:#{transfer.expense.id}"
+                )
+              }
             />
           </.budget_day_group>
 
@@ -1622,6 +1719,14 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               expense={activity.expense}
               display_currency={@display_currency}
               can_edit={@can_edit}
+              edit={
+                open_form_matches?(
+                  @open_form,
+                  "edit",
+                  "budget-expense",
+                  "activity:#{activity.expense.id}"
+                )
+              }
             />
           </.budget_day_group>
 
@@ -1639,6 +1744,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               trip={@trip}
               display_currency={@display_currency}
               can_edit={@can_edit}
+              open_form={@open_form}
             />
             <.live_component
               :if={@can_edit && day_index < @trip.duration}
@@ -1647,6 +1753,14 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               trip={@trip}
               day_index={day_index}
               can_edit={@can_edit}
+              edit={
+                open_form_matches?(
+                  @open_form,
+                  "new",
+                  "day-expense",
+                  "day-expense-new-#{day_index}"
+                )
+              }
             />
           </.budget_day_group>
 
@@ -1661,6 +1775,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:destinations, :list, required: true)
   attr(:day_index, :integer, required: true)
   attr(:can_edit, :boolean, required: true)
+  attr(:open_form, :map, default: nil)
 
   def destinations_list(assigns) do
     ~H"""
@@ -1672,6 +1787,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       destination={destination}
       day_index={@day_index}
       can_edit={@can_edit}
+      edit={open_form_matches?(@open_form, "edit", "destination", destination.id)}
     />
     """
   end
@@ -1757,6 +1873,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:day_index, :integer, required: true)
   attr(:display_currency, :string, required: true)
   attr(:can_edit, :boolean, required: true)
+  attr(:open_form, :map, default: nil)
 
   def transfers_list(assigns) do
     ~H"""
@@ -1770,6 +1887,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       display_currency={@display_currency}
       day_index={@day_index}
       can_edit={@can_edit}
+      edit={open_form_matches?(@open_form, "edit", "transfer", transfer.id)}
     />
     """
   end
@@ -1779,6 +1897,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:day_index, :integer, required: true)
   attr(:display_currency, :string, required: true)
   attr(:can_edit, :boolean, required: true)
+  attr(:open_form, :map, default: nil)
 
   def accommodations_list(assigns) do
     ~H"""
@@ -1791,6 +1910,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       display_currency={@display_currency}
       day_index={@day_index}
       can_edit={@can_edit}
+      edit={open_form_matches?(@open_form, "edit", "accommodation", accommodation.id)}
     />
     """
   end
@@ -1800,6 +1920,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:trip, Trip, required: true)
   attr(:display_currency, :string, required: true)
   attr(:can_edit, :boolean, required: true)
+  attr(:open_form, :map, default: nil)
 
   def activities_list(assigns) do
     ~H"""
@@ -1812,6 +1933,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       display_currency={@display_currency}
       index={index}
       can_edit={@can_edit}
+      edit={open_form_matches?(@open_form, "edit", "activity", activity.id)}
     />
     """
   end
@@ -1822,6 +1944,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:display_currency, :string, required: true)
   attr(:can_edit, :boolean, required: true)
   attr(:draggable, :boolean, default: false)
+  attr(:open_form, :map, default: nil)
 
   def day_expenses_list(assigns) do
     ~H"""
@@ -1834,6 +1957,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       display_currency={@display_currency}
       can_edit={@can_edit}
       draggable={@draggable}
+      edit={open_form_matches?(@open_form, "edit", "day-expense", day_expense.id)}
     />
     """
   end
@@ -1842,6 +1966,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:notes, :list, required: true)
   attr(:day_index, :integer, required: true)
   attr(:can_edit, :boolean, required: true)
+  attr(:open_form, :map, default: nil)
 
   def notes_list(assigns) do
     ~H"""
@@ -1852,6 +1977,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       trip={@trip}
       note={note}
       can_edit={@can_edit}
+      edit={open_form_matches?(@open_form, "edit", "note", note.id)}
     />
     """
   end
@@ -2387,68 +2513,163 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     end)
   end
 
-  defp get_key_for_component_adding_active_state_assign(component_type) do
-    case component_type do
-      "destination" -> :active_destination_adding_component_id
-      "accommodation" -> :active_accommodation_adding_component_id
-      "transfer" -> :active_transfer_adding_component_id
-      "activity" -> :active_activity_adding_component_id
-      "day-expense" -> :active_day_expense_adding_component_id
-      "note" -> :active_note_adding_component_id
-      _ -> raise ArgumentError, "Unsupported component type: #{component_type}"
+  defp recover_open_form(socket) do
+    case LiveStash.recover_state(socket) do
+      {:recovered, recovered_socket} -> validate_recovered_open_form(recovered_socket)
+      {_status, unrecovered_socket} -> unrecovered_socket
     end
   end
 
-  defp send_edit_state_to_entity_creation_components(socket, component_type) do
-    case get_creation_component_info(component_type) do
-      {module, active_assign_key} ->
-        trip = socket.assigns.trip
-        component_ids = creation_component_ids(component_type, trip.duration)
-
-        Enum.each(component_ids, fn component_id ->
-          send_update(module,
-            id: component_id,
-            edit: Map.get(socket.assigns, active_assign_key) == component_id
-          )
-        end)
-
-        socket
-
-      nil ->
-        socket
+  defp validate_recovered_open_form(%{assigns: %{open_form: open_form}} = socket) do
+    if valid_open_form?(open_form, socket.assigns) do
+      socket
+    else
+      close_form(socket)
     end
   end
 
-  defp get_creation_component_info(component_type) do
-    case component_type do
-      "destination" ->
-        {HamsterTravelWeb.Planning.DestinationNew, :active_destination_adding_component_id}
+  defp valid_open_form?(
+         %{
+           version: 1,
+           trip_id: trip_id,
+           tab: tab,
+           mode: mode,
+           type: type,
+           id: id
+         },
+         %{trip: trip, active_tab: active_tab, can_edit: true}
+       )
+       when mode in ["new", "edit"] and type in @open_form_types and is_binary(id) do
+    trip_id == trip.id and tab == active_tab and form_identity_exists?(trip, mode, type, id)
+  end
 
-      "accommodation" ->
-        {HamsterTravelWeb.Planning.AccommodationNew, :active_accommodation_adding_component_id}
+  defp valid_open_form?(_open_form, _assigns), do: false
 
-      "transfer" ->
-        {HamsterTravelWeb.Planning.TransferNew, :active_transfer_adding_component_id}
+  defp form_identity_exists?(trip, "new", type, id) do
+    id in new_form_ids(trip, type)
+  end
 
-      "activity" ->
-        {HamsterTravelWeb.Planning.ActivityNew, :active_activity_adding_component_id}
+  defp form_identity_exists?(trip, "edit", "destination", id) do
+    entity_id_exists?(trip.destinations, id)
+  end
 
-      "day-expense" ->
-        {HamsterTravelWeb.Planning.DayExpenseNew, :active_day_expense_adding_component_id}
+  defp form_identity_exists?(trip, "edit", "accommodation", id) do
+    entity_id_exists?(trip.accommodations, id)
+  end
 
-      "note" ->
-        {HamsterTravelWeb.Planning.NoteNew, :active_note_adding_component_id}
+  defp form_identity_exists?(trip, "edit", "transfer", id) do
+    entity_id_exists?(trip.transfers, id)
+  end
 
-      _ ->
-        nil
+  defp form_identity_exists?(trip, "edit", "activity", id) do
+    entity_id_exists?(trip.activities, id)
+  end
+
+  defp form_identity_exists?(trip, "edit", "day-expense", id) do
+    entity_id_exists?(trip.day_expenses, id)
+  end
+
+  defp form_identity_exists?(trip, "edit", "note", id) do
+    entity_id_exists?(trip.notes, id)
+  end
+
+  defp form_identity_exists?(trip, "edit", "budget-category", id) do
+    entity_id_exists?(trip.budget_categories, id)
+  end
+
+  defp form_identity_exists?(trip, "edit", "budget-category-actual-expense", id) do
+    trip.budget_categories
+    |> Enum.flat_map(& &1.actual_expenses)
+    |> entity_id_exists?(id)
+  end
+
+  defp form_identity_exists?(trip, "edit", "budget-expense", id) do
+    case String.split(id, ":", parts: 2) do
+      [source, expense_id] when source in @budget_expense_sources ->
+        expense_id_exists?(trip, source, expense_id)
+
+      _other ->
+        false
     end
   end
 
-  defp creation_component_ids(component_type, duration) do
-    base_ids = for i <- 0..(duration - 1), do: "#{component_type}-new-#{i}"
+  defp form_identity_exists?(_trip, _mode, _type, _id), do: false
 
-    base_ids ++ ["#{component_type}-new-unassigned"]
+  defp new_form_ids(trip, type)
+       when type in ["destination", "accommodation", "transfer", "activity", "day-expense"] do
+    for day_index <- 0..(trip.duration - 1), do: "#{type}-new-#{day_index}"
   end
+
+  defp new_form_ids(trip, "note") do
+    [
+      "note-new-unassigned"
+      | for(day_index <- 0..(trip.duration - 1), do: "note-new-#{day_index}")
+    ]
+  end
+
+  defp new_form_ids(trip, "budget-category") do
+    ["budget-category-new-#{trip.id}"]
+  end
+
+  defp new_form_ids(trip, "budget-category-actual-expense") do
+    Enum.map(trip.budget_categories, &to_string(&1.id))
+  end
+
+  defp new_form_ids(_trip, _type), do: []
+
+  defp entity_id_exists?(entities, id) do
+    Enum.any?(entities, &(to_string(&1.id) == id))
+  end
+
+  defp expense_id_exists?(trip, "hotel", id) do
+    Enum.any?(trip.accommodations, &(to_string(&1.expense.id) == id))
+  end
+
+  defp expense_id_exists?(trip, "transfer", id) do
+    Enum.any?(trip.transfers, &(to_string(&1.expense.id) == id))
+  end
+
+  defp expense_id_exists?(trip, "activity", id) do
+    Enum.any?(trip.activities, &(to_string(&1.expense.id) == id))
+  end
+
+  defp open_form(socket, mode, type, id) when type in @open_form_types do
+    open_form = %{
+      version: 1,
+      trip_id: socket.assigns.trip.id,
+      tab: socket.assigns.active_tab,
+      mode: mode,
+      type: type,
+      id: to_string(id)
+    }
+
+    socket
+    |> assign(:open_form, open_form)
+    |> LiveStash.stash()
+  end
+
+  defp close_form(socket) do
+    socket
+    |> assign(:open_form, nil)
+    |> LiveStash.reset_stash()
+  end
+
+  defp maybe_clear_open_form_for_tab(socket, active_tab) do
+    if socket.assigns.active_tab != active_tab and socket.assigns.open_form do
+      close_form(socket)
+    else
+      socket
+    end
+  end
+
+  defp open_form_matches?(%{mode: mode, type: type, id: form_id}, mode, type, id) do
+    form_id == to_string(id)
+  end
+
+  defp open_form_matches?(_open_form, _mode, _type, _id), do: false
+
+  defp open_form_id(%{mode: mode, type: type, id: form_id}, mode, type), do: form_id
+  defp open_form_id(_open_form, _mode, _type), do: nil
 
   defp handle_entity_event(entity_type, operation, entity, socket) do
     # Preload associations based on entity type

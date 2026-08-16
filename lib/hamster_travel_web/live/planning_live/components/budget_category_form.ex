@@ -39,7 +39,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryForm do
         for={@form}
         as={:budget_category}
         phx-target={@myself}
-        phx-change={@food && "form_changed"}
+        phx-change="form_changed"
         phx-submit="form_submit"
         phx-mounted={JS.focus_first(to: "#budget-category-form-#{@id}")}
         class={[

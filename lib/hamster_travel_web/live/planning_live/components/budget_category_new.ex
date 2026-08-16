@@ -17,6 +17,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryNew do
 
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :can_edit, :boolean, default: false
+  attr :edit, :boolean, default: false
 
   @impl true
   def render(%{edit: true} = assigns) do
@@ -28,7 +29,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryNew do
         action={:new}
         trip={@trip}
         can_edit={@can_edit}
-        on_finish={fn -> send_update(@myself, edit: false) end}
+        on_finish={fn -> send(self(), :close_form) end}
       />
     </div>
     """
@@ -54,7 +55,8 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryNew do
   @impl true
   def handle_event("add", _params, socket) do
     if socket.assigns.can_edit do
-      {:noreply, assign(socket, :edit, true)}
+      send(self(), {:open_form, "new", "budget-category", socket.assigns.id})
+      {:noreply, socket}
     else
       {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
     end

@@ -4,6 +4,7 @@ import 'phoenix_html';
 // Establish Phoenix Socket and LiveView configuration.
 import { Socket } from 'phoenix';
 import { LiveSocket } from 'phoenix_live_view';
+import initLiveStash from '../../deps/live_stash/assets/js/live-stash.js';
 import topbar from '../vendor/topbar';
 
 // alpinejs for interactivity and persist plugin for local storage
@@ -48,7 +49,7 @@ let hooks = {
 };
 
 let liveSocket = new LiveSocket('/live', Socket, {
-  params: { _csrf_token: csrfToken },
+  params: initLiveStash({ _csrf_token: csrfToken }),
   hooks: hooks,
   dom: {
     onBeforeElUpdated(from, to) {

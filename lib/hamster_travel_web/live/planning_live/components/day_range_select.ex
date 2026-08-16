@@ -119,10 +119,8 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
         errors: Enum.map(errors, &translate_error(&1)),
         start_date: start_date,
         # the results of this field
-        start_day_selection:
-          if(assigns.start_day_field.value == "", do: nil, else: assigns.start_day_field.value),
-        end_day_selection:
-          if(assigns.end_day_field.value == "", do: nil, else: assigns.end_day_field.value),
+        start_day_selection: normalize_day_selection(assigns.start_day_field.value),
+        end_day_selection: normalize_day_selection(assigns.end_day_field.value),
         # the days list, comes from the server when the component is mounted
         days: Enum.map(0..(assigns.duration - 1), fn index -> index end),
         locale: Gettext.get_locale(HamsterTravelWeb.Gettext)
@@ -176,6 +174,17 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
       transition:
         {"transition ease-in duration-75", "opacity-100 scale-100", "opacity-0 scale-95"}
     )
+  end
+
+  defp normalize_day_selection(nil), do: nil
+  defp normalize_day_selection(""), do: nil
+  defp normalize_day_selection(day) when is_integer(day), do: day
+
+  defp normalize_day_selection(day) when is_binary(day) do
+    case Integer.parse(day) do
+      {day, ""} -> day
+      _error -> nil
+    end
   end
 
   def short_day_label(%{start_date: nil} = assigns) do

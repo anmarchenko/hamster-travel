@@ -1366,6 +1366,172 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "button", "Cancel")
     end
 
+    test "keeps one nested form open and clears it on cancel", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      view
+      |> element("tr:first-child td a", "Add transfer")
+      |> render_click()
+
+      assert has_element?(view, "form#transfer-form-new-transfer-new-0")
+
+      view
+      |> element("tr:first-child td a", "Add accommodation")
+      |> render_click()
+
+      refute has_element?(view, "form#transfer-form-new-transfer-new-0")
+      assert has_element?(view, "form#accommodation-form-new-accommodation-new-0")
+
+      view
+      |> element("form#accommodation-form-new-accommodation-new-0 button", "Cancel")
+      |> render_click()
+
+      refute has_element?(view, "form#accommodation-form-new-accommodation-new-0")
+    end
+
+    test "rebuilds the complete transfer form on change and keeps validation failures open", %{
+      conn: conn
+    } do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      view
+      |> element("tr:first-child td a", "Add transfer")
+      |> render_click()
+
+      form_selector = "form#transfer-form-new-transfer-new-0"
+
+      view
+      |> form(form_selector, %{
+        transfer: %{
+          transport_mode: "flight",
+          departure_time: "08:15",
+          arrival_time: "10:45",
+          plus_one_day: "true",
+          departure_station: "BER",
+          arrival_station: "LHR",
+          vessel_number: "HT 42",
+          carrier: "Hamster Air",
+          day_index: "0"
+        }
+      })
+      |> render_change()
+
+      assert has_element?(view, "#{form_selector} option[value='flight'][selected]")
+
+      assert has_element?(
+               view,
+               "#{form_selector} input[name='transfer[departure_time]'][value='08:15']"
+             )
+
+      assert has_element?(
+               view,
+               "#{form_selector} input[name='transfer[arrival_time]'][value='10:45']"
+             )
+
+      assert has_element?(
+               view,
+               "#{form_selector} input[name='transfer[carrier]'][value='Hamster Air']"
+             )
+
+      assert has_element?(
+               view,
+               "#{form_selector} input[name='transfer[vessel_number]'][value='HT 42']"
+             )
+
+      view
+      |> form(form_selector, %{transfer: %{transport_mode: "flight", day_index: "0"}})
+      |> render_submit()
+
+      assert has_element?(view, form_selector)
+    end
+
+    test "preserves transfer city selections when the form is replayed after reconnect", %{
+      conn: conn
+    } do
+      geonames_fixture()
+      berlin = Geo.find_city_by_geonames_id("2950159")
+      hamburg = Geo.find_city_by_geonames_id("2911298")
+
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      view
+      |> element("tr:first-child td a", "Add transfer")
+      |> render_click()
+
+      form_selector = "form#transfer-form-new-transfer-new-0"
+      departure_select = "#departure-city-input-new-transfer-new-0-live-select"
+      arrival_select = "#arrival-city-input-new-transfer-new-0-live-select"
+
+      # Native form recovery replays the form before LiveSelect restores its client-side selection.
+      view
+      |> element(form_selector)
+      |> render_change(%{
+        "_target" => ["transfer", "transport_mode"],
+        "transfer" => %{
+          "transport_mode" => "flight",
+          "departure_city" => Jason.encode!(%{id: berlin.id, country: berlin.country.iso}),
+          "departure_city_text_input" => Geo.city_text(berlin),
+          "arrival_city" => Jason.encode!(%{id: hamburg.id, country: hamburg.country.iso}),
+          "arrival_city_text_input" => Geo.city_text(hamburg),
+          "departure_time" => "08:15",
+          "arrival_time" => "10:45",
+          "day_index" => "0"
+        }
+      })
+
+      view
+      |> element(departure_select)
+      |> render_hook("selection_recovery", [
+        %{
+          "disabled" => false,
+          "label" => Geo.city_text(berlin),
+          "value" => %{"id" => berlin.id, "country" => berlin.country.iso}
+        }
+      ])
+
+      view
+      |> element(arrival_select)
+      |> render_hook("selection_recovery", [
+        %{
+          "disabled" => false,
+          "label" => Geo.city_text(hamburg),
+          "value" => %{"id" => hamburg.id, "country" => hamburg.country.iso}
+        }
+      ])
+
+      assert has_element?(
+               view,
+               "#{departure_select} input[name='transfer[departure_city]']:not([value=''])"
+             )
+
+      assert has_element?(
+               view,
+               "#{arrival_select} input[name='transfer[arrival_city]']:not([value=''])"
+             )
+
+      assert has_element?(
+               view,
+               "#{departure_select} input[name='transfer[departure_city_text_input]'][value*='#{berlin.name}']"
+             )
+
+      assert has_element?(
+               view,
+               "#{arrival_select} input[name='transfer[arrival_city_text_input]'][value*='#{hamburg.name}']"
+             )
+    end
+
     test "shows user's home city in transfer city default options", %{conn: conn} do
       geonames_fixture()
       home_city = Geo.find_city_by_geonames_id("2950159")
@@ -1432,6 +1598,37 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert accommodation.name == "Test Hotel"
       # 120.00 EUR
       assert accommodation.expense.price == Money.new(:EUR, "120.00")
+    end
+
+    test "keeps accommodation day selections renderable after form changes", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      view
+      |> element("tr:first-child td a", "Add accommodation")
+      |> render_click()
+
+      form_selector = "form#accommodation-form-new-accommodation-new-0"
+
+      view
+      |> form(form_selector, %{
+        accommodation: %{
+          name: "Unsaved Hotel",
+          start_day: "0",
+          end_day: "2"
+        }
+      })
+      |> render_change()
+
+      assert has_element?(
+               view,
+               "#{form_selector} input[name='accommodation[name]'][value='Unsaved Hotel']"
+             )
+
+      assert has_element?(view, "#{form_selector} [id^='selected-range-display-']", "1")
     end
 
     test "renders accommodation with currency conversion and tooltip", %{conn: conn} do

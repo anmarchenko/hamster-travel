@@ -28,6 +28,9 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :display_currency, :string, required: true
   attr :can_edit, :boolean, default: false
+  attr :edit, :boolean, default: false
+  attr :add_actual, :boolean, default: false
+  attr :editing_actual_expense_id, :string, default: nil
 
   @impl true
   def render(%{edit: true} = assigns) do
@@ -40,7 +43,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
         category={@category}
         trip={@trip}
         can_edit={@can_edit}
-        on_finish={fn -> send_update(@myself, edit: false) end}
+        on_finish={fn -> send(self(), :close_form) end}
       />
     </div>
     """
@@ -130,6 +133,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
             trip={@trip}
             display_currency={@display_currency}
             can_edit={@can_edit}
+            edit={@editing_actual_expense_id == to_string(expense.id)}
           />
         </div>
 
@@ -140,6 +144,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
           as={:expense}
           phx-target={@myself}
           phx-submit="save_actual"
+          phx-change="form_changed_actual"
           phx-window-keydown="cancel_actual"
           phx-key="escape"
           phx-mounted={
@@ -194,14 +199,24 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
   @impl true
   def handle_event("add_actual", _params, socket) do
     if socket.assigns.can_edit do
-      {:noreply, assign(socket, :add_actual, true)}
+      send(
+        self(),
+        {:open_form, "new", "budget-category-actual-expense", socket.assigns.category.id}
+      )
+
+      {:noreply, socket}
     else
       {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
     end
   end
 
   def handle_event("cancel_actual", _params, socket) do
-    {:noreply, assign(socket, :add_actual, false)}
+    send(self(), :close_form)
+    {:noreply, socket}
+  end
+
+  def handle_event("form_changed_actual", %{"expense" => params}, socket) do
+    {:noreply, assign_actual_form(socket, params)}
   end
 
   def handle_event("save_actual", %{"expense" => params}, socket) do
@@ -216,7 +231,8 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
 
   def handle_event("edit", _params, socket) do
     if socket.assigns.can_edit do
-      {:noreply, assign(socket, :edit, true)}
+      send(self(), {:open_form, "edit", "budget-category", socket.assigns.category.id})
+      {:noreply, socket}
     else
       {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
     end
@@ -254,9 +270,10 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
   end
 
   defp actual_result({:ok, _expense}, socket) do
+    send(self(), :clear_form_stash)
+
     {:noreply,
      socket
-     |> assign(:add_actual, true)
      |> update(:actual_form_version, &(&1 + 1))
      |> assign_actual_form()}
   end
@@ -265,12 +282,17 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
     {:noreply, assign(socket, :actual_form, to_form(changeset))}
   end
 
-  defp assign_actual_form(socket) do
-    expense =
-      Planning.new_expense(socket.assigns.trip, %{
-        name: socket.assigns.category.name,
-        price: Money.new(socket.assigns.trip.currency, 0)
-      })
+  defp assign_actual_form(socket, attrs \\ %{}) do
+    attrs =
+      Map.merge(
+        %{
+          "name" => socket.assigns.category.name,
+          "price" => Money.new(socket.assigns.trip.currency, 0)
+        },
+        attrs
+      )
+
+    expense = Planning.new_expense(socket.assigns.trip, attrs)
 
     assign(socket, :actual_form, to_form(expense))
   end

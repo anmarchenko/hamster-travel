@@ -11,6 +11,7 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
   attr :accommodation, HamsterTravel.Planning.Accommodation, required: true
   attr :display_currency, :string, required: true
   attr :can_edit, :boolean, default: false
+  attr :edit, :boolean, default: false
 
   def render(%{edit: true} = assigns) do
     ~H"""
@@ -23,7 +24,7 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
         day_index={@accommodation.start_day}
         action={:edit}
         can_edit={@can_edit}
-        on_finish={fn -> send_update(@myself, edit: false) end}
+        on_finish={fn -> send(self(), :close_form) end}
       />
     </div>
     """
@@ -92,10 +93,7 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
 
   def handle_event("edit", _, socket) do
     if socket.assigns.can_edit do
-      socket =
-        socket
-        |> assign(:edit, true)
-
+      send(self(), {:open_form, "edit", "accommodation", socket.assigns.accommodation.id})
       {:noreply, socket}
     else
       {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}

@@ -52,6 +52,7 @@ defmodule HamsterTravel.MixProject do
       {:html_sanitize_ex, "~> 1.4"},
       {:petal_components, "~> 2.8.0"},
       {:live_select, "~> 1.0"},
+      {:live_stash, "~> 1.0"},
 
       # assets
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},

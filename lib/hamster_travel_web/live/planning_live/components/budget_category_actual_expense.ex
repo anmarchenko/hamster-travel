@@ -26,6 +26,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryActualExpense do
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :display_currency, :string, required: true
   attr :can_edit, :boolean, default: false
+  attr :edit, :boolean, default: false
 
   @impl true
   def render(%{edit: true} = assigns) do
@@ -37,6 +38,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryActualExpense do
         as={:expense}
         phx-target={@myself}
         phx-submit="save"
+        phx-change="form_changed"
         phx-mounted={JS.focus_first(to: "#budget-category-actual-form-#{@expense.id}")}
         class="flex max-w-2xl flex-col gap-3 py-2 sm:flex-row sm:items-start"
       >
@@ -109,16 +111,27 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryActualExpense do
   end
 
   @impl true
+  def handle_event("form_changed", %{"expense" => params}, socket) do
+    {:noreply, assign_form(socket, Planning.change_expense(socket.assigns.expense, params))}
+  end
+
+  @impl true
   def handle_event("edit", _params, socket) do
     if socket.assigns.can_edit do
-      {:noreply, assign(socket, :edit, true)}
+      send(
+        self(),
+        {:open_form, "edit", "budget-category-actual-expense", socket.assigns.expense.id}
+      )
+
+      {:noreply, socket}
     else
       {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
     end
   end
 
   def handle_event("cancel", _params, socket) do
-    {:noreply, assign(socket, :edit, false)}
+    send(self(), :close_form)
+    {:noreply, socket}
   end
 
   def handle_event("save", %{"expense" => params}, socket) do
@@ -135,6 +148,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryActualExpense do
     if socket.assigns.can_edit do
       case Planning.delete_budget_category_actual_expense(socket.assigns.expense) do
         {:ok, _expense} ->
+          send(self(), :close_form)
           {:noreply, socket}
 
         {:error, _reason} ->
@@ -146,6 +160,8 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryActualExpense do
   end
 
   defp result({:ok, expense}, socket) do
+    send(self(), :close_form)
+
     {:noreply,
      socket
      |> assign(:expense, expense)

@@ -12,6 +12,7 @@ defmodule HamsterTravelWeb.Planning.DayExpense do
   attr(:display_currency, :string, required: true)
   attr(:can_edit, :boolean, default: false)
   attr(:draggable, :boolean, default: false)
+  attr(:edit, :boolean, default: false)
 
   def render(%{edit: true} = assigns) do
     ~H"""
@@ -24,7 +25,7 @@ defmodule HamsterTravelWeb.Planning.DayExpense do
         day_index={@day_expense.day_index}
         action={:edit}
         can_edit={@can_edit}
-        on_finish={fn -> send_update(@myself, edit: false) end}
+        on_finish={fn -> send(self(), :close_form) end}
       />
     </div>
     """
@@ -88,10 +89,7 @@ defmodule HamsterTravelWeb.Planning.DayExpense do
 
   def handle_event("edit", _, socket) do
     if socket.assigns.can_edit do
-      socket =
-        socket
-        |> assign(:edit, true)
-
+      send(self(), {:open_form, "edit", "day-expense", socket.assigns.day_expense.id})
       {:noreply, socket}
     else
       {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
