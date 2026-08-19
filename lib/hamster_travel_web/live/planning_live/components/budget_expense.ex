@@ -28,7 +28,10 @@ defmodule HamsterTravelWeb.Planning.BudgetExpense do
   @impl true
   def render(%{edit: true} = assigns) do
     ~H"""
-    <div id={"budget-expense-#{@source}-#{@expense.id}"} class="w-full max-w-3xl py-1.5">
+    <div
+      id={"budget-expense-#{@source}-#{@expense.id}"}
+      class="w-full max-w-3xl py-1.5 min-[1920px]:max-w-6xl"
+    >
       <.form
         id={"budget-expense-form-#{@source}-#{@expense.id}"}
         for={@form}
@@ -67,7 +70,7 @@ defmodule HamsterTravelWeb.Planning.BudgetExpense do
     ~H"""
     <div
       id={"budget-expense-#{@source}-#{@expense.id}"}
-      class="flex w-full max-w-3xl flex-col gap-y-1 rounded-md py-1.5"
+      class="flex w-full max-w-3xl flex-col gap-y-1 rounded-md py-1.5 min-[1920px]:max-w-6xl"
     >
       <.inline class="w-full gap-2 2xl:text-lg">
         <span class="flex min-w-0 flex-1 items-center gap-1.5">

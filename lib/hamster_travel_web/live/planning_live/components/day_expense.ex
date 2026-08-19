@@ -35,7 +35,7 @@ defmodule HamsterTravelWeb.Planning.DayExpense do
     ~H"""
     <div
       class={[
-        "flex w-full max-w-3xl flex-col gap-y-1 rounded-md py-1.5",
+        "flex w-full max-w-3xl flex-col gap-y-1 rounded-md py-1.5 min-[1920px]:max-w-6xl",
         @can_edit && @draggable && "draggable-day-expense cursor-grab active:cursor-grabbing"
       ]}
       data-day-expense-id={@day_expense.id}

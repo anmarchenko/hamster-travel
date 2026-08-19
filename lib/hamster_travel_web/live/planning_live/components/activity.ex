@@ -36,7 +36,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
     ~H"""
     <div
       class={[
-        "flex w-full max-w-3xl flex-col gap-y-1.5 rounded-md border-l-4 px-2.5 py-1.5 transition-colors duration-200",
+        "flex w-full max-w-3xl flex-col gap-y-1.5 rounded-md border-l-4 px-2.5 py-1.5 transition-colors duration-200 min-[1920px]:max-w-6xl",
         activity_priority_accent(@activity.priority),
         @can_edit &&
           "draggable-activity sm:hover:bg-zinc-50 sm:dark:hover:bg-zinc-800"

@@ -25,7 +25,7 @@ defmodule HamsterTravelWeb.Planning.NoteForm do
         phx-submit="form_submit"
         phx-change="form_changed"
         phx-mounted={JS.focus_first(to: "#note-form-#{@id}")}
-        class="space-y-4 max-w-2xl"
+        class="space-y-4 max-w-2xl min-[1920px]:max-w-6xl"
       >
         <.field
           field={@form[:title]}

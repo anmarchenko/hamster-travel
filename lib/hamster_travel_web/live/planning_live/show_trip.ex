@@ -23,6 +23,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   alias HamsterTravel.Social
   alias HamsterTravelWeb.Cldr
   alias HamsterTravelWeb.CoreComponents
+  alias HamsterTravelWeb.Planning.ShowTripTabs
   alias HamsterTravelWeb.TripPdf
 
   alias HamsterTravelWeb.Planning.{
@@ -44,6 +45,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   }
 
   @tabs ["itinerary", "activities", "budget", "notes"]
+  @destination_tabs ["itinerary", "activities", "notes"]
   @open_form_types ~w(destination accommodation transfer activity day-expense note budget-category budget-category-actual-expense budget-expense)
   @budget_expense_sources ~w(hotel transfer activity)
   @drag_drop_edit_events ~w(move_transfer move_activity reorder_activity move_note reorder_note)
@@ -54,7 +56,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   @impl true
   def render(assigns) do
     ~H"""
-    <.container full nomargin class="px-6 pt-2 pb-2 sm:mt-4 sm:p-6">
+    <.container
+      full
+      nomargin
+      class="px-6 pt-2 pb-2 sm:mt-4 sm:p-6 min-[1920px]:max-w-[1920px]"
+    >
       <div class="flex flex-col-reverse sm:flex-row">
         <div class="flex-1 flex flex-col gap-y-4">
           <.header>
@@ -148,10 +154,10 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
     <.container
       full
-      class="mt-*! p-*! py-3 sm:py-6 px-6 sm:px-10 mb-10 mt-0 sm:mt-4 bg-white dark:bg-zinc-800 rounded-md"
+      class="mt-*! p-*! py-3 sm:py-6 px-6 sm:px-10 mb-10 mt-0 sm:mt-4 bg-white dark:bg-zinc-800 rounded-md min-[1920px]:max-w-[1920px]"
     >
-      <.planning_tabs trip={@trip} active_tab={@active_tab} return_to={@return_to} />
-      <.render_tab
+      <.planning_tabs active_tab={@active_tab} />
+      <.render_tabs
         trip={@trip}
         active_tab={@active_tab}
         budget={@budget}
@@ -383,6 +389,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   @impl true
+  def handle_info({:open_form, mode, component_type, entity_id, component_id}, socket) do
+    {:noreply,
+     open_form(socket, mode, component_type, entity_id, %{component_id: to_string(component_id)})}
+  end
+
+  @impl true
   def handle_info(:close_form, socket) do
     {:noreply, close_form(socket)}
   end
@@ -480,6 +492,16 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         {:noreply, socket}
       end
     end
+  end
+
+  @impl true
+  def handle_event("show_trip_tab", %{"tab" => tab}, socket) when tab in @tabs do
+    socket =
+      socket
+      |> maybe_clear_open_form_for_tab(tab)
+      |> assign(:active_tab, tab)
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -996,130 +1018,130 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   # COMPONENTS
-  def render_tab(%{active_tab: "itinerary"} = assigns) do
+  def render_tabs(assigns) do
     ~H"""
-    <.tab_itinerary
-      trip={@trip}
-      accommodations={@trip.accommodations}
-      accommodations_outside={accommodations_outside(@trip)}
-      destinations={@trip.destinations}
-      destinations_outside={destinations_outside(@trip)}
-      transfers={@trip.transfers}
-      transfers_outside={transfers_outside(@trip)}
-      budget={@budget}
-      display_currency={@display_currency}
-      current_user={@current_user}
-      can_edit={@can_edit}
-      open_form={@open_form}
-    />
+    <div id="trip-tab-panels">
+      <section
+        id="trip-tab-panel-itinerary"
+        role="tabpanel"
+        aria-labelledby="trip-tab-itinerary"
+        data-trip-tab-panel
+        class={@active_tab != "itinerary" && "hidden"}
+      >
+        <.tab_itinerary
+          trip={@trip}
+          accommodations={@trip.accommodations}
+          accommodations_outside={accommodations_outside(@trip)}
+          destinations={@trip.destinations}
+          destinations_outside={destinations_outside(@trip)}
+          transfers={@trip.transfers}
+          transfers_outside={transfers_outside(@trip)}
+          budget={@budget}
+          display_currency={@display_currency}
+          current_user={@current_user}
+          can_edit={@can_edit}
+          open_form={open_form_for_tab(@open_form, "itinerary")}
+        />
+      </section>
+      <section
+        id="trip-tab-panel-activities"
+        role="tabpanel"
+        aria-labelledby="trip-tab-activities"
+        data-trip-tab-panel
+        class={@active_tab != "activities" && "hidden"}
+      >
+        <.tab_activity
+          trip={@trip}
+          destinations={@trip.destinations}
+          destinations_outside={destinations_outside(@trip)}
+          activities={@trip.activities}
+          activities_outside={activities_outside(@trip)}
+          budget={@budget}
+          display_currency={@display_currency}
+          can_edit={@can_edit}
+          open_form={open_form_for_tab(@open_form, "activities")}
+        />
+      </section>
+      <section
+        id="trip-tab-panel-budget"
+        role="tabpanel"
+        aria-labelledby="trip-tab-budget"
+        data-trip-tab-panel
+        class={@active_tab != "budget" && "hidden"}
+      >
+        <.tab_budget_view
+          trip={@trip}
+          budget={@budget}
+          display_currency={@display_currency}
+          can_edit={@can_edit}
+          open_form={open_form_for_tab(@open_form, "budget")}
+        />
+      </section>
+      <section
+        id="trip-tab-panel-notes"
+        role="tabpanel"
+        aria-labelledby="trip-tab-notes"
+        data-trip-tab-panel
+        class={@active_tab != "notes" && "hidden"}
+      >
+        <.tab_notes
+          trip={@trip}
+          destinations={@trip.destinations}
+          destinations_outside={destinations_outside(@trip)}
+          notes={@trip.notes}
+          notes_outside={notes_outside(@trip)}
+          budget={@budget}
+          display_currency={@display_currency}
+          can_edit={@can_edit}
+          open_form={open_form_for_tab(@open_form, "notes")}
+        />
+      </section>
+    </div>
     """
   end
 
-  def render_tab(%{active_tab: "activities"} = assigns) do
-    ~H"""
-    <.tab_activity
-      trip={@trip}
-      destinations={@trip.destinations}
-      destinations_outside={destinations_outside(@trip)}
-      activities={@trip.activities}
-      activities_outside={activities_outside(@trip)}
-      budget={@budget}
-      display_currency={@display_currency}
-      can_edit={@can_edit}
-      open_form={@open_form}
-    />
-    """
-  end
-
-  def render_tab(%{active_tab: "budget"} = assigns) do
-    ~H"""
-    <.tab_budget_view
-      trip={@trip}
-      budget={@budget}
-      display_currency={@display_currency}
-      can_edit={@can_edit}
-      open_form={@open_form}
-    />
-    """
-  end
-
-  def render_tab(%{active_tab: "notes"} = assigns) do
-    ~H"""
-    <.tab_notes
-      trip={@trip}
-      destinations={@trip.destinations}
-      destinations_outside={destinations_outside(@trip)}
-      notes={@trip.notes}
-      notes_outside={notes_outside(@trip)}
-      budget={@budget}
-      display_currency={@display_currency}
-      can_edit={@can_edit}
-      open_form={@open_form}
-    />
-    """
-  end
-
-  attr(:trip, :map, required: true)
   attr(:active_tab, :string, required: true)
-  attr(:return_to, :string, required: true)
   attr(:class, :string, default: nil)
 
   def planning_tabs(assigns) do
     ~H"""
-    <.tabs
-      underline
+    <nav
+      id="trip-tabs"
+      role="tablist"
+      aria-label={gettext("Trip plan")}
       class={
         CoreComponents.build_class([
-          "hidden sm:flex",
+          "pc-tabs pc-tabs--underline hidden sm:flex",
           @class
         ])
       }
     >
-      <.tab
-        underline
-        to={trip_url(@trip.slug, :itinerary, @return_to)}
-        is_active={@active_tab == "itinerary"}
-        link_type="live_patch"
+      <button
+        :for={tab <- ShowTripTabs.tabs()}
+        id={"trip-tab-#{tab}"}
+        type="button"
+        role="tab"
+        aria-selected={to_string(@active_tab == tab)}
+        aria-controls={"trip-tab-panel-#{tab}"}
+        data-trip-tab={tab}
+        data-trip-tab-kind="desktop"
+        phx-click={ShowTripTabs.show(tab)}
+        class={desktop_tab_classes(@active_tab == tab)}
       >
-        <.inline>
-          <.airplane />
-          {gettext("Transfers and hotels")}
+        <.inline :if={tab == "itinerary"}>
+          <.airplane /> {gettext("Transfers and hotels")}
         </.inline>
-      </.tab>
-      <.tab
-        underline
-        to={trip_url(@trip.slug, :activities, @return_to)}
-        is_active={@active_tab == "activities"}
-        link_type="live_patch"
-      >
-        <.inline>
-          <.icon name="hero-ticket" class="h-5 w-5" />
-          {gettext("Activities")}
+        <.inline :if={tab == "activities"}>
+          <.icon name="hero-ticket" class="h-5 w-5" /> {gettext("Activities")}
         </.inline>
-      </.tab>
-      <.tab
-        underline
-        to={trip_url(@trip.slug, :budget, @return_to)}
-        is_active={@active_tab == "budget"}
-        link_type="live_patch"
-      >
-        <.inline>
-          <.icon name="hero-banknotes" class="h-5 w-5" />
-          {gettext("Budget")}
+        <.inline :if={tab == "budget"}>
+          <.icon name="hero-banknotes" class="h-5 w-5" /> {gettext("Budget")}
         </.inline>
-      </.tab>
-      <.tab
-        underline
-        to={trip_url(@trip.slug, :notes, @return_to)}
-        is_active={@active_tab == "notes"}
-        link_type="live_patch"
-      >
-        <.inline>
-          <.icon name="hero-document-text" class="h-5 w-5" />
-          {gettext("Notes")}
+        <.inline :if={tab == "notes"}>
+          <.icon name="hero-document-text" class="h-5 w-5" /> {gettext("Notes")}
         </.inline>
-      </.tab>
-    </.tabs>
+      </button>
+    </nav>
     """
   end
 
@@ -1151,6 +1173,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           trip={@trip}
           destinations={@destinations_outside}
           day_index={0}
+          scope="notes"
           can_edit={@can_edit}
           open_form={@open_form}
         />
@@ -1216,6 +1239,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               trip={@trip}
               destinations={Planning.items_for_day(i, @destinations)}
               day_index={i}
+              scope="notes"
               can_edit={@can_edit}
               open_form={@open_form}
             />
@@ -1282,6 +1306,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           trip={@trip}
           destinations={@destinations_outside}
           day_index={0}
+          scope="itinerary"
           can_edit={@can_edit}
           open_form={@open_form}
         />
@@ -1384,6 +1409,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                   trip={@trip}
                   destinations={Planning.items_for_day(i, @destinations)}
                   day_index={i}
+                  scope="itinerary"
                   can_edit={@can_edit}
                   open_form={@open_form}
                 />
@@ -1507,6 +1533,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           trip={@trip}
           destinations={@destinations_outside}
           day_index={0}
+          scope="activities"
           can_edit={@can_edit}
           open_form={@open_form}
         />
@@ -1547,13 +1574,14 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           <.day_heading
             day_index={i}
             start_date={@trip.start_date}
-            class="max-w-3xl rounded-md py-1 text-left font-bold text-zinc-950 dark:text-zinc-50"
+            class="w-full max-w-3xl rounded-md py-1 text-left font-bold text-zinc-950 dark:text-zinc-50 min-[1920px]:max-w-6xl"
           />
           <div class="flex flex-col gap-y-1 sm:flex-row sm:gap-x-4 sm:gap-y-0">
             <.destinations_list
               trip={@trip}
               destinations={Planning.items_for_day(i, @destinations)}
               day_index={i}
+              scope="activities"
               can_edit={@can_edit}
               open_form={@open_form}
             />
@@ -1673,7 +1701,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           <.day_heading
             day_index={day_index}
             start_date={@trip.start_date}
-            class="max-w-3xl rounded-md py-2 text-left font-bold text-zinc-950 dark:text-zinc-50"
+            class="max-w-3xl rounded-md py-2 text-left font-bold text-zinc-950 dark:text-zinc-50 min-[1920px]:max-w-6xl"
           />
 
           <.budget_day_group
@@ -1774,6 +1802,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:trip, Trip, required: true)
   attr(:destinations, :list, required: true)
   attr(:day_index, :integer, required: true)
+  attr(:scope, :string, required: true)
   attr(:can_edit, :boolean, required: true)
   attr(:open_form, :map, default: nil)
 
@@ -1782,12 +1811,20 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     <.live_component
       :for={destination <- @destinations}
       module={Destination}
-      id={"destination-#{destination.id}-day-#{@day_index}"}
+      id={destination_component_id(@scope, destination.id, @day_index)}
       trip={@trip}
       destination={destination}
       day_index={@day_index}
       can_edit={@can_edit}
-      edit={open_form_matches?(@open_form, "edit", "destination", destination.id)}
+      edit={
+        open_form_matches_component?(
+          @open_form,
+          "edit",
+          "destination",
+          destination.id,
+          destination_component_id(@scope, destination.id, @day_index)
+        )
+      }
     />
     """
   end
@@ -1828,7 +1865,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   def budget_day_group(assigns) do
     ~H"""
-    <div class={CoreComponents.build_class(["flex max-w-3xl flex-col gap-y-1", @class])}>
+    <div class={
+      CoreComponents.build_class([
+        "flex max-w-3xl flex-col gap-y-1 min-[1920px]:max-w-6xl",
+        @class
+      ])
+    }>
       <.section_header icon={@icon} label={@title} class="!mt-0" />
       {render_slot(@inner_block)}
     </div>
@@ -1904,13 +1946,21 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     <.live_component
       :for={accommodation <- @accommodations}
       module={Accommodation}
-      id={"accommodation-#{accommodation.id}-day-#{@day_index}"}
+      id={accommodation_component_id(accommodation.id, @day_index)}
       trip={@trip}
       accommodation={accommodation}
       display_currency={@display_currency}
       day_index={@day_index}
       can_edit={@can_edit}
-      edit={open_form_matches?(@open_form, "edit", "accommodation", accommodation.id)}
+      edit={
+        open_form_matches_component?(
+          @open_form,
+          "edit",
+          "accommodation",
+          accommodation.id,
+          accommodation_component_id(accommodation.id, @day_index)
+        )
+      }
     />
     """
   end
@@ -2458,6 +2508,22 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   defp fetch_tab(_), do: "itinerary"
 
+  defp desktop_tab_classes(true) do
+    [
+      "pc-tab__underline",
+      "pc-tab__underline--is-active",
+      "pc-tab__underline--with-underline-and-is-active"
+    ]
+  end
+
+  defp desktop_tab_classes(false) do
+    [
+      "pc-tab__underline",
+      "pc-tab__underline--is-not-active",
+      "pc-tab__underline--with-underline-and-is-not-active"
+    ]
+  end
+
   defp return_to(%{"return_to" => return_to}, active_nav) when is_binary(return_to) do
     case URI.parse(return_to) do
       %{scheme: nil, host: nil, path: path, query: query} when path in ["/plans", "/drafts"] ->
@@ -2536,14 +2602,46 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
            mode: mode,
            type: type,
            id: id
-         },
+         } = open_form,
          %{trip: trip, active_tab: active_tab, can_edit: true}
        )
        when mode in ["new", "edit"] and type in @open_form_types and is_binary(id) do
-    trip_id == trip.id and tab == active_tab and form_identity_exists?(trip, mode, type, id)
+    trip_id == trip.id and tab == active_tab and form_identity_exists?(trip, mode, type, id) and
+      form_component_identity_exists?(open_form, trip, active_tab)
   end
 
   defp valid_open_form?(_open_form, _assigns), do: false
+
+  defp form_component_identity_exists?(
+         %{mode: "edit", type: "destination", id: id, component_id: component_id},
+         trip,
+         active_tab
+       ) do
+    case Enum.find(trip.destinations, &(to_string(&1.id) == id)) do
+      nil -> false
+      destination -> component_id in destination_component_ids(trip, destination, active_tab)
+    end
+  end
+
+  defp form_component_identity_exists?(
+         %{mode: "edit", type: "accommodation", id: id, component_id: component_id},
+         trip,
+         active_tab
+       ) do
+    case Enum.find(trip.accommodations, &(to_string(&1.id) == id)) do
+      nil ->
+        false
+
+      accommodation ->
+        component_id in accommodation_component_ids(trip, accommodation, active_tab)
+    end
+  end
+
+  defp form_component_identity_exists?(%{mode: "edit", type: type}, _trip, _active_tab)
+       when type in ["destination", "accommodation"],
+       do: false
+
+  defp form_component_identity_exists?(_open_form, _trip, _active_tab), do: true
 
   defp form_identity_exists?(trip, "new", type, id) do
     id in new_form_ids(trip, type)
@@ -2634,14 +2732,21 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   defp open_form(socket, mode, type, id) when type in @open_form_types do
-    open_form = %{
-      version: 1,
-      trip_id: socket.assigns.trip.id,
-      tab: socket.assigns.active_tab,
-      mode: mode,
-      type: type,
-      id: to_string(id)
-    }
+    open_form(socket, mode, type, id, %{})
+  end
+
+  defp open_form(socket, mode, type, id, metadata)
+       when type in @open_form_types and is_map(metadata) do
+    open_form =
+      %{
+        version: 1,
+        trip_id: socket.assigns.trip.id,
+        tab: socket.assigns.active_tab,
+        mode: mode,
+        type: type,
+        id: to_string(id)
+      }
+      |> Map.merge(metadata)
 
     socket
     |> assign(:open_form, open_form)
@@ -2662,11 +2767,58 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     end
   end
 
+  defp open_form_for_tab(%{tab: tab} = open_form, tab), do: open_form
+  defp open_form_for_tab(_open_form, _tab), do: nil
+
   defp open_form_matches?(%{mode: mode, type: type, id: form_id}, mode, type, id) do
     form_id == to_string(id)
   end
 
   defp open_form_matches?(_open_form, _mode, _type, _id), do: false
+
+  defp open_form_matches_component?(
+         %{mode: mode, type: type, id: form_id, component_id: form_component_id},
+         mode,
+         type,
+         id,
+         component_id
+       ) do
+    form_id == to_string(id) and form_component_id == to_string(component_id)
+  end
+
+  defp open_form_matches_component?(_open_form, _mode, _type, _id, _component_id), do: false
+
+  defp destination_component_ids(trip, destination, tab) when tab in @destination_tabs do
+    trip
+    |> ranged_item_day_indices(destination)
+    |> Enum.map(&destination_component_id(tab, destination.id, &1))
+  end
+
+  defp destination_component_ids(_trip, _destination, _tab), do: []
+
+  defp destination_component_id(scope, destination_id, day_index) do
+    "destination-#{scope}-#{destination_id}-day-#{day_index}"
+  end
+
+  defp accommodation_component_ids(trip, accommodation, "itinerary") do
+    trip
+    |> ranged_item_day_indices(accommodation)
+    |> Enum.map(&accommodation_component_id(accommodation.id, &1))
+  end
+
+  defp accommodation_component_ids(_trip, _accommodation, _tab), do: []
+
+  defp accommodation_component_id(accommodation_id, day_index) do
+    "accommodation-#{accommodation_id}-day-#{day_index}"
+  end
+
+  defp ranged_item_day_indices(trip, item) do
+    if item.start_day >= trip.duration do
+      [0]
+    else
+      Enum.filter(0..(trip.duration - 1), &(&1 >= item.start_day && &1 <= item.end_day))
+    end
+  end
 
   defp open_form_id(%{mode: mode, type: type, id: form_id}, mode, type), do: form_id
   defp open_form_id(_open_form, _mode, _type), do: nil

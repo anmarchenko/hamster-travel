@@ -14,7 +14,7 @@ defmodule HamsterTravelWeb.Planning.Note do
 
   def render(%{edit: true} = assigns) do
     ~H"""
-    <div class="max-w-2xl">
+    <div class="max-w-2xl min-[1920px]:max-w-6xl">
       <.live_component
         module={HamsterTravelWeb.Planning.NoteForm}
         id={"note-form-#{@note.id}"}

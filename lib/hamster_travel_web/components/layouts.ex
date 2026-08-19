@@ -3,6 +3,8 @@ defmodule HamsterTravelWeb.Layouts do
 
   import HamsterTravelWeb.Icons.Airplane
 
+  alias HamsterTravelWeb.Planning.ShowTripTabs
+
   embed_templates "layouts/*"
 
   def navbar(assigns) do
@@ -81,34 +83,28 @@ defmodule HamsterTravelWeb.Layouts do
     <.mobile_nav_link label={gettext("Back")} to={back_url(assigns)} active={false}>
       <.icon name="hero-arrow-left" class="h-6 w-6" />
     </.mobile_nav_link>
-    <.mobile_nav_link_tab
-      label={gettext("Transfers")}
-      to={trip_url(@trip_slug, :itinerary, @return_to)}
-      active={@active_tab == "itinerary"}
-    >
-      <.airplane class="h-6 w-6" />
-    </.mobile_nav_link_tab>
-    <.mobile_nav_link_tab
-      label={gettext("Activities")}
-      to={trip_url(@trip_slug, :activities, @return_to)}
-      active={@active_tab == "activities"}
-    >
-      <.icon name="hero-ticket" class="h-6 w-6" />
-    </.mobile_nav_link_tab>
-    <.mobile_nav_link_tab
-      label={gettext("Budget")}
-      to={trip_url(@trip_slug, :budget, @return_to)}
-      active={@active_tab == "budget"}
-    >
-      <.icon name="hero-banknotes" class="h-6 w-6" />
-    </.mobile_nav_link_tab>
-    <.mobile_nav_link_tab
-      label={gettext("Notes")}
-      to={trip_url(@trip_slug, :notes, @return_to)}
-      active={@active_tab == "notes"}
-    >
-      <.icon name="hero-document-text" class="h-6 w-6" />
-    </.mobile_nav_link_tab>
+    <div class="contents" role="tablist" aria-label={gettext("Trip plan")}>
+      <.mobile_nav_link_tab
+        label={gettext("Transfers")}
+        tab="itinerary"
+        active={@active_tab == "itinerary"}
+      >
+        <.airplane class="h-6 w-6" />
+      </.mobile_nav_link_tab>
+      <.mobile_nav_link_tab
+        label={gettext("Activities")}
+        tab="activities"
+        active={@active_tab == "activities"}
+      >
+        <.icon name="hero-ticket" class="h-6 w-6" />
+      </.mobile_nav_link_tab>
+      <.mobile_nav_link_tab label={gettext("Budget")} tab="budget" active={@active_tab == "budget"}>
+        <.icon name="hero-banknotes" class="h-6 w-6" />
+      </.mobile_nav_link_tab>
+      <.mobile_nav_link_tab label={gettext("Notes")} tab="notes" active={@active_tab == "notes"}>
+        <.icon name="hero-document-text" class="h-6 w-6" />
+      </.mobile_nav_link_tab>
+    </div>
     """
   end
 
@@ -158,9 +154,19 @@ defmodule HamsterTravelWeb.Layouts do
 
   def mobile_nav_link_tab(assigns) do
     ~H"""
-    <.link patch={@to} class={"#{mobile_nav_classes()} #{color_classes(assigns)}"}>
+    <button
+      id={"mobile-trip-tab-#{@tab}"}
+      type="button"
+      role="tab"
+      aria-selected={to_string(@active)}
+      aria-controls={"trip-tab-panel-#{@tab}"}
+      data-trip-tab={@tab}
+      data-trip-tab-kind="mobile"
+      phx-click={ShowTripTabs.show(@tab)}
+      class={"#{mobile_nav_classes()} #{color_classes(assigns)}"}
+    >
       {render_slot(@inner_block)} <.mobile_nav_label label={@label} />
-    </.link>
+    </button>
     """
   end
 

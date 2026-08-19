@@ -7,6 +7,7 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.Accommodation
 
+  attr :id, :string, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :accommodation, HamsterTravel.Planning.Accommodation, required: true
   attr :display_currency, :string, required: true
@@ -18,7 +19,7 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
     <div>
       <.live_component
         module={HamsterTravelWeb.Planning.AccommodationForm}
-        id={"accommodation-form-#{@accommodation.id}"}
+        id={@id}
         accommodation={@accommodation}
         trip={@trip}
         day_index={@accommodation.start_day}
@@ -93,7 +94,11 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
 
   def handle_event("edit", _, socket) do
     if socket.assigns.can_edit do
-      send(self(), {:open_form, "edit", "accommodation", socket.assigns.accommodation.id})
+      send(
+        self(),
+        {:open_form, "edit", "accommodation", socket.assigns.accommodation.id, socket.assigns.id}
+      )
+
       {:noreply, socket}
     else
       {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}

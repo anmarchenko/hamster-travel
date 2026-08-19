@@ -51,7 +51,10 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
 
   def render(assigns) do
     ~H"""
-    <div id={"budget-category-#{@category.id}"} class="max-w-3xl py-1">
+    <div
+      id={"budget-category-#{@category.id}"}
+      class="max-w-3xl py-1 min-[1920px]:max-w-6xl"
+    >
       <div class="flex w-full items-center gap-2 py-1.5 2xl:text-lg">
         <span class="flex min-w-0 flex-1 items-center gap-1.5">
           <span class="min-w-0 truncate font-medium">
@@ -118,7 +121,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
 
       <div
         :if={@can_edit || Enum.any?(@category.actual_expenses)}
-        class="ml-4 max-w-3xl border-l border-zinc-200 py-1 pl-4 dark:border-zinc-700"
+        class="ml-4 max-w-3xl border-l border-zinc-200 py-1 pl-4 dark:border-zinc-700 min-[1920px]:max-w-6xl"
       >
         <div
           :if={Enum.any?(@category.actual_expenses)}
