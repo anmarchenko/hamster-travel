@@ -9,6 +9,8 @@
   />
 </header>
 
+<.flash_group flash={@flash} />
+
 <main
   id="offline-read-only-root"
   phx-hook="OfflineReadOnly"
@@ -16,7 +18,4 @@
   data-offline-lock={if assigns[:offline_local_tabs], do: nil, else: true}
 >
   {@inner_content}
-  <.container nomargin>
-    <.flash_group flash={@flash} />
-  </.container>
 </main>

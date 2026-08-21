@@ -13,6 +13,11 @@ defmodule HamsterTravelWeb.LayoutsTest do
       assert html =~ ~s(phx-hook="OfflineReadOnly")
       assert html =~ ~r/<main[^>]*data-offline-lock/
       refute html =~ "data-offline-local"
+
+      {offline_notice_position, _length} = :binary.match(html, ~s(id="disconnected"))
+      {locked_main_position, _length} = :binary.match(html, ~s(id="offline-read-only-root"))
+
+      assert offline_notice_position < locked_main_position
     end
 
     test "leaves main unlocked only for pages with local offline tabs" do

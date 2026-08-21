@@ -218,17 +218,16 @@ defmodule HamsterTravelWeb.CoreComponents do
     ~H"""
     <.flash kind={:info} title={gettext("Success!")} flash={@flash} />
     <.flash kind={:error} title={gettext("Error!")} flash={@flash} />
-    <.flash
+    <div
       id="disconnected"
-      kind={:error}
-      title={gettext("We can't find the internet")}
       phx-disconnected={show("#disconnected")}
       phx-connected={hide("#disconnected")}
+      role="status"
+      class="sticky top-0 z-50 w-full border-b border-amber-300 bg-amber-50 px-4 py-3 text-center text-sm font-medium text-amber-900 shadow-sm dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100"
       hidden
     >
-      {gettext("Attempting to reconnect")}
-      <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
-    </.flash>
+      {gettext("You are offline at the moment, the app is in readonly mode")}
+    </div>
     """
   end
 
