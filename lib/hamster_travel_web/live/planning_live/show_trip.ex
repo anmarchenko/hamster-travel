@@ -57,8 +57,10 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   def render(assigns) do
     ~H"""
     <.container
+      id="trip-offline-header"
       full
       nomargin
+      data-offline-lock
       class="px-6 pt-2 pb-2 sm:mt-4 sm:p-6 min-[1920px]:max-w-[1920px]"
     >
       <div class="flex flex-col-reverse sm:flex-row">
@@ -209,6 +211,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     socket =
       socket
       |> assign(mobile_menu: :plan_tabs)
+      |> assign(offline_local_tabs: true)
       |> assign(trip_slug: trip.slug)
       |> assign(active_tab: fetch_tab(params))
       |> assign(active_nav: active_nav)
@@ -1026,6 +1029,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         role="tabpanel"
         aria-labelledby="trip-tab-itinerary"
         data-trip-tab-panel
+        data-offline-lock
         class={@active_tab != "itinerary" && "hidden"}
       >
         <.tab_itinerary
@@ -1048,6 +1052,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         role="tabpanel"
         aria-labelledby="trip-tab-activities"
         data-trip-tab-panel
+        data-offline-lock
         class={@active_tab != "activities" && "hidden"}
       >
         <.tab_activity
@@ -1067,6 +1072,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         role="tabpanel"
         aria-labelledby="trip-tab-budget"
         data-trip-tab-panel
+        data-offline-lock
         class={@active_tab != "budget" && "hidden"}
       >
         <.tab_budget_view
@@ -1082,6 +1088,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         role="tabpanel"
         aria-labelledby="trip-tab-notes"
         data-trip-tab-panel
+        data-offline-lock
         class={@active_tab != "notes" && "hidden"}
       >
         <.tab_notes
@@ -1125,6 +1132,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         aria-controls={"trip-tab-panel-#{tab}"}
         data-trip-tab={tab}
         data-trip-tab-kind="desktop"
+        data-offline-local
         phx-click={ShowTripTabs.show(tab)}
         class={desktop_tab_classes(@active_tab == tab)}
       >

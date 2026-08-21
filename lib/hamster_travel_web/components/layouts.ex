@@ -162,6 +162,7 @@ defmodule HamsterTravelWeb.Layouts do
       aria-controls={"trip-tab-panel-#{@tab}"}
       data-trip-tab={@tab}
       data-trip-tab-kind="mobile"
+      data-offline-local
       phx-click={ShowTripTabs.show(@tab)}
       class={"#{mobile_nav_classes()} #{color_classes(assigns)}"}
     >

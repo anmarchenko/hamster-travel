@@ -116,6 +116,7 @@ defmodule HamsterTravelWeb.CoreComponents do
       phx-mounted={@show && show_modal(@id)}
       phx-remove={hide_modal(@id)}
       data-cancel={JS.exec(@on_cancel, "phx-remove")}
+      data-offline-lock
       class="relative z-50 hidden"
     >
       <div
@@ -339,19 +340,23 @@ defmodule HamsterTravelWeb.CoreComponents do
   attr(:full, :boolean, default: false)
   attr(:nomargin, :boolean, default: false)
   attr(:class, :string, default: nil)
+  attr(:rest, :global)
 
   slot(:inner_block, required: true)
 
   def container(assigns) do
     ~H"""
-    <section class={
-      build_class([
-        "mx-auto max-w-screen-md lg:max-w-screen-lg xl:max-w-screen-lg",
-        container_margins(assigns),
-        container_width(assigns),
-        @class
-      ])
-    }>
+    <section
+      class={
+        build_class([
+          "mx-auto max-w-screen-md lg:max-w-screen-lg xl:max-w-screen-lg",
+          container_margins(assigns),
+          container_width(assigns),
+          @class
+        ])
+      }
+      {@rest}
+    >
       {render_slot(@inner_block)}
     </section>
     """

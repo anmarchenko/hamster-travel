@@ -25,6 +25,12 @@ import PackingDragDrop from './packing_drag_drop';
 import FormattedTextArea from './formatted_text_area';
 import UserMap from './user_map';
 import { registerPdfDownloadHandler } from './pdf_download';
+import {
+  initOfflineReadOnly,
+  lockAddedOfflineRegion,
+  OfflineReadOnly,
+  preserveOfflineLock,
+} from './offline_read_only';
 
 Alpine.plugin(persist);
 Alpine.plugin(collapse);
@@ -46,6 +52,7 @@ let hooks = {
   ...PackingDragDrop,
   ...FormattedTextArea,
   ...UserMap,
+  OfflineReadOnly,
 };
 
 let liveSocket = new LiveSocket('/live', Socket, {
@@ -56,9 +63,14 @@ let liveSocket = new LiveSocket('/live', Socket, {
       if (from._x_dataStack) {
         window.Alpine.clone(from, to);
       }
+
+      preserveOfflineLock(from, to);
     },
+    onNodeAdded: lockAddedOfflineRegion,
   },
 });
+
+initOfflineReadOnly();
 
 // Show progress bar on live navigation and form submits after 200ms of waiting
 topbar.config({ barColors: { 0: '#29d' }, shadowColor: 'rgba(0, 0, 0, .3)' });

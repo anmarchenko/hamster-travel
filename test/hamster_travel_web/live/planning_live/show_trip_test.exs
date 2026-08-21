@@ -113,15 +113,19 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       {:ok, view, html} = live(conn, ~p"/trips/#{trip.slug}")
 
+      assert has_element?(view, "#trip-offline-header[data-offline-lock]")
+
       for tab <- ~w(itinerary activities budget notes) do
         assert has_element?(
                  view,
-                 "#trip-tab-#{tab}[role='tab'][aria-controls='trip-tab-panel-#{tab}']"
+                 "#trip-tab-#{tab}[role='tab'][aria-controls='trip-tab-panel-#{tab}'][data-offline-local]"
                )
+
+        assert has_element?(view, "#mobile-trip-tab-#{tab}[data-offline-local]")
 
         assert has_element?(
                  view,
-                 "#trip-tab-panel-#{tab}[role='tabpanel'][aria-labelledby='trip-tab-#{tab}']"
+                 "#trip-tab-panel-#{tab}[role='tabpanel'][aria-labelledby='trip-tab-#{tab}'][data-offline-lock]"
                )
       end
 

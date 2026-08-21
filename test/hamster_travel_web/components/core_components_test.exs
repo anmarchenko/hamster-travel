@@ -5,6 +5,23 @@ defmodule HamsterTravelWeb.CoreComponentsTest do
 
   alias HamsterTravelWeb.CoreComponents
 
+  describe "offline edit boundaries" do
+    test "modals are always part of an offline lock region" do
+      html =
+        render_component(&CoreComponents.modal/1,
+          id: "offline-modal",
+          inner_block: [
+            %{
+              __slot__: :inner_block,
+              inner_block: fn _changed, _argument -> "Modal content" end
+            }
+          ]
+        )
+
+      assert html =~ ~r/<div[^>]*id="offline-modal"[^>]*data-offline-lock/
+    end
+  end
+
   describe "money_input/1" do
     test "uses a decimal mobile keyboard for the amount field" do
       form = %Phoenix.HTML.Form{

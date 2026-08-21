@@ -9,7 +9,12 @@
   />
 </header>
 
-<main class="pb-16 sm:pb-0 text-zinc-600 dark:text-zinc-300">
+<main
+  id="offline-read-only-root"
+  phx-hook="OfflineReadOnly"
+  class="pb-16 sm:pb-0 text-zinc-600 dark:text-zinc-300"
+  data-offline-lock={if assigns[:offline_local_tabs], do: nil, else: true}
+>
   {@inner_content}
   <.container nomargin>
     <.flash_group flash={@flash} />
