@@ -152,6 +152,12 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       |> element("#trip-tab-activities")
       |> render_click()
 
+      assert_patch(
+        view,
+        "/trips/#{trip.slug}?tab=activities&return_to=#{URI.encode_www_form("/drafts")}",
+        100
+      )
+
       assert has_element?(
                view,
                "#trip-tab-activities[aria-selected='true'].pc-tab__underline--is-active"

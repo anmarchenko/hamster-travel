@@ -503,6 +503,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       socket
       |> maybe_clear_open_form_for_tab(tab)
       |> assign(:active_tab, tab)
+      |> push_patch(to: trip_tab_path(socket, tab), replace: true)
 
     {:noreply, socket}
   end
@@ -2515,6 +2516,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
        do: tab
 
   defp fetch_tab(_), do: "itinerary"
+
+  defp trip_tab_path(socket, tab) do
+    query = URI.encode_query(tab: tab, return_to: socket.assigns.return_to)
+    ~p"/trips/#{socket.assigns.trip.slug}" <> "?#{query}"
+  end
 
   defp desktop_tab_classes(true) do
     [
