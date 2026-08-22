@@ -49,6 +49,12 @@ defmodule HamsterTravelWeb.Packing.ShowBackpackTest do
       # Verify that the item is displayed
       assert html =~ "T-shirts"
       assert html =~ "5"
+
+      # The dense item row keeps a generous checkbox hit target.
+      assert html =~ "data-checkbox-hit-target"
+      assert html =~ "min-h-8"
+      assert html =~ "text-[13px]"
+      assert html =~ "md:grid-cols-4"
     end
 
     test "redirects if user is not authenticated", %{conn: conn} do

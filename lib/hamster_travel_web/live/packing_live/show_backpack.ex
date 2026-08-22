@@ -19,52 +19,59 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
   @impl true
   def render(assigns) do
     ~H"""
-    <.container full class="!mt-* mt-4">
-      <div class="flex flex-col gap-y-4">
-        <.header>
-          {@backpack.name}
-        </.header>
-        <.inline class="gap-4">
-          <.icon name="hero-calendar" class="h-4 w-4" />
-          {@backpack.days} {ngettext("day", "days", @backpack.days)} / {@backpack.nights} {ngettext(
-            "night",
-            "nights",
-            @backpack.nights
-          )}
-        </.inline>
-        <.inline class="text-xs gap-4 sm:text-base">
+    <.container full class="!mt-2 !p-4">
+      <div class="mb-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <div class="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1">
+          <h1 class="text-base font-semibold leading-5 text-zinc-800 dark:text-zinc-300">
+            {@backpack.name}
+          </h1>
+          <.inline class="gap-1.5 text-xs leading-4">
+            <.icon name="hero-calendar" class="h-3.5 w-3.5" />
+            {@backpack.days} {ngettext("day", "days", @backpack.days)} / {@backpack.nights} {ngettext(
+              "night",
+              "nights",
+              @backpack.nights
+            )}
+          </.inline>
+        </div>
+        <.inline wrap class="gap-1.5 text-xs">
           <.button
             :if={Policy.authorized?(:edit, @backpack, @current_user)}
             link_type="live_redirect"
             to={backpack_url(@backpack.slug, :edit)}
             color="secondary"
+            size="xs"
           >
-            <.icon_text icon="hero-pencil" label={gettext("Edit")} />
+            <.icon_text icon="hero-pencil" label={gettext("Edit")} class="h-4 w-4" />
           </.button>
           <.button
             :if={Policy.authorized?(:copy, @backpack, @current_user)}
             link_type="live_redirect"
             to={backpack_url(@backpack.id, :copy)}
             color="secondary"
+            size="xs"
           >
-            <.icon_text icon="hero-document-duplicate" label={gettext("Make a copy")} />
+            <.icon_text
+              icon="hero-document-duplicate"
+              label={gettext("Make a copy")}
+              class="h-4 w-4"
+            />
           </.button>
           <.button
             :if={Policy.authorized?(:delete, @backpack, @current_user)}
             phx-click="delete_backpack"
             data-confirm={gettext("Are you sure you want to delete backpack?")}
             color="danger"
+            size="xs"
           >
-            <.icon_text icon="hero-trash" label={gettext("Delete")} />
+            <.icon_text icon="hero-trash" label={gettext("Delete")} class="h-4 w-4" />
           </.button>
         </.inline>
       </div>
-    </.container>
 
-    <.container full class="!mt-* mt-0">
       <.live_component module={ListNew} id={"add_item-#{@backpack.id}"} backpack={@backpack} />
       <div
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+        class="grid grid-cols-1 gap-4 md:grid-cols-4"
         phx-hook="PackingDragDrop"
         id="packing-lists-container"
       >

@@ -53,24 +53,30 @@ defmodule HamsterTravelWeb.Packing.ListNew do
 
   def render(%{edit: true} = assigns) do
     ~H"""
-    <div class="mb-5">
-      <.inline>
+    <div class="mb-3">
+      <.inline class="gap-1">
         <.form for={@form} phx-submit="create" phx-target={@myself} as={:list}>
-          <.inline>
+          <.inline class="gap-1">
             <span class="inline-flex" x-init="$nextTick(() => $el.querySelector('input')?.focus())">
               <.input
                 id={"add-list-#{@backpack.id}"}
                 field={@form[:name]}
                 placeholder={gettext("List name")}
+                class="!h-8 !px-2 !py-1 !text-xs"
               />
             </span>
-            <.icon_button>
-              <.icon name="hero-check" />
+            <.icon_button size="xs" class="!h-8 !w-8 !p-1.5">
+              <.icon name="hero-check" class="h-4 w-4" />
             </.icon_button>
           </.inline>
         </.form>
-        <.icon_button phx-click="cancel" phx-target={@myself}>
-          <.icon name="hero-x-mark" />
+        <.icon_button
+          size="xs"
+          class="!h-8 !w-8 !p-1.5"
+          phx-click="cancel"
+          phx-target={@myself}
+        >
+          <.icon name="hero-x-mark" class="h-4 w-4" />
         </.icon_button>
       </.inline>
     </div>
@@ -79,9 +85,9 @@ defmodule HamsterTravelWeb.Packing.ListNew do
 
   def render(assigns) do
     ~H"""
-    <div class="mb-5">
-      <.button color="primary" phx-click="edit" phx-target={@myself}>
-        <.icon name="hero-plus-solid" class="w-5 h-5 mr-2" />
+    <div class="mb-3">
+      <.button color="primary" size="xs" phx-click="edit" phx-target={@myself}>
+        <.icon name="hero-plus-solid" class="mr-1.5 h-4 w-4" />
         {gettext("Add list")}
       </.button>
     </div>

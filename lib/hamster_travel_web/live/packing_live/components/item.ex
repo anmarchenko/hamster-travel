@@ -88,10 +88,10 @@ defmodule HamsterTravelWeb.Packing.Item do
 
   def render(%{edit: true} = assigns) do
     ~H"""
-    <div class="mt-1">
-      <.inline>
-        <.form :let={f} for={%{}} phx-submit="update" phx-target={@myself}>
-          <.inline>
+    <div class="mt-0.5">
+      <.inline class="gap-1">
+        <.form :let={f} for={%{}} class="min-w-0 grow" phx-submit="update" phx-target={@myself}>
+          <.inline class="gap-1">
             <span class="inline-flex" x-init="$nextTick(() => $el.querySelector('input')?.focus())">
               <.text_input
                 form={f}
@@ -99,15 +99,16 @@ defmodule HamsterTravelWeb.Packing.Item do
                 field={:name}
                 placeholder={@name}
                 value={@name}
+                class="!h-8 !px-2 !py-1 !text-xs"
               />
             </span>
-            <.icon_button>
-              <.icon name="hero-check" />
+            <.icon_button size="xs" class="!h-7 !w-7 !p-1.5">
+              <.icon name="hero-check" class="h-4 w-4" />
             </.icon_button>
           </.inline>
         </.form>
-        <.icon_button phx-click="cancel" phx-target={@myself}>
-          <.icon name="hero-x-mark" />
+        <.icon_button size="xs" class="!h-7 !w-7 !p-1.5" phx-click="cancel" phx-target={@myself}>
+          <.icon name="hero-x-mark" class="h-4 w-4" />
         </.icon_button>
       </.inline>
     </div>
@@ -117,30 +118,48 @@ defmodule HamsterTravelWeb.Packing.Item do
   def render(assigns) do
     ~H"""
     <div
-      class="px-2 draggable-item rounded cursor-grab hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 active:cursor-grabbing"
+      class="draggable-item cursor-grab rounded px-1 transition-colors duration-200 hover:bg-gray-100 active:cursor-grabbing dark:hover:bg-gray-800"
       data-item-id={@item.id}
     >
-      <.inline class="!gap gap-1">
-        <.form :let={f} for={%{}} class="grow mr-2" phx-change="check" phx-target={@myself}>
-          <label class="cursor-pointer">
-            <.inline class={decoration_classes(@item.checked)}>
-              <.checkbox
-                form={f}
-                id={"item-#{@item.id}"}
-                field={:checked}
-                label={@item.name}
-                value={@item.checked}
-              />
-              <div class="text-sm grow">{@item.name}</div>
-              <div class="text-sm justify-self-end">{@item.count}</div>
+      <.inline class="gap-0.5">
+        <.form :let={f} for={%{}} class="min-w-0 grow" phx-change="check" phx-target={@myself}>
+          <label class="block cursor-pointer rounded">
+            <.inline class={"min-h-8 w-full gap-0.5 #{decoration_classes(@item.checked)}"}>
+              <span
+                class="flex h-8 w-8 shrink-0 items-center justify-center"
+                data-checkbox-hit-target
+              >
+                <.checkbox
+                  form={f}
+                  id={"item-#{@item.id}"}
+                  field={:checked}
+                  label={@item.name}
+                  value={@item.checked}
+                  class="!h-4 !w-4"
+                />
+              </span>
+              <div class="min-w-0 grow text-[13px] leading-4">{@item.name}</div>
+              <div class="shrink-0 text-[13px] leading-4 tabular-nums">{@item.count}</div>
             </.inline>
           </label>
         </.form>
-        <.icon_button size="xs" class="justify-self-end" phx-click="edit" phx-target={@myself}>
-          <.icon name="hero-pencil" class="w-5 h-5" />
+        <.icon_button
+          size="xs"
+          class="!h-7 !w-7 !p-1.5"
+          phx-click="edit"
+          phx-target={@myself}
+          aria-label={gettext("Edit")}
+        >
+          <.icon name="hero-pencil" class="h-4 w-4" />
         </.icon_button>
-        <.icon_button size="xs" class="justify-self-end" phx-click="delete" phx-target={@myself}>
-          <.icon name="hero-trash" class="w-5 h-5" />
+        <.icon_button
+          size="xs"
+          class="!h-7 !w-7 !p-1.5"
+          phx-click="delete"
+          phx-target={@myself}
+          aria-label={gettext("Delete")}
+        >
+          <.icon name="hero-trash" class="h-4 w-4" />
         </.icon_button>
       </.inline>
     </div>

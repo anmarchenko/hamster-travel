@@ -71,16 +71,18 @@ defmodule HamsterTravelWeb.Packing.List do
   def render(assigns) do
     ~H"""
     <div class="draggable-list" data-list-id={@list.id}>
-      <.card hover={false}>
+      <.card hover={false} class="overflow-hidden">
         <div
-          class="flex flex-col w-full"
+          class="flex w-full flex-col text-sm"
           x-data={"{ showItems: $persist(true).as('list-#{@list.id}') }"}
         >
-          <div class={"p-4 rounded-t-lg draggable-list-handle cursor-grab active:cursor-grabbing #{decoration_classes(@done)}"}>
+          <div class={
+            "draggable-list-handle cursor-grab p-2 active:cursor-grabbing #{decoration_classes(@done)}"
+          }>
             <.card_header edit={@edit} form={@form} list={@list} phx-target={@myself} />
           </div>
           <div
-            class="p-2 min-h-[50px]"
+            class="min-h-10 p-1"
             x-show="showItems"
             x-transition.duration.300ms
             data-packing-drop-zone
@@ -108,34 +110,44 @@ defmodule HamsterTravelWeb.Packing.List do
 
   def card_header(%{edit: false} = assigns) do
     ~H"""
-    <.inline>
-      <div class="grow text-white dark:text-zinc-300">{@list.name}</div>
+    <.inline class="gap-1">
+      <div class="min-w-0 grow text-sm leading-5 text-white dark:text-zinc-300">{@list.name}</div>
       <.icon_button
         size="xs"
-        class={button_color()}
+        class={"!h-7 !w-7 !p-1.5 #{button_color()}"}
         phx-click="edit"
         phx-target={assigns[:"phx-target"]}
+        aria-label={gettext("Edit")}
       >
-        <.icon name="hero-pencil" />
+        <.icon name="hero-pencil" class="h-4 w-4" />
       </.icon_button>
       <.icon_button
         size="xs"
-        class={button_color()}
+        class={"!h-7 !w-7 !p-1.5 #{button_color()}"}
         phx-click="delete"
         phx-target={assigns[:"phx-target"]}
         data-confirm={gettext("Are you sure you want to delete this list? All items will be lost")}
+        aria-label={gettext("Delete")}
       >
-        <.icon name="hero-trash" />
+        <.icon name="hero-trash" class="h-4 w-4" />
       </.icon_button>
       <span x-show="showItems" @click="showItems = !showItems">
-        <.icon_button size="xs" class={button_color()}>
-          <.icon name="hero-chevron-down" />
+        <.icon_button
+          size="xs"
+          class={"!h-7 !w-7 !p-1.5 #{button_color()}"}
+          aria-label={gettext("Collapse")}
+        >
+          <.icon name="hero-chevron-down" class="h-4 w-4" />
         </.icon_button>
       </span>
 
       <span x-show="!showItems" @click="showItems = !showItems">
-        <.icon_button size="xs" class={button_color()}>
-          <.icon name="hero-chevron-right" />
+        <.icon_button
+          size="xs"
+          class={"!h-7 !w-7 !p-1.5 #{button_color()}"}
+          aria-label={gettext("Expand")}
+        >
+          <.icon name="hero-chevron-right" class="h-4 w-4" />
         </.icon_button>
       </span>
     </.inline>
@@ -144,19 +156,33 @@ defmodule HamsterTravelWeb.Packing.List do
 
   def card_header(%{edit: true} = assigns) do
     ~H"""
-    <.inline>
-      <.form for={@form} phx-submit="update" phx-target={assigns[:"phx-target"]} as={:list}>
-        <.inline>
+    <.inline class="gap-1">
+      <.form
+        for={@form}
+        class="min-w-0 grow"
+        phx-submit="update"
+        phx-target={assigns[:"phx-target"]}
+        as={:list}
+      >
+        <.inline class="gap-1">
           <span class="inline-flex" x-init="$nextTick(() => $el.querySelector('input')?.focus())">
-            <.input id={"update-item-#{@list.id}"} field={@form[:name]} />
+            <.input
+              id={"update-item-#{@list.id}"}
+              field={@form[:name]}
+              class="!h-8 !px-2 !py-1 !text-xs"
+            />
           </span>
-          <.icon_button class={button_color()}>
-            <.icon name="hero-check" />
+          <.icon_button class={"!h-7 !w-7 !p-1.5 #{button_color()}"}>
+            <.icon name="hero-check" class="h-4 w-4" />
           </.icon_button>
         </.inline>
       </.form>
-      <.icon_button class={button_color()} phx-click="cancel" phx-target={assigns[:"phx-target"]}>
-        <.icon name="hero-x-mark" />
+      <.icon_button
+        class={"!h-7 !w-7 !p-1.5 #{button_color()}"}
+        phx-click="cancel"
+        phx-target={assigns[:"phx-target"]}
+      >
+        <.icon name="hero-x-mark" class="h-4 w-4" />
       </.icon_button>
     </.inline>
     """

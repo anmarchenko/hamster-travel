@@ -48,17 +48,18 @@ defmodule HamsterTravelWeb.Packing.ItemNew do
 
   def render(assigns) do
     ~H"""
-    <div class="mt-3">
+    <div class="mt-1">
       <.form for={@form} as={:item} phx-submit="create_item" phx-change="change" phx-target={@myself}>
-        <.inline>
+        <.inline class="gap-1">
           <.input
             id={"add-item-#{@list.id}"}
             field={@form[:name]}
             placeholder={gettext("Add backpack item")}
             value={@name}
+            class="!h-8 !px-2 !py-1 !text-xs"
           />
-          <.icon_button size="md">
-            <.icon name="hero-plus" />
+          <.icon_button size="xs" class="!h-8 !w-8 !p-1.5">
+            <.icon name="hero-plus" class="h-4 w-4" />
           </.icon_button>
         </.inline>
       </.form>
