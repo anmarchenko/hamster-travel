@@ -55,6 +55,44 @@
     transition: all 0.2s ease;
 }
 
+/* Offline lock regions are inert; these rules make that state visible. */
+body[data-offline-readonly] [data-offline-lock] :is(
+        a,
+        button,
+        input,
+        select,
+        textarea,
+        [contenteditable]:not([contenteditable="false"]),
+        [draggable="true"]
+    ) {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+}
+
+body[data-offline-readonly] [data-offline-lock] :is(input, select, textarea) {
+    @apply bg-gray-100 text-gray-500 border-gray-300 dark:bg-zinc-800 dark:text-zinc-500 dark:border-zinc-700;
+}
+
+body[data-offline-readonly] [data-offline-lock] label:has(:is(input, select, textarea)) {
+    opacity: 0.55;
+    cursor: not-allowed !important;
+}
+
+body[data-offline-readonly] [data-offline-lock] .formatted-text-area {
+    @apply bg-gray-100 border-gray-300 dark:bg-zinc-800 dark:border-zinc-700;
+    opacity: 0.65;
+}
+
+body[data-offline-readonly] [data-offline-lock] :is(
+        .draggable-activity,
+        .draggable-item,
+        .draggable-list-handle,
+        .draggable-note,
+        .draggable-transfer
+    ) {
+    cursor: not-allowed !important;
+}
+
 /* Rich Text Editor Styles */
 .toolbar-btn {
     @apply p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200;

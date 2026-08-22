@@ -23,6 +23,7 @@ defmodule HamsterTravelWeb.Planning.DayExpenseForm do
         as={:day_expense}
         phx-target={@myself}
         phx-submit="form_submit"
+        phx-change="form_changed"
         phx-mounted={JS.focus_first(to: "#day-expense-form-#{@id}")}
         class="space-y-4 max-w-lg"
       >
@@ -87,6 +88,24 @@ defmodule HamsterTravelWeb.Planning.DayExpenseForm do
       |> assign_form(changeset)
 
     {:ok, socket}
+  end
+
+  @impl true
+  def handle_event("form_changed", %{"day_expense" => day_expense_params}, socket) do
+    changeset =
+      case socket.assigns.action do
+        :new ->
+          Planning.new_day_expense(
+            socket.assigns.trip,
+            socket.assigns.day_index,
+            day_expense_params
+          )
+
+        :edit ->
+          Planning.change_day_expense(socket.assigns.day_expense, day_expense_params)
+      end
+
+    {:noreply, assign_form(socket, changeset)}
   end
 
   @impl true

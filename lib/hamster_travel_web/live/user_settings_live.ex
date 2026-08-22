@@ -4,6 +4,7 @@ defmodule HamsterTravelWeb.UserSettingsLive do
   alias HamsterTravel.Accounts
   alias HamsterTravelWeb.CityInput
   alias HamsterTravelWeb.Cldr
+  alias LiveSelect.Component, as: LiveSelectComponent
 
   def render(assigns) do
     ~H"""
@@ -15,7 +16,14 @@ defmodule HamsterTravelWeb.UserSettingsLive do
             label={gettext("General settings")}
             class="border-t-0 pt-0 mt-0"
           />
-          <.form for={@general_form} id="general_form" phx-submit="update_settings" class="space-y-6">
+          <.form
+            for={@general_form}
+            id="general_form"
+            phx-submit="update_settings"
+            phx-change="validate_settings"
+            phx-auto-recover="recover_settings"
+            class="space-y-6"
+          >
             <.field
               type="select"
               field={@general_form[:locale]}
@@ -153,6 +161,28 @@ defmodule HamsterTravelWeb.UserSettingsLive do
     {:noreply, assign(socket, email_form: email_form, email_form_current_password: password)}
   end
 
+  def handle_event("validate_settings", %{"user" => user_params}, socket) do
+    {general_form, _home_city} = settings_form(socket, user_params)
+
+    {:noreply, assign(socket, :general_form, general_form)}
+  end
+
+  def handle_event("recover_settings", %{"user" => user_params}, socket) do
+    {general_form, home_city} = settings_form(socket, user_params)
+
+    if home_city do
+      # LiveSelect restores its label on reconnect, then needs a follow-up select event to
+      # repopulate the hidden value after LiveView applies the recovered form patch.
+      send_update_after(
+        LiveSelectComponent,
+        [id: "home-city-settings-input-live-select", value: home_city],
+        100
+      )
+    end
+
+    {:noreply, assign(socket, :general_form, general_form)}
+  end
+
   def handle_event("update_email", params, socket) do
     %{"current_password" => password, "user" => user_params} = params
     user = socket.assigns.current_user
@@ -222,6 +252,21 @@ defmodule HamsterTravelWeb.UserSettingsLive do
       {:error, changeset} ->
         {:noreply, assign(socket, :general_form, to_form(Map.put(changeset, :action, :insert)))}
     end
+  end
+
+  defp settings_form(socket, user_params) do
+    settings_params = CityInput.process_selected_value_on_submit(user_params, "home_city")
+    home_city = settings_params["home_city"]
+    form_user = %{socket.assigns.current_user | home_city: home_city}
+    changeset_params = Map.take(settings_params, ["locale", "default_currency", "home_city_id"])
+
+    general_form =
+      form_user
+      |> Accounts.change_user_settings(changeset_params)
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    {general_form, home_city}
   end
 
   defp settings_form_user(user) do

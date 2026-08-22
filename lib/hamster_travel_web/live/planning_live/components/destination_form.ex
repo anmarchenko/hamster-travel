@@ -26,6 +26,7 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
         as={:destination}
         phx-target={@myself}
         phx-submit="form_submit"
+        phx-change="form_changed"
         phx-mounted={JS.focus_first(to: "#destination-form-#{@id}")}
         class="space-y-4"
       >
@@ -75,6 +76,26 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
       |> assign_form(changeset)
 
     {:ok, socket}
+  end
+
+  @impl true
+  def handle_event("form_changed", %{"destination" => destination_params}, socket) do
+    destination_params = CityInput.process_selected_value_on_submit(destination_params, "city")
+
+    changeset =
+      case socket.assigns.action do
+        :new ->
+          Planning.new_destination(
+            socket.assigns.trip,
+            socket.assigns.day_index,
+            destination_params
+          )
+
+        :edit ->
+          Planning.change_destination(socket.assigns.destination, destination_params)
+      end
+
+    {:noreply, assign_form(socket, changeset)}
   end
 
   @impl true

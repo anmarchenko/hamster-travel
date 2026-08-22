@@ -23,8 +23,9 @@ defmodule HamsterTravelWeb.Planning.NoteForm do
         as={:note}
         phx-target={@myself}
         phx-submit="form_submit"
+        phx-change="form_changed"
         phx-mounted={JS.focus_first(to: "#note-form-#{@id}")}
-        class="space-y-4 max-w-2xl"
+        class="space-y-4 max-w-2xl min-[1920px]:max-w-6xl"
       >
         <.field
           field={@form[:title]}
@@ -73,6 +74,17 @@ defmodule HamsterTravelWeb.Planning.NoteForm do
       |> assign_form(changeset)
 
     {:ok, socket}
+  end
+
+  @impl true
+  def handle_event("form_changed", %{"note" => note_params}, socket) do
+    changeset =
+      case socket.assigns.action do
+        :new -> Planning.new_note(socket.assigns.trip, socket.assigns.day_index, note_params)
+        :edit -> Planning.change_note(socket.assigns.note, note_params)
+      end
+
+    {:noreply, assign_form(socket, changeset)}
   end
 
   @impl true

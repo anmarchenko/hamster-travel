@@ -28,6 +28,34 @@ defmodule HamsterTravelWeb.Packing.CreateBackpackTest do
       assert has_element?(view, "a", "Cancel")
     end
 
+    test "rebuilds the complete form from the recovery change payload", %{conn: conn} do
+      conn = log_in_user(conn, user_fixture())
+      {:ok, view, _html} = live(conn, ~p"/backpacks/new")
+
+      assert has_element?(view, "#backpack-form[phx-change='form_changed']")
+
+      view
+      |> element("#backpack-form")
+      |> render_change(%{
+        "_target" => ["backpack", "name"],
+        "backpack" => %{
+          "name" => "Recovered backpack",
+          "days" => "8",
+          "nights" => "7",
+          "template" => "sea"
+        }
+      })
+
+      assert has_element?(
+               view,
+               "#backpack-form input[name='backpack[name]'][value='Recovered backpack']"
+             )
+
+      assert has_element?(view, "#backpack-form input[name='backpack[days]'][value='8']")
+      assert has_element?(view, "#backpack-form input[name='backpack[nights]'][value='7']")
+      assert has_element?(view, "#backpack-form option[value='sea'][selected]")
+    end
+
     test "creates a new backpack when form is submitted with valid data", %{conn: conn} do
       # Create a user and log them in
       user = user_fixture()

@@ -237,16 +237,30 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
     end
   end
 
-  def handle_event("form_changed", %{"transfer" => %{"transport_mode" => transport_mode}}, socket) do
+  def handle_event("form_changed", %{"transfer" => transfer_params}, socket) do
+    transfer_params =
+      transfer_params
+      |> CityInput.process_selected_value_on_submit("departure_city")
+      |> CityInput.process_selected_value_on_submit("arrival_city")
+
+    transport_mode = Map.get(transfer_params, "transport_mode", socket.assigns.transport_mode)
+
+    changeset =
+      case socket.assigns.action do
+        :new ->
+          Planning.new_transfer(socket.assigns.trip, socket.assigns.day_index, transfer_params)
+
+        :edit ->
+          Planning.change_transfer(socket.assigns.transfer, transfer_params)
+      end
+      |> convert_datetime_to_time_for_form()
+
     socket =
       socket
       |> assign(:transport_mode, transport_mode)
       |> assign(:show_carrier_info, show_carrier_info(transport_mode))
+      |> assign_form(changeset)
 
-    {:noreply, socket}
-  end
-
-  def handle_event("form_changed", %{"transfer" => _transfer_params}, socket) do
     {:noreply, socket}
   end
 

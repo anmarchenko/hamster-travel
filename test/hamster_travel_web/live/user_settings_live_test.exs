@@ -8,7 +8,7 @@ defmodule HamsterTravelWeb.UserSettingsLiveTest do
 
   describe "Settings page" do
     test "renders settings page", %{conn: conn} do
-      {:ok, _lv, html} =
+      {:ok, lv, html} =
         conn
         |> log_in_user(user_fixture())
         |> live(~p"/users/settings")
@@ -19,6 +19,14 @@ defmodule HamsterTravelWeb.UserSettingsLiveTest do
       assert html =~ "Change Email"
       assert html =~ "Change Password"
       assert html =~ "Save settings"
+
+      assert has_element?(
+               lv,
+               "#general_form[phx-change='validate_settings'][phx-auto-recover='recover_settings']"
+             )
+
+      assert has_element?(lv, "#email_form[phx-change='validate_email']")
+      assert has_element?(lv, "#password_form[phx-change='validate_password']")
     end
 
     test "redirects if user is not logged in", %{conn: conn} do
@@ -119,6 +127,47 @@ defmodule HamsterTravelWeb.UserSettingsLiveTest do
       assert updated_user.locale == "ru"
       assert updated_user.default_currency == "USD"
       assert updated_user.home_city_id == city.id
+    end
+
+    test "rebuilds all fields from the recovery change payload", %{conn: conn, city: city} do
+      home_city_value = Jason.encode!(%{id: city.id})
+      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+
+      lv
+      |> element("#general_form")
+      |> render_change(%{
+        "_target" => ["user", "locale"],
+        "user" => %{
+          "locale" => "ru",
+          "default_currency" => "USD",
+          "home_city" => home_city_value
+        }
+      })
+
+      assert has_element?(lv, "#general_form option[value='ru'][selected]")
+      assert has_element?(lv, "#general_form option[value='USD'][selected]")
+      assert lv |> element("#user_home_city") |> render() =~ Integer.to_string(city.id)
+      assert lv |> element("#user_home_city_text_input") |> render() =~ city.name
+    end
+
+    test "restores the LiveSelect value after form recovery", %{conn: conn, city: city} do
+      home_city_value = Jason.encode!(%{id: city.id})
+      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+
+      render_hook(lv, "recover_settings", %{
+        "user" => %{
+          "locale" => "ru",
+          "default_currency" => "USD",
+          "home_city" => home_city_value
+        }
+      })
+
+      Process.sleep(150)
+
+      assert has_element?(lv, "#general_form option[value='ru'][selected]")
+      assert has_element?(lv, "#general_form option[value='USD'][selected]")
+      assert lv |> element("#user_home_city") |> render() =~ Integer.to_string(city.id)
+      assert lv |> element("#user_home_city_text_input") |> render() =~ city.name
     end
   end
 

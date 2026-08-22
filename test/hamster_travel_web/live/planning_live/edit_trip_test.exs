@@ -9,6 +9,43 @@ defmodule HamsterTravelWeb.Planning.EditTripTest do
   alias HamsterTravel.Planning.Trip
 
   describe "Edit trip page" do
+    test "rebuilds an edit form from the recovery change payload", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      trip =
+        trip_fixture(user, %{
+          status: Trip.planned(),
+          dates_unknown: true,
+          duration: 4,
+          start_date: nil,
+          end_date: nil
+        })
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}/edit")
+
+      view
+      |> element("#trip-form")
+      |> render_change(%{
+        "_target" => ["trip", "name"],
+        "trip" => %{
+          "name" => "Recovered edit",
+          "status" => Trip.planned(),
+          "currency" => trip.currency,
+          "dates_unknown" => "false",
+          "start_date" => "2026-08-10",
+          "end_date" => "2026-08-15",
+          "people_count" => "3",
+          "private" => "false"
+        }
+      })
+
+      assert has_element?(view, "#trip-form input[name='trip[name]'][value='Recovered edit']")
+      assert has_element?(view, "#trip-form input[name='trip[start_date]'][value='2026-08-10']")
+      assert has_element?(view, "#trip-form input[name='trip[end_date]'][value='2026-08-15']")
+      refute has_element?(view, "#trip-form input[name='trip[duration]']")
+    end
+
     test "keeps return_to in cancel and save flows", %{conn: conn} do
       user = user_fixture()
       conn = log_in_user(conn, user)

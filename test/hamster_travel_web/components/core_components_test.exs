@@ -5,6 +5,35 @@ defmodule HamsterTravelWeb.CoreComponentsTest do
 
   alias HamsterTravelWeb.CoreComponents
 
+  describe "offline edit boundaries" do
+    test "modals are always part of an offline lock region" do
+      html =
+        render_component(&CoreComponents.modal/1,
+          id: "offline-modal",
+          inner_block: [
+            %{
+              __slot__: :inner_block,
+              inner_block: fn _changed, _argument -> "Modal content" end
+            }
+          ]
+        )
+
+      assert html =~ ~r/<div[^>]*id="offline-modal"[^>]*data-offline-lock/
+    end
+
+    test "renders a full-width sticky offline notice without a spinner" do
+      html = render_component(&CoreComponents.flash_group/1, flash: %{})
+
+      assert html =~ ~r/<div[^>]*id="disconnected"/
+      assert html =~ "sticky top-0"
+      assert html =~ "w-full"
+      assert html =~ "bg-amber-50"
+      assert html =~ "You are offline at the moment, the app is in readonly mode"
+      refute html =~ "animate-spin"
+      refute html =~ "hero-arrow-path"
+    end
+  end
+
   describe "money_input/1" do
     test "uses a decimal mobile keyboard for the amount field" do
       form = %Phoenix.HTML.Form{

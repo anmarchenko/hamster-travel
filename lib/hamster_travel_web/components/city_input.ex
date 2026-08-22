@@ -36,7 +36,7 @@ defmodule HamsterTravelWeb.CityInput do
       >
         <:option :let={option}>
           <.inline>
-            <.flag size={20} country={option.value.country} /> {option.label}
+            <.flag size={20} country={option.value["country"]} /> {option.label}
           </.inline>
         </:option>
       </.live_select>
@@ -89,8 +89,8 @@ defmodule HamsterTravelWeb.CityInput do
     %{
       label: Geo.city_text(city),
       value: %{
-        id: city.id,
-        country: city.country.iso
+        "id" => city.id,
+        "country" => city.country.iso
       }
     }
   end
@@ -114,12 +114,12 @@ defmodule HamsterTravelWeb.CityInput do
     matching_trip_cities =
       search_results
       |> Enum.filter(fn option ->
-        option.value.id in trip_city_ids
+        option.value["id"] in trip_city_ids
       end)
 
     other_results =
       Enum.reject(search_results, fn option ->
-        option.value.id in trip_city_ids
+        option.value["id"] in trip_city_ids
       end)
 
     matching_trip_cities ++ other_results

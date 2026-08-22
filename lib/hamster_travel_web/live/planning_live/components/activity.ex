@@ -12,6 +12,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
   attr(:display_currency, :string, required: true)
   attr(:index, :integer, required: true)
   attr(:can_edit, :boolean, default: false)
+  attr(:edit, :boolean, default: false)
 
   def render(%{edit: true} = assigns) do
     ~H"""
@@ -25,7 +26,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
         action={:edit}
         can_edit={@can_edit}
         position={@index + 1}
-        on_finish={fn -> send_update(@myself, edit: false) end}
+        on_finish={fn -> send(self(), :close_form) end}
       />
     </div>
     """
@@ -35,7 +36,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
     ~H"""
     <div
       class={[
-        "flex w-full max-w-3xl flex-col gap-y-1.5 rounded-md border-l-4 px-2.5 py-1.5 transition-colors duration-200",
+        "flex w-full max-w-3xl flex-col gap-y-1.5 rounded-md border-l-4 px-2.5 py-1.5 transition-colors duration-200 min-[1920px]:max-w-6xl",
         activity_priority_accent(@activity.priority),
         @can_edit &&
           "draggable-activity sm:hover:bg-zinc-50 sm:dark:hover:bg-zinc-800"
@@ -124,10 +125,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
 
   def handle_event("edit", _, socket) do
     if socket.assigns.can_edit do
-      socket =
-        socket
-        |> assign(:edit, true)
-
+      send(self(), {:open_form, "edit", "activity", socket.assigns.activity.id})
       {:noreply, socket}
     else
       {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}

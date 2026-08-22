@@ -1,6 +1,7 @@
 defmodule HamsterTravelWeb.UserLoginLive do
   use HamsterTravelWeb, :live_view
 
+  @impl true
   def render(assigns) do
     ~H"""
     <.form_container>
@@ -15,7 +16,7 @@ defmodule HamsterTravelWeb.UserLoginLive do
         class="mt-8 space-y-6"
         for={@form}
         action={~p"/users/log_in"}
-        phx-update="ignore"
+        phx-change="form_changed"
       >
         <div class="-space-y-px rounded-md shadow-sm">
           <div>
@@ -79,9 +80,15 @@ defmodule HamsterTravelWeb.UserLoginLive do
     """
   end
 
+  @impl true
   def mount(_params, _session, socket) do
     email = Phoenix.Flash.get(socket.assigns.flash, :email)
     form = to_form(%{"email" => email}, as: "user")
-    {:ok, assign(socket, form: form), temporary_assigns: [form: form]}
+    {:ok, assign(socket, form: form)}
+  end
+
+  @impl true
+  def handle_event("form_changed", %{"user" => user_params}, socket) do
+    {:noreply, assign(socket, :form, to_form(user_params, as: "user"))}
   end
 end

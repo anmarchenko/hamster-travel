@@ -42,13 +42,13 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "button[phx-click='export_pdf']", "Export to PDF")
 
       # Verify that the tabs are rendered
-      assert has_element?(view, "a", "Transfers and hotels")
-      assert has_element?(view, "a", "Activities")
-      assert has_element?(view, "a", "Budget")
-      assert has_element?(view, "a", "Notes")
+      assert has_element?(view, "button[role='tab']", "Transfers and hotels")
+      assert has_element?(view, "button[role='tab']", "Activities")
+      assert has_element?(view, "button[role='tab']", "Budget")
+      assert has_element?(view, "button[role='tab']", "Notes")
 
       # Verify that the itinerary tab is active by default
-      assert has_element?(view, "a.pc-tab__underline--is-active", "Transfers and hotels")
+      assert has_element?(view, "button.pc-tab__underline--is-active", "Transfers and hotels")
 
       # Verify that dates are displayed
       assert html =~ "12.06 - 14.06.2023"
@@ -104,7 +104,73 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert html =~ "31.12.2025 - 02.01.2026"
     end
 
-    test "uses return_to for mobile back and preserves it in tab links", %{conn: conn} do
+    test "eagerly renders accessible tab panels and switches them with client-first JS", %{
+      conn: conn
+    } do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      {:ok, view, html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      assert has_element?(view, "#trip-offline-header[data-offline-lock]")
+
+      for tab <- ~w(itinerary activities budget notes) do
+        assert has_element?(
+                 view,
+                 "#trip-tab-#{tab}[role='tab'][aria-controls='trip-tab-panel-#{tab}'][data-offline-local]"
+               )
+
+        assert has_element?(view, "#mobile-trip-tab-#{tab}[data-offline-local]")
+
+        assert has_element?(
+                 view,
+                 "#trip-tab-panel-#{tab}[role='tabpanel'][aria-labelledby='trip-tab-#{tab}'][data-offline-lock]"
+               )
+      end
+
+      assert has_element?(view, "#trip-tab-itinerary[aria-selected='true']")
+      refute has_element?(view, "#trip-tab-panel-itinerary.hidden")
+      assert has_element?(view, "#trip-tab-panel-activities.hidden")
+      assert has_element?(view, "#trip-tab-panel-budget.hidden")
+      assert has_element?(view, "#trip-tab-panel-notes.hidden")
+
+      [click_commands] =
+        html
+        |> Floki.parse_document!()
+        |> Floki.find("#trip-tab-activities")
+        |> Floki.attribute("phx-click")
+        |> Enum.map(&Jason.decode!/1)
+
+      assert [["add_class", _add_options], ["remove_class", _remove_options] | _rest] =
+               click_commands
+
+      assert ["push", %{"event" => "show_trip_tab", "value" => %{"tab" => "activities"}}] =
+               List.last(click_commands)
+
+      view
+      |> element("#trip-tab-activities")
+      |> render_click()
+
+      assert_patch(
+        view,
+        "/trips/#{trip.slug}?tab=activities&return_to=#{URI.encode_www_form("/drafts")}",
+        100
+      )
+
+      assert has_element?(
+               view,
+               "#trip-tab-activities[aria-selected='true'].pc-tab__underline--is-active"
+             )
+
+      assert has_element?(view, "#trip-tab-itinerary[aria-selected='false']")
+      assert has_element?(view, "#trip-tab-panel-itinerary.hidden")
+      refute has_element?(view, "#trip-tab-panel-activities.hidden")
+      assert has_element?(view, "#trip-tab-panel-budget.hidden")
+      assert has_element?(view, "#trip-tab-panel-notes.hidden")
+    end
+
+    test "uses return_to for mobile back and trip actions", %{conn: conn} do
       user = user_fixture()
       conn = log_in_user(conn, user)
       trip = trip_fixture(%{author_id: user.id, status: "1_planned"})
@@ -115,12 +181,6 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       {:ok, _view, html} = live(conn, "/trips/#{trip.slug}?return_to=#{encoded_return_to}")
 
       assert html =~ ~s(href="/plans?page=2&amp;q=Searchable")
-
-      assert html =~
-               ~s(href="/trips/#{trip.slug}?tab=activities&amp;return_to=%2Fplans%3Fpage%3D2%26q%3DSearchable")
-
-      assert html =~
-               ~s(href="/trips/#{trip.slug}?tab=budget&amp;return_to=%2Fplans%3Fpage%3D2%26q%3DSearchable")
 
       assert html =~
                ~s(href="/trips/#{trip.slug}/edit?return_to=%2Fplans%3Fpage%3D2%26q%3DSearchable")
@@ -369,13 +429,13 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert html =~ trip.name
 
       # Verify that the tabs are rendered
-      assert has_element?(view, "a", "Transfers and hotels")
-      assert has_element?(view, "a", "Activities")
-      assert has_element?(view, "a", "Budget")
-      assert has_element?(view, "a", "Notes")
+      assert has_element?(view, "button[role='tab']", "Transfers and hotels")
+      assert has_element?(view, "button[role='tab']", "Activities")
+      assert has_element?(view, "button[role='tab']", "Budget")
+      assert has_element?(view, "button[role='tab']", "Notes")
 
       # Verify that the itinerary tab is active by default
-      assert has_element?(view, "a.pc-tab__underline--is-active", "Transfers and hotels")
+      assert has_element?(view, "button.pc-tab__underline--is-active", "Transfers and hotels")
 
       # Verify that dates are displayed
       assert html =~ "Day 1"
@@ -403,13 +463,13 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert html =~ trip.name
 
       # Verify that the tabs are rendered
-      assert has_element?(view, "a", "Transfers and hotels")
-      assert has_element?(view, "a", "Activities")
-      assert has_element?(view, "a", "Budget")
-      assert has_element?(view, "a", "Notes")
+      assert has_element?(view, "button[role='tab']", "Transfers and hotels")
+      assert has_element?(view, "button[role='tab']", "Activities")
+      assert has_element?(view, "button[role='tab']", "Budget")
+      assert has_element?(view, "button[role='tab']", "Notes")
 
       # Verify that the itinerary tab is active by default
-      assert has_element?(view, "a.pc-tab__underline--is-active", "Transfers and hotels")
+      assert has_element?(view, "button.pc-tab__underline--is-active", "Transfers and hotels")
 
       # Verify that destination is present
       assert html =~ destination.city.name
@@ -417,6 +477,35 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       {:ok, _view, activities_html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
 
       assert activities_html =~ "flex flex-col gap-y-1 sm:flex-row sm:gap-x-4 sm:gap-y-0"
+    end
+
+    test "edits only the clicked copy of a multi-day destination", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft", duration: 3})
+      destination = destination_fixture(%{trip_id: trip.id, start_day: 0, end_day: 2})
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      view
+      |> element("#trip-itinerary tbody tr:first-child td:nth-child(2) button[phx-click='edit']")
+      |> render_click()
+
+      assert has_element?(
+               view,
+               "form#destination-form-destination-itinerary-#{destination.id}-day-0"
+             )
+
+      refute has_element?(
+               view,
+               "form#destination-form-destination-itinerary-#{destination.id}-day-1"
+             )
+
+      assert view
+             |> render()
+             |> Floki.parse_document!()
+             |> Floki.find("#trip-tab-panel-itinerary form[id^='destination-form-']")
+             |> length() == 1
     end
 
     test "shows destination form when clicking add destination link", %{conn: conn} do
@@ -547,13 +636,15 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert budget_section_headers =~ "Day expenses"
       assert html =~ "Hotels"
       assert html =~ "Grand Hotel Vienna, Day 1-2"
-      refute html =~ "Free couch"
+      budget_text = panel_text(html, "#trip-tab-panel-budget")
+
+      refute budget_text =~ "Free couch"
       assert html =~ "Transfers"
       assert html =~ "Berlin → Hamburg, DB ICE 123"
       assert html =~ "Activities"
       assert html =~ "Museum"
-      refute html =~ "Hamburg → Berlin, ZeroBus FREE 1"
-      refute html =~ "Free walking tour"
+      refute budget_text =~ "Hamburg → Berlin, ZeroBus FREE 1"
+      refute budget_text =~ "Free walking tour"
       assert html =~ "Day expenses"
       assert html =~ "Snacks"
       refute has_element?(view, "#day-expense-new-0")
@@ -1099,13 +1190,12 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       {:ok, _notes_view, notes_html} = live(conn, ~p"/trips/#{trip.slug}?tab=notes")
 
       # Assert
-      refute activities_html =~ day_note.title
-      refute activities_html =~ outside_note.title
-      refute activities_html =~ unassigned_note.title
-
-      assert notes_html =~ day_note.title
-      assert notes_html =~ outside_note.title
-      assert notes_html =~ unassigned_note.title
+      assert panel_text(activities_html, "#trip-tab-panel-notes") =~ day_note.title
+      assert panel_text(activities_html, "#trip-tab-panel-notes") =~ outside_note.title
+      assert panel_text(activities_html, "#trip-tab-panel-notes") =~ unassigned_note.title
+      assert panel_text(notes_html, "#trip-tab-panel-notes") =~ day_note.title
+      assert panel_text(notes_html, "#trip-tab-panel-notes") =~ outside_note.title
+      assert panel_text(notes_html, "#trip-tab-panel-notes") =~ unassigned_note.title
     end
 
     test "deletes outside items from activities tab", %{conn: conn} do
@@ -1234,8 +1324,44 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "[phx-click='delete']")
 
       # Verify that the itinerary tab is active and shows Hotel column
-      assert has_element?(view, "a.pc-tab__underline--is-active", "Transfers and hotels")
+      assert has_element?(view, "button.pc-tab__underline--is-active", "Transfers and hotels")
       assert html =~ "Hotel"
+    end
+
+    test "edits only the clicked copy of a multi-day accommodation", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft", duration: 3})
+
+      accommodation =
+        accommodation_fixture(%{
+          trip_id: trip.id,
+          name: "Three-night hotel",
+          start_day: 0,
+          end_day: 2
+        })
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      view
+      |> element("#trip-itinerary tbody tr:first-child td:nth-child(4) button[phx-click='edit']")
+      |> render_click()
+
+      assert has_element?(
+               view,
+               "form#accommodation-form-accommodation-#{accommodation.id}-day-0"
+             )
+
+      refute has_element?(
+               view,
+               "form#accommodation-form-accommodation-#{accommodation.id}-day-1"
+             )
+
+      assert view
+             |> render()
+             |> Floki.parse_document!()
+             |> Floki.find("#trip-tab-panel-itinerary form[id^='accommodation-form-']")
+             |> length() == 1
     end
 
     test "renders trip page with transfers", %{conn: conn} do
@@ -1285,7 +1411,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "[phx-click='delete']")
 
       # Verify that the itinerary tab is active
-      assert has_element?(view, "a.pc-tab__underline--is-active", "Transfers and hotels")
+      assert has_element?(view, "button.pc-tab__underline--is-active", "Transfers and hotels")
     end
 
     test "opens day reorder modal from the transfers table", %{conn: conn} do
@@ -1366,6 +1492,172 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "button", "Cancel")
     end
 
+    test "keeps one nested form open and clears it on cancel", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      view
+      |> element("tr:first-child td a", "Add transfer")
+      |> render_click()
+
+      assert has_element?(view, "form#transfer-form-new-transfer-new-0")
+
+      view
+      |> element("tr:first-child td a", "Add accommodation")
+      |> render_click()
+
+      refute has_element?(view, "form#transfer-form-new-transfer-new-0")
+      assert has_element?(view, "form#accommodation-form-new-accommodation-new-0")
+
+      view
+      |> element("form#accommodation-form-new-accommodation-new-0 button", "Cancel")
+      |> render_click()
+
+      refute has_element?(view, "form#accommodation-form-new-accommodation-new-0")
+    end
+
+    test "rebuilds the complete transfer form on change and keeps validation failures open", %{
+      conn: conn
+    } do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      view
+      |> element("tr:first-child td a", "Add transfer")
+      |> render_click()
+
+      form_selector = "form#transfer-form-new-transfer-new-0"
+
+      view
+      |> form(form_selector, %{
+        transfer: %{
+          transport_mode: "flight",
+          departure_time: "08:15",
+          arrival_time: "10:45",
+          plus_one_day: "true",
+          departure_station: "BER",
+          arrival_station: "LHR",
+          vessel_number: "HT 42",
+          carrier: "Hamster Air",
+          day_index: "0"
+        }
+      })
+      |> render_change()
+
+      assert has_element?(view, "#{form_selector} option[value='flight'][selected]")
+
+      assert has_element?(
+               view,
+               "#{form_selector} input[name='transfer[departure_time]'][value='08:15']"
+             )
+
+      assert has_element?(
+               view,
+               "#{form_selector} input[name='transfer[arrival_time]'][value='10:45']"
+             )
+
+      assert has_element?(
+               view,
+               "#{form_selector} input[name='transfer[carrier]'][value='Hamster Air']"
+             )
+
+      assert has_element?(
+               view,
+               "#{form_selector} input[name='transfer[vessel_number]'][value='HT 42']"
+             )
+
+      view
+      |> form(form_selector, %{transfer: %{transport_mode: "flight", day_index: "0"}})
+      |> render_submit()
+
+      assert has_element?(view, form_selector)
+    end
+
+    test "preserves transfer city selections when the form is replayed after reconnect", %{
+      conn: conn
+    } do
+      geonames_fixture()
+      berlin = Geo.find_city_by_geonames_id("2950159")
+      hamburg = Geo.find_city_by_geonames_id("2911298")
+
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      view
+      |> element("tr:first-child td a", "Add transfer")
+      |> render_click()
+
+      form_selector = "form#transfer-form-new-transfer-new-0"
+      departure_select = "#departure-city-input-new-transfer-new-0-live-select"
+      arrival_select = "#arrival-city-input-new-transfer-new-0-live-select"
+
+      # Native form recovery replays the form before LiveSelect restores its client-side selection.
+      view
+      |> element(form_selector)
+      |> render_change(%{
+        "_target" => ["transfer", "transport_mode"],
+        "transfer" => %{
+          "transport_mode" => "flight",
+          "departure_city" => Jason.encode!(%{id: berlin.id, country: berlin.country.iso}),
+          "departure_city_text_input" => Geo.city_text(berlin),
+          "arrival_city" => Jason.encode!(%{id: hamburg.id, country: hamburg.country.iso}),
+          "arrival_city_text_input" => Geo.city_text(hamburg),
+          "departure_time" => "08:15",
+          "arrival_time" => "10:45",
+          "day_index" => "0"
+        }
+      })
+
+      view
+      |> element(departure_select)
+      |> render_hook("selection_recovery", [
+        %{
+          "disabled" => false,
+          "label" => Geo.city_text(berlin),
+          "value" => %{"id" => berlin.id, "country" => berlin.country.iso}
+        }
+      ])
+
+      view
+      |> element(arrival_select)
+      |> render_hook("selection_recovery", [
+        %{
+          "disabled" => false,
+          "label" => Geo.city_text(hamburg),
+          "value" => %{"id" => hamburg.id, "country" => hamburg.country.iso}
+        }
+      ])
+
+      assert has_element?(
+               view,
+               "#{departure_select} input[name='transfer[departure_city]']:not([value=''])"
+             )
+
+      assert has_element?(
+               view,
+               "#{arrival_select} input[name='transfer[arrival_city]']:not([value=''])"
+             )
+
+      assert has_element?(
+               view,
+               "#{departure_select} input[name='transfer[departure_city_text_input]'][value*='#{berlin.name}']"
+             )
+
+      assert has_element?(
+               view,
+               "#{arrival_select} input[name='transfer[arrival_city_text_input]'][value*='#{hamburg.name}']"
+             )
+    end
+
     test "shows user's home city in transfer city default options", %{conn: conn} do
       geonames_fixture()
       home_city = Geo.find_city_by_geonames_id("2950159")
@@ -1432,6 +1724,37 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert accommodation.name == "Test Hotel"
       # 120.00 EUR
       assert accommodation.expense.price == Money.new(:EUR, "120.00")
+    end
+
+    test "keeps accommodation day selections renderable after form changes", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}")
+
+      view
+      |> element("tr:first-child td a", "Add accommodation")
+      |> render_click()
+
+      form_selector = "form#accommodation-form-new-accommodation-new-0"
+
+      view
+      |> form(form_selector, %{
+        accommodation: %{
+          name: "Unsaved Hotel",
+          start_day: "0",
+          end_day: "2"
+        }
+      })
+      |> render_change()
+
+      assert has_element?(
+               view,
+               "#{form_selector} input[name='accommodation[name]'][value='Unsaved Hotel']"
+             )
+
+      assert has_element?(view, "#{form_selector} [id^='selected-range-display-']", "1")
     end
 
     test "renders accommodation with currency conversion and tooltip", %{conn: conn} do
@@ -2010,6 +2333,13 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
   defp assert_eventually_contains(_view, expected_text, 0) do
     flunk("expected rendered LiveView to include #{inspect(expected_text)}")
+  end
+
+  defp panel_text(html, selector) do
+    html
+    |> Floki.parse_document!()
+    |> Floki.find(selector)
+    |> Floki.text(sep: " ")
   end
 
   defp with_pdf_renderer(renderer, fun) do
