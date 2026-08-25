@@ -18,18 +18,11 @@ defmodule HamsterTravel.Accounts.UserAvatar do
 
   def transform(:original, _scope), do: :noaction
 
-  def transform(version, _scope) do
+  def transform(:thumb, _scope) do
     if skip_processing?() do
       :noaction
     else
-      case version do
-        :thumb ->
-          {:convert, "-strip -thumbnail 256x256^ -gravity center -extent 256x256 -format jpg",
-           :jpg}
-
-        :original ->
-          :noaction
-      end
+      {:convert, "-strip -thumbnail 256x256^ -gravity center -extent 256x256 -format jpg", :jpg}
     end
   end
 
@@ -46,7 +39,7 @@ defmodule HamsterTravel.Accounts.UserAvatar do
     ]
   end
 
-  def s3_object_headers(_version, _scope) do
+  def s3_object_headers(:thumb, _scope) do
     [
       content_type: "image/jpeg",
       cache_control: "public, max-age=31536000"

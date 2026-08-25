@@ -1,0 +1,44 @@
+servers:
+  web:
+    hosts:
+      - <%= ENV.fetch("KAMAL_DEPLOY_HOST", "127.0.0.1") %>
+    proxy: false
+    stop_timeout: 30
+    options:
+      publish: 127.0.0.1:4400:4000
+      read-only: true
+      tmpfs: /tmp:rw,noexec,nosuid,size=1g
+      cap-drop: ALL
+      security-opt: no-new-privileges:true
+      memory: 2g
+      cpus: 2
+      pids-limit: 512
+
+ssh:
+  user: <%= ENV.fetch("KAMAL_SSH_USER", ENV.fetch("USER")) %>
+
+env:
+  clear:
+    PHX_HOST: <%= ENV.fetch("PHX_HOST", "localhost") %>
+    PHX_SCHEME: <%= ENV.fetch("PHX_SCHEME", "http") %>
+    PHX_PORT: <%= ENV.fetch("PHX_PORT", "4400") %>
+    PORT: 4000
+    POOL_SIZE: 10
+    AWS_REGION: <%= ENV.fetch("AWS_REGION", "eu-central-1") %>
+    AWS_S3_BUCKET: <%= ENV.fetch("AWS_S3_BUCKET", "hamster-travel-prod-images") %>
+    S3_ASSET_HOST: <%= ENV.fetch("S3_ASSET_HOST", "https://hamster-travel-prod-images.s3.eu-central-1.amazonaws.com") %>
+    CHROMIC_PDF_ON_DEMAND: "true"
+    CHROMIC_PDF_NO_SANDBOX: "true"
+    CHROMIC_PDF_DISCARD_STDERR: "true"
+    CHROMIC_PDF_DISABLE_DEV_SHM_USAGE: "true"
+    MAGICK_MEMORY_LIMIT: 128MiB
+    MAGICK_MAP_LIMIT: 128MiB
+    MAGICK_DISK_LIMIT: 1GiB
+    MAGICK_TEMPORARY_PATH: /tmp
+  secret:
+    - DATABASE_URL
+    - SECRET_KEY_BASE
+    - AWS_ACCESS_KEY_ID
+    - AWS_SECRET_ACCESS_KEY
+    - OPEN_EXCHANGE_RATES_APP_ID
+    - MAPBOX_ACCESS_TOKEN

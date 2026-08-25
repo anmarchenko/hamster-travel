@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+set -eu
+
+if [ "${KAMAL_DESTINATION:-}" != "production" ]; then
+  exit 0
+fi
+
+database_container="hamster-travel-production-db"
+health="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "${database_container}" 2>/dev/null || true)"
+
+if [ "${health}" != "healthy" ]; then
+  echo "Production PostgreSQL is not healthy (${health:-not running})." >&2
+  echo "Start it from ~/Work/hamster-travel-production before deploying." >&2
+  exit 1
+fi

@@ -41,6 +41,12 @@ uploads
 # local environment
 .envrc
 
+# production deployment secrets
+/.kamal/secrets
+/.kamal/secrets-common
+/.kamal/secrets.*
+!/.kamal/secrets.example
+
 # page snapshots
 .playwright-cli/
 

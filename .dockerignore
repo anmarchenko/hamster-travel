@@ -1,7 +1,10 @@
-# flyctl launch added from .elixir_ls/.gitignore
 .elixir_ls/**/*
+.git
+.github
+.agents
+.claude
+.codex
 
-# flyctl launch added from .gitignore
 # The directory Mix will write compiled artifacts to.
 _build
 
@@ -38,6 +41,20 @@ assets/node_modules
 
 **/.elixir_ls
 
-# flyctl launch added from deps/slugger/bench/.gitignore
 deps/slugger/bench/**/snapshots
-fly.toml
+
+# Files that are not part of the production image.
+test
+docs
+prod_backup
+uploads
+.playwright-cli
+legacy_csv
+legacy_csv_clean
+docker-compose.yml
+
+# Local deployment credentials and development environment.
+.kamal/secrets
+.kamal/secrets-common
+.kamal/secrets.*
+.envrc

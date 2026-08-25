@@ -18,19 +18,13 @@ defmodule HamsterTravel.Accounts.UserCover do
 
   def transform(:original, _scope), do: :noaction
 
-  def transform(version, _scope) do
+  def transform(:hero, _scope) do
     if skip_processing?() do
       :noaction
     else
-      case version do
-        :hero ->
-          {:convert,
-           "-auto-orient -thumbnail 2400x960 -colorspace sRGB -quality 95 -sampling-factor 4:4:4 -format jpg",
-           :jpg}
-
-        :original ->
-          :noaction
-      end
+      {:convert,
+       "-auto-orient -thumbnail 2400x960 -colorspace sRGB -quality 95 -sampling-factor 4:4:4 -format jpg",
+       :jpg}
     end
   end
 
@@ -47,7 +41,7 @@ defmodule HamsterTravel.Accounts.UserCover do
     ]
   end
 
-  def s3_object_headers(_version, _scope) do
+  def s3_object_headers(:hero, _scope) do
     [
       content_type: "image/jpeg",
       cache_control: "public, max-age=31536000"

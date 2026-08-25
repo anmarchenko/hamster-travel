@@ -44,6 +44,12 @@ defmodule HamsterTravelWeb.Router do
     end
   end
 
+  scope "/", HamsterTravelWeb do
+    pipe_through :api
+
+    get "/up", HealthController, :show
+  end
+
   ## Authentication routes
   scope "/", HamsterTravelWeb do
     pipe_through [:browser, :redirect_if_user_is_authenticated]

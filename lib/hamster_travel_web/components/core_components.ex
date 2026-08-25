@@ -914,7 +914,9 @@ defmodule HamsterTravelWeb.CoreComponents do
         @class
       ])
     }>
-      {Cldr.format_money(@display_money.amount, @display_money.currency)}<span :if={@suffix != []}>{render_slot(@suffix)}</span>
+      {Cldr.format_money(@display_money.amount, @display_money.currency)}<span :if={@suffix != []}>{render_slot(
+        @suffix
+      )}</span>
       <div
         :if={@is_converted}
         class="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-1 hidden group-hover:block w-max px-2 py-1 bg-gray-900 text-white text-xs rounded shadow-lg z-50"

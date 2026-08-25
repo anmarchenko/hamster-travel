@@ -12,17 +12,21 @@
 #   - https://pkgs.org/ - resource for finding needed packages
 #   - Ex: hexpm/elixir:1.14.3-erlang-25.2-debian-bullseye-20221004-slim
 #
-ARG ELIXIR_VERSION=1.18.3
-ARG OTP_VERSION=27.3
+ARG ELIXIR_VERSION=1.20.3
+ARG OTP_VERSION=27
 ARG DEBIAN_VERSION=bookworm-20250224-slim
 
-ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
+ARG BUILDER_IMAGE="elixir:${ELIXIR_VERSION}-otp-${OTP_VERSION}-slim"
+ARG NODE_IMAGE="node:22-bookworm-slim"
 ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
+
+FROM ${NODE_IMAGE} AS node
 
 FROM ${BUILDER_IMAGE} AS builder
 
 # install build dependencies
-RUN apt-get update -y && apt-get install -y build-essential git npm \
+COPY --from=node /usr/local/ /usr/local/
+RUN apt-get update -y && apt-get install -y build-essential git \
   && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
 # prepare build dir
@@ -71,6 +75,7 @@ FROM ${RUNNER_IMAGE}
 RUN apt-get update -y && apt-get install -y \
   libstdc++6 \
   openssl \
+  curl \
   libncurses5 \
   locales \
   imagemagick \
@@ -97,15 +102,7 @@ COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/hamster_trave
 
 USER nobody
 
+HEALTHCHECK --interval=10s --timeout=3s --start-period=30s --retries=6 \
+  CMD ["curl", "--fail", "--silent", "--show-error", "http://127.0.0.1:4000/up"]
+
 CMD ["/app/bin/server"]
-# Appended by flyctl
-ENV ECTO_IPV6=true
-ENV ERL_AFLAGS="-proto_dist inet6_tcp"
-
-# Appended by flyctl
-ENV ECTO_IPV6=true
-ENV ERL_AFLAGS="-proto_dist inet6_tcp"
-
-# Appended by flyctl
-ENV ECTO_IPV6=true
-ENV ERL_AFLAGS="-proto_dist inet6_tcp"

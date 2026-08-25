@@ -58,8 +58,8 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
           <.icon name="hero-calendar-date-range" class="h-5 w-5 text-gray-400 dark:text-gray-300" />
         </button>
         <.field_error :for={msg <- @errors}>{msg}</.field_error>
-        
-    <!-- Dropdown -->
+
+        <!-- Dropdown -->
         <div
           id={"day-range-dropdown-#{@id}"}
           class="day-range-select-dropdown absolute z-50 w-max max-w-[330px] sm:max-w-md mt-1 border border-gray-200 rounded-md shadow-lg overflow-visible bg-white dark:bg-zinc-900 hidden"
@@ -85,8 +85,8 @@ defmodule HamsterTravelWeb.Planning.DayRangeSelect do
               </div>
             </div>
           </div>
-          
-    <!-- Flatpickr calendar - when trip dates are known -->
+
+          <!-- Flatpickr calendar - when trip dates are known -->
           <div :if={@start_date != nil} class="max-h-80 overflow-y-auto p-2">
             <span class="day-range-flatpickr" />
           </div>

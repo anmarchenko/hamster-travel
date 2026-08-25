@@ -35,7 +35,7 @@ defmodule HamsterTravel.MixProject do
     [
       # phoenix framework
       {:phoenix, "~> 1.7.0"},
-      {:plug_cowboy, "~> 2.5"},
+      {:bandit, "~> 1.12"},
 
       # database
       {:phoenix_ecto, "~> 4.4"},
@@ -81,11 +81,10 @@ defmodule HamsterTravel.MixProject do
       {:yaml_elixir, "~> 2.9"},
 
       # file uploads
-      {:waffle, "~> 1.1"},
-      {:waffle_ecto, "~> 0.0.12"},
+      {:waffle, "~> 2.0"},
+      {:waffle_ecto, "~> 0.0.13"},
       {:ex_aws, "~> 2.6"},
       {:ex_aws_s3, "~> 2.5"},
-      {:hackney, "~> 1.20"},
       {:sweet_xml, "~> 0.7"},
 
       # math formulas - used for backpack packing templates

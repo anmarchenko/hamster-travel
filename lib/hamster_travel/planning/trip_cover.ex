@@ -18,7 +18,7 @@ defmodule HamsterTravel.Planning.TripCover do
 
   def transform(:original, _scope), do: :noaction
 
-  def transform(version, _scope) do
+  def transform(version, _scope) when version in [:hero, :card] do
     if skip_processing?() do
       :noaction
     else
@@ -28,9 +28,6 @@ defmodule HamsterTravel.Planning.TripCover do
 
         :card ->
           {:convert, "-strip -thumbnail 256x256 -format jpg", :jpg}
-
-        :original ->
-          :noaction
       end
     end
   end
@@ -48,7 +45,7 @@ defmodule HamsterTravel.Planning.TripCover do
     ]
   end
 
-  def s3_object_headers(_version, _scope) do
+  def s3_object_headers(version, _scope) when version in [:hero, :card] do
     [
       content_type: "image/jpeg",
       cache_control: "public, max-age=31536000"

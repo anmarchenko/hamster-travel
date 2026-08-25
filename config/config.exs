@@ -12,6 +12,7 @@ config :hamster_travel,
 
 # Configures the endpoint
 config :hamster_travel, HamsterTravelWeb.Endpoint,
+  adapter: Bandit.PhoenixAdapter,
   url: [host: "localhost"],
   render_errors: [
     formats: [html: HamsterTravelWeb.ErrorHTML, json: HamsterTravelWeb.ErrorJSON],
@@ -62,6 +63,7 @@ config :waffle,
   asset_host: {:system, "S3_ASSET_HOST"}
 
 config :ex_aws,
+  http_client: ExAws.Request.Req,
   json_codec: Jason,
   access_key_id: [{:system, "AWS_ACCESS_KEY_ID"}, :instance_role],
   secret_access_key: [{:system, "AWS_SECRET_ACCESS_KEY"}, :instance_role],
