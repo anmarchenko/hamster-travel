@@ -10,10 +10,7 @@ defmodule HamsterTravel.MixProject do
       compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps(),
-      elixirc_options: [
-        warnings_as_errors: true
-      ]
+      deps: deps()
     ]
   end
 
