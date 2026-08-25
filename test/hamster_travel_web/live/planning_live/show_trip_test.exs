@@ -1937,6 +1937,62 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "span", "2")
     end
 
+    test "keeps the default activity priority selected after form changes", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      view
+      |> element("#activity-new-0 [phx-click='add_activity']")
+      |> render_click()
+
+      form_selector = "form[id*='activity-form-new-activity-new-0']"
+
+      assert has_element?(
+               view,
+               "#{form_selector} input[name='activity[priority]'][value='2'][checked]"
+             )
+
+      view
+      |> form(form_selector, %{activity: %{name: "Museum"}})
+      |> render_change()
+
+      assert has_element?(
+               view,
+               "#{form_selector} input[name='activity[priority]'][value='2'][checked]"
+             )
+    end
+
+    test "shows activity priority validation errors", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      view
+      |> element("#activity-new-0 [phx-click='add_activity']")
+      |> render_click()
+
+      form_selector = "form[id*='activity-form-new-activity-new-0']"
+
+      view
+      |> element(form_selector)
+      |> render_submit(%{
+        "activity" => %{
+          "name" => "Museum",
+          "priority" => "4",
+          "day_index" => "0",
+          "expense" => %{"price" => %{"amount" => "0", "currency" => "EUR"}}
+        }
+      })
+
+      assert has_element?(view, "#{form_selector} .pc-form-field-error", "is invalid")
+      assert Planning.list_activities(trip) == []
+    end
+
     test "can create activity via form", %{conn: conn} do
       # Arrange
 
@@ -1985,6 +2041,45 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       activity = List.first(activities)
       assert activity.name == "Eiffel Tower"
       assert activity.priority == 3
+    end
+
+    test "can move and delete a newly created activity without reloading", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft", duration: 2})
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      view
+      |> element("#activity-new-0 [phx-click='add_activity']")
+      |> render_click()
+
+      view
+      |> form("form[id*='activity-form-new-activity-new-0']", %{
+        activity: %{
+          name: "New activity",
+          priority: "2",
+          day_index: "0",
+          expense: %{price: %{amount: "0", currency: "EUR"}}
+        }
+      })
+      |> render_submit()
+
+      [activity] = Planning.list_activities(trip)
+
+      render_hook(view, "move_activity", %{
+        "activity_id" => to_string(activity.id),
+        "new_day_index" => 1,
+        "position" => 0
+      })
+
+      assert Planning.get_activity!(activity.id).day_index == 1
+
+      view
+      |> element("[data-activity-id='#{activity.id}'] [phx-click='delete']")
+      |> render_click()
+
+      refute Enum.any?(Planning.list_activities(trip), &(&1.id == activity.id))
     end
 
     test "shows day expense form when clicking add expense button", %{conn: conn} do

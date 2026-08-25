@@ -3,6 +3,28 @@ import { sortableTouchDragOptions } from "./sortable_options";
 
 let ActivityDragDrop = {
   mounted() {
+    this.setupSortables();
+  },
+
+  updated() {
+    if (this.sortableStateSignature() !== this.sortableSignature) {
+      this.setupSortables();
+    }
+  },
+
+  destroyed() {
+    this.destroySortables();
+  },
+
+  destroySortables() {
+    (this.sortables || []).forEach((sortable) => sortable.destroy());
+    this.sortables = [];
+  },
+
+  setupSortables() {
+    this.destroySortables();
+    this.sortableSignature = this.sortableStateSignature();
+
     if (
       this.el.dataset.canEdit === undefined ||
       this.el.dataset.canEdit === "false"
@@ -31,7 +53,7 @@ let ActivityDragDrop = {
           );
         };
 
-        new Sortable(zone, {
+        const sortable = new Sortable(zone, {
           group: {
             name: groupName,
             put: (to, _from, dragEl) => canDrop(to.el || to, dragEl),
@@ -74,6 +96,8 @@ let ActivityDragDrop = {
             }
           },
         });
+
+        this.sortables.push(sortable);
       });
     };
 
@@ -96,6 +120,30 @@ let ActivityDragDrop = {
       idParam: "note_id",
       moveEvent: "move_note",
       reorderEvent: "reorder_note",
+    });
+  },
+
+  sortableStateSignature() {
+    const zoneSignature = ({ selector, draggable, idKey }) =>
+      Array.from(this.el.querySelectorAll(selector)).map((zone) => ({
+        targetDay: zone.dataset.targetDay,
+        itemIds: Array.from(zone.querySelectorAll(draggable)).map(
+          (item) => item.dataset[idKey],
+        ),
+      }));
+
+    return JSON.stringify({
+      canEdit: this.el.dataset.canEdit,
+      activities: zoneSignature({
+        selector: "[data-activity-drop-zone]",
+        draggable: ".draggable-activity",
+        idKey: "activityId",
+      }),
+      notes: zoneSignature({
+        selector: "[data-note-drop-zone]",
+        draggable: ".draggable-note",
+        idKey: "noteId",
+      }),
     });
   },
 };
