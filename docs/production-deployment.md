@@ -140,6 +140,41 @@ when no verified backup has completed for more than 24 hours. It does not send
 the notification again during the same outage; a later successful backup
 automatically arms the notification for the next outage.
 
+### Encrypted infrastructure backups
+
+The production infrastructure definition in
+`~/Work/hamster-travel-production` is backed up separately with Restic to the
+same S3 bucket under `beelink-infra-backups/`. Restic encrypts file contents,
+paths, and metadata before upload. The local `backups/` directory is explicitly
+excluded, so database dumps are never included in this encrypted repository.
+
+The Restic password lives outside the protected directory at
+`~/.config/hamster-travel/infra-backup-restic-password` with mode `0600`. Keep a
+copy of that password in a password manager or another machine: neither AWS nor
+Restic can recover the repository without it. The production `.env` supplies
+the same backup-only AWS credentials used by the database uploader.
+
+The infrastructure timer runs every six hours at approximately 00:45, 06:45,
+12:45, and 18:45, with up to ten minutes of randomized delay. Retention keeps
+all snapshots from the last 24 hours, 14 daily snapshots, eight weekly
+snapshots, and 12 monthly snapshots. Each run prunes expired data, checks the
+repository, and updates
+`~/.local/state/hamster-travel/infra-backup-last-successful` only after success.
+
+Install and verify the checked-in user unit with:
+
+```bash
+systemctl --user daemon-reload
+systemctl --user enable --now hamster-travel-production-infra-backup.timer
+systemctl --user start hamster-travel-production-infra-backup.service
+systemctl --user status hamster-travel-production-infra-backup.service
+```
+
+To restore on another machine, install Restic, provide the password file and
+the backup-only AWS credentials, set `RESTIC_REPOSITORY` to the same S3
+repository, and restore into a new empty directory. Never restore directly over
+the live production directory.
+
 ## Tailscale
 
 Tailscale comes only after local functional, restart, rollback, persistence, and

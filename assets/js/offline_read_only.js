@@ -1,4 +1,5 @@
 const LOCK_SELECTOR = '[data-offline-lock]';
+const NOTICE_SELECTOR = '[data-offline-notice]';
 const OFFLINE_MARKER = 'data-offline-readonly';
 
 let initialized = false;
@@ -17,6 +18,14 @@ function lockAllRegions(locked) {
   });
 }
 
+function showOfflineNotices(visible) {
+  document.querySelectorAll(NOTICE_SELECTOR).forEach((notice) => {
+    if (notice instanceof HTMLElement) {
+      notice.hidden = !visible;
+    }
+  });
+}
+
 function shouldBeReadOnly() {
   return navigator.onLine === false || liveViewConnected === false;
 }
@@ -25,6 +34,7 @@ function setReadOnly(nextReadOnly) {
   readOnly = nextReadOnly;
   document.body.toggleAttribute(OFFLINE_MARKER, readOnly);
   lockAllRegions(readOnly);
+  showOfflineNotices(readOnly);
 
   window.dispatchEvent(
     new CustomEvent('hamster:offline-read-only', {
@@ -61,7 +71,21 @@ export function preserveOfflineLock(_from, to) {
 }
 
 export function lockAddedOfflineRegion(node) {
-  if (!readOnly || !(node instanceof Element)) {
+  if (!(node instanceof Element)) {
+    return;
+  }
+
+  if (node.matches(NOTICE_SELECTOR) && node instanceof HTMLElement) {
+    node.hidden = !readOnly;
+  }
+
+  node.querySelectorAll(NOTICE_SELECTOR).forEach((notice) => {
+    if (notice instanceof HTMLElement) {
+      notice.hidden = !readOnly;
+    }
+  });
+
+  if (!readOnly) {
     return;
   }
 

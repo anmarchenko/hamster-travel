@@ -24,11 +24,14 @@ defmodule HamsterTravelWeb.CoreComponentsTest do
     test "renders a full-width sticky offline notice without a spinner" do
       html = render_component(&CoreComponents.flash_group/1, flash: %{})
 
-      assert html =~ ~r/<div[^>]*id="disconnected"/
+      assert html =~ ~r/<div[^>]*id="disconnected"[^>]*data-offline-notice/
       assert html =~ "sticky top-0"
       assert html =~ "w-full"
       assert html =~ "bg-amber-50"
       assert html =~ "You are offline at the moment, the app is in readonly mode"
+      assert html =~ ~r/<div[^>]*id="disconnected"[^>]*hidden/
+      refute html =~ "phx-connected"
+      refute html =~ "phx-disconnected"
       refute html =~ "animate-spin"
       refute html =~ "hero-arrow-path"
     end

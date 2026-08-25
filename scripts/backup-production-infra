@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+infra_dir="${HAMSTER_TRAVEL_PRODUCTION_DIR:-/home/marvin/Work/hamster-travel-production}"
+production_env="${HAMSTER_TRAVEL_PRODUCTION_ENV_FILE:-${infra_dir}/.env}"
+password_file="${HAMSTER_TRAVEL_INFRA_RESTIC_PASSWORD_FILE:-/home/marvin/.config/hamster-travel/infra-backup-restic-password}"
+success_marker="${HAMSTER_TRAVEL_INFRA_BACKUP_SUCCESS_MARKER:-/home/marvin/.local/state/hamster-travel/infra-backup-last-successful}"
+restic_bin="${RESTIC_BIN:-}"
+
+if [[ ! -d "${infra_dir}" || ! -f "${production_env}" ]]; then
+  printf 'Production infrastructure directory or environment file is missing\n' >&2
+  exit 1
+fi
+
+if [[ ! -f "${password_file}" ]]; then
+  printf 'Restic password file is missing: %s\n' "${password_file}" >&2
+  exit 1
+fi
+
+if [[ -z "${restic_bin}" ]]; then
+  restic_bin="$(command -v restic || true)"
+fi
+
+if [[ -z "${restic_bin}" || ! -x "${restic_bin}" ]]; then
+  printf 'Restic is not installed\n' >&2
+  exit 1
+fi
+
+set -a
+# shellcheck disable=SC1090
+source "${production_env}"
+set +a
+
+AWS_ACCESS_KEY_ID="${HAMSTER_TRAVEL_BACKUP_AWS_ACCESS_KEY_ID:-${AWS_ACCESS_KEY_ID:-}}"
+AWS_SECRET_ACCESS_KEY="${HAMSTER_TRAVEL_BACKUP_AWS_SECRET_ACCESS_KEY:-${AWS_SECRET_ACCESS_KEY:-}}"
+AWS_REGION="${HAMSTER_TRAVEL_BACKUP_AWS_REGION:-${AWS_REGION:-}}"
+AWS_S3_BUCKET="${HAMSTER_TRAVEL_BACKUP_AWS_S3_BUCKET:-${AWS_S3_BUCKET:-}}"
+export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_REGION
+
+: "${AWS_ACCESS_KEY_ID:?AWS_ACCESS_KEY_ID is required}"
+: "${AWS_SECRET_ACCESS_KEY:?AWS_SECRET_ACCESS_KEY is required}"
+: "${AWS_REGION:?AWS_REGION is required}"
+: "${AWS_S3_BUCKET:?AWS_S3_BUCKET is required}"
+
+prefix="${HAMSTER_TRAVEL_INFRA_BACKUP_S3_PREFIX:-beelink-infra-backups}"
+prefix="${prefix#/}"
+prefix="${prefix%/}"
+
+if [[ -z "${prefix}" ]]; then
+  printf 'Infrastructure backup S3 prefix must not be empty\n' >&2
+  exit 1
+fi
+
+RESTIC_REPOSITORY="${RESTIC_REPOSITORY:-s3:s3.${AWS_REGION}.amazonaws.com/${AWS_S3_BUCKET}/${prefix}}"
+RESTIC_PASSWORD_FILE="${RESTIC_PASSWORD_FILE:-${password_file}}"
+export RESTIC_REPOSITORY RESTIC_PASSWORD_FILE
+
+umask 077
+
+if ! "${restic_bin}" snapshots --no-lock >/dev/null; then
+  printf 'Restic repository is unavailable or has not been initialized: %s\n' "${RESTIC_REPOSITORY}" >&2
+  exit 1
+fi
+
+"${restic_bin}" backup \
+  --one-file-system \
+  --exclude "${infra_dir}/backups" \
+  --tag hamster-travel-production-infra \
+  "${infra_dir}"
+
+"${restic_bin}" forget \
+  --tag hamster-travel-production-infra \
+  --keep-within 24h \
+  --keep-daily 14 \
+  --keep-weekly 8 \
+  --keep-monthly 12 \
+  --prune
+
+"${restic_bin}" check
+
+mkdir --parents "$(dirname -- "${success_marker}")"
+success_marker_partial="${success_marker}.partial.$$"
+printf '%s\n' "$(date --utc +%Y-%m-%dT%H:%M:%SZ)" >"${success_marker_partial}"
+chmod 600 "${success_marker_partial}"
+mv -- "${success_marker_partial}" "${success_marker}"
+
+printf 'repository=%s\n' "${RESTIC_REPOSITORY}"
+printf 'source=%s\n' "${infra_dir}"
+printf 'excluded=%s/backups\n' "${infra_dir}"
+printf 'success_marker=%s\n' "${success_marker}"

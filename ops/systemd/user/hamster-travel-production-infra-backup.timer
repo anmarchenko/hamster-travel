@@ -1,0 +1,11 @@
+[Unit]
+Description=Back up Hamster Travel production infrastructure every six hours
+
+[Timer]
+OnCalendar=*-*-* 00/6:45:00
+RandomizedDelaySec=10m
+Persistent=true
+Unit=hamster-travel-production-infra-backup.service
+
+[Install]
+WantedBy=timers.target

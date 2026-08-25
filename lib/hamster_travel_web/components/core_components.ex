@@ -220,8 +220,7 @@ defmodule HamsterTravelWeb.CoreComponents do
     <.flash kind={:error} title={gettext("Error!")} flash={@flash} />
     <div
       id="disconnected"
-      phx-disconnected={show("#disconnected")}
-      phx-connected={hide("#disconnected")}
+      data-offline-notice
       role="status"
       class="sticky top-0 z-50 w-full border-b border-amber-300 bg-amber-50 px-4 py-3 text-center text-sm font-medium text-amber-900 shadow-sm dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100"
       hidden

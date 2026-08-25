@@ -1,0 +1,31 @@
+[Unit]
+Description=Back up Hamster Travel production infrastructure with Restic
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/marvin/Projects/hamster-travel/scripts/backup-production-infra
+Environment=PATH=/usr/bin
+Environment=RESTIC_CACHE_DIR=/home/marvin/.cache/hamster-travel-infra-restic
+UMask=0077
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+NoNewPrivileges=true
+PrivateDevices=true
+PrivateTmp=true
+ProtectClock=true
+ProtectControlGroups=true
+ProtectHome=read-only
+ProtectKernelLogs=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectSystem=strict
+ReadWritePaths=/home/marvin/.cache/hamster-travel-infra-restic
+ReadWritePaths=/home/marvin/.local/state/hamster-travel
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+LockPersonality=true
+SystemCallArchitectures=native
