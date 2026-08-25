@@ -24,7 +24,7 @@ defmodule HamsterTravelWeb.UserLoginLive do
             <.field
               type="email"
               autocomplete="email"
-              class="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+              class="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm dark:text-gray-200"
               field={@form[:email]}
               placeholder={gettext("Email")}
               required={true}
@@ -35,7 +35,7 @@ defmodule HamsterTravelWeb.UserLoginLive do
             <.field
               type="password"
               autocomplete="current-password"
-              class="relative block w-full appearance-none rounded-none rounded-b-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+              class="relative block w-full appearance-none rounded-none rounded-b-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm dark:text-gray-200"
               field={@form[:password]}
               placeholder={gettext("Password")}
               required={true}

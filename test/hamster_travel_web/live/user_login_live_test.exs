@@ -11,6 +11,8 @@ defmodule HamsterTravelWeb.UserLoginLiveTest do
       assert html =~ "Log in"
       assert html =~ "Forgot your password?"
       assert has_element?(lv, "#login-form[phx-change='form_changed']")
+      assert has_element?(lv, "input[name='user[email]'][class*='dark:text-gray-200']")
+      assert has_element?(lv, "input[name='user[password]'][class*='dark:text-gray-200']")
     end
 
     test "accepts the complete recovery change payload", %{conn: conn} do
