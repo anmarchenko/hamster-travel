@@ -5,7 +5,9 @@ servers:
     proxy: false
     stop_timeout: 30
     options:
-      publish: 127.0.0.1:4400:4000
+      publish:
+        - 127.0.0.1:4400:4000
+        - 192.168.4.90:4400:4000
       read-only: true
       tmpfs:
         - /tmp:rw,noexec,nosuid,size=1g
@@ -21,10 +23,10 @@ ssh:
 
 env:
   clear:
-    PHX_HOST: <%= ENV.fetch("PHX_HOST", "127.0.0.1") %>
-    PHX_SCHEME: <%= ENV.fetch("PHX_SCHEME", "http") %>
-    PHX_PORT: <%= ENV.fetch("PHX_PORT", "4400") %>
-    PHX_CHECK_ORIGINS: <%= ENV.fetch("PHX_CHECK_ORIGINS", "http://127.0.0.1:4400") %>
+    PHX_HOST: <%= ENV.fetch("PHX_HOST", "hamster-travel.tail920074.ts.net") %>
+    PHX_SCHEME: <%= ENV.fetch("PHX_SCHEME", "https") %>
+    PHX_PORT: <%= ENV.fetch("PHX_PORT", "443") %>
+    PHX_CHECK_ORIGINS: <%= ENV.fetch("PHX_CHECK_ORIGINS", "https://hamster-travel.tail920074.ts.net,http://127.0.0.1:4400,http://192.168.4.90:4400") %>
     PORT: 4000
     POOL_SIZE: 10
     AWS_REGION: <%= ENV.fetch("AWS_REGION", "eu-central-1") %>

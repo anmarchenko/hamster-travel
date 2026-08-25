@@ -8,7 +8,8 @@ production operations.
 
 - Application deployment: this repository, via Kamal destination `production`.
 - PostgreSQL and network: `~/Work/hamster-travel-production/compose.yaml`.
-- Application endpoint on the host: `http://127.0.0.1:4400`.
+- Application endpoints on the host: `http://127.0.0.1:4400` and
+  `http://192.168.4.90:4400` on the home LAN.
 - PostgreSQL endpoint on the host: `127.0.0.1:65432`.
 - Container network: external Docker network `kamal`.
 
@@ -16,12 +17,21 @@ The application runs without `kamal-proxy` during the local-validation stage.
 This avoids an additional persistent proxy volume, but deployments have a short
 interruption while the old container releases port `4400`.
 
-Phoenix keeps WebSocket origin checking enabled. For local validation the
-canonical URL is `http://127.0.0.1:4400`. When enabling Tailscale Serve, set
-`PHX_HOST` to the full MagicDNS hostname, `PHX_SCHEME=https`, `PHX_PORT=443`,
-and `PHX_CHECK_ORIGINS=https://<full-magicdns-hostname>` before redeploying.
+Phoenix keeps WebSocket origin checking enabled. The canonical production URL
+is `https://hamster-travel.tail920074.ts.net`, exposed through Tailscale Funnel
+on public HTTPS port `443`. Funnel proxies only to `http://127.0.0.1:4400`;
+PostgreSQL remains loopback-only and is never included in the Funnel config.
+Set `PHX_HOST` to the full MagicDNS hostname, `PHX_SCHEME=https`, `PHX_PORT=443`,
+and include both `https://<full-magicdns-hostname>` and
+`http://127.0.0.1:4400` in `PHX_CHECK_ORIGINS` before redeploying. When LAN
+access is enabled, include its explicit origin as well.
 `PHX_CHECK_ORIGINS` accepts a comma-separated list of explicit origins; wildcard
 origins are rejected.
+
+The Beelink uses Eero DHCP reservation `192.168.4.90` for its wired interface.
+Reserve that address for the connected Beelink device in the Eero app; do not
+create an internet port-forward. Production publishes port `4400` only on
+loopback and that LAN address. PostgreSQL remains loopback-only on `65432`.
 
 The deployment wrapper starts an ephemeral registry on `127.0.0.1:5555` and
 removes it after each local deployment. It has no persistent volume. Set
