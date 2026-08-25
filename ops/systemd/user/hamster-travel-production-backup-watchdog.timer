@@ -1,0 +1,11 @@
+[Unit]
+Description=Check hourly for overdue Hamster Travel production backups
+
+[Timer]
+OnCalendar=hourly
+RandomizedDelaySec=5m
+Persistent=true
+Unit=hamster-travel-production-backup-watchdog.service
+
+[Install]
+WantedBy=timers.target

@@ -22,19 +22,16 @@ defmodule HamsterTravelWeb.TripPdf do
   defmodule ChromicRenderer do
     @moduledoc false
     @behaviour HamsterTravelWeb.TripPdf.Renderer
-    @trip_pdf_lock {:hamster_travel, :trip_pdf_chromic_lock}
 
     @impl true
     def render(html, opts \\ []) do
-      :global.trans(@trip_pdf_lock, fn ->
-        with {:ok, encoded_pdf} <- ChromicPDF.print_to_pdf({:html, html}, opts),
-             {:ok, pdf_binary} <- Base.decode64(encoded_pdf) do
-          {:ok, pdf_binary}
-        else
-          :error -> {:error, :invalid_pdf_data}
-          {:error, reason} -> {:error, reason}
-        end
-      end)
+      with {:ok, encoded_pdf} <- ChromicPDF.print_to_pdf({:html, html}, opts),
+           {:ok, pdf_binary} <- Base.decode64(encoded_pdf) do
+        {:ok, pdf_binary}
+      else
+        :error -> {:error, :invalid_pdf_data}
+        {:error, reason} -> {:error, reason}
+      end
     end
   end
 

@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+infra_dir="${HAMSTER_TRAVEL_PRODUCTION_DIR:-/home/marvin/Work/hamster-travel-production}"
+backup_dir="${HAMSTER_TRAVEL_BACKUP_DIR:-${infra_dir}/backups}"
+container="${HAMSTER_TRAVEL_POSTGRES_CONTAINER:-hamster-travel-production-db}"
+database="${POSTGRES_DB:-hamster_travel}"
+database_user="${POSTGRES_USER:-hamster_travel}"
+backup_path="${1:-}"
+
+if [[ -z "${backup_path}" ]]; then
+  newest_mtime=-1
+
+  while IFS= read -r -d '' candidate; do
+    candidate_mtime="$(stat --format '%Y' -- "${candidate}")"
+
+    if ((candidate_mtime > newest_mtime)); then
+      backup_path="${candidate}"
+      newest_mtime="${candidate_mtime}"
+    fi
+  done < <(find "${backup_dir}" -maxdepth 1 -type f -name 'hamster-travel-*.dump' -print0)
+fi
+
+if [[ -z "${backup_path}" || ! -f "${backup_path}" ]]; then
+  printf 'No production backup found\n' >&2
+  exit 1
+fi
+
+backup_path="$(realpath -- "${backup_path}")"
+backup_dir="$(realpath -- "${backup_dir}")"
+
+if [[ "${backup_path}" != "${backup_dir}"/hamster-travel-*.dump ]]; then
+  printf 'Backup must be a Hamster Travel dump inside %s\n' "${backup_dir}" >&2
+  exit 1
+fi
+
+checksum_path="${backup_path}.sha256"
+if [[ ! -f "${checksum_path}" ]]; then
+  printf 'Missing backup checksum: %s\n' "${checksum_path}" >&2
+  exit 1
+fi
+
+(cd "${backup_dir}" && sha256sum --check -- "$(basename "${checksum_path}")")
+
+restore_database="hamster_travel_restore_test_$(date --utc +%Y%m%d%H%M%S)"
+
+cleanup() {
+  docker exec "${container}" dropdb \
+    --username "${database_user}" \
+    --if-exists \
+    --force \
+    "${restore_database}" >/dev/null 2>&1 || true
+}
+
+trap cleanup EXIT
+cleanup
+
+docker exec "${container}" createdb \
+  --username "${database_user}" \
+  "${restore_database}"
+
+docker exec --interactive "${container}" \
+  pg_restore \
+  --username "${database_user}" \
+  --dbname "${restore_database}" \
+  --exit-on-error \
+  --single-transaction \
+  --no-owner \
+  --no-acl <"${backup_path}"
+
+production_counts="$(docker exec "${container}" psql \
+  --username "${database_user}" \
+  --dbname "${database}" \
+  --tuples-only \
+  --no-align \
+  --command 'SELECT count(*) FROM users UNION ALL SELECT count(*) FROM trips UNION ALL SELECT count(*) FROM cities;')"
+
+restore_counts="$(docker exec "${container}" psql \
+  --username "${database_user}" \
+  --dbname "${restore_database}" \
+  --tuples-only \
+  --no-align \
+  --command 'SELECT count(*) FROM users UNION ALL SELECT count(*) FROM trips UNION ALL SELECT count(*) FROM cities;')"
+
+if [[ "${production_counts}" != "${restore_counts}" ]]; then
+  printf 'Restore-test row counts differ from production\n' >&2
+  exit 1
+fi
+
+printf 'restore_test=passed\n'
+printf 'users_trips_cities=%s\n' "$(tr '\n' ',' <<<"${restore_counts}" | sed 's/,$//')"

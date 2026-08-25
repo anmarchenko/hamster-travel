@@ -71,7 +71,7 @@ defmodule HamsterTravel.MixProject do
       {:req, "~> 0.5"},
 
       # i18n, l10n
-      {:gettext, "~> 0.22"},
+      {:gettext, "~> 1.0"},
       {:ex_cldr, "~> 2.23"},
       {:ex_cldr_dates_times, "~> 2.0"},
       {:ex_cldr_numbers, "~> 2.0"},
@@ -91,8 +91,8 @@ defmodule HamsterTravel.MixProject do
       {:abacus, "~> 2.0"},
 
       # money
-      {:ex_money, "~> 5.0"},
-      {:ex_money_sql, "~> 1.0"},
+      {:ex_money, "~> 6.2"},
+      {:ex_money_sql, "~> 2.1"},
       {:chromic_pdf, "~> 1.16"},
 
       # observability

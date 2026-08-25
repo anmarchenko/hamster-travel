@@ -1,0 +1,17 @@
+[Unit]
+Description=Back up Hamster Travel production PostgreSQL to S3
+
+[Service]
+Type=oneshot
+ExecStart=/home/marvin/Projects/hamster-travel/scripts/backup-production
+UMask=0077
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/marvin/Work/hamster-travel-production/backups
+RestrictSUIDSGID=true
+LockPersonality=true

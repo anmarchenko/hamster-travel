@@ -1,0 +1,14 @@
+[Unit]
+Description=Alert when Hamster Travel production backups are overdue
+
+[Service]
+Type=oneshot
+ExecStart=/home/marvin/Projects/hamster-travel/scripts/check-production-backup-freshness
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/marvin/Work/hamster-travel-production/backups
+RestrictSUIDSGID=true
+LockPersonality=true

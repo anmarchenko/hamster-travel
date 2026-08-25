@@ -29,15 +29,6 @@ defmodule HamsterTravel.TestExchangeRates do
   end
 
   @impl Money.ExchangeRates
-  def decode_rates(body) when is_map(body) do
-    body
-  end
-
-  def decode_rates(_body) do
-    @fixed_rates
-  end
-
-  @impl Money.ExchangeRates
   def init(config) do
     config
   end

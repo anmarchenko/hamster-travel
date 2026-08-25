@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+production_env="${HAMSTER_TRAVEL_PRODUCTION_ENV_FILE:-/home/marvin/Work/hamster-travel-production/.env}"
+direnv_file="${HAMSTER_TRAVEL_DIRENV_FILE:-${repo_dir}/.envrc}"
+backup_path="${1:-}"
+checksum_path="${2:-}"
+
+if [[ ! -f "${production_env}" || ! -f "${direnv_file}" ]]; then
+  printf 'AWS environment files are missing\n' >&2
+  exit 1
+fi
+
+# The repository direnv file provides the historical backup bucket and region.
+# Production credentials override any matching development values.
+set -a
+# shellcheck disable=SC1090
+source "${direnv_file}"
+# shellcheck disable=SC1090
+source "${production_env}"
+set +a
+
+AWS_ACCESS_KEY_ID="${HAMSTER_TRAVEL_BACKUP_AWS_ACCESS_KEY_ID:-${AWS_ACCESS_KEY_ID:-}}"
+AWS_SECRET_ACCESS_KEY="${HAMSTER_TRAVEL_BACKUP_AWS_SECRET_ACCESS_KEY:-${AWS_SECRET_ACCESS_KEY:-}}"
+AWS_REGION="${HAMSTER_TRAVEL_BACKUP_AWS_REGION:-${AWS_REGION:-}}"
+AWS_S3_BUCKET="${HAMSTER_TRAVEL_BACKUP_AWS_S3_BUCKET:-${AWS_S3_BUCKET:-}}"
+export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_REGION AWS_S3_BUCKET
+
+: "${AWS_ACCESS_KEY_ID:?AWS_ACCESS_KEY_ID is required}"
+: "${AWS_SECRET_ACCESS_KEY:?AWS_SECRET_ACCESS_KEY is required}"
+: "${AWS_REGION:?AWS_REGION is required}"
+: "${AWS_S3_BUCKET:?AWS_S3_BUCKET is required}"
+
+if [[ ! -f "${backup_path}" || ! -f "${checksum_path}" ]]; then
+  printf 'Backup and checksum files are required\n' >&2
+  exit 1
+fi
+
+backup_path="$(realpath -- "${backup_path}")"
+checksum_path="$(realpath -- "${checksum_path}")"
+
+if [[ "${checksum_path}" != "${backup_path}.sha256" ]]; then
+  printf 'Checksum path must match the backup path\n' >&2
+  exit 1
+fi
+
+aws_cli="${AWS_CLI:-}"
+
+if [[ -z "${aws_cli}" ]]; then
+  aws_cli="$(command -v aws || true)"
+fi
+
+if [[ -z "${aws_cli}" && -x /home/marvin/.local/bin/aws ]]; then
+  aws_cli=/home/marvin/.local/bin/aws
+fi
+
+if [[ -z "${aws_cli}" || ! -x "${aws_cli}" ]]; then
+  printf 'AWS CLI is not installed\n' >&2
+  exit 1
+fi
+
+prefix="${HAMSTER_TRAVEL_BACKUP_S3_PREFIX:-beelink-db-backups}"
+prefix="${prefix#/}"
+prefix="${prefix%/}"
+
+if [[ -z "${prefix}" ]]; then
+  printf 'S3 backup prefix must not be empty\n' >&2
+  exit 1
+fi
+
+backup_name="$(basename -- "${backup_path}")"
+checksum_name="$(basename -- "${checksum_path}")"
+backup_key="${prefix}/${backup_name}"
+checksum_key="${prefix}/${checksum_name}"
+backup_size="$(stat --format '%s' -- "${backup_path}")"
+checksum_size="$(stat --format '%s' -- "${checksum_path}")"
+backup_sha256="$(cut --delimiter ' ' --fields 1 "${checksum_path}")"
+
+"${aws_cli}" s3 cp \
+  --only-show-errors \
+  --region "${AWS_REGION}" \
+  --metadata "sha256=${backup_sha256}" \
+  "${backup_path}" \
+  "s3://${AWS_S3_BUCKET}/${backup_key}"
+
+"${aws_cli}" s3 cp \
+  --only-show-errors \
+  --region "${AWS_REGION}" \
+  "${checksum_path}" \
+  "s3://${AWS_S3_BUCKET}/${checksum_key}"
+
+remote_backup_size="$("${aws_cli}" s3api head-object \
+  --region "${AWS_REGION}" \
+  --bucket "${AWS_S3_BUCKET}" \
+  --key "${backup_key}" \
+  --query ContentLength \
+  --output text)"
+
+remote_checksum_size="$("${aws_cli}" s3api head-object \
+  --region "${AWS_REGION}" \
+  --bucket "${AWS_S3_BUCKET}" \
+  --key "${checksum_key}" \
+  --query ContentLength \
+  --output text)"
+
+if [[ "${remote_backup_size}" != "${backup_size}" || "${remote_checksum_size}" != "${checksum_size}" ]]; then
+  printf 'S3 object size verification failed\n' >&2
+  exit 1
+fi
+
+printf 's3_backup=s3://%s/%s\n' "${AWS_S3_BUCKET}" "${backup_key}"
+printf 's3_checksum=s3://%s/%s\n' "${AWS_S3_BUCKET}" "${checksum_key}"

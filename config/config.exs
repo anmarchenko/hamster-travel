@@ -54,8 +54,12 @@ config :ex_cldr,
   json_library: Jason
 
 config :ex_money,
-  json_library: Jason,
-  default_cldr_backend: HamsterTravelWeb.Cldr
+  auto_start_exchange_rate_service: false,
+  json_library: Jason
+
+config :localize,
+  default_locale: :en,
+  supported_locales: [:en, :ru]
 
 config :waffle,
   storage: Waffle.Storage.S3,

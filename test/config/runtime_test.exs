@@ -13,7 +13,12 @@ defmodule HamsterTravel.Config.RuntimeTest do
     "CHROMIC_PDF_NO_SANDBOX",
     "CHROMIC_PDF_DISCARD_STDERR",
     "CHROMIC_PDF_DISABLE_DEV_SHM_USAGE",
+    "CHROMIC_PDF_GHOSTSCRIPT_POOL_SIZE",
     "CHROME_BIN",
+    "CHROMIC_PDF_POOL_SIZE",
+    "PHX_CHECK_ORIGINS",
+    "PHX_PORT",
+    "PHX_SCHEME",
     "POOL_SIZE",
     "TRIP_PDF_RENDERER"
   ]
@@ -52,6 +57,10 @@ defmodule HamsterTravel.Config.RuntimeTest do
     assert config
            |> hamster_travel_config()
            |> Keyword.fetch!(:trip_pdf_renderer) == HamsterTravelWeb.TripPdf.ChromicRenderer
+
+    assert config
+           |> hamster_travel_config()
+           |> Keyword.fetch!(:warm_chromic_pdf)
   end
 
   test "stale TRIP_PDF_RENDERER=flame env is ignored" do
@@ -77,6 +86,37 @@ defmodule HamsterTravel.Config.RuntimeTest do
     assert Keyword.fetch!(repo_config, :pool_size) == 25
   end
 
+  test "endpoint permits only the canonical origin by default" do
+    endpoint_config =
+      read_prod_config()
+      |> hamster_travel_config()
+      |> Keyword.fetch!(HamsterTravelWeb.Endpoint)
+
+    assert Keyword.fetch!(endpoint_config, :check_origin) == ["https://example.com"]
+  end
+
+  test "endpoint accepts an explicit origin allowlist" do
+    System.put_env("PHX_CHECK_ORIGINS", "http://127.0.0.1:4400, https://hamster.example.ts.net")
+
+    endpoint_config =
+      read_prod_config()
+      |> hamster_travel_config()
+      |> Keyword.fetch!(HamsterTravelWeb.Endpoint)
+
+    assert Keyword.fetch!(endpoint_config, :check_origin) == [
+             "http://127.0.0.1:4400",
+             "https://hamster.example.ts.net"
+           ]
+  end
+
+  test "endpoint rejects wildcard origins" do
+    System.put_env("PHX_CHECK_ORIGINS", "https://*.example.com")
+
+    assert_raise RuntimeError, ~r/explicit comma-separated HTTP\(S\) origins/, fn ->
+      read_prod_config()
+    end
+  end
+
   test "chromic pdf session pool has explicit init timeout in prod config" do
     config = read_prod_config()
 
@@ -88,10 +128,26 @@ defmodule HamsterTravel.Config.RuntimeTest do
     session_pool_opts = Keyword.fetch!(chromic_pdf_opts, :session_pool)
 
     assert Keyword.fetch!(chromic_pdf_opts, :on_demand) == false
+    assert Keyword.fetch!(session_pool_opts, :size) == 4
     assert Keyword.fetch!(session_pool_opts, :timeout) == 60_000
     assert Keyword.fetch!(session_pool_opts, :init_timeout) == 60_000
     assert Keyword.fetch!(session_pool_opts, :checkout_timeout) == 60_000
-    assert Keyword.fetch!(chromic_pdf_opts, :chrome_args) == "--disable-dev-shm-usage"
+    assert Keyword.fetch!(session_pool_opts, :max_uses) == 500
+    assert Keyword.fetch!(chromic_pdf_opts, :ghostscript_pool) == [size: 2]
+    assert Keyword.fetch!(chromic_pdf_opts, :chrome_args) == nil
+  end
+
+  test "chromic PDF pool sizes are configurable" do
+    System.put_env("CHROMIC_PDF_POOL_SIZE", "6")
+    System.put_env("CHROMIC_PDF_GHOSTSCRIPT_POOL_SIZE", "3")
+
+    chromic_pdf_opts =
+      read_prod_config()
+      |> hamster_travel_config()
+      |> Keyword.fetch!(ChromicPDF)
+
+    assert chromic_pdf_opts[:session_pool][:size] == 6
+    assert chromic_pdf_opts[:ghostscript_pool][:size] == 3
   end
 
   defp read_prod_config do

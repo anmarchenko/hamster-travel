@@ -15,6 +15,7 @@ defmodule HamsterTravel.Application do
       [
         # Start the Ecto repository
         HamsterTravel.Repo,
+        Money.ExchangeRates.Retriever,
         {ChromicPDF, chromic_pdf_opts},
         # Start the Telemetry supervisor
         HamsterTravelWeb.Telemetry,
@@ -32,11 +33,31 @@ defmodule HamsterTravel.Application do
 
     case Supervisor.start_link(children, opts) do
       {:ok, pid} ->
+        warm_chromic_pdf()
         log_storage_startup_check()
         {:ok, pid}
 
       error ->
         error
+    end
+  end
+
+  defp warm_chromic_pdf do
+    if Application.get_env(:hamster_travel, :warm_chromic_pdf, false) do
+      {duration_us, result} =
+        :timer.tc(fn ->
+          ChromicPDF.print_to_pdf(
+            {:html, "<html><body><p>Hamster Travel PDF warm-up</p></body></html>"}
+          )
+        end)
+
+      case result do
+        {:ok, _pdf} ->
+          Logger.info("ChromicPDF warm-up completed in #{div(duration_us, 1_000)}ms")
+
+        {:error, reason} ->
+          raise "ChromicPDF warm-up failed: #{inspect(reason)}"
+      end
     end
   end
 
@@ -132,9 +153,6 @@ defmodule HamsterTravel.Application do
   defp resolve_access_key_source(_), do: nil
 
   defp mask_key(key) when is_binary(key) do
-    key
-    |> String.slice(0, 4)
-    |> Kernel.||("")
-    |> Kernel.<>("***")
+    String.slice(key, 0, 4) <> "***"
   end
 end

@@ -1,0 +1,11 @@
+[Unit]
+Description=Back up Hamster Travel production PostgreSQL every six hours
+
+[Timer]
+OnCalendar=*-*-* 00/6:15:00
+RandomizedDelaySec=10m
+Persistent=true
+Unit=hamster-travel-production-backup.service
+
+[Install]
+WantedBy=timers.target

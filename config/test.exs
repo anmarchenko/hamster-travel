@@ -37,7 +37,6 @@ config :hamster_travel, HamsterTravelWeb.Telemetry,
 config :hamster_travel, :geonames_req_options, plug: {Req.Test, HamsterTravel.Geo.Geonames}
 
 config :ex_money,
-  auto_start_exchange_rate_service: true,
   api_module: HamsterTravel.TestExchangeRates
 
 config :waffle,

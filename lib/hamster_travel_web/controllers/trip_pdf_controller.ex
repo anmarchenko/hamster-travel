@@ -37,6 +37,7 @@ defmodule HamsterTravelWeb.TripPdfController do
   defp set_locale(locale) do
     Gettext.put_locale(HamsterTravelWeb.Gettext, locale)
     {:ok, _} = Cldr.put_locale(HamsterTravelWeb.Cldr, locale)
+    {:ok, _} = Localize.put_locale(locale)
     :ok
   end
 end

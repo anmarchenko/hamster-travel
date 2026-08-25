@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+infra_dir="${HAMSTER_TRAVEL_PRODUCTION_DIR:-/home/marvin/Work/hamster-travel-production}"
+backup_dir="${HAMSTER_TRAVEL_BACKUP_DIR:-${infra_dir}/backups}"
+success_marker="${HAMSTER_TRAVEL_BACKUP_SUCCESS_MARKER:-${backup_dir}/.last-successful-backup}"
+alert_marker="${HAMSTER_TRAVEL_BACKUP_ALERT_MARKER:-${backup_dir}/.backup-overdue-alerted}"
+max_age_seconds="${HAMSTER_TRAVEL_BACKUP_MAX_AGE_SECONDS:-86400}"
+notify_command="${HAMSTER_TRAVEL_BACKUP_NOTIFY_COMMAND:-/usr/bin/notify-send}"
+
+if [[ ! "${max_age_seconds}" =~ ^[0-9]+$ ]] || ((max_age_seconds == 0)); then
+  printf 'Backup maximum age must be a positive number of seconds\n' >&2
+  exit 1
+fi
+
+now="$(date +%s)"
+last_success=0
+
+if [[ -f "${success_marker}" ]]; then
+  last_success="$(stat --format '%Y' -- "${success_marker}")"
+fi
+
+age_seconds=$((now - last_success))
+
+if ((last_success > 0 && age_seconds <= max_age_seconds)); then
+  printf 'backup_freshness=ok\n'
+  printf 'age_seconds=%s\n' "${age_seconds}"
+  exit 0
+fi
+
+if [[ -f "${alert_marker}" ]]; then
+  last_alert="$(stat --format '%Y' -- "${alert_marker}")"
+
+  if ((last_success == 0 || last_alert >= last_success)); then
+    printf 'backup_freshness=overdue\n'
+    printf 'notification=already_sent\n'
+    exit 0
+  fi
+fi
+
+if [[ ! -x "${notify_command}" ]]; then
+  printf 'Notification command is not executable: %s\n' "${notify_command}" >&2
+  exit 1
+fi
+
+max_age_hours=$((max_age_seconds / 3600))
+"${notify_command}" \
+  --urgency=critical \
+  --app-name="Hamster Travel" \
+  "Production backup overdue" \
+  "No S3-verified Hamster Travel production backup has completed in more than ${max_age_hours} hours."
+
+mkdir --parents "${backup_dir}"
+touch -- "${alert_marker}"
+chmod 600 "${alert_marker}"
+
+printf 'backup_freshness=overdue\n'
+printf 'notification=sent\n'

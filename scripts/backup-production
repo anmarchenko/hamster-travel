@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+infra_dir="${HAMSTER_TRAVEL_PRODUCTION_DIR:-/home/marvin/Work/hamster-travel-production}"
+backup_dir="${HAMSTER_TRAVEL_BACKUP_DIR:-${infra_dir}/backups}"
+container="${HAMSTER_TRAVEL_POSTGRES_CONTAINER:-hamster-travel-production-db}"
+database="${POSTGRES_DB:-hamster_travel}"
+database_user="${POSTGRES_USER:-hamster_travel}"
+offsite_command="${HAMSTER_TRAVEL_BACKUP_OFFSITE_COMMAND:-}"
+success_marker="${HAMSTER_TRAVEL_BACKUP_SUCCESS_MARKER:-${backup_dir}/.last-successful-backup}"
+
+if [[ -z "${offsite_command}" ]]; then
+  repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+  offsite_command="${repo_dir}/scripts/upload-production-backup-s3"
+fi
+
+umask 077
+
+if [[ "$(docker inspect --format '{{.State.Health.Status}}' "${container}")" != "healthy" ]]; then
+  printf 'Production PostgreSQL container is not healthy: %s\n' "${container}" >&2
+  exit 1
+fi
+
+mkdir --parents "${backup_dir}"
+chmod 700 "${backup_dir}"
+
+timestamp="$(date --utc +%Y%m%dT%H%M%SZ)"
+filename="hamster-travel-${timestamp}.dump"
+partial_path="${backup_dir}/.${filename}.partial"
+backup_path="${backup_dir}/${filename}"
+checksum_path="${backup_path}.sha256"
+
+cleanup() {
+  rm --force -- "${partial_path}"
+}
+
+trap cleanup EXIT
+
+docker exec "${container}" \
+  pg_dump \
+  --username "${database_user}" \
+  --dbname "${database}" \
+  --format custom \
+  --no-owner \
+  --no-acl >"${partial_path}"
+
+if [[ ! -s "${partial_path}" ]]; then
+  printf 'Backup is empty\n' >&2
+  exit 1
+fi
+
+mv -- "${partial_path}" "${backup_path}"
+(cd -- "${backup_dir}" && sha256sum -- "${filename}") >"${checksum_path}"
+chmod 600 "${backup_path}" "${checksum_path}"
+trap - EXIT
+
+if [[ ! -x "${offsite_command}" ]]; then
+  printf 'Off-site backup command is not executable: %s\n' "${offsite_command}" >&2
+  exit 1
+fi
+
+"${offsite_command}" "${backup_path}" "${checksum_path}"
+
+success_marker_partial="${success_marker}.partial.$$"
+printf '%s\n' "$(date --utc +%Y-%m-%dT%H:%M:%SZ)" >"${success_marker_partial}"
+chmod 600 "${success_marker_partial}"
+mv -- "${success_marker_partial}" "${success_marker}"
+
+printf 'offsite=uploaded\n'
+printf 'success_marker=%s\n' "${success_marker}"
+printf 'backup=%s\n' "${backup_path}"
+printf 'checksum=%s\n' "${checksum_path}"

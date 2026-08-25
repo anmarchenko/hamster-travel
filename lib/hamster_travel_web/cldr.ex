@@ -5,7 +5,7 @@ defmodule HamsterTravelWeb.Cldr do
   use Cldr,
     default_locale: "en",
     locales: ["en", "ru"],
-    providers: [Cldr.Number, Cldr.Calendar, Cldr.DateTime, Money]
+    providers: [Cldr.Number, Cldr.Calendar, Cldr.DateTime]
 
   alias HamsterTravelWeb.Cldr.Currency
 

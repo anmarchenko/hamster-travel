@@ -51,9 +51,28 @@ if config_env() == :prod do
   phx_port = String.to_integer(System.get_env("PHX_PORT", "443"))
   http_port = String.to_integer(System.get_env("PORT", "4000"))
 
+  default_origin =
+    if (phx_scheme == "https" and phx_port == 443) or (phx_scheme == "http" and phx_port == 80) do
+      "#{phx_scheme}://#{phx_host}"
+    else
+      "#{phx_scheme}://#{phx_host}:#{phx_port}"
+    end
+
+  check_origins =
+    System.get_env("PHX_CHECK_ORIGINS", default_origin)
+    |> String.split(",", trim: true)
+    |> Enum.map(&String.trim/1)
+    |> Enum.reject(&(&1 == ""))
+
+  if check_origins == [] or
+       Enum.any?(check_origins, &(not Regex.match?(~r/^https?:\/\/[^\/*]+(?::\d+)?$/, &1))) do
+    raise "PHX_CHECK_ORIGINS must contain one or more explicit comma-separated HTTP(S) origins"
+  end
+
   config :hamster_travel, HamsterTravelWeb.Endpoint,
     server: true,
     url: [scheme: phx_scheme, host: phx_host, port: phx_port],
+    check_origin: check_origins,
     http: [
       ip: {0, 0, 0, 0},
       port: http_port
@@ -63,6 +82,8 @@ if config_env() == :prod do
   config :hamster_travel, HamsterTravelWeb.Telemetry,
     report_metrics: true,
     periodic_measurements_enabled: false
+
+  config :hamster_travel, :warm_chromic_pdf, true
 
   chromic_pdf_on_demand? =
     System.get_env("CHROMIC_PDF_ON_DEMAND", "false")
@@ -77,8 +98,20 @@ if config_env() == :prod do
     |> env_true?.()
 
   chromic_pdf_disable_dev_shm_usage? =
-    System.get_env("CHROMIC_PDF_DISABLE_DEV_SHM_USAGE", "true")
+    System.get_env("CHROMIC_PDF_DISABLE_DEV_SHM_USAGE", "false")
     |> env_true?.()
+
+  chromic_pdf_pool_size =
+    System.get_env("CHROMIC_PDF_POOL_SIZE", "4")
+    |> String.to_integer()
+
+  chromic_pdf_ghostscript_pool_size =
+    System.get_env("CHROMIC_PDF_GHOSTSCRIPT_POOL_SIZE", "2")
+    |> String.to_integer()
+
+  if chromic_pdf_pool_size < 1 or chromic_pdf_ghostscript_pool_size < 1 do
+    raise "ChromicPDF pool sizes must be positive integers"
+  end
 
   chrome_args =
     if chromic_pdf_disable_dev_shm_usage? do
@@ -93,13 +126,18 @@ if config_env() == :prod do
     discard_stderr: chromic_pdf_discard_stderr?,
     chrome_args: chrome_args,
     chrome_executable: System.get_env("CHROME_BIN", "/usr/bin/chromium"),
-    session_pool: [size: 1, timeout: 60_000, init_timeout: 60_000, checkout_timeout: 60_000],
-    ghostscript_pool: [size: 1]
+    session_pool: [
+      size: chromic_pdf_pool_size,
+      timeout: 60_000,
+      init_timeout: 60_000,
+      checkout_timeout: 60_000,
+      max_uses: 500
+    ],
+    ghostscript_pool: [size: chromic_pdf_ghostscript_pool_size]
 
   open_exchange_rates_app_id = System.fetch_env!("OPEN_EXCHANGE_RATES_APP_ID")
 
   config :ex_money,
-    auto_start_exchange_rate_service: true,
     # 2 hours
     exchange_rates_retrieve_every: 7_200_000,
     open_exchange_rates_app_id: open_exchange_rates_app_id

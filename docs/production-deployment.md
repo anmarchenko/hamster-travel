@@ -16,10 +16,25 @@ The application runs without `kamal-proxy` during the local-validation stage.
 This avoids an additional persistent proxy volume, but deployments have a short
 interruption while the old container releases port `4400`.
 
+Phoenix keeps WebSocket origin checking enabled. For local validation the
+canonical URL is `http://127.0.0.1:4400`. When enabling Tailscale Serve, set
+`PHX_HOST` to the full MagicDNS hostname, `PHX_SCHEME=https`, `PHX_PORT=443`,
+and `PHX_CHECK_ORIGINS=https://<full-magicdns-hostname>` before redeploying.
+`PHX_CHECK_ORIGINS` accepts a comma-separated list of explicit origins; wildcard
+origins are rejected.
+
 The deployment wrapper starts an ephemeral registry on `127.0.0.1:5555` and
 removes it after each local deployment. It has no persistent volume. Set
 `KAMAL_REGISTRY_SERVER=ghcr.io` and configure `KAMAL_REGISTRY_PASSWORD` when
 moving image storage to GHCR.
+
+Production keeps Chromium warm for fast PDF generation. The container uses a
+writable tmpfs home and `/dev/shm`, four reusable ChromicPDF sessions, two
+Ghostscript workers, an 8-CPU limit, and a 6 GiB memory limit. These defaults
+can be adjusted with `CHROMIC_PDF_POOL_SIZE` and
+`CHROMIC_PDF_GHOSTSCRIPT_POOL_SIZE` without rebuilding the image. Application
+startup performs a real PDF render before the release is considered healthy,
+so the first user request does not pay Chromium's initialization cost.
 
 The wrapper builds the next image while the current release is still serving,
 stops the old container only for the loopback port handoff, and restarts it if
@@ -76,6 +91,44 @@ version, and checksum, use a `pg_restore` client at least as new as the client
 that created the archive. Restore through the loopback-only PostgreSQL port with
 `--single-transaction --no-owner --no-acl`, run the release migrations, verify
 important table counts and constraints, and create a post-restore backup.
+
+## Backups
+
+Production backups are PostgreSQL custom-format archives with no application
+encryption layer. They are kept locally in
+`~/Work/hamster-travel-production/backups` with directory mode `0700` and file
+mode `0600`, then uploaded to the same S3 bucket used by the retired GitHub
+Actions backup, under the new `beelink-db-backups/` prefix. S3 may still apply
+its own transparent storage encryption; a downloaded archive does not require
+a separate decryption key.
+
+The uploader reads defaults from `.envrc` and lets values in
+`~/Work/hamster-travel-production/.env` override them. To keep database-backup
+access separate from the application's image-upload identity, set
+`HAMSTER_TRAVEL_BACKUP_AWS_ACCESS_KEY_ID`,
+`HAMSTER_TRAVEL_BACKUP_AWS_SECRET_ACCESS_KEY`,
+`HAMSTER_TRAVEL_BACKUP_AWS_REGION`, and
+`HAMSTER_TRAVEL_BACKUP_AWS_S3_BUCKET` in that production environment file.
+Neither environment file is committed. Run and validate a backup manually
+with:
+
+```bash
+scripts/backup-production
+scripts/restore-test-production-backup
+```
+
+Install the checked-in user service and timer under `~/.config/systemd/user/`.
+The backup timer runs every six hours at approximately 00:15, 06:15, 12:15,
+and 18:15, with up to ten minutes of randomized delay, matching the retired
+workflow cadence. A backup is successful only after both the dump and its
+checksum are uploaded and their remote sizes are verified. Only then does the
+backup script update `.last-successful-backup` in the backup directory.
+
+Install and enable the checked-in backup watchdog service and timer as well.
+It checks the success marker hourly and sends one critical desktop notification
+when no verified backup has completed for more than 24 hours. It does not send
+the notification again during the same outage; a later successful backup
+automatically arms the notification for the next outage.
 
 ## Tailscale
 
