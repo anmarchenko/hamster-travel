@@ -4,55 +4,69 @@ set -euo pipefail
 infra_dir="${HAMSTER_TRAVEL_PRODUCTION_DIR:-/home/marvin/Work/hamster-travel-production}"
 backup_dir="${HAMSTER_TRAVEL_BACKUP_DIR:-${infra_dir}/backups}"
 success_marker="${HAMSTER_TRAVEL_BACKUP_SUCCESS_MARKER:-${backup_dir}/.last-successful-backup}"
-alert_marker="${HAMSTER_TRAVEL_BACKUP_ALERT_MARKER:-${backup_dir}/.backup-overdue-alerted}"
+infra_success_marker="${HAMSTER_TRAVEL_INFRA_BACKUP_SUCCESS_MARKER:-/home/marvin/.local/state/hamster-travel/infra-backup-last-successful}"
+database_alert_marker="${HAMSTER_TRAVEL_BACKUP_ALERT_MARKER:-${backup_dir}/.backup-overdue-alerted}"
+infra_alert_marker="${HAMSTER_TRAVEL_INFRA_BACKUP_ALERT_MARKER:-${backup_dir}/.infra-backup-overdue-alerted}"
 max_age_seconds="${HAMSTER_TRAVEL_BACKUP_MAX_AGE_SECONDS:-86400}"
+infra_max_age_seconds="${HAMSTER_TRAVEL_INFRA_BACKUP_MAX_AGE_SECONDS:-86400}"
 notify_command="${HAMSTER_TRAVEL_BACKUP_NOTIFY_COMMAND:-/usr/bin/notify-send}"
 
-if [[ ! "${max_age_seconds}" =~ ^[0-9]+$ ]] || ((max_age_seconds == 0)); then
-  printf 'Backup maximum age must be a positive number of seconds\n' >&2
-  exit 1
-fi
+check_freshness() {
+  local label="$1"
+  local marker="$2"
+  local alert_marker="$3"
+  local allowed_age="$4"
+  local last_success=0
+  local age_seconds
+  local last_alert
+  local max_age_hours
 
-now="$(date +%s)"
-last_success=0
-
-if [[ -f "${success_marker}" ]]; then
-  last_success="$(stat --format '%Y' -- "${success_marker}")"
-fi
-
-age_seconds=$((now - last_success))
-
-if ((last_success > 0 && age_seconds <= max_age_seconds)); then
-  printf 'backup_freshness=ok\n'
-  printf 'age_seconds=%s\n' "${age_seconds}"
-  exit 0
-fi
-
-if [[ -f "${alert_marker}" ]]; then
-  last_alert="$(stat --format '%Y' -- "${alert_marker}")"
-
-  if ((last_success == 0 || last_alert >= last_success)); then
-    printf 'backup_freshness=overdue\n'
-    printf 'notification=already_sent\n'
-    exit 0
+  if [[ ! "${allowed_age}" =~ ^[0-9]+$ ]] || ((allowed_age == 0)); then
+    printf '%s backup maximum age must be a positive number of seconds\n' "${label}" >&2
+    return 1
   fi
-fi
 
-if [[ ! -x "${notify_command}" ]]; then
-  printf 'Notification command is not executable: %s\n' "${notify_command}" >&2
-  exit 1
-fi
+  if [[ -f "${marker}" ]]; then
+    last_success="$(stat --format '%Y' -- "${marker}")"
+  fi
 
-max_age_hours=$((max_age_seconds / 3600))
-"${notify_command}" \
-  --urgency=critical \
-  --app-name="Hamster Travel" \
-  "Production backup overdue" \
-  "No S3-verified Hamster Travel production backup has completed in more than ${max_age_hours} hours."
+  age_seconds=$(($(date +%s) - last_success))
 
-mkdir --parents "${backup_dir}"
-touch -- "${alert_marker}"
-chmod 600 "${alert_marker}"
+  if ((last_success > 0 && age_seconds <= allowed_age)); then
+    printf '%s_backup_freshness=ok\n' "${label}"
+    printf '%s_age_seconds=%s\n' "${label}" "${age_seconds}"
+    return 0
+  fi
 
-printf 'backup_freshness=overdue\n'
-printf 'notification=sent\n'
+  if [[ -f "${alert_marker}" ]]; then
+    last_alert="$(stat --format '%Y' -- "${alert_marker}")"
+
+    if ((last_success == 0 || last_alert >= last_success)); then
+      printf '%s_backup_freshness=overdue\n' "${label}"
+      printf '%s_notification=already_sent\n' "${label}"
+      return 0
+    fi
+  fi
+
+  if [[ ! -x "${notify_command}" ]]; then
+    printf 'Notification command is not executable: %s\n' "${notify_command}" >&2
+    return 1
+  fi
+
+  max_age_hours=$((allowed_age / 3600))
+  "${notify_command}" \
+    --urgency=critical \
+    --app-name="Hamster Travel" \
+    "Production ${label} backup overdue" \
+    "No verified Hamster Travel production ${label} backup has completed in more than ${max_age_hours} hours."
+
+  mkdir --parents "${backup_dir}"
+  touch -- "${alert_marker}"
+  chmod 600 "${alert_marker}"
+
+  printf '%s_backup_freshness=overdue\n' "${label}"
+  printf '%s_notification=sent\n' "${label}"
+}
+
+check_freshness database "${success_marker}" "${database_alert_marker}" "${max_age_seconds}"
+check_freshness infrastructure "${infra_success_marker}" "${infra_alert_marker}" "${infra_max_age_seconds}"

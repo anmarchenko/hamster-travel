@@ -2,12 +2,34 @@
 set -euo pipefail
 
 infra_dir="${HAMSTER_TRAVEL_PRODUCTION_DIR:-/home/marvin/Work/hamster-travel-production}"
+production_env="${HAMSTER_TRAVEL_PRODUCTION_ENV_FILE:-${infra_dir}/.env}"
 backup_dir="${HAMSTER_TRAVEL_BACKUP_DIR:-${infra_dir}/backups}"
-container="${HAMSTER_TRAVEL_POSTGRES_CONTAINER:-hamster-travel-production-db}"
-database="${POSTGRES_DB:-hamster_travel}"
-database_user="${POSTGRES_USER:-hamster_travel}"
 offsite_command="${HAMSTER_TRAVEL_BACKUP_OFFSITE_COMMAND:-}"
 success_marker="${HAMSTER_TRAVEL_BACKUP_SUCCESS_MARKER:-${backup_dir}/.last-successful-backup}"
+local_retention="${HAMSTER_TRAVEL_BACKUP_LOCAL_RETENTION:-8}"
+
+if [[ ! -f "${production_env}" ]]; then
+  printf 'Production environment file is missing: %s\n' "${production_env}" >&2
+  exit 1
+fi
+
+set -a
+# shellcheck disable=SC1090
+source "${production_env}"
+set +a
+
+database_host="${HAMSTER_TRAVEL_POSTGRES_HOST:-127.0.0.1}"
+database_port="${HAMSTER_TRAVEL_POSTGRES_PORT:-${POSTGRES_PORT:-65432}}"
+database="${POSTGRES_DB:-hamster_travel}"
+database_user="${POSTGRES_USER:-hamster_travel}"
+database_password="${POSTGRES_PASSWORD:-}"
+
+: "${database_password:?POSTGRES_PASSWORD is required}"
+
+if [[ ! "${local_retention}" =~ ^[0-9]+$ ]] || ((local_retention == 0)); then
+  printf 'Local backup retention must be a positive integer\n' >&2
+  exit 1
+fi
 
 if [[ -z "${offsite_command}" ]]; then
   repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -15,9 +37,28 @@ if [[ -z "${offsite_command}" ]]; then
 fi
 
 umask 077
+export PGPASSWORD="${database_password}"
+export PGCONNECT_TIMEOUT="${PGCONNECT_TIMEOUT:-5}"
 
-if [[ "$(docker inspect --format '{{.State.Health.Status}}' "${container}")" != "healthy" ]]; then
-  printf 'Production PostgreSQL container is not healthy: %s\n' "${container}" >&2
+database_ready=false
+
+for _attempt in {1..30}; do
+  if pg_isready \
+    --host "${database_host}" \
+    --port "${database_port}" \
+    --username "${database_user}" \
+    --dbname "${database}" >/dev/null; then
+    database_ready=true
+    break
+  fi
+
+  sleep 2
+done
+
+if [[ "${database_ready}" != true ]]; then
+  printf 'Production PostgreSQL is not ready at %s:%s\n' \
+    "${database_host}" \
+    "${database_port}" >&2
   exit 1
 fi
 
@@ -36,13 +77,16 @@ cleanup() {
 
 trap cleanup EXIT
 
-docker exec "${container}" \
-  pg_dump \
+pg_dump \
+  --host "${database_host}" \
+  --port "${database_port}" \
   --username "${database_user}" \
   --dbname "${database}" \
   --format custom \
   --no-owner \
-  --no-acl >"${partial_path}"
+  --no-acl \
+  --no-password \
+  --file "${partial_path}"
 
 if [[ ! -s "${partial_path}" ]]; then
   printf 'Backup is empty\n' >&2
@@ -61,6 +105,23 @@ fi
 
 "${offsite_command}" "${backup_path}" "${checksum_path}"
 
+mapfile -d '' -t local_backups < <(
+  find "${backup_dir}" \
+    -maxdepth 1 \
+    -type f \
+    -name 'hamster-travel-*.dump' \
+    -print0 | sort --zero-terminated
+)
+
+delete_count=$((${#local_backups[@]} - local_retention))
+
+if ((delete_count > 0)); then
+  for ((index = 0; index < delete_count; index++)); do
+    old_backup="${local_backups[index]}"
+    rm --force -- "${old_backup}" "${old_backup}.sha256"
+  done
+fi
+
 success_marker_partial="${success_marker}.partial.$$"
 printf '%s\n' "$(date --utc +%Y-%m-%dT%H:%M:%SZ)" >"${success_marker_partial}"
 chmod 600 "${success_marker_partial}"
@@ -70,3 +131,4 @@ printf 'offsite=uploaded\n'
 printf 'success_marker=%s\n' "${success_marker}"
 printf 'backup=%s\n' "${backup_path}"
 printf 'checksum=%s\n' "${checksum_path}"
+printf 'local_retention=%s\n' "${local_retention}"

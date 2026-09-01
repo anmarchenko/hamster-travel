@@ -1,13 +1,6 @@
 # Hamster Travel
 
-This is a second take on my personal travel planner that we as a family use since 2014. This version is a full rewrite of the project and is under active development. You can read a bit more about planned features on my [personal website](https://www.amarchenko.de/hamster-travel/).
-
-The old version is still in use and available on [https://travel.hmstr.rocks](https://travel.hmstr.rocks/en/landing) (source code for the old Hamster Travel is also on [github](https://github.com/anmarchenko/hamster_travel_legacy)).
-
-## Prerequisites
-
-- [elixir](https://elixir-lang.org)
-- [postgres](https://www.postgresql.org)
+My personal travel planner,
 
 ## Run locally
 
@@ -15,7 +8,7 @@ Run the following commands to setup dependencies and create the database:
 
 ```bash
 mix deps.get
-mix ecto.setup
+mix setup
 ```
 
 Run server:
@@ -41,4 +34,27 @@ mix credo --strict
 
 ## Deployment
 
-Production is deployed with Kamal. See [docs/production-deployment.md](docs/production-deployment.md).
+Production is deployed locally with Docker Compose and the Go deployment tool.
+Production runbooks are stored with the machine-local infrastructure rather than
+in this public repository.
+
+Common production operations are available through Mix:
+
+```bash
+mix deploy.status
+mix deploy.run
+mix db.prod.backup
+```
+
+## JavaScript dependencies
+
+Install the locked npm dependency tree or update dependencies allowed by
+`assets/package.json`:
+
+```bash
+mix assets.npm.install
+mix assets.npm.update
+```
+
+`mix assets.build` and `mix assets.deploy` run `mix assets.npm.install`
+automatically before compiling assets.

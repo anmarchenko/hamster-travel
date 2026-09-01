@@ -1,22 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 production_env="${HAMSTER_TRAVEL_PRODUCTION_ENV_FILE:-/home/marvin/Work/hamster-travel-production/.env}"
-direnv_file="${HAMSTER_TRAVEL_DIRENV_FILE:-${repo_dir}/.envrc}"
 backup_path="${1:-}"
 checksum_path="${2:-}"
 
-if [[ ! -f "${production_env}" || ! -f "${direnv_file}" ]]; then
-  printf 'AWS environment files are missing\n' >&2
+if [[ ! -f "${production_env}" ]]; then
+  printf 'Production environment file is missing: %s\n' "${production_env}" >&2
   exit 1
 fi
 
-# The repository direnv file provides the historical backup bucket and region.
-# Production credentials override any matching development values.
 set -a
-# shellcheck disable=SC1090
-source "${direnv_file}"
 # shellcheck disable=SC1090
 source "${production_env}"
 set +a

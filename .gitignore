@@ -41,18 +41,8 @@ uploads
 # local environment
 .envrc
 
-# production deployment secrets
-/.kamal/secrets
-/.kamal/secrets-common
-/.kamal/secrets.*
-!/.kamal/secrets.example
-
 # page snapshots
 .playwright-cli/
 
 # python
 *.pyc
-
-# import intermediate representation
-legacy_csv
-legacy_csv_clean

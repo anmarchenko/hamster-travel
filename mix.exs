@@ -124,13 +124,31 @@ defmodule HamsterTravel.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["cmd --cd assets npm install", "tailwind default", "esbuild default"],
+      "assets.npm.install": ["cmd --cd assets npm install"],
+      "assets.npm.update": ["cmd --cd assets npm update"],
+      "assets.build": ["assets.npm.install", "tailwind default", "esbuild default"],
       "assets.deploy": [
-        "cmd --cd assets npm install",
+        "assets.npm.install",
         "tailwind default --minify",
         "esbuild default --minify",
         "phx.digest"
       ],
+      "deploy.build": [
+        "cmd --cd deployment go test ./...",
+        "cmd --cd deployment go vet ./...",
+        "cmd --cd deployment go build -trimpath -o /tmp/hamster-deploy ./cmd/hamster-deploy",
+        "deploy.install"
+      ],
+      "deploy.help": ["cmd /usr/local/sbin/hamster-deploy help"],
+      "deploy.status": ["deploy.privileged status"],
+      "deploy.releases": ["deploy.privileged releases"],
+      "deploy.run": ["deploy.privileged deploy"],
+      "deploy.rollback": ["deploy.privileged rollback"],
+      "db.prod.backup": ["cmd scripts/backup-production"],
+      "db.prod.upload": ["cmd scripts/upload-production-backup-s3"],
+      "db.prod.restore.test": ["cmd scripts/restore-test-production-backup"],
+      "infra.prod.backup": ["cmd scripts/backup-production-infra"],
+      "backup.prod.check": ["cmd scripts/check-production-backup-freshness"],
       gettext: [
         "gettext.extract",
         "gettext.merge priv/gettext/en/LC_MESSAGES/default.po priv/gettext/default.pot",

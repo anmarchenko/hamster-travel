@@ -2,90 +2,182 @@
 set -euo pipefail
 
 infra_dir="${HAMSTER_TRAVEL_PRODUCTION_DIR:-/home/marvin/Work/hamster-travel-production}"
+production_env="${HAMSTER_TRAVEL_PRODUCTION_ENV_FILE:-${infra_dir}/.env}"
 backup_dir="${HAMSTER_TRAVEL_BACKUP_DIR:-${infra_dir}/backups}"
-container="${HAMSTER_TRAVEL_POSTGRES_CONTAINER:-hamster-travel-production-db}"
+backup_path="${1:-}"
+temporary_dir=""
+restore_database=""
+
+if [[ ! -f "${production_env}" ]]; then
+  printf 'Production environment file is missing: %s\n' "${production_env}" >&2
+  exit 1
+fi
+
+set -a
+# shellcheck disable=SC1090
+source "${production_env}"
+set +a
+
+database_host="${HAMSTER_TRAVEL_POSTGRES_HOST:-127.0.0.1}"
+database_port="${HAMSTER_TRAVEL_POSTGRES_PORT:-${POSTGRES_PORT:-65432}}"
 database="${POSTGRES_DB:-hamster_travel}"
 database_user="${POSTGRES_USER:-hamster_travel}"
-backup_path="${1:-}"
+database_password="${POSTGRES_PASSWORD:-}"
+
+: "${database_password:?POSTGRES_PASSWORD is required}"
+
+export PGPASSWORD="${database_password}"
+export PGCONNECT_TIMEOUT="${PGCONNECT_TIMEOUT:-5}"
+
+cleanup() {
+  if [[ -n "${restore_database}" ]]; then
+    dropdb \
+      --host "${database_host}" \
+      --port "${database_port}" \
+      --username "${database_user}" \
+      --if-exists \
+      --force \
+      --no-password \
+      "${restore_database}" >/dev/null 2>&1 || true
+  fi
+
+  if [[ -n "${temporary_dir}" ]]; then
+    rm --recursive --force -- "${temporary_dir}"
+  fi
+}
+
+trap cleanup EXIT
 
 if [[ -z "${backup_path}" ]]; then
-  newest_mtime=-1
+  AWS_ACCESS_KEY_ID="${HAMSTER_TRAVEL_BACKUP_AWS_ACCESS_KEY_ID:-${AWS_ACCESS_KEY_ID:-}}"
+  AWS_SECRET_ACCESS_KEY="${HAMSTER_TRAVEL_BACKUP_AWS_SECRET_ACCESS_KEY:-${AWS_SECRET_ACCESS_KEY:-}}"
+  AWS_REGION="${HAMSTER_TRAVEL_BACKUP_AWS_REGION:-${AWS_REGION:-}}"
+  AWS_S3_BUCKET="${HAMSTER_TRAVEL_BACKUP_AWS_S3_BUCKET:-${AWS_S3_BUCKET:-}}"
+  export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_REGION AWS_S3_BUCKET
 
-  while IFS= read -r -d '' candidate; do
-    candidate_mtime="$(stat --format '%Y' -- "${candidate}")"
+  : "${AWS_ACCESS_KEY_ID:?AWS_ACCESS_KEY_ID is required}"
+  : "${AWS_SECRET_ACCESS_KEY:?AWS_SECRET_ACCESS_KEY is required}"
+  : "${AWS_REGION:?AWS_REGION is required}"
+  : "${AWS_S3_BUCKET:?AWS_S3_BUCKET is required}"
 
-    if ((candidate_mtime > newest_mtime)); then
-      backup_path="${candidate}"
-      newest_mtime="${candidate_mtime}"
-    fi
-  done < <(find "${backup_dir}" -maxdepth 1 -type f -name 'hamster-travel-*.dump' -print0)
+  aws_cli="${AWS_CLI:-}"
+
+  if [[ -z "${aws_cli}" ]]; then
+    aws_cli="$(command -v aws || true)"
+  fi
+
+  if [[ -z "${aws_cli}" && -x /home/marvin/.local/bin/aws ]]; then
+    aws_cli=/home/marvin/.local/bin/aws
+  fi
+
+  if [[ -z "${aws_cli}" || ! -x "${aws_cli}" ]]; then
+    printf 'AWS CLI is not installed\n' >&2
+    exit 1
+  fi
+
+  prefix="${HAMSTER_TRAVEL_BACKUP_S3_PREFIX:-beelink-db-backups}"
+  prefix="${prefix#/}"
+  prefix="${prefix%/}"
+
+  if [[ -z "${prefix}" ]]; then
+    printf 'S3 backup prefix must not be empty\n' >&2
+    exit 1
+  fi
+
+  newest_key="$("${aws_cli}" s3api list-objects-v2 \
+    --region "${AWS_REGION}" \
+    --bucket "${AWS_S3_BUCKET}" \
+    --prefix "${prefix}/hamster-travel-" \
+    --query 'Contents[?ends_with(Key, `.dump`)].Key' \
+    --output text | tr '\t' '\n' | sort | tail --lines 1)"
+
+  if [[ -z "${newest_key}" || "${newest_key}" == "None" ]]; then
+    printf 'No production dump found in s3://%s/%s/\n' "${AWS_S3_BUCKET}" "${prefix}" >&2
+    exit 1
+  fi
+
+  temporary_dir="$(mktemp --directory --tmpdir hamster-travel-restore-test.XXXXXXXX)"
+  backup_path="${temporary_dir}/$(basename -- "${newest_key}")"
+  checksum_path="${backup_path}.sha256"
+
+  "${aws_cli}" s3 cp \
+    --only-show-errors \
+    --region "${AWS_REGION}" \
+    "s3://${AWS_S3_BUCKET}/${newest_key}" \
+    "${backup_path}"
+
+  "${aws_cli}" s3 cp \
+    --only-show-errors \
+    --region "${AWS_REGION}" \
+    "s3://${AWS_S3_BUCKET}/${newest_key}.sha256" \
+    "${checksum_path}"
+
+  backup_source="s3://${AWS_S3_BUCKET}/${newest_key}"
+else
+  backup_path="$(realpath -- "${backup_path}")"
+  backup_dir="$(realpath -- "${backup_dir}")"
+
+  if [[ "${backup_path}" != "${backup_dir}"/hamster-travel-*.dump ]]; then
+    printf 'Backup must be a Hamster Travel dump inside %s\n' "${backup_dir}" >&2
+    exit 1
+  fi
+
+  checksum_path="${backup_path}.sha256"
+  backup_source="${backup_path}"
 fi
 
-if [[ -z "${backup_path}" || ! -f "${backup_path}" ]]; then
-  printf 'No production backup found\n' >&2
-  exit 1
-fi
-
-backup_path="$(realpath -- "${backup_path}")"
-backup_dir="$(realpath -- "${backup_dir}")"
-
-if [[ "${backup_path}" != "${backup_dir}"/hamster-travel-*.dump ]]; then
-  printf 'Backup must be a Hamster Travel dump inside %s\n' "${backup_dir}" >&2
-  exit 1
-fi
-
-checksum_path="${backup_path}.sha256"
-if [[ ! -f "${checksum_path}" ]]; then
+if [[ ! -f "${backup_path}" || ! -f "${checksum_path}" ]]; then
   printf 'Missing backup checksum: %s\n' "${checksum_path}" >&2
   exit 1
 fi
 
-(cd "${backup_dir}" && sha256sum --check -- "$(basename "${checksum_path}")")
+(cd "$(dirname -- "${backup_path}")" && sha256sum --check -- "$(basename -- "${checksum_path}")")
 
-restore_database="hamster_travel_restore_test_$(date --utc +%Y%m%d%H%M%S)"
+restore_database="hamster_travel_restore_test_$(date --utc +%Y%m%d%H%M%S)_$$"
 
-cleanup() {
-  docker exec "${container}" dropdb \
-    --username "${database_user}" \
-    --if-exists \
-    --force \
-    "${restore_database}" >/dev/null 2>&1 || true
-}
-
-trap cleanup EXIT
-cleanup
-
-docker exec "${container}" createdb \
+createdb \
+  --host "${database_host}" \
+  --port "${database_port}" \
   --username "${database_user}" \
+  --no-password \
   "${restore_database}"
 
-docker exec --interactive "${container}" \
-  pg_restore \
+pg_restore \
+  --host "${database_host}" \
+  --port "${database_port}" \
   --username "${database_user}" \
   --dbname "${restore_database}" \
   --exit-on-error \
   --single-transaction \
   --no-owner \
-  --no-acl <"${backup_path}"
+  --no-acl \
+  --no-password \
+  "${backup_path}"
 
-production_counts="$(docker exec "${container}" psql \
-  --username "${database_user}" \
-  --dbname "${database}" \
-  --tuples-only \
-  --no-align \
-  --command 'SELECT count(*) FROM users UNION ALL SELECT count(*) FROM trips UNION ALL SELECT count(*) FROM cities;')"
-
-restore_counts="$(docker exec "${container}" psql \
+restore_counts="$(psql \
+  --host "${database_host}" \
+  --port "${database_port}" \
   --username "${database_user}" \
   --dbname "${restore_database}" \
   --tuples-only \
   --no-align \
+  --no-password \
   --command 'SELECT count(*) FROM users UNION ALL SELECT count(*) FROM trips UNION ALL SELECT count(*) FROM cities;')"
 
-if [[ "${production_counts}" != "${restore_counts}" ]]; then
-  printf 'Restore-test row counts differ from production\n' >&2
+mapfile -t count_values <<<"${restore_counts}"
+
+if ((${#count_values[@]} != 3)); then
+  printf 'Restore-test queries returned unexpected row counts\n' >&2
   exit 1
 fi
 
+for count_value in "${count_values[@]}"; do
+  if [[ ! "${count_value}" =~ ^[0-9]+$ ]]; then
+    printf 'Restore-test query returned a non-numeric row count\n' >&2
+    exit 1
+  fi
+done
+
 printf 'restore_test=passed\n'
+printf 'source=%s\n' "${backup_source}"
 printf 'users_trips_cities=%s\n' "$(tr '\n' ',' <<<"${restore_counts}" | sed 's/,$//')"
