@@ -2,9 +2,13 @@ defmodule HamsterTravelWeb.Cldr do
   @moduledoc """
   Locale data
   """
+
+  @money_input_format "0.##################"
+
   use Cldr,
     default_locale: "en",
     locales: ["en", "ru"],
+    precompile_number_formats: [@money_input_format],
     providers: [Cldr.Number, Cldr.Calendar, Cldr.DateTime]
 
   alias HamsterTravelWeb.Cldr.Currency
@@ -13,6 +17,15 @@ defmodule HamsterTravelWeb.Cldr do
     HamsterTravelWeb.Cldr.Number.to_string!(val,
       format: :currency,
       currency: currency
+    )
+  end
+
+  @spec format_money_input(Decimal.t(), String.t()) :: String.t()
+  def format_money_input(%Decimal{} = amount, locale) do
+    HamsterTravelWeb.Cldr.Number.to_string!(amount,
+      locale: locale,
+      format: @money_input_format,
+      fractional_digits: Decimal.scale(amount)
     )
   end
 

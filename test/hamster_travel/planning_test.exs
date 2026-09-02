@@ -2137,6 +2137,38 @@ defmodule HamsterTravel.PlanningTest do
       assert expense.price == Money.new(:HUF, "4000")
     end
 
+    test "create_expense/2 parses English-formatted amounts from form params" do
+      trip = trip_fixture()
+
+      Localize.with_locale(:en, fn ->
+        for {amount, expected_amount} <- [{"23.34", "23.34"}, {"1,234.56", "1234.56"}] do
+          assert {:ok, %Expense{} = expense} =
+                   Planning.create_expense(trip, %{
+                     "price" => %{"amount" => amount, "currency" => "EUR"},
+                     "name" => "Fractional expense"
+                   })
+
+          assert Money.equal?(expense.price, Money.new(:EUR, expected_amount))
+        end
+      end)
+    end
+
+    test "create_expense/2 parses Russian-formatted amounts from form params" do
+      trip = trip_fixture()
+
+      Localize.with_locale(:ru, fn ->
+        for {amount, expected_amount} <- [{"23,34", "23.34"}, {"1234,54", "1234.54"}] do
+          assert {:ok, %Expense{} = expense} =
+                   Planning.create_expense(trip, %{
+                     "price" => %{"amount" => amount, "currency" => "EUR"},
+                     "name" => "Fractional expense"
+                   })
+
+          assert Money.equal?(expense.price, Money.new(:EUR, expected_amount, locale: :en))
+        end
+      end)
+    end
+
     test "create_expense/2 with invalid data returns error changeset" do
       trip = trip_fixture()
       assert {:error, %Ecto.Changeset{}} = Planning.create_expense(trip, %{})
@@ -2697,6 +2729,20 @@ defmodule HamsterTravel.PlanningTest do
         )
 
       assert Money.equal?(total, Money.new(:EUR, "75.00"))
+
+      comma_total =
+        Localize.with_locale(:ru, fn ->
+          BudgetCategoryFoodSetting.estimate_total(
+            %{
+              "price_per_day" => %{"amount" => "12,50", "currency" => "EUR"},
+              "days_count" => "3",
+              "people_count" => "2"
+            },
+            "EUR"
+          )
+        end)
+
+      assert Money.equal?(comma_total, Money.new(:EUR, "75.00"))
 
       assert {:ok, price_per_day} =
                BudgetCategoryFoodSetting.price_per_day_from_total(

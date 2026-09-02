@@ -168,6 +168,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
               }
               default_currency={@trip.currency}
               reserve_error_space
+              blank_zero
             />
           </div>
           <div class="flex gap-2 sm:mt-7">

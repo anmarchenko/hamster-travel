@@ -61,6 +61,7 @@ RUN mix assets.deploy
 
 # Compile the release
 RUN mix compile
+RUN mix localize.download_locales
 
 # Changes to config/runtime.exs don't require recompiling the code
 COPY config/runtime.exs config/

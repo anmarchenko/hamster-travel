@@ -39,39 +39,45 @@ defmodule HamsterTravelWeb.CoreComponentsTest do
 
   describe "money_input/1" do
     test "uses a decimal mobile keyboard for the amount field" do
-      form = %Phoenix.HTML.Form{
-        source: %{},
-        impl: Phoenix.HTML.FormData.Atom,
-        id: "expense",
-        name: "expense",
-        data: %{},
-        action: nil,
-        hidden: [],
-        params: %{},
-        errors: [],
-        options: [],
-        index: nil
-      }
-
-      field = %Phoenix.HTML.FormField{
-        id: "expense_price",
-        name: "expense[price]",
-        errors: [],
-        field: :price,
-        form: form,
-        value: %{"amount" => "12.34", "currency" => "EUR"}
-      }
-
-      html =
-        render_component(&CoreComponents.money_input/1,
-          id: "expense-price",
-          field: field,
-          label: "Price"
-        )
+      html = render_money_input(%{"amount" => "12.34", "currency" => "EUR"})
 
       assert html =~ ~s|id="expense-price_amount"|
       assert html =~ ~s|inputmode="decimal"|
       refute html =~ ~s|inputmode="numeric"|
+    end
+
+    test "formats a saved amount using the Russian decimal separator" do
+      html =
+        Gettext.with_locale(HamsterTravelWeb.Gettext, "ru", fn ->
+          render_money_input(Money.new(:EUR, "12.34", locale: :en))
+        end)
+
+      assert html =~ ~s|id="expense-price_amount"|
+      assert html =~ ~s|value="12,34"|
+    end
+
+    test "formats a saved amount using the English decimal separator" do
+      html =
+        Gettext.with_locale(HamsterTravelWeb.Gettext, "en", fn ->
+          render_money_input(Money.new(:EUR, "12.34", locale: :en))
+        end)
+
+      assert html =~ ~s|id="expense-price_amount"|
+      assert html =~ ~s|value="12.34"|
+    end
+
+    test "can render a default zero amount as an empty field" do
+      html = render_money_input(Money.new(:EUR, 0), blank_zero: true)
+
+      assert html =~ ~s|id="expense-price_amount"|
+      assert html =~ ~s|value=""|
+    end
+
+    test "shows zero when blanking was not requested" do
+      html = render_money_input(Money.new(:EUR, 0))
+
+      assert html =~ ~s|id="expense-price_amount"|
+      assert html =~ ~s|value="0"|
     end
   end
 
@@ -105,5 +111,35 @@ defmodule HamsterTravelWeb.CoreComponentsTest do
 
       assert html =~ ~s|<a href="https://example.com">Visit</a>|
     end
+  end
+
+  defp render_money_input(value, options \\ []) do
+    form = %Phoenix.HTML.Form{
+      source: %{},
+      impl: Phoenix.HTML.FormData.Atom,
+      id: "expense",
+      name: "expense",
+      data: %{},
+      action: nil,
+      hidden: [],
+      params: %{},
+      errors: [],
+      options: [],
+      index: nil
+    }
+
+    field = %Phoenix.HTML.FormField{
+      id: "expense_price",
+      name: "expense[price]",
+      errors: [],
+      field: :price,
+      form: form,
+      value: value
+    }
+
+    render_component(
+      &CoreComponents.money_input/1,
+      Keyword.merge([id: "expense-price", field: field, label: "Price"], options)
+    )
   end
 end

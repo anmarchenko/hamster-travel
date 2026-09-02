@@ -53,6 +53,7 @@ defmodule HamsterTravelWeb.Planning.AccommodationForm do
             field={expense_form[:price]}
             label={gettext("Price")}
             default_currency={@trip.currency}
+            blank_zero={@action == :new}
           />
         </.inputs_for>
 

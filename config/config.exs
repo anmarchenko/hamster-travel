@@ -59,6 +59,7 @@ config :ex_money,
 
 config :localize,
   default_locale: :en,
+  otp_app: :hamster_travel,
   supported_locales: [:en, :ru]
 
 config :waffle,

@@ -67,6 +67,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryForm do
               field={expense_form[:price]}
               label={gettext("Estimated cost")}
               default_currency={@trip.currency}
+              blank_zero={@action == :new}
             />
           </.inputs_for>
         </div>
@@ -103,6 +104,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryForm do
             field={expense_form[:price]}
             label={gettext("Estimated cost")}
             default_currency={@trip.currency}
+            blank_zero={@action == :new}
           />
         </.inputs_for>
 
@@ -127,6 +129,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryForm do
                 field={food_form[:price_per_day]}
                 label={gettext("Price per day per person")}
                 default_currency={@trip.currency}
+                blank_zero={@action == :new}
               />
             </div>
             <.field

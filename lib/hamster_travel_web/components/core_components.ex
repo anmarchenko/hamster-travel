@@ -802,6 +802,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   attr(:field, Phoenix.HTML.FormField, required: true)
   attr(:default_currency, :string, default: "EUR")
   attr(:reserve_error_space, :boolean, default: false)
+  attr(:blank_zero, :boolean, default: false)
 
   def money_input(assigns) do
     field = assigns.field
@@ -815,7 +816,7 @@ defmodule HamsterTravelWeb.CoreComponents do
       |> assign(:placeholder, money_placeholder(locale))
       |> assign_new(:name, fn -> field.name end)
       |> assign_new(:value, fn -> field.value end)
-      |> update(:value, &money_value/1)
+      |> update(:value, &money_value(&1, locale, blank_zero: assigns.blank_zero))
 
     ~H"""
     <div>
@@ -864,15 +865,22 @@ defmodule HamsterTravelWeb.CoreComponents do
     end
   end
 
-  defp money_value(nil) do
+  defp money_value(nil, _locale, _options) do
     nil
   end
 
-  defp money_value(money) when is_struct(money, Money) do
-    %{amount: money.amount, currency: money.currency}
+  defp money_value(money, locale, options) when is_struct(money, Money) do
+    amount =
+      if options[:blank_zero] && Money.zero?(money) do
+        ""
+      else
+        Cldr.format_money_input(money.amount, locale)
+      end
+
+    %{amount: amount, currency: money.currency}
   end
 
-  defp money_value(%{"amount" => amount, "currency" => currency}) do
+  defp money_value(%{"amount" => amount, "currency" => currency}, _locale, _options) do
     %{amount: amount, currency: currency}
   end
 

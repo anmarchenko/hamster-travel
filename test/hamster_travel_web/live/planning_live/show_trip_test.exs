@@ -1007,7 +1007,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       assert has_element?(
                view,
-               "#budget-category-actual-new-form-#{category.id}-1 input[name='expense[price][amount]'][value='0']"
+               "#budget-category-actual-new-form-#{category.id}-1 input[name='expense[price][amount]'][value='']"
              )
 
       view
@@ -1909,6 +1909,11 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "label", "Activity Name")
       assert has_element?(view, "label", "Priority")
       assert has_element?(view, "label", "Price")
+
+      assert has_element?(
+               view,
+               "form[id*='activity-form-new-activity-new-0'] input[name='activity[expense][price][amount]'][value='']"
+             )
     end
 
     test "shows activity position when editing an activity", %{conn: conn} do
@@ -1990,6 +1995,12 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       })
 
       assert has_element?(view, "#{form_selector} .pc-form-field-error", "is invalid")
+
+      assert has_element?(
+               view,
+               "#{form_selector} input[name='activity[expense][price][amount]'][value='']"
+             )
+
       assert Planning.list_activities(trip) == []
     end
 
