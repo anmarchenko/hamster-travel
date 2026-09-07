@@ -1637,3 +1637,18 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "Expand"
 msgstr ""
+
+#: lib/hamster_travel_web/components/layouts.ex:37
+#, elixir-autogen, elixir-format
+msgid "Switch to dark mode"
+msgstr "Switch to dark mode"
+
+#: lib/hamster_travel_web/components/layouts.ex:38
+#, elixir-autogen, elixir-format
+msgid "Switch to light mode"
+msgstr "Switch to light mode"
+
+#: lib/hamster_travel_web/components/layouts.ex:39
+#, elixir-autogen, elixir-format
+msgid "Toggle color mode"
+msgstr "Toggle color mode"

@@ -9,6 +9,23 @@
     <.live_title suffix=" · Hamster Travel">
       {assigns[:page_title] || "Home"}
     </.live_title>
+    <script>
+      (() => {
+        let storedTheme;
+
+        try {
+          storedTheme = window.localStorage.getItem("theme");
+        } catch (_error) {
+          storedTheme = null;
+        }
+
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const darkMode = storedTheme === "dark" || (storedTheme !== "light" && prefersDark);
+
+        document.documentElement.classList.toggle("dark", darkMode);
+        document.documentElement.style.colorScheme = darkMode ? "dark" : "light";
+      })();
+    </script>
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>

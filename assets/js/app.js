@@ -25,6 +25,7 @@ import PackingDragDrop from './packing_drag_drop';
 import FormattedTextArea from './formatted_text_area';
 import UserMap from './user_map';
 import { registerPdfDownloadHandler } from './pdf_download';
+import { initTheme } from './theme';
 import {
   initOfflineReadOnly,
   lockAddedOfflineRegion,
@@ -36,6 +37,7 @@ Alpine.plugin(persist);
 Alpine.plugin(collapse);
 window.Alpine = Alpine;
 
+initTheme();
 Alpine.start();
 
 let csrfToken = document

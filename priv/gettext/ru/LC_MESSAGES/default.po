@@ -1640,3 +1640,18 @@ msgstr "Свернуть"
 #, elixir-autogen, elixir-format
 msgid "Expand"
 msgstr "Развернуть"
+
+#: lib/hamster_travel_web/components/layouts.ex:37
+#, elixir-autogen, elixir-format
+msgid "Switch to dark mode"
+msgstr "Включить тёмную тему"
+
+#: lib/hamster_travel_web/components/layouts.ex:38
+#, elixir-autogen, elixir-format
+msgid "Switch to light mode"
+msgstr "Включить светлую тему"
+
+#: lib/hamster_travel_web/components/layouts.ex:39
+#, elixir-autogen, elixir-format
+msgid "Toggle color mode"
+msgstr "Переключить цветовую тему"

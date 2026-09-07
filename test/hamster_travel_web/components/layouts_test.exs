@@ -5,6 +5,19 @@ defmodule HamsterTravelWeb.LayoutsTest do
 
   alias HamsterTravelWeb.Layouts
 
+  describe "navigation theme switcher" do
+    test "renders an accessible theme toggle" do
+      html = render_app_layout()
+
+      assert html =~ "data-theme-toggle"
+      assert html =~ ~s(data-dark-label="Switch to dark mode")
+      assert html =~ ~s(data-light-label="Switch to light mode")
+      assert html =~ ~s(aria-pressed="false")
+      assert html =~ "hero-moon"
+      assert html =~ "hero-sun"
+    end
+  end
+
   describe "offline edit boundaries" do
     test "locks the complete main content by default" do
       html = render_app_layout()

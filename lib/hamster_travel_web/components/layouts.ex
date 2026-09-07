@@ -31,6 +31,18 @@ defmodule HamsterTravelWeb.Layouts do
             <% end %>
           </div>
         </div>
+        <button
+          type="button"
+          data-theme-toggle
+          data-dark-label={gettext("Switch to dark mode")}
+          data-light-label={gettext("Switch to light mode")}
+          aria-label={gettext("Toggle color mode")}
+          aria-pressed="false"
+          class="inline-flex h-9 w-9 items-center justify-center rounded-full text-zinc-600 transition-colors hover:bg-orange-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-50 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white dark:focus-visible:ring-offset-zinc-900"
+        >
+          <.icon name="hero-moon" class="h-5 w-5 dark:hidden" />
+          <.icon name="hero-sun" class="hidden h-5 w-5 dark:inline-block" />
+        </button>
         <%= if @current_user do %>
           <.nav_link to={~p"/profile"}>
             <.avatar size="md" src={@current_user.avatar_url} name={@current_user.name} random_color />
