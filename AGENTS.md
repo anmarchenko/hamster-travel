@@ -185,7 +185,9 @@ mix gettext
 
 ## Project Rules
 - Check if port 4000 is already in use before running `mix phx.server`.
-- Never commit changes; the user will review before committing.
+- Never commit changes unless the user explicitly asks for a commit.
+- When the user explicitly asks to commit, push, or deploy, treat that request as authorization for the named actions and
+  complete them without asking for redundant confirmation. Report any real failure that prevents completion.
 
 ## Editor Rules
 - No Cursor rules found in `.cursor/rules/` or `.cursorrules`.
