@@ -7,6 +7,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryForm do
 
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.BudgetCategory
+  alias HamsterTravelWeb.FormSubmission
 
   @impl true
   def update(assigns, socket) do
@@ -17,6 +18,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryForm do
     socket =
       socket
       |> assign(assigns)
+      |> FormSubmission.init()
       |> assign(:food, food_category?(category))
       |> assign(:estimation_mode, estimation_mode)
       |> assign_form(changeset)
@@ -76,7 +78,13 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryForm do
           <.button color="light" type="button" phx-click="cancel" phx-target={@myself}>
             {gettext("Cancel")}
           </.button>
-          <.button color="primary" size="xs" type="submit">
+          <.button
+            color="primary"
+            size="xs"
+            type="submit"
+            disabled={@submitting}
+            phx-disable-with={gettext("Save")}
+          >
             {gettext("Save")}
           </.button>
         </div>
@@ -153,7 +161,13 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryForm do
           <.button color="light" type="button" phx-click="cancel" phx-target={@myself}>
             {gettext("Cancel")}
           </.button>
-          <.button color="primary" size="xs" type="submit">
+          <.button
+            color="primary"
+            size="xs"
+            type="submit"
+            disabled={@submitting}
+            phx-disable-with={gettext("Save")}
+          >
             {gettext("Save")}
           </.button>
         </div>
@@ -179,7 +193,10 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryForm do
   def handle_event("form_submit", %{"budget_category" => params}, socket) do
     if socket.assigns.can_edit do
       params = normalize_params(params, socket)
-      submit(socket, socket.assigns.action, params)
+
+      FormSubmission.submit_once(socket, fn socket ->
+        submit(socket, socket.assigns.action, params)
+      end)
     else
       {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
     end
@@ -208,7 +225,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryForm do
   end
 
   defp result({:error, changeset}, socket) do
-    {:noreply, assign_form(socket, changeset)}
+    {:noreply, socket |> FormSubmission.reset() |> assign_form(changeset)}
   end
 
   defp category_changeset(%{action: :new, trip: trip}, attrs) do

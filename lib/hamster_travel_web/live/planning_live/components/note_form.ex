@@ -6,6 +6,7 @@ defmodule HamsterTravelWeb.Planning.NoteForm do
   use HamsterTravelWeb, :live_component
 
   alias HamsterTravel.Planning
+  alias HamsterTravelWeb.FormSubmission
 
   attr :action, :atom, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true
@@ -46,7 +47,13 @@ defmodule HamsterTravelWeb.Planning.NoteForm do
           <.button color="light" type="button" phx-click="cancel" phx-target={@myself}>
             {gettext("Cancel")}
           </.button>
-          <.button color="primary" size="xs" type="submit">
+          <.button
+            color="primary"
+            size="xs"
+            type="submit"
+            disabled={@submitting}
+            phx-disable-with={gettext("Save")}
+          >
             {gettext("Save")}
           </.button>
         </div>
@@ -71,6 +78,7 @@ defmodule HamsterTravelWeb.Planning.NoteForm do
     socket =
       socket
       |> assign(assigns)
+      |> FormSubmission.init()
       |> assign_form(changeset)
 
     {:ok, socket}
@@ -90,7 +98,9 @@ defmodule HamsterTravelWeb.Planning.NoteForm do
   @impl true
   def handle_event("form_submit", %{"note" => note_params}, socket) do
     if socket.assigns.can_edit do
-      on_submit(socket, socket.assigns.action, note_params)
+      FormSubmission.submit_once(socket, fn socket ->
+        on_submit(socket, socket.assigns.action, note_params)
+      end)
     else
       {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
     end
@@ -125,6 +135,6 @@ defmodule HamsterTravelWeb.Planning.NoteForm do
   end
 
   defp result({:error, changeset}, socket) do
-    {:noreply, assign_form(socket, changeset)}
+    {:noreply, socket |> FormSubmission.reset() |> assign_form(changeset)}
   end
 end

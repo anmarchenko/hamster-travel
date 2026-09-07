@@ -7,7 +7,7 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
 
   alias HamsterTravel.Planning
 
-  alias HamsterTravelWeb.CityInput
+  alias HamsterTravelWeb.{CityInput, FormSubmission}
   alias HamsterTravelWeb.Planning.DayRangeSelect
 
   attr :action, :atom, required: true
@@ -50,7 +50,13 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
           <.button color="light" type="button" phx-click="cancel" phx-target={@myself}>
             {gettext("Cancel")}
           </.button>
-          <.button color="primary" size="xs" type="submit">
+          <.button
+            color="primary"
+            size="xs"
+            type="submit"
+            disabled={@submitting}
+            phx-disable-with={gettext("Save")}
+          >
             {gettext("Save")}
           </.button>
         </div>
@@ -73,6 +79,7 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
     socket =
       socket
       |> assign(assigns)
+      |> FormSubmission.init()
       |> assign_form(changeset)
 
     {:ok, socket}
@@ -103,7 +110,9 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
     if socket.assigns.can_edit do
       destination_params = CityInput.process_selected_value_on_submit(destination_params, "city")
 
-      on_submit(socket, socket.assigns.action, destination_params)
+      FormSubmission.submit_once(socket, fn socket ->
+        on_submit(socket, socket.assigns.action, destination_params)
+      end)
     else
       {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
     end
@@ -138,6 +147,6 @@ defmodule HamsterTravelWeb.Planning.DestinationForm do
   end
 
   defp result({:error, changeset}, socket) do
-    {:noreply, assign_form(socket, changeset)}
+    {:noreply, socket |> FormSubmission.reset() |> assign_form(changeset)}
   end
 end

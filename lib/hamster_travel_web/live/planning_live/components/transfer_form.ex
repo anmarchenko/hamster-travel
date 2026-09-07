@@ -7,7 +7,7 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
 
   alias HamsterTravel.Planning
 
-  alias HamsterTravelWeb.CityInput
+  alias HamsterTravelWeb.{CityInput, FormSubmission}
 
   attr :action, :atom, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true
@@ -150,7 +150,13 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
           <.button color="light" type="button" phx-click="cancel" phx-target={@myself}>
             {gettext("Cancel")}
           </.button>
-          <.button color="primary" size="xs" type="submit">
+          <.button
+            color="primary"
+            size="xs"
+            type="submit"
+            disabled={@submitting}
+            phx-disable-with={gettext("Save")}
+          >
             {gettext("Save")}
           </.button>
         </div>
@@ -176,6 +182,7 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
     socket =
       socket
       |> assign(assigns)
+      |> FormSubmission.init()
       |> assign(:transport_mode, transport_mode)
       |> assign(:show_carrier_info, show_carrier_info(transport_mode))
       |> assign_form(changeset)
@@ -232,7 +239,9 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
         |> CityInput.process_selected_value_on_submit("arrival_city")
         |> cleanup_carrier_fields_if_not_shown(socket.assigns.show_carrier_info)
 
-      on_submit(socket, socket.assigns.action, transfer_params)
+      FormSubmission.submit_once(socket, fn socket ->
+        on_submit(socket, socket.assigns.action, transfer_params)
+      end)
     else
       {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
     end
@@ -304,7 +313,10 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
   end
 
   defp result({:error, changeset}, socket) do
-    {:noreply, assign_form(socket, convert_datetime_to_time_for_form(changeset))}
+    {:noreply,
+     socket
+     |> FormSubmission.reset()
+     |> assign_form(convert_datetime_to_time_for_form(changeset))}
   end
 
   defp transport_mode_options do

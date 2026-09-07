@@ -1489,6 +1489,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "label", "Arrival time")
       assert has_element?(view, "label", "Price")
       assert has_element?(view, "button", "Save")
+      assert has_element?(view, "form[id^='transfer-form-'] button[phx-disable-with='Save']")
       assert has_element?(view, "button", "Cancel")
     end
 
@@ -1909,6 +1910,11 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "label", "Activity Name")
       assert has_element?(view, "label", "Priority")
       assert has_element?(view, "label", "Price")
+
+      assert has_element?(
+               view,
+               "form[id*='activity-form-new-activity-new-0'] button[phx-disable-with='Save']"
+             )
 
       assert has_element?(
                view,
