@@ -55,50 +55,11 @@ defmodule HamsterTravelWeb.Planning.PlanningComponents do
       <div class="pointer-events-none absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-orange-200/35 blur-3xl dark:bg-amber-400/10" />
       <div class="relative mx-auto flex min-h-[58vh] max-w-2xl flex-col items-center justify-center text-center">
         <div class="mb-8 w-56 sm:w-64">
-          <svg
-            class="h-full w-full drop-shadow-xl"
-            fill="none"
-            viewBox="0 0 200 200"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle class="fill-white/75 dark:fill-zinc-800/75" cx="100" cy="100" r="90" />
-            <rect
-              class="fill-amber-700 dark:fill-amber-800"
-              height="50"
-              rx="8"
-              width="80"
-              x="60"
-              y="120"
-            />
-            <rect class="fill-amber-900/20" height="5" width="80" x="60" y="130" />
-            <path
-              d="M85 120V110C85 105 115 105 115 110V120"
-              fill="none"
-              stroke="#78350f"
-              stroke-width="4"
-            />
-            <ellipse class="fill-orange-200 dark:fill-orange-300" cx="100" cy="95" rx="35" ry="40" />
-            <circle class="fill-orange-200 dark:fill-orange-300" cx="75" cy="65" r="10" />
-            <circle class="fill-orange-200 dark:fill-orange-300" cx="125" cy="65" r="10" />
-            <circle class="fill-pink-200" cx="75" cy="65" r="5" />
-            <circle class="fill-pink-200" cx="125" cy="65" r="5" />
-            <circle class="fill-zinc-800" cx="90" cy="85" r="4" />
-            <circle class="fill-zinc-800" cx="110" cy="85" r="4" />
-            <path d="M95 95Q100 100 105 95" stroke="#374151" stroke-linecap="round" stroke-width="2" />
-            <ellipse class="fill-pink-300/50" cx="90" cy="100" rx="4" ry="2" />
-            <ellipse class="fill-pink-300/50" cx="110" cy="100" rx="4" ry="2" />
-            <rect
-              class="fill-sky-100"
-              height="30"
-              rx="2"
-              transform="rotate(12 110 80)"
-              width="40"
-              x="110"
-              y="80"
-            />
-            <path d="M120 85L140 85M120 90L135 90M120 95L140 95" stroke="#93C5FD" stroke-width="2" />
-            <circle class="fill-orange-200 dark:fill-orange-300" cx="115" cy="105" r="6" />
-          </svg>
+          <img
+            src={~p"/images/trips-empty-state.png"}
+            alt=""
+            class="h-auto w-full drop-shadow-xl"
+          />
         </div>
         <h2 class="mb-3 text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
           {@title}
