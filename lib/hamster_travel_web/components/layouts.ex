@@ -45,9 +45,11 @@ defmodule HamsterTravelWeb.Layouts do
             <.icon name="hero-sun" class="h-5 w-5 dark:hidden" />
           </button>
           <% locale = current_locale(@current_user) %>
-          <.link
-            href={~p"/users/locale?locale=#{other_locale(locale)}"}
-            method="post"
+          <button
+            :if={@current_user}
+            type="button"
+            phx-click="switch_locale"
+            phx-value-locale={other_locale(locale)}
             data-locale-switch
             data-current-locale={locale}
             data-target-locale={other_locale(locale)}
@@ -56,7 +58,7 @@ defmodule HamsterTravelWeb.Layouts do
             class="inline-flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold uppercase text-zinc-600 transition-colors hover:bg-orange-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-50 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white dark:focus-visible:ring-offset-zinc-900"
           >
             {locale}
-          </.link>
+          </button>
         </div>
         <%= if @current_user do %>
           <.nav_link to={~p"/profile"}>

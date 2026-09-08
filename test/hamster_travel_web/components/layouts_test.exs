@@ -21,29 +21,35 @@ defmodule HamsterTravelWeb.LayoutsTest do
   end
 
   describe "navigation locale switcher" do
-    test "renders a control that switches from English to Russian" do
+    test "does not render for an unauthenticated visitor" do
       html = render_app_layout()
+
+      refute html =~ "data-locale-switch"
+    end
+
+    test "renders a control that switches from English to Russian" do
+      html = render_app_layout(current_user: user_with_locale("en"))
 
       assert html =~ "data-locale-switch"
       assert html =~ ~s(data-current-locale="en")
       assert html =~ ~s(data-target-locale="ru")
       assert html =~ ~s(aria-label="Switch to Russian")
-      assert html =~ ~s(href="/users/locale?locale=ru")
-      assert html =~ ~s(data-method="post")
-      assert html =~ ~r/data-locale-switch[^>]*>\s*en\s*<\/a>/
+      assert html =~ ~s(phx-click="switch_locale")
+      assert html =~ ~s(phx-value-locale="ru")
+      assert html =~ ~r/data-locale-switch[^>]*>\s*en\s*<\/button>/
     end
 
     test "renders a control that switches from Russian to English" do
       html =
         Gettext.with_locale(HamsterTravelWeb.Gettext, "ru", fn ->
-          render_app_layout()
+          render_app_layout(current_user: user_with_locale("ru"))
         end)
 
       assert html =~ ~s(data-current-locale="ru")
       assert html =~ ~s(data-target-locale="en")
       assert html =~ ~s(aria-label="Переключить на английский")
-      assert html =~ ~s(href="/users/locale?locale=en")
-      assert html =~ ~r/data-locale-switch[^>]*>\s*ru\s*<\/a>/
+      assert html =~ ~s(phx-value-locale="en")
+      assert html =~ ~r/data-locale-switch[^>]*>\s*ru\s*<\/button>/
     end
   end
 
@@ -83,5 +89,9 @@ defmodule HamsterTravelWeb.LayoutsTest do
       )
 
     render_component(&Layouts.app/1, assigns)
+  end
+
+  defp user_with_locale(locale) do
+    %{avatar_url: nil, locale: locale, name: "User"}
   end
 end

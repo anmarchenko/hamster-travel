@@ -33,7 +33,6 @@ defmodule HamsterTravelWeb.UserAuth do
 
     conn
     |> renew_session()
-    |> put_session(:preferred_locale, preferred_locale(user, nil))
     |> put_token_in_session(token)
     |> maybe_write_remember_me_cookie(token, params)
     |> redirect(to: user_return_to || signed_in_path(conn))
@@ -43,34 +42,12 @@ defmodule HamsterTravelWeb.UserAuth do
     put_resp_cookie(conn, @remember_me_cookie, token, @remember_me_options)
   end
 
-  # This function renews the session ID and erases the whole
-  # session to avoid fixation attacks. If there is any data
-  # in the session you may want to preserve after log in/log out,
-  # you must explicitly fetch the session data before clearing
-  # and then immediately set it after clearing, for example:
-  #
-  #     defp renew_session(conn) do
-  #       preferred_locale = get_session(conn, :preferred_locale)
-  #
-  #       conn
-  #       |> configure_session(renew: true)
-  #       |> clear_session()
-  #       |> put_session(:preferred_locale, preferred_locale)
-  #     end
-  #
+  # Renew the session ID and erase the previous session to avoid fixation attacks.
   defp renew_session(conn) do
-    preferred_locale = get_session(conn, :preferred_locale)
-
     conn
     |> configure_session(renew: true)
     |> clear_session()
-    |> maybe_restore_preferred_locale(preferred_locale)
   end
-
-  defp maybe_restore_preferred_locale(conn, locale) when locale in @supported_locales,
-    do: put_session(conn, :preferred_locale, locale)
-
-  defp maybe_restore_preferred_locale(conn, _locale), do: conn
 
   @doc """
   Logs the user out.
@@ -99,7 +76,7 @@ defmodule HamsterTravelWeb.UserAuth do
     {user_token, conn} = ensure_user_token(conn)
     user = user_token && Accounts.get_user_by_session_token(user_token)
 
-    set_locale(preferred_locale(user, get_session(conn, :preferred_locale)))
+    set_locale(user_locale(user))
 
     assign(conn, :current_user, user)
   end
@@ -161,7 +138,7 @@ defmodule HamsterTravelWeb.UserAuth do
     socket = mount_current_user(session, socket)
 
     if socket.assigns.current_user do
-      {:cont, socket}
+      {:cont, attach_locale_switcher(socket)}
     else
       socket =
         socket
@@ -186,7 +163,7 @@ defmodule HamsterTravelWeb.UserAuth do
     user_token = session["user_token"]
     user = user_token && Accounts.get_user_by_session_token(user_token)
 
-    set_locale(preferred_locale(user, session["preferred_locale"]))
+    set_locale(user_locale(user))
 
     Phoenix.Component.assign(socket, :current_user, user)
   end
@@ -236,11 +213,41 @@ defmodule HamsterTravelWeb.UserAuth do
 
   defp signed_in_path(_conn), do: ~p"/"
 
-  defp preferred_locale(%{locale: locale}, _session_locale) when locale in @supported_locales,
-    do: locale
+  defp attach_locale_switcher(socket) do
+    if Phoenix.LiveView.connected?(socket) do
+      socket
+      |> Phoenix.LiveView.attach_hook(:locale_current_path, :handle_params, &store_current_path/3)
+      |> Phoenix.LiveView.attach_hook(:locale_switcher, :handle_event, &handle_locale_switch/3)
+    else
+      socket
+    end
+  end
 
-  defp preferred_locale(_user, locale) when locale in @supported_locales, do: locale
-  defp preferred_locale(_user, _locale), do: "en"
+  defp store_current_path(_params, uri, socket) do
+    {:cont, Phoenix.Component.assign(socket, :current_path, local_path(uri))}
+  end
+
+  defp handle_locale_switch("switch_locale", %{"locale" => locale}, socket)
+       when locale in @supported_locales do
+    case Accounts.update_user_locale(socket.assigns.current_user, locale) do
+      {:ok, _user} ->
+        set_locale(locale)
+        {:halt, Phoenix.LiveView.redirect(socket, to: socket.assigns.current_path)}
+
+      {:error, _changeset} ->
+        {:halt, socket}
+    end
+  end
+
+  defp handle_locale_switch(_event, _params, socket), do: {:cont, socket}
+
+  defp local_path(uri) do
+    %URI{path: path, query: query} = URI.parse(uri)
+    if query, do: path <> "?" <> query, else: path
+  end
+
+  defp user_locale(%{locale: locale}) when locale in @supported_locales, do: locale
+  defp user_locale(_user), do: "en"
 
   defp set_locale(locale) do
     Gettext.put_locale(HamsterTravelWeb.Gettext, locale)
