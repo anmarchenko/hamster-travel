@@ -1655,3 +1655,13 @@ msgstr "Включить светлую тему"
 #, elixir-autogen, elixir-format
 msgid "Toggle color mode"
 msgstr "Переключить цветовую тему"
+
+#: lib/hamster_travel_web/components/layouts.ex:227
+#, elixir-autogen, elixir-format
+msgid "Switch to English"
+msgstr "Переключить на английский"
+
+#: lib/hamster_travel_web/components/layouts.ex:228
+#, elixir-autogen, elixir-format
+msgid "Switch to Russian"
+msgstr "Переключить на русский"

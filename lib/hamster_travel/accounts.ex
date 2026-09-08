@@ -162,6 +162,17 @@ defmodule HamsterTravel.Accounts do
   end
 
   @doc """
+  Updates a user's preferred locale without requiring the other settings fields.
+  """
+  @spec update_user_locale(User.t(), String.t()) ::
+          {:ok, User.t()} | {:error, Ecto.Changeset.t()}
+  def update_user_locale(user, locale) do
+    user
+    |> User.locale_changeset(%{locale: locale})
+    |> Repo.update()
+  end
+
+  @doc """
   Stores a user avatar and updates user avatar URL.
 
   Returns `{:ok, %User{}}` or `{:error, reason}`.

@@ -13,6 +13,7 @@ defmodule HamsterTravelWeb.UserAuth do
   @max_age 365 * 60 * 24 * 60
   @remember_me_cookie "_hamster_travel_web_user_remember_me"
   @remember_me_options [sign: true, max_age: @max_age, same_site: "Lax"]
+  @supported_locales ~w(en ru)
 
   @doc """
   Logs the user in.
@@ -32,6 +33,7 @@ defmodule HamsterTravelWeb.UserAuth do
 
     conn
     |> renew_session()
+    |> put_session(:preferred_locale, preferred_locale(user, nil))
     |> put_token_in_session(token)
     |> maybe_write_remember_me_cookie(token, params)
     |> redirect(to: user_return_to || signed_in_path(conn))
@@ -57,10 +59,18 @@ defmodule HamsterTravelWeb.UserAuth do
   #     end
   #
   defp renew_session(conn) do
+    preferred_locale = get_session(conn, :preferred_locale)
+
     conn
     |> configure_session(renew: true)
     |> clear_session()
+    |> maybe_restore_preferred_locale(preferred_locale)
   end
+
+  defp maybe_restore_preferred_locale(conn, locale) when locale in @supported_locales,
+    do: put_session(conn, :preferred_locale, locale)
+
+  defp maybe_restore_preferred_locale(conn, _locale), do: conn
 
   @doc """
   Logs the user out.
@@ -88,6 +98,9 @@ defmodule HamsterTravelWeb.UserAuth do
   def fetch_current_user(conn, _opts) do
     {user_token, conn} = ensure_user_token(conn)
     user = user_token && Accounts.get_user_by_session_token(user_token)
+
+    set_locale(preferred_locale(user, get_session(conn, :preferred_locale)))
+
     assign(conn, :current_user, user)
   end
 
@@ -173,11 +186,7 @@ defmodule HamsterTravelWeb.UserAuth do
     user_token = session["user_token"]
     user = user_token && Accounts.get_user_by_session_token(user_token)
 
-    if user do
-      set_locale(user.locale)
-    else
-      set_locale("en")
-    end
+    set_locale(preferred_locale(user, session["preferred_locale"]))
 
     Phoenix.Component.assign(socket, :current_user, user)
   end
@@ -226,6 +235,12 @@ defmodule HamsterTravelWeb.UserAuth do
   defp maybe_store_return_to(conn), do: conn
 
   defp signed_in_path(_conn), do: ~p"/"
+
+  defp preferred_locale(%{locale: locale}, _session_locale) when locale in @supported_locales,
+    do: locale
+
+  defp preferred_locale(_user, locale) when locale in @supported_locales, do: locale
+  defp preferred_locale(_user, _locale), do: "en"
 
   defp set_locale(locale) do
     Gettext.put_locale(HamsterTravelWeb.Gettext, locale)

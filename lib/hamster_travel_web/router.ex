@@ -50,6 +50,12 @@ defmodule HamsterTravelWeb.Router do
     get "/up", HealthController, :show
   end
 
+  scope "/", HamsterTravelWeb do
+    pipe_through :browser
+
+    post "/users/locale", LocaleController, :update
+  end
+
   ## Authentication routes
   scope "/", HamsterTravelWeb do
     pipe_through [:browser, :redirect_if_user_is_authenticated]

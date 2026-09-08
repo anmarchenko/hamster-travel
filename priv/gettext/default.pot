@@ -1660,3 +1660,13 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "Toggle color mode"
 msgstr ""
+
+#: lib/hamster_travel_web/components/layouts.ex:227
+#, elixir-autogen, elixir-format
+msgid "Switch to English"
+msgstr ""
+
+#: lib/hamster_travel_web/components/layouts.ex:228
+#, elixir-autogen, elixir-format
+msgid "Switch to Russian"
+msgstr ""

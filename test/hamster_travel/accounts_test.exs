@@ -221,6 +221,23 @@ defmodule HamsterTravel.AccountsTest do
     end
   end
 
+  describe "update_user_locale/2" do
+    test "updates the locale without requiring other settings" do
+      user = user_fixture()
+
+      assert {:ok, updated_user} = Accounts.update_user_locale(user, "ru")
+      assert updated_user.locale == "ru"
+      assert updated_user.default_currency == nil
+    end
+
+    test "validates the locale" do
+      user = user_fixture()
+
+      assert {:error, changeset} = Accounts.update_user_locale(user, "de")
+      assert %{locale: ["is invalid"]} = errors_on(changeset)
+    end
+  end
+
   describe "visited cities" do
     setup do
       geonames_fixture()

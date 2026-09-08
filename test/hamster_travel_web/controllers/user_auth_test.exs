@@ -30,6 +30,13 @@ defmodule HamsterTravelWeb.UserAuthTest do
       refute get_session(conn, :to_be_removed)
     end
 
+    test "stores the user's locale in the renewed session", %{conn: conn} do
+      user = user_fixture(%{locale: "ru"})
+      conn = UserAuth.log_in_user(conn, user)
+
+      assert get_session(conn, :preferred_locale) == "ru"
+    end
+
     test "redirects to the configured path", %{conn: conn, user: user} do
       conn = conn |> put_session(:user_return_to, "/hello") |> UserAuth.log_in_user(user)
       assert redirected_to(conn) == "/hello"
@@ -67,6 +74,19 @@ defmodule HamsterTravelWeb.UserAuthTest do
       refute get_session(conn, :user_token)
       assert redirected_to(conn) == "/"
     end
+
+    test "preserves the preferred locale", %{conn: conn, user: user} do
+      user_token = Accounts.generate_user_session_token(user)
+
+      conn =
+        conn
+        |> put_session(:user_token, user_token)
+        |> put_session(:preferred_locale, "ru")
+        |> fetch_cookies()
+        |> UserAuth.log_out_user()
+
+      assert get_session(conn, :preferred_locale) == "ru"
+    end
   end
 
   describe "fetch_current_user/2" do
@@ -81,6 +101,23 @@ defmodule HamsterTravelWeb.UserAuthTest do
       conn = UserAuth.fetch_current_user(conn, [])
       refute get_session(conn, :user_token)
       refute conn.assigns.current_user
+    end
+
+    test "sets the locale from the authenticated user", %{conn: conn} do
+      user = user_fixture(%{locale: "ru"})
+      user_token = Accounts.generate_user_session_token(user)
+
+      conn = conn |> put_session(:user_token, user_token) |> UserAuth.fetch_current_user([])
+
+      assert conn.assigns.current_user.id == user.id
+      assert Gettext.get_locale(HamsterTravelWeb.Gettext) == "ru"
+    end
+
+    test "sets an anonymous visitor's locale from the session", %{conn: conn} do
+      conn = conn |> put_session(:preferred_locale, "ru") |> UserAuth.fetch_current_user([])
+
+      assert conn.assigns.current_user == nil
+      assert Gettext.get_locale(HamsterTravelWeb.Gettext) == "ru"
     end
   end
 

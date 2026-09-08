@@ -13,8 +13,37 @@ defmodule HamsterTravelWeb.LayoutsTest do
       assert html =~ ~s(data-dark-label="Switch to dark mode")
       assert html =~ ~s(data-light-label="Switch to light mode")
       assert html =~ ~s(aria-pressed="false")
-      assert html =~ "hero-moon"
-      assert html =~ "hero-sun"
+      assert html =~ ~s(class="hero-moon hidden h-5 w-5 dark:inline-block")
+      assert html =~ ~s(class="hero-sun h-5 w-5 dark:hidden")
+      assert length(:binary.matches(html, ~s(class="flex items-center gap-6"))) == 2
+      assert html =~ ~s(class="flex items-center gap-3.5")
+    end
+  end
+
+  describe "navigation locale switcher" do
+    test "renders a control that switches from English to Russian" do
+      html = render_app_layout()
+
+      assert html =~ "data-locale-switch"
+      assert html =~ ~s(data-current-locale="en")
+      assert html =~ ~s(data-target-locale="ru")
+      assert html =~ ~s(aria-label="Switch to Russian")
+      assert html =~ ~s(href="/users/locale?locale=ru")
+      assert html =~ ~s(data-method="post")
+      assert html =~ ~r/data-locale-switch[^>]*>\s*en\s*<\/a>/
+    end
+
+    test "renders a control that switches from Russian to English" do
+      html =
+        Gettext.with_locale(HamsterTravelWeb.Gettext, "ru", fn ->
+          render_app_layout()
+        end)
+
+      assert html =~ ~s(data-current-locale="ru")
+      assert html =~ ~s(data-target-locale="en")
+      assert html =~ ~s(aria-label="Переключить на английский")
+      assert html =~ ~s(href="/users/locale?locale=en")
+      assert html =~ ~r/data-locale-switch[^>]*>\s*ru\s*<\/a>/
     end
   end
 

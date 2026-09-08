@@ -113,6 +113,16 @@ defmodule HamsterTravel.Accounts.User do
   end
 
   @doc """
+  A user changeset for changing only the preferred locale.
+  """
+  def locale_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:locale])
+    |> validate_required([:locale])
+    |> validate_inclusion(:locale, ["en", "ru"])
+  end
+
+  @doc """
   A user changeset for changing the password.
 
   ## Options

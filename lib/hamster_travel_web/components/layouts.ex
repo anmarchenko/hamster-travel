@@ -15,9 +15,9 @@ defmodule HamsterTravelWeb.Layouts do
           Hamster Travel
         </h1>
       </.link>
-      <nav class="space-x-6 flex items-center">
+      <nav class="flex items-center gap-6">
         <div class="hidden sm:block">
-          <div class="space-x-6 flex items-center">
+          <div class="flex items-center gap-6">
             <%= if @current_user do %>
               <.nav_link to={plans_url()} active={@active_nav == plans_nav_item()}>
                 {gettext("Plans")}
@@ -31,18 +31,33 @@ defmodule HamsterTravelWeb.Layouts do
             <% end %>
           </div>
         </div>
-        <button
-          type="button"
-          data-theme-toggle
-          data-dark-label={gettext("Switch to dark mode")}
-          data-light-label={gettext("Switch to light mode")}
-          aria-label={gettext("Toggle color mode")}
-          aria-pressed="false"
-          class="inline-flex h-9 w-9 items-center justify-center rounded-full text-zinc-600 transition-colors hover:bg-orange-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-50 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white dark:focus-visible:ring-offset-zinc-900"
-        >
-          <.icon name="hero-moon" class="h-5 w-5 dark:hidden" />
-          <.icon name="hero-sun" class="hidden h-5 w-5 dark:inline-block" />
-        </button>
+        <div class="flex items-center gap-3.5">
+          <button
+            type="button"
+            data-theme-toggle
+            data-dark-label={gettext("Switch to dark mode")}
+            data-light-label={gettext("Switch to light mode")}
+            aria-label={gettext("Toggle color mode")}
+            aria-pressed="false"
+            class="inline-flex h-9 w-9 items-center justify-center rounded-full text-zinc-600 transition-colors hover:bg-orange-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-50 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white dark:focus-visible:ring-offset-zinc-900"
+          >
+            <.icon name="hero-moon" class="hidden h-5 w-5 dark:inline-block" />
+            <.icon name="hero-sun" class="h-5 w-5 dark:hidden" />
+          </button>
+          <% locale = current_locale(@current_user) %>
+          <.link
+            href={~p"/users/locale?locale=#{other_locale(locale)}"}
+            method="post"
+            data-locale-switch
+            data-current-locale={locale}
+            data-target-locale={other_locale(locale)}
+            aria-label={locale_switch_label(locale)}
+            title={locale_switch_label(locale)}
+            class="inline-flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold uppercase text-zinc-600 transition-colors hover:bg-orange-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-50 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white dark:focus-visible:ring-offset-zinc-900"
+          >
+            {locale}
+          </.link>
+        </div>
         <%= if @current_user do %>
           <.nav_link to={~p"/profile"}>
             <.avatar size="md" src={@current_user.avatar_url} name={@current_user.name} random_color />
@@ -198,6 +213,21 @@ defmodule HamsterTravelWeb.Layouts do
 
   def inactive_class,
     do: "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+
+  defp current_locale(%{locale: locale}) when locale in ["en", "ru"], do: locale
+
+  defp current_locale(_current_user) do
+    case Gettext.get_locale(HamsterTravelWeb.Gettext) do
+      locale when locale in ["en", "ru"] -> locale
+      _locale -> "en"
+    end
+  end
+
+  defp other_locale("ru"), do: "en"
+  defp other_locale(_locale), do: "ru"
+
+  defp locale_switch_label("ru"), do: gettext("Switch to English")
+  defp locale_switch_label(_locale), do: gettext("Switch to Russian")
 
   def back_url(assigns) do
     cond do
