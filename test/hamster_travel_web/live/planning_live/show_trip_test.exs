@@ -399,6 +399,8 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       assert has_element?(activities_view, "#activities-#{trip.id}[data-can-edit='false']")
       refute has_element?(activities_view, ".draggable-activity")
+      refute has_element?(activities_view, "button[aria-label='Move to day']")
+      refute has_element?(activities_view, "[data-activity-day-picker]")
       refute has_element?(activities_view, ".draggable-day-expense")
     end
 
@@ -2010,6 +2012,55 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert Planning.list_activities(trip) == []
     end
 
+    test "creates an activity with zero cost when the cost is left blank", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      view |> element("#activity-new-0 [phx-click='add_activity']") |> render_click()
+
+      activity_form =
+        form(view, "form[id*='activity-form-new-activity-new-0']", %{
+          activity: %{name: "Free museum", expense: %{price: %{amount: "", currency: "EUR"}}}
+        })
+
+      render_change(activity_form)
+      render_submit(activity_form)
+
+      assert [activity] = Planning.list_activities(trip)
+      assert activity.name == "Free museum"
+      assert activity.expense.price == Money.new(:EUR, 0)
+      refute has_element?(view, "form[id*='activity-form-new-activity-new-0']")
+    end
+
+    test "saves zero in the selected currency when clearing an activity cost", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+
+      activity =
+        activity_fixture(%{
+          trip_id: trip.id,
+          day_index: 0,
+          expense: %{price: Money.new(:EUR, 25), trip_id: trip.id}
+        })
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+      view |> element("[data-activity-id='#{activity.id}'] [phx-click='edit']") |> render_click()
+
+      activity_form =
+        form(view, "#activity-form-activity-form-#{activity.id}", %{
+          activity: %{expense: %{price: %{amount: "", currency: "USD"}}}
+        })
+
+      render_change(activity_form)
+      render_submit(activity_form)
+
+      assert Planning.get_activity!(activity.id).expense.price == Money.new(:USD, 0)
+      refute has_element?(view, "#activity-form-activity-form-#{activity.id}")
+    end
+
     test "can create activity via form", %{conn: conn} do
       # Arrange
 
@@ -2362,6 +2413,54 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       assert created_day_expense.expense.price == Money.new(:EUR, 20)
       assert_eventually_contains(view, "€135.00")
+    end
+
+    test "can move an activity to the last day using the scrollable picker", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      trip =
+        trip_fixture(%{author_id: user.id, status: "0_draft", dates_unknown: true, duration: 30})
+
+      activity = activity_fixture(%{trip_id: trip.id, day_index: 0, name: "Museum"})
+      existing = activity_fixture(%{trip_id: trip.id, day_index: 29, name: "Park"})
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      assert has_element?(view, "#move-activity-#{activity.id}[aria-haspopup='dialog']")
+      picker = "#move-activity-modal-#{activity.id}"
+
+      assert has_element?(view, "#{picker} [data-activity-day-picker].max-h-60.overflow-y-auto")
+      assert has_element?(view, "#{picker} button[data-day-index='0'][disabled]", "Day 1")
+      assert has_element?(view, "#{picker} button[data-day-index='29']", "Day 30")
+      refute has_element?(view, "#{picker} button[data-day-index='30']")
+
+      view |> element("#{picker} button[data-day-index='29']") |> render_click()
+
+      assert Planning.get_activity!(activity.id).day_index == 29
+
+      assert Enum.map(Planning.activities_for_day(29, Planning.list_activities(trip)), & &1.id) ==
+               [existing.id, activity.id]
+
+      assert has_element?(view, "[data-target-day='29'] [data-activity-id='#{activity.id}']")
+      assert has_element?(view, "#{picker} button[data-day-index='29'][disabled]")
+    end
+
+    test "shows dates in the activity move picker", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+      activity = activity_fixture(%{trip_id: trip.id, day_index: 0, name: "Museum"})
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      assert has_element?(view, "#move-activity-#{activity.id}[aria-haspopup='dialog']")
+
+      assert has_element?(
+               view,
+               "#move-activity-modal-#{activity.id} button[data-day-index='1']",
+               HamsterTravelWeb.Cldr.date_with_weekday(Date.add(trip.start_date, 1))
+             )
     end
 
     test "can move activity via drag and drop", %{conn: conn} do

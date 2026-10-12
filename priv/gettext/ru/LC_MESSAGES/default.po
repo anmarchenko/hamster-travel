@@ -1665,3 +1665,10 @@ msgstr "Переключить на английский"
 #, elixir-autogen, elixir-format
 msgid "Switch to Russian"
 msgstr "Переключить на русский"
+
+#: lib/hamster_travel_web/live/planning_live/components/activity.ex:94
+#: lib/hamster_travel_web/live/planning_live/components/activity.ex:95
+#: lib/hamster_travel_web/live/planning_live/components/activity.ex:133
+#, elixir-autogen, elixir-format
+msgid "Move to day"
+msgstr "Переместить на день"

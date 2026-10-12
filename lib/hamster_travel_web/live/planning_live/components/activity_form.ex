@@ -156,6 +156,8 @@ defmodule HamsterTravelWeb.Planning.ActivityForm do
 
   @impl true
   def handle_event("form_changed", %{"activity" => activity_params}, socket) do
+    activity_params = default_blank_cost(activity_params)
+
     changeset =
       case socket.assigns.action do
         :new ->
@@ -171,6 +173,8 @@ defmodule HamsterTravelWeb.Planning.ActivityForm do
   @impl true
   def handle_event("form_submit", %{"activity" => activity_params}, socket) do
     if socket.assigns.can_edit do
+      activity_params = default_blank_cost(activity_params)
+
       FormSubmission.submit_once(socket, fn socket ->
         on_submit(socket, socket.assigns.action, activity_params)
       end)
@@ -188,6 +192,13 @@ defmodule HamsterTravelWeb.Planning.ActivityForm do
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
     assign(socket, :form, to_form(changeset))
   end
+
+  defp default_blank_cost(%{"expense" => %{"price" => %{"amount" => amount}}} = params)
+       when amount in [nil, ""] do
+    put_in(params, ["expense", "price", "amount"], "0")
+  end
+
+  defp default_blank_cost(params), do: params
 
   defp on_submit(socket, :new, activity_params) do
     socket.assigns.trip

@@ -87,15 +87,29 @@ defmodule HamsterTravelWeb.Planning.Activity do
             display_currency={@display_currency}
             class="text-base font-normal tabular-nums text-zinc-500 dark:text-zinc-400 sm:text-right 2xl:text-lg"
           />
-          <.edit_delete_buttons
-            :if={@can_edit}
-            class="shrink-0"
-            edit_target={@myself}
-            delete_target={@myself}
-            delete_confirm={
-              gettext("Are you sure you want to delete activity \"%{name}\"?", name: @activity.name)
-            }
-          />
+          <div :if={@can_edit} class="flex shrink-0 items-center gap-1">
+            <.icon_button
+              size="xs"
+              id={"move-activity-#{@activity.id}"}
+              type="button"
+              aria-label={gettext("Move to day")}
+              title={gettext("Move to day")}
+              aria-haspopup="dialog"
+              aria-controls={"move-activity-modal-#{@activity.id}"}
+              phx-click={show_modal("move-activity-modal-#{@activity.id}")}
+              class="!h-5 !w-5 !p-0 min-h-0 bg-transparent hover:bg-transparent text-slate-500 dark:text-slate-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+            >
+              <.icon name="hero-calendar-days" class="h-4 w-4" />
+            </.icon_button>
+            <.edit_delete_buttons
+              class="shrink-0"
+              edit_target={@myself}
+              delete_target={@myself}
+              delete_confirm={
+                gettext("Are you sure you want to delete activity \"%{name}\"?", name: @activity.name)
+              }
+            />
+          </div>
         </div>
       </div>
       <div id={"activity-content-#{@activity.id}"} class="hidden flex flex-col gap-y-1 pl-7">
@@ -111,6 +125,53 @@ defmodule HamsterTravelWeb.Planning.Activity do
         <.activity_feature icon="hero-map-pin" value={@activity.address} />
         <.formatted_text :if={@activity.description} text={@activity.description} class="mt-3" />
       </div>
+      <.modal
+        :if={@can_edit}
+        id={"move-activity-modal-#{@activity.id}"}
+        max_width_class="max-w-lg"
+      >
+        <h2 id={"move-activity-modal-#{@activity.id}-title"} class="text-lg font-semibold">
+          {gettext("Move to day")}
+        </h2>
+        <p
+          id={"move-activity-modal-#{@activity.id}-description"}
+          class="mt-2 text-sm text-zinc-500 dark:text-zinc-400"
+        >
+          {@activity.name}
+        </p>
+        <div
+          class="-mr-8 mt-4 max-h-60 overflow-y-auto overscroll-contain pr-6 [scrollbar-gutter:stable] [scrollbar-width:thin] lg:max-h-[min(65vh,40rem)]"
+          data-activity-day-picker
+        >
+          <button
+            :for={day_index <- 0..(@trip.duration - 1)}
+            type="button"
+            phx-click={
+              hide_modal("move-activity-modal-#{@activity.id}")
+              |> JS.push("move_activity",
+                value: %{
+                  activity_id: to_string(@activity.id),
+                  new_day_index: day_index,
+                  position: length(Planning.activities_for_day(day_index, @trip.activities))
+                }
+              )
+            }
+            data-day-index={day_index}
+            disabled={day_index == @activity.day_index}
+            class="flex w-full items-center justify-between gap-2 rounded px-3 py-2 text-left text-sm hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500 disabled:cursor-default disabled:opacity-50 dark:hover:bg-zinc-800"
+          >
+            <span class="shrink-0">{gettext("Day")} {day_index + 1}</span>
+            <span class="ml-auto flex items-center gap-3">
+              <span :if={@trip.start_date} class="text-right text-zinc-500 dark:text-zinc-400">
+                {Formatter.date_with_weekday(Date.add(@trip.start_date, day_index))}
+              </span>
+              <span class="h-4 w-4 shrink-0" aria-hidden="true">
+                <.icon :if={day_index == @activity.day_index} name="hero-check" class="h-4 w-4" />
+              </span>
+            </span>
+          </button>
+        </div>
+      </.modal>
     </div>
     """
   end
