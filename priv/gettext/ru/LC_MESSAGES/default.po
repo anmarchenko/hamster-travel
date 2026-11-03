@@ -1631,6 +1631,26 @@ msgstr "Готовим PDF"
 msgid "You are offline at the moment, the app is in readonly mode"
 msgstr "Сейчас вы не в сети, приложение работает в режиме только для чтения"
 
+#: lib/hamster_travel_web/components/core_components.ex
+#, elixir-autogen, elixir-format
+msgid "Connecting to the app. Editing is temporarily unavailable."
+msgstr "Подключаемся к приложению. Редактирование временно недоступно."
+
+#: lib/hamster_travel_web/components/core_components.ex
+#, elixir-autogen, elixir-format
+msgid "Connection to the app is unavailable. Editing is temporarily unavailable."
+msgstr "Подключение к приложению недоступно. Редактирование временно недоступно."
+
+#: lib/hamster_travel_web/components/core_components.ex
+#, elixir-autogen, elixir-format
+msgid "Connection failed after two attempts. Please retry."
+msgstr "Не удалось подключиться с двух попыток. Повторите попытку."
+
+#: lib/hamster_travel_web/components/core_components.ex
+#, elixir-autogen, elixir-format
+msgid "Retry"
+msgstr "Повторить"
+
 #: lib/hamster_travel_web/live/packing_live/components/list.ex:138
 #, elixir-autogen, elixir-format
 msgid "Collapse"

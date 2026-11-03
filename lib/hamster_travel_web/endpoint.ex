@@ -11,7 +11,16 @@ defmodule HamsterTravelWeb.Endpoint do
     max_age: 365 * 24 * 60 * 60
   ]
 
-  socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
+  socket "/live", Phoenix.LiveView.Socket,
+    websocket: [compress: true, connect_info: [session: @session_options]]
+
+  # esbuild gives these optional feature chunks content-hashed filenames.
+  # Their import URLs do not carry Phoenix's ?vsn= query string.
+  plug Plug.Static,
+    at: "/assets/chunks",
+    from: {:hamster_travel, "priv/static/assets/chunks"},
+    gzip: Application.compile_env(:hamster_travel, :static_gzip, false),
+    cache_control_for_etags: "public, max-age=31536000, immutable"
 
   # Serve at "/" the static files from "priv/static" directory.
   #

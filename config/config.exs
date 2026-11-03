@@ -25,7 +25,13 @@ config :hamster_travel, HamsterTravelWeb.Endpoint,
 config :esbuild,
   version: "0.17.11",
   default: [
-    args: ~w(js/app.js --bundle --target=es2020 --outdir=../priv/static/assets),
+    # Phoenix digests app.js, but does not rewrite JavaScript import paths. Keep
+    # esbuild's content-hashed chunk names and ship their original files alongside
+    # Phoenix's digested copies (phx.digest preserves both).
+    args: ~w(
+      js/app.js --bundle --format=esm --splitting
+      --chunk-names=chunks/[name]-[hash] --target=es2020 --outdir=../priv/static/assets
+    ),
     cd: Path.expand("../assets", __DIR__),
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
   ]

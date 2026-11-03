@@ -14,6 +14,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
   attr(:can_edit, :boolean, default: false)
   attr(:edit, :boolean, default: false)
 
+  @impl true
   def render(%{edit: true} = assigns) do
     ~H"""
     <div>
@@ -96,7 +97,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
               title={gettext("Move to day")}
               aria-haspopup="dialog"
               aria-controls={"move-activity-modal-#{@activity.id}"}
-              phx-click={show_modal("move-activity-modal-#{@activity.id}")}
+              phx-click={JS.push("open_move_modal", target: @myself)}
               class="!h-5 !w-5 !p-0 min-h-0 bg-transparent hover:bg-transparent text-slate-500 dark:text-slate-400 hover:text-zinc-900 dark:hover:text-zinc-100"
             >
               <.icon name="hero-calendar-days" class="h-4 w-4" />
@@ -126,9 +127,11 @@ defmodule HamsterTravelWeb.Planning.Activity do
         <.formatted_text :if={@activity.description} text={@activity.description} class="mt-3" />
       </div>
       <.modal
-        :if={@can_edit}
+        :if={@can_edit and @move_modal_open}
         id={"move-activity-modal-#{@activity.id}"}
         max_width_class="max-w-lg"
+        show={true}
+        on_cancel={JS.push("close_move_modal", target: @myself)}
       >
         <h2 id={"move-activity-modal-#{@activity.id}-title"} class="text-lg font-semibold">
           {gettext("Move to day")}
@@ -148,6 +151,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
             type="button"
             phx-click={
               hide_modal("move-activity-modal-#{@activity.id}")
+              |> JS.push("close_move_modal", target: @myself)
               |> JS.push("move_activity",
                 value: %{
                   activity_id: to_string(@activity.id),
@@ -171,19 +175,30 @@ defmodule HamsterTravelWeb.Planning.Activity do
             </span>
           </button>
         </div>
+        <div class="mt-4 flex justify-end">
+          <button
+            type="button"
+            phx-click={JS.push("close_move_modal", target: @myself)}
+            class="rounded-md px-3 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:text-zinc-200 dark:hover:bg-zinc-800"
+          >
+            {gettext("Close")}
+          </button>
+        </div>
       </.modal>
     </div>
     """
   end
 
+  @impl true
   def mount(socket) do
     socket =
       socket
-      |> assign(edit: false)
+      |> assign(edit: false, move_modal_open: false)
 
     {:ok, socket}
   end
 
+  @impl true
   def handle_event("edit", _, socket) do
     if socket.assigns.can_edit do
       send(self(), {:open_form, "edit", "activity", socket.assigns.activity.id})
@@ -193,6 +208,21 @@ defmodule HamsterTravelWeb.Planning.Activity do
     end
   end
 
+  @impl true
+  def handle_event("open_move_modal", _, socket) do
+    if socket.assigns.can_edit do
+      {:noreply, assign(socket, :move_modal_open, true)}
+    else
+      {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
+    end
+  end
+
+  @impl true
+  def handle_event("close_move_modal", _, socket) do
+    {:noreply, assign(socket, :move_modal_open, false)}
+  end
+
+  @impl true
   def handle_event("delete", _, socket) do
     if socket.assigns.can_edit do
       case Planning.delete_activity(socket.assigns.activity) do

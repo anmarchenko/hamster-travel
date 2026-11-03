@@ -22,10 +22,13 @@ import MoneyInput from './money_input';
 import TransferDragDrop from './transfer_drag_drop';
 import ActivityDragDrop from './activity_drag_drop';
 import PackingDragDrop from './packing_drag_drop';
-import FormattedTextArea from './formatted_text_area';
-import UserMap from './user_map';
+import { lazyHook } from './lazy_hook';
 import { registerPdfDownloadHandler } from './pdf_download';
 import { initTheme } from './theme';
+import {
+  connectionSocketOptions,
+  createConnectionController,
+} from './connection_controller';
 import {
   initOfflineReadOnly,
   lockAddedOfflineRegion,
@@ -52,12 +55,13 @@ let hooks = {
   ...TransferDragDrop,
   ...ActivityDragDrop,
   ...PackingDragDrop,
-  ...FormattedTextArea,
-  ...UserMap,
+  FormattedTextArea: lazyHook(() => import('./formatted_text_area'), 'FormattedTextArea'),
+  UserMap: lazyHook(() => import('./user_map'), 'UserMap'),
   OfflineReadOnly,
 };
 
 let liveSocket = new LiveSocket('/live', Socket, {
+  ...connectionSocketOptions,
   params: initLiveStash({ _csrf_token: csrfToken }),
   hooks: hooks,
   dom: {
@@ -84,16 +88,24 @@ window.addEventListener('phx:page-loading-start', () => {
   }
 });
 
-window.addEventListener('phx:page-loading-stop', () => {
+function stopPageLoading() {
   clearTimeout(topBarScheduled);
   topBarScheduled = undefined;
   topbar.hide();
+}
+
+window.addEventListener('phx:page-loading-stop', stopPageLoading);
+window.addEventListener('hamster:connection-state', ({ detail }) => {
+  if (detail.state === 'failed') {
+    stopPageLoading();
+  }
 });
 
 registerPdfDownloadHandler();
 
 // connect if there are any LiveViews on the page
-liveSocket.connect();
+const connectionController = createConnectionController(liveSocket);
+connectionController.connect();
 
 // expose liveSocket on window for web console debug logs and latency simulation:
 // >> liveSocket.enableDebug()

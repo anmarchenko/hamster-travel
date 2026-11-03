@@ -2135,6 +2135,11 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       [activity] = Planning.list_activities(trip)
 
+      assert has_element?(
+               view,
+               "[data-activity-drop-zone][data-target-day='0'] [data-activity-id='#{activity.id}']"
+             )
+
       render_hook(view, "move_activity", %{
         "activity_id" => to_string(activity.id),
         "new_day_index" => 1,
@@ -2143,11 +2148,58 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       assert Planning.get_activity!(activity.id).day_index == 1
 
+      refute has_element?(
+               view,
+               "[data-activity-drop-zone][data-target-day='0'] [data-activity-id='#{activity.id}']"
+             )
+
+      assert has_element?(
+               view,
+               "[data-activity-drop-zone][data-target-day='1'] [data-activity-id='#{activity.id}']"
+             )
+
       view
       |> element("[data-activity-id='#{activity.id}'] [phx-click='delete']")
       |> render_click()
 
       refute Enum.any?(Planning.list_activities(trip), &(&1.id == activity.id))
+      refute has_element?(view, "[data-activity-id='#{activity.id}']")
+    end
+
+    test "updates hidden budget day rows when an activity expense becomes nonzero or zero", %{
+      conn: conn
+    } do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft", currency: "EUR"})
+
+      activity =
+        activity_fixture(%{
+          trip_id: trip.id,
+          day_index: 0,
+          name: "Museum",
+          expense: %{price: Money.new(:EUR, 0), name: "Museum", trip_id: trip.id}
+        })
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+      row = "#budget-expense-activity-#{activity.expense.id}"
+      refute has_element?(view, row)
+
+      {:ok, updated_activity} =
+        Planning.update_activity(activity, %{
+          expense: %{id: activity.expense.id, price: Money.new(:EUR, 25)}
+        })
+
+      assert_eventually_contains(view, "€25.00")
+      assert has_element?(view, row)
+
+      {:ok, _activity} =
+        Planning.update_activity(updated_activity, %{
+          expense: %{id: activity.expense.id, price: Money.new(:EUR, 0)}
+        })
+
+      assert_eventually_contains(view, "€0.00")
+      refute has_element?(view, row)
     end
 
     test "shows day expense form when clicking add expense button", %{conn: conn} do
@@ -2429,7 +2481,11 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       assert has_element?(view, "#move-activity-#{activity.id}[aria-haspopup='dialog']")
       picker = "#move-activity-modal-#{activity.id}"
+      refute has_element?(view, picker)
 
+      view |> element("#move-activity-#{activity.id}") |> render_click()
+
+      assert has_element?(view, "#{picker}[phx-mounted]")
       assert has_element?(view, "#{picker} [data-activity-day-picker].max-h-60.overflow-y-auto")
       assert has_element?(view, "#{picker} button[data-day-index='0'][disabled]", "Day 1")
       assert has_element?(view, "#{picker} button[data-day-index='29']", "Day 30")
@@ -2443,7 +2499,16 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
                [existing.id, activity.id]
 
       assert has_element?(view, "[data-target-day='29'] [data-activity-id='#{activity.id}']")
+      refute has_element?(view, picker)
+
+      view |> element("#move-activity-#{activity.id}") |> render_click()
       assert has_element?(view, "#{picker} button[data-day-index='29'][disabled]")
+
+      view |> element("#{picker} button", "Close") |> render_click()
+      refute has_element?(view, picker)
+
+      view |> element("#move-activity-#{activity.id}") |> render_click()
+      assert has_element?(view, picker)
     end
 
     test "shows dates in the activity move picker", %{conn: conn} do
@@ -2455,6 +2520,9 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
 
       assert has_element?(view, "#move-activity-#{activity.id}[aria-haspopup='dialog']")
+      refute has_element?(view, "#move-activity-modal-#{activity.id}")
+
+      view |> element("#move-activity-#{activity.id}") |> render_click()
 
       assert has_element?(
                view,

@@ -221,11 +221,31 @@ defmodule HamsterTravelWeb.CoreComponents do
     <div
       id="disconnected"
       data-offline-notice
+      data-connection-state="connecting"
       role="status"
+      aria-live="polite"
       class="sticky top-0 z-50 w-full border-b border-amber-300 bg-amber-50 px-4 py-3 text-center text-sm font-medium text-amber-900 shadow-sm dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100"
-      hidden
     >
-      {gettext("You are offline at the moment, the app is in readonly mode")}
+      <span data-connection-message="connecting">{gettext(
+        "Connecting to the app. Editing is temporarily unavailable."
+      )}</span>
+      <span data-connection-message="unavailable" hidden>
+        {gettext("Connection to the app is unavailable. Editing is temporarily unavailable.")}
+      </span>
+      <span data-connection-message="offline" hidden>
+        {gettext("You are offline at the moment, the app is in readonly mode")}
+      </span>
+      <span data-connection-message="failed" hidden>
+        {gettext("Connection failed after two attempts. Please retry.")}
+      </span>
+      <button
+        type="button"
+        data-connection-retry
+        class="ml-2 rounded border border-current px-2 py-1 font-semibold"
+        hidden
+      >
+        {gettext("Retry")}
+      </button>
     </div>
     """
   end

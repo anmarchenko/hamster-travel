@@ -371,7 +371,7 @@ const FormattedTextArea = {
       editorTarget.removeEventListener("paste", handlePaste, true);
   },
 
-  beforeDestroy() {
+  destroyed() {
     if (this.editor) {
       this.editor.destroy();
     }

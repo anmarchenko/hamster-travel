@@ -1628,6 +1628,26 @@ msgstr ""
 msgid "You are offline at the moment, the app is in readonly mode"
 msgstr ""
 
+#: lib/hamster_travel_web/components/core_components.ex
+#, elixir-autogen, elixir-format
+msgid "Connecting to the app. Editing is temporarily unavailable."
+msgstr "Connecting to the app. Editing is temporarily unavailable."
+
+#: lib/hamster_travel_web/components/core_components.ex
+#, elixir-autogen, elixir-format
+msgid "Connection to the app is unavailable. Editing is temporarily unavailable."
+msgstr "Connection to the app is unavailable. Editing is temporarily unavailable."
+
+#: lib/hamster_travel_web/components/core_components.ex
+#, elixir-autogen, elixir-format
+msgid "Connection failed after two attempts. Please retry."
+msgstr "Connection failed after two attempts. Please retry."
+
+#: lib/hamster_travel_web/components/core_components.ex
+#, elixir-autogen, elixir-format
+msgid "Retry"
+msgstr "Retry"
+
 #: lib/hamster_travel_web/live/packing_live/components/list.ex:138
 #, elixir-autogen, elixir-format
 msgid "Collapse"

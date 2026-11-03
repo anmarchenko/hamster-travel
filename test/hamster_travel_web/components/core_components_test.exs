@@ -29,7 +29,15 @@ defmodule HamsterTravelWeb.CoreComponentsTest do
       assert html =~ "w-full"
       assert html =~ "bg-amber-50"
       assert html =~ "You are offline at the moment, the app is in readonly mode"
-      assert html =~ ~r/<div[^>]*id="disconnected"[^>]*hidden/
+      assert html =~ "Connecting to the app. Editing is temporarily unavailable."
+      assert html =~ "Connection to the app is unavailable. Editing is temporarily unavailable."
+      assert html =~ "Connection failed after two attempts. Please retry."
+      assert html =~ ~s(data-connection-retry)
+      assert html =~ ~s(data-connection-state="connecting")
+      assert html =~ ~s(data-connection-message="connecting")
+      assert html =~ ~s(data-connection-message="unavailable")
+      assert html =~ ~s(data-connection-message="offline")
+      refute html =~ ~r/<div[^>]*id="disconnected"[^>]*hidden/
       refute html =~ "phx-connected"
       refute html =~ "phx-disconnected"
       refute html =~ "animate-spin"

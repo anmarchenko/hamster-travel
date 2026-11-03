@@ -161,6 +161,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       <.planning_tabs active_tab={@active_tab} />
       <.render_tabs
         trip={@trip}
+        day_projection={@day_projection}
         active_tab={@active_tab}
         budget={@budget}
         display_currency={@display_currency}
@@ -1034,6 +1035,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         class={@active_tab != "itinerary" && "hidden"}
       >
         <.tab_itinerary
+          day_projection={@day_projection}
           trip={@trip}
           accommodations={@trip.accommodations}
           accommodations_outside={accommodations_outside(@trip)}
@@ -1057,6 +1059,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         class={@active_tab != "activities" && "hidden"}
       >
         <.tab_activity
+          day_projection={@day_projection}
           trip={@trip}
           destinations={@trip.destinations}
           destinations_outside={destinations_outside(@trip)}
@@ -1077,6 +1080,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         class={@active_tab != "budget" && "hidden"}
       >
         <.tab_budget_view
+          day_projection={@day_projection}
           trip={@trip}
           budget={@budget}
           display_currency={@display_currency}
@@ -1093,6 +1097,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         class={@active_tab != "notes" && "hidden"}
       >
         <.tab_notes
+          day_projection={@day_projection}
           trip={@trip}
           destinations={@trip.destinations}
           destinations_outside={destinations_outside(@trip)}
@@ -1163,6 +1168,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:display_currency, :string, required: true)
   attr(:can_edit, :boolean, required: true)
   attr(:open_form, :map, default: nil)
+
+  attr(:day_projection, :map, required: true)
 
   def tab_notes(assigns) do
     ~H"""
@@ -1246,7 +1253,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           <div class="flex flex-col gap-y-1 sm:flex-row sm:gap-x-4 sm:gap-y-0">
             <.destinations_list
               trip={@trip}
-              destinations={Planning.items_for_day(i, @destinations)}
+              destinations={Map.get(@day_projection.destinations, i, [])}
               day_index={i}
               scope="notes"
               can_edit={@can_edit}
@@ -1255,7 +1262,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           </div>
           <div class="flex flex-col gap-y-1" data-note-drop-zone data-target-day={i}>
             <.notes_list
-              notes={Planning.notes_for_day(i, @notes)}
+              notes={Map.get(@day_projection.notes, i, [])}
               day_index={i}
               trip={@trip}
               can_edit={@can_edit}
@@ -1290,6 +1297,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:current_user, HamsterTravel.Accounts.User, default: nil)
   attr(:can_edit, :boolean, required: true)
   attr(:open_form, :map, default: nil)
+
+  attr(:day_projection, :map, required: true)
 
   def tab_itinerary(assigns) do
     ~H"""
@@ -1409,14 +1418,14 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
               <div class="flex flex-col gap-y-1">
                 <.section_header
-                  :if={Enum.any?(Planning.items_for_day(i, @destinations))}
+                  :if={Enum.any?(Map.get(@day_projection.destinations, i, []))}
                   icon="hero-map-pin"
                   label={gettext("Places")}
                   class="mb-2 sm:hidden"
                 />
                 <.destinations_list
                   trip={@trip}
-                  destinations={Planning.items_for_day(i, @destinations)}
+                  destinations={Map.get(@day_projection.destinations, i, [])}
                   day_index={i}
                   scope="itinerary"
                   can_edit={@can_edit}
@@ -1442,7 +1451,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             </td>
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
               <.section_header
-                :if={Enum.any?(Planning.transfers_for_day(i, @transfers))}
+                :if={Enum.any?(Map.get(@day_projection.transfers, i, []))}
                 icon="hero-arrows-right-left"
                 label={gettext("Transfers")}
                 class="mb-2 sm:hidden"
@@ -1454,7 +1463,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               >
                 <.transfers_list
                   trip={@trip}
-                  transfers={Planning.transfers_for_day(i, @transfers)}
+                  transfers={Map.get(@day_projection.transfers, i, [])}
                   current_user={@current_user}
                   display_currency={@display_currency}
                   day_index={i}
@@ -1476,14 +1485,14 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             <td class="sm:border sm:border-slate-600 sm:px-2 sm:py-4 align-top">
               <div class="flex flex-col gap-y-1">
                 <.section_header
-                  :if={Enum.any?(Planning.items_for_day(i, @accommodations))}
+                  :if={Enum.any?(Map.get(@day_projection.accommodations, i, []))}
                   icon="hero-home"
                   label={gettext("Hotel")}
                   class="mb-2 sm:hidden"
                 />
                 <.accommodations_list
                   trip={@trip}
-                  accommodations={Planning.items_for_day(i, @accommodations)}
+                  accommodations={Map.get(@day_projection.accommodations, i, [])}
                   display_currency={@display_currency}
                   day_index={i}
                   can_edit={@can_edit}
@@ -1523,6 +1532,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:activities_outside, :list, required: true)
   attr(:can_edit, :boolean, required: true)
   attr(:open_form, :map, default: nil)
+
+  attr(:day_projection, :map, required: true)
 
   def tab_activity(assigns) do
     ~H"""
@@ -1588,7 +1599,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           <div class="flex flex-col gap-y-1 sm:flex-row sm:gap-x-4 sm:gap-y-0">
             <.destinations_list
               trip={@trip}
-              destinations={Planning.items_for_day(i, @destinations)}
+              destinations={Map.get(@day_projection.destinations, i, [])}
               day_index={i}
               scope="activities"
               can_edit={@can_edit}
@@ -1599,7 +1610,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           <div class="flex flex-col gap-y-1 min-h-8">
             <div class="flex flex-col gap-y-1" data-activity-drop-zone data-target-day={i}>
               <.activities_list
-                activities={Planning.activities_for_day(i, @activities)}
+                activities={Map.get(@day_projection.activities, i, [])}
                 day_index={i}
                 trip={@trip}
                 display_currency={@display_currency}
@@ -1613,7 +1624,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                 trip={@trip}
                 day_index={i}
                 can_edit={@can_edit}
-                position={length(Planning.activities_for_day(i, @activities)) + 1}
+                position={length(Map.get(@day_projection.activities, i, [])) + 1}
                 edit={open_form_matches?(@open_form, "new", "activity", "activity-new-#{i}")}
               />
             </div>
@@ -1630,6 +1641,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:display_currency, :string, required: true)
   attr(:can_edit, :boolean, required: true)
   attr(:open_form, :map, default: nil)
+
+  attr(:day_projection, :map, required: true)
 
   def tab_budget_view(assigns) do
     ~H"""
@@ -1706,7 +1719,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       </.budget_section>
 
       <div class="flex flex-col gap-y-8">
-        <div :for={day_index <- budget_day_indices(@trip)} class="flex flex-col gap-y-3">
+        <div :for={day_index <- @day_projection.budget_days} class="flex flex-col gap-y-3">
           <.day_heading
             day_index={day_index}
             start_date={@trip.start_date}
@@ -1714,12 +1727,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           />
 
           <.budget_day_group
-            :if={Enum.any?(budget_transfers_for_day(day_index, @trip))}
+            :if={Enum.any?(Map.get(@day_projection.budget_transfers, day_index, []))}
             icon="hero-arrows-right-left"
             title={gettext("Transfers")}
           >
             <.live_component
-              :for={transfer <- budget_transfers_for_day(day_index, @trip)}
+              :for={transfer <- Map.get(@day_projection.budget_transfers, day_index, [])}
               module={BudgetExpense}
               id={"budget-expense-transfer-#{transfer.expense.id}"}
               trip={@trip}
@@ -1741,12 +1754,12 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           </.budget_day_group>
 
           <.budget_day_group
-            :if={Enum.any?(budget_activities_for_day(day_index, @trip))}
+            :if={Enum.any?(Map.get(@day_projection.budget_activities, day_index, []))}
             icon="hero-ticket"
             title={gettext("Activities")}
           >
             <.live_component
-              :for={activity <- budget_activities_for_day(day_index, @trip)}
+              :for={activity <- Map.get(@day_projection.budget_activities, day_index, [])}
               module={BudgetExpense}
               id={"budget-expense-activity-#{activity.expense.id}"}
               trip={@trip}
@@ -1770,13 +1783,13 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           <.budget_day_group
             :if={
               day_index < @trip.duration ||
-                Enum.any?(Planning.day_expenses_for_day(day_index, @trip.day_expenses))
+                Enum.any?(Map.get(@day_projection.day_expenses, day_index, []))
             }
             icon="hero-banknotes"
             title={gettext("Day expenses")}
           >
             <.day_expenses_list
-              day_expenses={Planning.day_expenses_for_day(day_index, @trip.day_expenses)}
+              day_expenses={Map.get(@day_projection.day_expenses, day_index, [])}
               day_index={day_index}
               trip={@trip}
               display_currency={@display_currency}
@@ -2336,42 +2349,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     |> Enum.sort_by(&{&1.start_day, String.downcase(&1.name || "")})
   end
 
-  defp budget_day_indices(trip) do
-    duration = trip.duration || 0
-    trip_day_indices = if duration > 0, do: Enum.to_list(0..(duration - 1)), else: []
-
-    outside_day_indices =
-      (Enum.map(trip.transfers, & &1.day_index) ++
-         Enum.map(trip.activities, & &1.day_index) ++
-         Enum.map(trip.day_expenses, & &1.day_index))
-      |> Enum.filter(&(is_integer(&1) && &1 >= duration))
-      |> Enum.uniq()
-      |> Enum.sort()
-
-    (trip_day_indices ++ outside_day_indices)
-    |> Enum.uniq()
-    |> Enum.sort()
-    |> Enum.filter(&budget_day_has_items?(&1, trip))
-  end
-
-  defp budget_day_has_items?(day_index, trip) do
-    Enum.any?(budget_transfers_for_day(day_index, trip)) ||
-      Enum.any?(budget_activities_for_day(day_index, trip)) ||
-      Enum.any?(Planning.day_expenses_for_day(day_index, trip.day_expenses))
-  end
-
-  defp budget_transfers_for_day(day_index, trip) do
-    day_index
-    |> Planning.transfers_for_day(trip.transfers)
-    |> Enum.filter(&non_zero_expense?/1)
-  end
-
-  defp budget_activities_for_day(day_index, trip) do
-    day_index
-    |> Planning.activities_for_day(trip.activities)
-    |> Enum.filter(&non_zero_expense?/1)
-  end
-
   defp non_zero_expense?(%{expense: %{price: %Money{} = price}}) do
     not Money.equal?(price, Money.new(price.currency, 0))
   end
@@ -2443,6 +2420,29 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   defp can_edit?(_trip, nil), do: false
   defp can_edit?(trip, user), do: Policy.authorized?(:edit, trip, user)
 
+  defp assign_projected_trip(socket, trip) do
+    fields = [
+      :duration,
+      :destinations,
+      :accommodations,
+      :transfers,
+      :activities,
+      :day_expenses,
+      :notes
+    ]
+
+    previous = socket.assigns[:trip]
+
+    socket =
+      if previous && Map.take(previous, fields) == Map.take(trip, fields) do
+        socket
+      else
+        assign(socket, :day_projection, HamsterTravel.Planning.DayProjection.build(trip))
+      end
+
+    assign(socket, :trip, trip)
+  end
+
   defp assign_trip_state(socket, %Trip{} = trip) do
     current_user = socket.assigns.current_user
     participants = trip_participant_users(trip)
@@ -2453,7 +2453,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       can_add_participants?(trip, current_user, available_participants)
 
     socket
-    |> assign(trip: trip)
+    |> assign_projected_trip(trip)
     |> assign(budget: Planning.calculate_budget(trip))
     |> assign(can_edit: can_edit?(trip, current_user))
     |> assign(trip_participants: participants)
@@ -2861,7 +2861,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     # Recalculate budget if the changed entity has an expense attached
     socket =
       socket
-      |> assign(trip: trip)
+      |> assign_projected_trip(trip)
       |> maybe_recalculate_budget(entity_type, trip)
 
     {:noreply, socket}
@@ -2881,7 +2881,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
     socket =
       socket
-      |> assign(trip: trip)
+      |> assign_projected_trip(trip)
       |> assign(budget: budget_from_db(trip))
 
     {:noreply, socket}

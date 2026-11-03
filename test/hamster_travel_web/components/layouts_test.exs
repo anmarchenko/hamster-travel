@@ -60,6 +60,7 @@ defmodule HamsterTravelWeb.LayoutsTest do
       assert html =~ ~s(id="offline-read-only-root")
       assert html =~ ~s(phx-hook="OfflineReadOnly")
       assert html =~ ~r/<main[^>]*data-offline-lock/
+      assert html =~ ~r/<main[^>]*inert/
       refute html =~ "data-offline-local"
 
       {offline_notice_position, _length} = :binary.match(html, ~s(id="disconnected"))
@@ -74,6 +75,7 @@ defmodule HamsterTravelWeb.LayoutsTest do
       assert html =~ ~s(id="offline-read-only-root")
       assert html =~ ~s(phx-hook="OfflineReadOnly")
       refute html =~ ~r/<main[^>]*data-offline-lock/
+      refute html =~ ~r/<main[^>]*inert/
     end
   end
 
