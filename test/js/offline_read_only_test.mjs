@@ -22,25 +22,37 @@ class FakeElement {
     this._hidden = value;
   }
 
+  get inert() {
+    return this.attributes.has('inert');
+  }
+
+  set inert(value) {
+    this.toggleAttribute('inert', value);
+  }
+
   append(...children) {
+    children.forEach((child) => { child.parentElement = this; });
     this.children.push(...children);
     return children.at(-1);
   }
 
   matches(selector) {
-    if (selector === '[data-offline-lock]') return this.attributes.has('data-offline-lock');
-    if (selector === '[data-offline-notice]') return this.attributes.has('data-offline-notice');
-    if (selector === '[data-connection-retry]') return this.attributes.has('data-connection-retry');
-    return false;
+    return /^\[[\w-]+\]$/.test(selector) && this.attributes.has(selector.slice(1, -1));
+  }
+
+  closest(selector) {
+    if (this.matches(selector)) return this;
+    return this.parentElement?.closest(selector) ?? null;
+  }
+
+  querySelector(selector) {
+    return this.querySelectorAll(selector)[0] ?? null;
   }
 
   querySelectorAll(selector) {
     const matches = [];
     const visit = (node) => {
       node.children.forEach((child) => {
-        if (selector === '[data-connection-message]' && child.attributes.has('data-connection-message')) {
-          matches.push(child);
-        }
         if (child.matches(selector)) matches.push(child);
         visit(child);
       });
@@ -56,6 +68,10 @@ class FakeElement {
 
   setAttribute(name) {
     this.attributes.add(name);
+  }
+
+  hasAttribute(name) {
+    return this.attributes.has(name);
   }
 }
 
@@ -247,6 +263,53 @@ test('resynchronizes notice state and write locks when LiveView inserts or patch
   observeMutations([{ target: addedNotice, attributeName: 'data-connection-state', addedNodes: [] }]);
   assert.equal(addedNotice.dataset.connectionState, 'unavailable');
   assert.equal(addedNotice.hidden, false);
+});
+
+test('keeps local activity toggles usable while locking surrounding writes and restoring them on reconnect', () => {
+  const panel = new FakeHTMLElement({ 'data-offline-lock': '' });
+  const activity = new FakeHTMLElement();
+  const heading = new FakeHTMLElement();
+  const toggle = new FakeHTMLElement({ 'data-offline-local': '' });
+  const icon = new FakeHTMLElement();
+  const editButton = new FakeHTMLElement();
+  const details = new FakeHTMLElement();
+  const addButton = new FakeHTMLElement();
+  toggle.append(icon);
+  heading.append(toggle, editButton);
+  activity.append(heading, details);
+  panel.append(activity, addButton);
+  liveViewRoot.append(panel);
+
+  navigator.onLine = false;
+  window.dispatchEvent(new CustomEvent('offline'));
+  lockAddedOfflineRegion(panel);
+
+  for (const node of [panel, activity, heading, toggle, icon]) {
+    assert.equal(node.inert, false, 'local controls and their ancestors must remain interactive');
+  }
+  for (const node of [editButton, details, addButton]) {
+    assert.equal(node.inert, true, 'surrounding branches must remain locked');
+  }
+
+  const patchedEditButton = new FakeHTMLElement();
+  preserveOfflineLock(editButton, patchedEditButton);
+  assert.equal(patchedEditButton.inert, true);
+
+  const addedButton = new FakeHTMLElement();
+  heading.append(addedButton);
+  lockAddedOfflineRegion(addedButton);
+  assert.equal(addedButton.inert, true, 'new controls alongside a local toggle must also be locked');
+  assert.equal(toggle.inert, false);
+
+  navigator.onLine = true;
+  OfflineReadOnly.reconnected();
+  for (const node of [panel, activity, heading, toggle, icon, editButton, details, addButton, addedButton]) {
+    assert.equal(node.inert, false, 'reconnecting must clear all locks created in split regions');
+    assert.equal(node.hasAttribute('data-offline-inert'), false);
+  }
+
+  preserveOfflineLock(patchedEditButton, patchedEditButton);
+  assert.equal(patchedEditButton.inert, false);
 });
 
 test('does not leave static pages locked when no LiveView root exists', async () => {

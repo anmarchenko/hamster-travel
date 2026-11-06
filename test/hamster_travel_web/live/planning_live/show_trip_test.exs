@@ -1975,6 +1975,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
         activity_fixture(%{
           trip_id: trip.id,
           name: "Louvre Museum",
+          description: "Book tickets before visiting the museum.",
           # Must see
           priority: 3,
           day_index: 0,
@@ -2001,8 +2002,24 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       assert has_element?(
                view,
-               "[data-activity-toggle][aria-label='Toggle activity details'][aria-expanded='false']"
+               "[data-activity-toggle][data-offline-local][aria-label='Toggle activity details'][aria-expanded='false']"
              )
+
+      assert has_element?(
+               view,
+               "#activity-content-#{activity.id}.hidden",
+               "Book tickets before visiting the museum."
+             )
+
+      [toggle_commands] =
+        html
+        |> Floki.parse_document!()
+        |> Floki.find("[data-activity-toggle]")
+        |> Floki.attribute("phx-click")
+        |> Enum.map(&Jason.decode!/1)
+
+      assert Enum.map(toggle_commands, &hd/1) ==
+               ["toggle", "toggle_class", "toggle_class", "toggle_attr"]
 
       assert has_element?(view, "#activity-chevron-right-#{activity.id}")
       assert has_element?(view, "#activity-chevron-down-#{activity.id}.hidden")

@@ -1,4 +1,6 @@
 const LOCK_SELECTOR = '[data-offline-lock]';
+const LOCAL_SELECTOR = '[data-offline-local]';
+const INERT_MARKER = 'data-offline-inert';
 const NOTICE_SELECTOR = '[data-offline-notice]';
 const MESSAGE_SELECTOR = '[data-connection-message]';
 const RETRY_SELECTOR = '[data-connection-retry]';
@@ -35,9 +37,35 @@ function shouldBeReadOnly() {
   return connectionState() !== 'connected';
 }
 
+function setRegionInert(region, locked) {
+  region.inert = locked;
+  region.toggleAttribute(INERT_MARKER, locked);
+}
+
+function lockRegion(region) {
+  if (!isHtmlElement(region) || region.matches(LOCAL_SELECTOR)) {
+    return;
+  }
+
+  // An inert ancestor cannot be overridden by a local control. Lock the
+  // surrounding branches instead so browser-only interactions stay usable.
+  if (region.querySelector(LOCAL_SELECTOR)) {
+    Array.from(region.children).forEach(lockRegion);
+  } else {
+    setRegionInert(region, true);
+  }
+}
+
 function syncRegion(region, locked) {
-  if (isHtmlElement(region)) {
-    region.inert = locked;
+  if (!isHtmlElement(region)) {
+    return;
+  }
+
+  setRegionInert(region, false);
+  region.querySelectorAll(`[${INERT_MARKER}]`).forEach((node) => setRegionInert(node, false));
+
+  if (locked) {
+    lockRegion(region);
   }
 }
 
@@ -90,6 +118,12 @@ function syncNode(node, state) {
 
   if (node.matches(LOCK_SELECTOR)) {
     syncRegion(node, state !== 'connected');
+  } else {
+    const region = node.closest(LOCK_SELECTOR);
+
+    if (region) {
+      syncRegion(region, state !== 'connected');
+    }
   }
 
   node.querySelectorAll(LOCK_SELECTOR).forEach((region) => {
@@ -170,9 +204,9 @@ export const OfflineReadOnly = {
   },
 };
 
-export function preserveOfflineLock(_from, to) {
-  if (to.matches?.(LOCK_SELECTOR)) {
-    to.toggleAttribute('inert', readOnly);
+export function preserveOfflineLock(from, to) {
+  if (to.matches?.(LOCK_SELECTOR) || from?.hasAttribute(INERT_MARKER)) {
+    syncRegion(to, readOnly);
   }
 }
 

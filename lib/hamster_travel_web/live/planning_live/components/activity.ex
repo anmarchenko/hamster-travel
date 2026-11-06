@@ -69,6 +69,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
               title={gettext("Toggle activity details")}
               class="ml-1 inline-flex h-6 w-6 items-center justify-center align-middle rounded text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
               data-activity-toggle
+              data-offline-local
               phx-click={toggle_activity_details(@activity.id)}
             >
               <.icon
