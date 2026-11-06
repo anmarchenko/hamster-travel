@@ -45,10 +45,10 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   }
 
   @tabs ["itinerary", "activities", "budget", "notes"]
-  @destination_tabs ["itinerary", "activities", "notes"]
+  @destination_tabs ["itinerary", "activities"]
   @open_form_types ~w(destination accommodation transfer activity day-expense note budget-category budget-category-actual-expense budget-expense)
   @budget_expense_sources ~w(hotel transfer activity)
-  @drag_drop_edit_events ~w(move_transfer move_activity reorder_activity move_note reorder_note)
+  @drag_drop_edit_events ~w(move_transfer move_activity reorder_activity reorder_note)
   @cover_upload_max_mb 8
   @cover_upload_max_file_size @cover_upload_max_mb * 1_000_000
   @cover_upload_accept ~w(.jpg .jpeg .png .webp)
@@ -168,6 +168,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         current_user={@current_user}
         can_edit={@can_edit}
         open_form={@open_form}
+        reading_note_id={@reading_note_id}
+        notes_path={~p"/trips/#{@trip.slug}?#{[tab: "notes", return_to: @return_to]}"}
       />
     </.container>
 
@@ -220,6 +222,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> assign(display_currency: display_currency)
       |> assign(return_to: return_to)
       |> assign(open_form: nil)
+      |> assign(reading_note_id: nil)
       |> assign(cover_upload_errors: [])
       |> assign(show_invite_participant_modal: false)
       |> assign(show_reorder_days_modal: false)
@@ -242,11 +245,20 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   @impl true
   def handle_params(params, _url, socket) do
     active_tab = fetch_tab(params)
+    reading_note_id = if active_tab == "notes", do: params["note"]
+
+    socket =
+      if socket.assigns.reading_note_id != reading_note_id and socket.assigns.open_form do
+        close_form(socket)
+      else
+        socket
+      end
 
     socket =
       socket
       |> maybe_clear_open_form_for_tab(active_tab)
       |> assign(active_tab: active_tab)
+      |> assign(reading_note_id: reading_note_id)
       |> assign(return_to: return_to(params, socket.assigns.active_nav))
 
     {:noreply, socket}
@@ -328,18 +340,10 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   @impl true
-  def handle_info({[:note, :created], %{value: created_note}}, socket) do
-    handle_entity_event(:note, :created, created_note, socket)
-  end
-
-  @impl true
-  def handle_info({[:note, :updated], %{value: updated_note}}, socket) do
-    handle_entity_event(:note, :updated, updated_note, socket)
-  end
-
-  @impl true
-  def handle_info({[:note, :deleted], %{value: deleted_note}}, socket) do
-    handle_entity_event(:note, :deleted, deleted_note, socket)
+  def handle_info({[:note, event], _payload}, socket)
+      when event in [:created, :updated, :deleted] do
+    trip = socket.assigns.trip
+    {:noreply, assign(socket, trip: %{trip | notes: Planning.list_notes(trip)})}
   end
 
   @impl true
@@ -507,19 +511,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> push_patch(to: trip_tab_path(socket, tab), replace: true)
 
     {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("delete_outside_notes", _params, socket) do
-    if socket.assigns.can_edit do
-      socket.assigns.trip
-      |> notes_outside()
-      |> Enum.each(&Planning.delete_note/1)
-
-      {:noreply, socket}
-    else
-      {:noreply, unauthorized_edit(socket)}
-    end
   end
 
   @impl true
@@ -901,36 +892,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   @impl true
   def handle_event(
-        "move_note",
-        %{"note_id" => note_id, "new_day_index" => new_day_index, "position" => position},
-        socket
-      ) do
-    note = find_note_in_trip(note_id, socket.assigns.trip)
-    new_day_index = ensure_int(new_day_index)
-    position = ensure_int(position)
-
-    case Planning.move_note_to_day(
-           note,
-           new_day_index,
-           socket.assigns.trip,
-           socket.assigns.current_user,
-           position
-         ) do
-      {:ok, _updated_note} ->
-        {:noreply, socket}
-
-      {:error, reason} ->
-        socket =
-          put_flash(socket, :error, gettext("Failed to move note: %{reason}", reason: reason))
-
-        Logger.error("Failed to move note: #{inspect(reason)}")
-
-        {:noreply, socket}
-    end
-  end
-
-  @impl true
-  def handle_event(
         "reorder_note",
         %{"note_id" => note_id, "position" => position},
         socket
@@ -1097,16 +1058,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         class={@active_tab != "notes" && "hidden"}
       >
         <.tab_notes
-          day_projection={@day_projection}
           trip={@trip}
-          destinations={@trip.destinations}
-          destinations_outside={destinations_outside(@trip)}
-          notes={@trip.notes}
-          notes_outside={notes_outside(@trip)}
-          budget={@budget}
-          display_currency={@display_currency}
           can_edit={@can_edit}
           open_form={open_form_for_tab(@open_form, "notes")}
+          reading_note_id={@reading_note_id}
+          notes_path={@notes_path}
         />
       </section>
     </div>
@@ -1160,126 +1116,71 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   attr(:trip, Trip, required: true)
-  attr(:destinations, :list, required: true)
-  attr(:destinations_outside, :list, required: true)
-  attr(:notes, :list, required: true)
-  attr(:notes_outside, :list, required: true)
-  attr(:budget, Money, required: true)
-  attr(:display_currency, :string, required: true)
   attr(:can_edit, :boolean, required: true)
   attr(:open_form, :map, default: nil)
-
-  attr(:day_projection, :map, required: true)
+  attr(:reading_note_id, :string, default: nil)
+  attr(:notes_path, :string, required: true)
 
   def tab_notes(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :reading_note,
+        Enum.find(assigns.trip.notes, &(to_string(&1.id) == assigns.reading_note_id))
+      )
+
     ~H"""
     <div
       id={"notes-#{@trip.id}"}
       phx-hook="ActivityDragDrop"
       data-can-edit={to_string(@can_edit)}
+      class={["mt-5 flex w-full flex-col gap-4", @reading_note && "max-w-3xl"]}
     >
-      <.tab_budget budget={@budget} display_currency={@display_currency} />
+      <.live_component
+        :if={@can_edit && !@reading_note}
+        module={NoteNew}
+        id="note-new"
+        trip={@trip}
+        can_edit={@can_edit}
+        edit={open_form_matches?(@open_form, "new", "note", "note-new")}
+      />
 
-      <.toggle
-        :if={Enum.any?(@destinations_outside) || Enum.any?(@notes_outside)}
-        label={gettext("Some items are scheduled outside of the trip duration")}
-        class="mt-4"
+      <div
+        :if={@trip.notes == []}
+        class="w-full max-w-3xl rounded-xl border border-dashed border-zinc-300 px-5 py-10 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400"
       >
-        <.destinations_list
+        <.icon name="hero-book-open" class="mb-2 h-6 w-6" />
+        <p>{gettext("No notes yet.")}</p>
+      </div>
+
+      <.live_component
+        :if={@reading_note}
+        module={Note}
+        id={"note-#{@reading_note.id}"}
+        trip={@trip}
+        note={@reading_note}
+        can_edit={@can_edit}
+        edit={open_form_matches?(@open_form, "edit", "note", @reading_note.id)}
+        reading={true}
+        notes_path={@notes_path}
+      />
+
+      <div
+        :if={!@reading_note && @trip.notes != []}
+        class="grid grid-cols-1 items-start gap-4 lg:grid-cols-2 2xl:grid-cols-3"
+        data-note-drop-zone
+      >
+        <.live_component
+          :for={note <- @trip.notes}
+          module={Note}
+          id={"note-#{note.id}"}
           trip={@trip}
-          destinations={@destinations_outside}
-          day_index={0}
-          scope="notes"
+          note={note}
           can_edit={@can_edit}
-          open_form={@open_form}
+          edit={open_form_matches?(@open_form, "edit", "note", note.id)}
+          reading={false}
+          notes_path={@notes_path}
         />
-        <.section_header
-          :if={Enum.any?(@notes_outside)}
-          icon="hero-document-text"
-          label={gettext("Notes")}
-          class="mt-3"
-        />
-        <div
-          :if={Enum.any?(@notes_outside)}
-          class="flex flex-col gap-y-1"
-          data-note-drop-zone
-          data-target-day="outside"
-        >
-          <.notes_list
-            notes={@notes_outside}
-            day_index={-1}
-            trip={@trip}
-            can_edit={@can_edit}
-            open_form={@open_form}
-          />
-        </div>
-        <div :if={@can_edit} class="flex justify-start mt-4">
-          <.button
-            color="danger"
-            size="xs"
-            phx-click="delete_outside_notes"
-            data-confirm={gettext("Delete all notes scheduled outside this trip?")}
-          >
-            <.icon_text icon="hero-trash" label={gettext("Delete all")} />
-          </.button>
-        </div>
-      </.toggle>
-
-      <div class="flex flex-col gap-y-8 mt-4">
-        <div class="flex flex-col gap-y-2">
-          <.section_header icon="hero-document-text" label={gettext("Trip notes")} class="!mt-0" />
-          <div class="flex flex-col gap-y-1" data-note-drop-zone data-target-day="unassigned">
-            <.notes_list
-              notes={Planning.notes_unassigned(@notes)}
-              day_index={-1}
-              trip={@trip}
-              can_edit={@can_edit}
-              open_form={@open_form}
-            />
-            <.live_component
-              :if={@can_edit}
-              module={NoteNew}
-              id="note-new-unassigned"
-              trip={@trip}
-              day_index={nil}
-              can_edit={@can_edit}
-              edit={open_form_matches?(@open_form, "new", "note", "note-new-unassigned")}
-            />
-          </div>
-        </div>
-
-        <div :for={i <- 0..(@trip.duration - 1)} class="flex flex-col gap-y-2">
-          <.day_heading day_index={i} start_date={@trip.start_date} />
-          <div class="flex flex-col gap-y-1 sm:flex-row sm:gap-x-4 sm:gap-y-0">
-            <.destinations_list
-              trip={@trip}
-              destinations={Map.get(@day_projection.destinations, i, [])}
-              day_index={i}
-              scope="notes"
-              can_edit={@can_edit}
-              open_form={@open_form}
-            />
-          </div>
-          <div class="flex flex-col gap-y-1" data-note-drop-zone data-target-day={i}>
-            <.notes_list
-              notes={Map.get(@day_projection.notes, i, [])}
-              day_index={i}
-              trip={@trip}
-              can_edit={@can_edit}
-              open_form={@open_form}
-            />
-            <.live_component
-              :if={@can_edit}
-              module={NoteNew}
-              id={"note-new-#{i}"}
-              trip={@trip}
-              day_index={i}
-              can_edit={@can_edit}
-              edit={open_form_matches?(@open_form, "new", "note", "note-new-#{i}")}
-            />
-          </div>
-          <hr />
-        </div>
       </div>
     </div>
     """
@@ -2035,26 +1936,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   attr(:trip, Trip, required: true)
-  attr(:notes, :list, required: true)
-  attr(:day_index, :integer, required: true)
-  attr(:can_edit, :boolean, required: true)
-  attr(:open_form, :map, default: nil)
-
-  def notes_list(assigns) do
-    ~H"""
-    <.live_component
-      :for={note <- @notes}
-      module={Note}
-      id={"note-#{note.id}-day-#{@day_index}"}
-      trip={@trip}
-      note={note}
-      can_edit={@can_edit}
-      edit={open_form_matches?(@open_form, "edit", "note", note.id)}
-    />
-    """
-  end
-
-  attr(:trip, Trip, required: true)
 
   def reorder_days_modal(assigns) do
     ~H"""
@@ -2064,9 +1945,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       </h3>
 
       <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
-        {gettext(
-          "All places, transfers, hotels, activities, expenses, and notes will be moved together."
-        )}
+        {gettext("Places, transfers, hotels, activities, and expenses will be moved together.")}
       </p>
 
       <div class="mt-6 overflow-x-auto">
@@ -2077,7 +1956,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
             <div>{gettext("Places")}</div>
             <div>{gettext("Transfers")}</div>
             <div>{gettext("Activities")}</div>
-            <div>{gettext("Expenses and notes")}</div>
+            <div>{gettext("Expenses")}</div>
           </div>
 
           <div
@@ -2123,7 +2002,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               {reorder_day_activities_summary(@trip, day_index)}
             </div>
             <div class="text-zinc-700 dark:text-zinc-300">
-              {reorder_day_other_summary(@trip, day_index)}
+              {reorder_day_expenses_summary(@trip, day_index)}
             </div>
           </div>
         </div>
@@ -2323,17 +2202,10 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     |> join_with_fallback(gettext("No activities"))
   end
 
-  defp reorder_day_other_summary(trip, day_index) do
-    day_expense_names =
-      Planning.day_expenses_for_day(day_index, trip.day_expenses)
-      |> Enum.map(& &1.name)
-
-    note_titles =
-      Planning.notes_for_day(day_index, trip.notes)
-      |> Enum.map(& &1.title)
-
-    (day_expense_names ++ note_titles)
-    |> join_with_fallback(gettext("No expenses or notes"))
+  defp reorder_day_expenses_summary(trip, day_index) do
+    Planning.day_expenses_for_day(day_index, trip.day_expenses)
+    |> Enum.map(& &1.name)
+    |> join_with_fallback(gettext("No expenses"))
   end
 
   defp transfer_route_summary(transfer) do
@@ -2427,8 +2299,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       :accommodations,
       :transfers,
       :activities,
-      :day_expenses,
-      :notes
+      :day_expenses
     ]
 
     previous = socket.assigns[:trip]
@@ -2586,13 +2457,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     end)
   end
 
-  defp notes_outside(trip) do
-    trip.notes
-    |> Enum.filter(fn note ->
-      is_integer(note.day_index) && note.day_index >= trip.duration
-    end)
-  end
-
   defp recover_open_form(socket) do
     case LiveStash.recover_state(socket) do
       {:recovered, recovered_socket} -> validate_recovered_open_form(recovered_socket)
@@ -2712,12 +2576,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     for day_index <- 0..(trip.duration - 1), do: "#{type}-new-#{day_index}"
   end
 
-  defp new_form_ids(trip, "note") do
-    [
-      "note-new-unassigned"
-      | for(day_index <- 0..(trip.duration - 1), do: "note-new-#{day_index}")
-    ]
-  end
+  defp new_form_ids(_trip, "note"), do: ["note-new"]
 
   defp new_form_ids(trip, "budget-category") do
     ["budget-category-new-#{trip.id}"]
@@ -2894,7 +2753,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   defp preload_entity_associations(:activity, entity), do: Repo.preload(entity, [:expense])
   defp preload_entity_associations(:day_expense, entity), do: Repo.preload(entity, [:expense])
-  defp preload_entity_associations(:note, entity), do: entity
 
   defp preload_entity_associations(:transfer, entity),
     do:
@@ -2908,7 +2766,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   defp get_entities_key(:accommodation), do: :accommodations
   defp get_entities_key(:activity), do: :activities
   defp get_entities_key(:day_expense), do: :day_expenses
-  defp get_entities_key(:note), do: :notes
   defp get_entities_key(:transfer), do: :transfers
 
   defp maybe_preload_countries(trip, :destination), do: Repo.preload(trip, :countries)

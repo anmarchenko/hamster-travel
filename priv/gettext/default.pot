@@ -1449,9 +1449,9 @@ msgstr ""
 msgid "Search trips"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2054
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1906
 #, elixir-autogen, elixir-format
-msgid "All places, transfers, hotels, activities, expenses, and notes will be moved together."
+msgid "Places, transfers, hotels, activities, and expenses will be moved together."
 msgstr ""
 
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:2050
@@ -1490,9 +1490,9 @@ msgstr ""
 msgid "No activities"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2323
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2166
 #, elixir-autogen, elixir-format
-msgid "No expenses or notes"
+msgid "No expenses"
 msgstr ""
 
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:2298
@@ -1696,4 +1696,14 @@ msgstr ""
 #: lib/hamster_travel_web/live/planning_live/components/activity.ex:133
 #, elixir-autogen, elixir-format
 msgid "Move to day"
+msgstr ""
+
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1129
+#, elixir-autogen, elixir-format
+msgid "No notes yet."
+msgstr ""
+
+#: lib/hamster_travel_web/live/planning_live/components/note.ex:37
+#, elixir-autogen, elixir-format
+msgid "Back to notes"
 msgstr ""

@@ -49,7 +49,7 @@ defmodule HamsterTravelWeb.TripPdfTest do
       refute html =~ "01.02.2026 - 10.02.2026"
     end
 
-    test "does not render whole-trip notes section when there are no unassigned notes" do
+    test "does not render whole-trip notes section when there are no notes" do
       trip = trip_fixture(%{dates_unknown: true, duration: 3})
 
       html = trip_html(trip)
@@ -57,7 +57,7 @@ defmodule HamsterTravelWeb.TripPdfTest do
       refute html =~ "Whole-trip notes"
     end
 
-    test "renders whole-trip notes section when unassigned notes exist" do
+    test "renders whole-trip notes section when the trip has notes" do
       trip = trip_fixture(%{dates_unknown: true, duration: 3})
       note_token = "WHOLE_TRIP_NOTE_TOKEN_2f554b6a"
 
@@ -225,8 +225,7 @@ defmodule HamsterTravelWeb.TripPdfTest do
       {:ok, _note} =
         Planning.create_note(trip, %{
           title: "Long note",
-          text: "<p>#{long_note_token}</p><p>#{long_paragraph}</p>",
-          day_index: 0
+          text: "<p>#{long_note_token}</p><p>#{long_paragraph}</p>"
         })
 
       {:ok, _activity} =

@@ -76,9 +76,9 @@ defmodule HamsterTravelWeb.TripPdf do
 
     overview_rows_html = Enum.join(overview_rows, "\n")
 
-    whole_trip_notes_html = trip_notes_html(trip)
+    whole_trip_notes_html = notes_html(trip.notes)
 
-    food_notes_section_html =
+    notes_section_html =
       if blank?(whole_trip_notes_html) do
         ""
       else
@@ -478,7 +478,7 @@ defmodule HamsterTravelWeb.TripPdf do
           </table>
         </section>
 
-        #{food_notes_section_html}
+        #{notes_section_html}
       </body>
     </html>
     """
@@ -540,7 +540,6 @@ defmodule HamsterTravelWeb.TripPdf do
     accommodations = Planning.items_for_day(day_index, trip.accommodations)
     transfers = Planning.transfers_for_day(day_index, trip.transfers)
     day_expenses = Planning.day_expenses_for_day(day_index, trip.day_expenses)
-    notes = Planning.notes_for_day(day_index, trip.notes)
     activities = Planning.activities_for_day(day_index, trip.activities)
 
     accommodation_costs =
@@ -562,7 +561,6 @@ defmodule HamsterTravelWeb.TripPdf do
       accommodations: accommodations,
       transfers: transfers,
       day_expenses: day_expenses,
-      notes: notes,
       activities: activities,
       transfer_total: transfer_total,
       day_expense_total: day_expense_total,
@@ -583,7 +581,6 @@ defmodule HamsterTravelWeb.TripPdf do
       #{cities_html(day_data.cities)}
       #{section_block_html(gettext("Transfers planned today"), transfers_html(day_data.transfers, display_currency))}
       #{section_block_html(gettext("All expenses planned for today"), daily_expenses_summary_html(day_data, display_currency))}
-      #{section_block_html(gettext("Notes for today"), notes_html(day_data.notes))}
       #{section_block_html(gettext("All activities"), activities_html(day_data.activities, display_currency))}
     </article>
     """
@@ -852,16 +849,6 @@ defmodule HamsterTravelWeb.TripPdf do
       </tbody>
     </table>
     """
-  end
-
-  defp trip_notes_html(trip) do
-    notes = Planning.notes_unassigned(trip.notes)
-
-    if notes == [] do
-      ""
-    else
-      notes_html(notes)
-    end
   end
 
   defp day_label(%Trip{start_date: %Date{} = start_date}, day_index) do

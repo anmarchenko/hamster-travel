@@ -38,6 +38,9 @@ mix format --check-formatted
 ```
 
 ### Testing
+- The development PostgreSQL database is always running via Docker on `localhost:6000`. Use it directly without starting Docker or provisioning another database.
+- Run test commands outside the sandbox so they can connect to the local PostgreSQL container.
+
 ```bash
 # Run all tests
 mix test

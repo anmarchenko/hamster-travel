@@ -1079,85 +1079,190 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert_eventually_contains(view, "€0.00")
     end
 
-    test "renders notes tab when selected", %{conn: conn} do
-      # Arrange
+    test "opens the full formatted note from a text preview", %{conn: conn} do
       user = user_fixture()
       conn = log_in_user(conn, user)
       trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+      long_text = String.duplicate("Travel plans. ", 40)
 
-      geonames_fixture()
-      berlin = Geo.find_city_by_geonames_id("2950159")
-      hamburg = Geo.find_city_by_geonames_id("2911298")
-
-      {:ok, _day_destination} =
-        Planning.create_destination(trip, %{city_id: berlin.id, start_day: 0, end_day: 0})
-
-      {:ok, _outside_destination} =
-        Planning.create_destination(trip, %{
-          city_id: hamburg.id,
-          start_day: trip.duration + 1,
-          end_day: trip.duration + 1
+      {:ok, note} =
+        Planning.create_note(trip, %{
+          title: "Trip report",
+          text: "<p>Breakfast &amp; coffee</p><p>#{long_text}<strong>Bring tickets</strong></p>"
         })
 
-      {:ok, day_note} = Planning.create_note(trip, %{title: "Day note", day_index: 0})
-      {:ok, unassigned_note} = Planning.create_note(trip, %{title: "Trip report", day_index: nil})
+      {:ok, other_note} = Planning.create_note(trip, %{title: "Other ideas"})
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=notes")
 
-      # Act
-      {:ok, view, html} = live(conn, ~p"/trips/#{trip.slug}?tab=notes")
+      assert has_element?(view, "#open-note-#{note.id}", "Breakfast & coffee Travel plans.")
+      refute has_element?(view, "#open-note-#{note.id}", "Bring tickets")
+      refute has_element?(view, "#read-note-#{note.id}")
 
-      # Assert
-      assert has_element?(view, "#notes-#{trip.id}")
-      assert html =~ berlin.name
-      assert html =~ hamburg.name
-      assert html =~ day_note.title
-      assert html =~ unassigned_note.title
-      refute has_element?(view, "#notes-#{trip.id} a", "Add city")
+      view
+      |> element("#open-note-#{note.id}")
+      |> render_click()
+
+      assert has_element?(view, "#read-note-#{note.id} h2", "Trip report")
+      assert has_element?(view, "#read-note-#{note.id} strong", "Bring tickets")
+      refute has_element?(view, "#notes-#{trip.id} [role='dialog']")
+      refute has_element?(view, "#note-new")
+      refute has_element?(view, "#open-note-#{other_note.id}")
+      note_path = assert_patch(view)
+      assert URI.decode_query(URI.parse(note_path).query)["note"] == to_string(note.id)
+
+      view
+      |> element("#back-note-#{note.id}", "Back to notes")
+      |> render_click()
+
+      refute has_element?(view, "#read-note-#{note.id}")
+      assert has_element?(view, "#open-note-#{note.id}")
+      assert has_element?(view, "#open-note-#{other_note.id}")
+      assert has_element?(view, "#note-new")
+
+      render_patch(view, note_path)
+      assert has_element?(view, "#read-note-#{note.id} strong", "Bring tickets")
     end
 
-    test "shows note form when adding an unassigned note", %{conn: conn} do
-      # Arrange
+    test "opens a note directly, saves edits in the reader, and returns to the list on deletion",
+         %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+      {:ok, note} = Planning.create_note(trip, %{title: "Packing", text: "<p>Bring layers</p>"})
+
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=notes&note=#{note.id}")
+      assert has_element?(view, "#read-note-#{note.id} h2", "Packing")
+
+      view
+      |> element("#note-#{note.id} button", "Edit")
+      |> render_click()
+
+      view
+      |> form("#note-form-edit-note-#{note.id}", note: %{title: "Packing list"})
+      |> render_submit(%{note: %{text: "<p>Remember the tickets</p>"}})
+
+      assert has_element?(view, "#read-note-#{note.id} h2", "Packing list")
+      assert has_element?(view, "#read-note-#{note.id}", "Remember the tickets")
+
+      view
+      |> element("#note-#{note.id} button[aria-label='Delete']")
+      |> render_click()
+
+      refute has_element?(view, "#read-note-#{note.id}")
+      assert has_element?(view, "#notes-#{trip.id}", "No notes yet.")
+      assert has_element?(view, "#note-new")
+    end
+
+    test "note URLs only open notes belonging to the current trip", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+      other_note = note_fixture()
+
+      for note_id <- [to_string(other_note.id), "invalid"] do
+        {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=notes&note=#{note_id}")
+
+        refute has_element?(view, "#read-note-#{other_note.id}")
+        assert has_element?(view, "#notes-#{trip.id}", "No notes yet.")
+      end
+    end
+
+    test "adds and edits a trip-wide note", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=notes")
+
+      assert has_element?(view, "#notes-#{trip.id}", "No notes yet.")
+
+      view
+      |> element("#note-new button", "Add note")
+      |> render_click()
+
+      view
+      |> form("#note-form-new-note-new", note: %{title: "Packing"})
+      |> render_submit(%{note: %{text: "<p>Bring layers</p>"}})
+
+      assert [note] = Planning.list_notes(trip)
+      assert has_element?(view, "#open-note-#{note.id}", "Bring layers")
+
+      view
+      |> element("#note-#{note.id} button[aria-label='Edit']")
+      |> render_click()
+
+      view
+      |> form("#note-form-edit-note-#{note.id}", note: %{title: "Packing list"})
+      |> render_submit()
+
+      assert has_element?(view, "#open-note-#{note.id}", "Packing list")
+    end
+
+    test "switching note editors uses separate editor elements and the selected note's content",
+         %{conn: conn} do
       user = user_fixture()
       conn = log_in_user(conn, user)
       trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
 
-      # Act
+      first_note =
+        note_fixture(%{trip_id: trip.id, title: "Packing", text: "<p>Bring layers</p>"})
+
+      second_note =
+        note_fixture(%{trip_id: trip.id, title: "Food", text: "<p>Visit the market</p>"})
+
       {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=notes")
 
       view
-      |> element("#note-new-unassigned a", "Add note")
+      |> element("#note-#{first_note.id} button[aria-label='Edit']")
       |> render_click()
 
-      # Assert
-      assert has_element?(view, "form#note-form-new-note-new-unassigned")
+      [first_editor_id] =
+        view
+        |> render()
+        |> Floki.parse_document!()
+        |> Floki.find("[phx-hook='FormattedTextArea']")
+        |> Floki.attribute("id")
+
+      view
+      |> form("#note-form-edit-note-#{first_note.id}")
+      |> render_change(%{note: %{title: "Unsaved packing", text: "<p>Unsaved text</p>"}})
+
+      view
+      |> element("#note-#{second_note.id} button[aria-label='Edit']")
+      |> render_click()
+
+      refute has_element?(view, "#note-form-edit-note-#{first_note.id}")
+      refute has_element?(view, "##{first_editor_id}")
+
+      assert has_element?(
+               view,
+               "#note-form-edit-note-#{second_note.id} input[name='note[title]'][value='Food']"
+             )
+
+      [second_editor_id] =
+        view
+        |> render()
+        |> Floki.parse_document!()
+        |> Floki.find("[phx-hook='FormattedTextArea']")
+        |> Floki.attribute("id")
+
+      assert second_editor_id != first_editor_id
+
+      assert view
+             |> render()
+             |> Floki.parse_document!()
+             |> Floki.find("#note-form-edit-note-#{second_note.id} [data-editor-input]")
+             |> Floki.attribute("value") == ["<p>Visit the market</p>"]
+
+      assert Planning.get_note!(first_note.id).text == "<p>Bring layers</p>"
     end
 
-    test "moves note to a new day via drag event", %{conn: conn} do
-      # Arrange
-      user = user_fixture()
-      conn = log_in_user(conn, user)
-      trip = trip_fixture(%{author_id: user.id, status: "0_draft", duration: 3})
-      {:ok, note} = Planning.create_note(trip, %{title: "Move me", day_index: 0})
-
-      # Act
-      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=notes")
-
-      render_hook(view, "move_note", %{
-        "note_id" => Integer.to_string(note.id),
-        "new_day_index" => "1",
-        "position" => 0
-      })
-
-      # Assert
-      assert Planning.get_note!(note.id).day_index == 1
-    end
-
-    test "reorders unassigned notes via drag event", %{conn: conn} do
+    test "reorders trip notes via drag event", %{conn: conn} do
       # Arrange
       user = user_fixture()
       conn = log_in_user(conn, user)
       trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
-      {:ok, note1} = Planning.create_note(trip, %{title: "First", day_index: nil})
-      {:ok, note2} = Planning.create_note(trip, %{title: "Second", day_index: nil})
+      {:ok, note1} = Planning.create_note(trip, %{title: "First"})
+      {:ok, note2} = Planning.create_note(trip, %{title: "Second"})
 
       # Act
       {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=notes")
@@ -1173,31 +1278,23 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert note1.id != note2.id
     end
 
-    test "renders notes on notes tab and not activities tab", %{conn: conn} do
-      # Arrange
+    test "keeps the notebook separate from day-by-day activities", %{conn: conn} do
       user = user_fixture()
       conn = log_in_user(conn, user)
       trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
+      {:ok, note} = Planning.create_note(trip, %{title: "Trip report"})
 
-      {:ok, day_note} = Planning.create_note(trip, %{title: "Day note", day_index: 0})
-      {:ok, unassigned_note} = Planning.create_note(trip, %{title: "Trip report", day_index: nil})
+      geonames_fixture()
+      berlin = Geo.find_city_by_geonames_id("2950159")
 
-      {:ok, outside_note} =
-        Planning.create_note(trip, %{title: "Outside note", day_index: trip.duration + 1})
+      {:ok, _destination} =
+        Planning.create_destination(trip, %{city_id: berlin.id, start_day: 0, end_day: 0})
 
-      # Act
-      {:ok, _activities_view, activities_html} =
-        live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+      {:ok, _view, html} = live(conn, ~p"/trips/#{trip.slug}?tab=notes")
 
-      {:ok, _notes_view, notes_html} = live(conn, ~p"/trips/#{trip.slug}?tab=notes")
-
-      # Assert
-      assert panel_text(activities_html, "#trip-tab-panel-notes") =~ day_note.title
-      assert panel_text(activities_html, "#trip-tab-panel-notes") =~ outside_note.title
-      assert panel_text(activities_html, "#trip-tab-panel-notes") =~ unassigned_note.title
-      assert panel_text(notes_html, "#trip-tab-panel-notes") =~ day_note.title
-      assert panel_text(notes_html, "#trip-tab-panel-notes") =~ outside_note.title
-      assert panel_text(notes_html, "#trip-tab-panel-notes") =~ unassigned_note.title
+      assert panel_text(html, "#trip-tab-panel-notes") =~ note.title
+      refute panel_text(html, "#trip-tab-panel-notes") =~ berlin.name
+      refute panel_text(html, "#trip-tab-panel-activities") =~ note.title
     end
 
     test "deletes outside items from activities tab", %{conn: conn} do
@@ -1252,8 +1349,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
           expense: %{price: Money.new(:EUR, 1200), name: "Outside expense", trip_id: trip.id}
         })
 
-      {:ok, inside_note} = Planning.create_note(trip, %{title: "Inside note", day_index: 0})
-      {:ok, outside_note} = Planning.create_note(trip, %{title: "Outside note", day_index: 2})
+      {:ok, note} = Planning.create_note(trip, %{title: "Trip report"})
 
       # Act
       {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
@@ -1275,9 +1371,8 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert Enum.any?(day_expenses, &(&1.id == outside_day_expense.id))
       assert Enum.any?(day_expenses, &(&1.id == inside_day_expense.id))
 
-      notes = Planning.list_notes(trip)
-      assert Enum.any?(notes, &(&1.id == outside_note.id))
-      assert Enum.any?(notes, &(&1.id == inside_note.id))
+      assert [remaining_note] = Planning.list_notes(trip)
+      assert remaining_note.id == note.id
     end
 
     test "renders trip page with accommodations", %{conn: conn} do

@@ -76,7 +76,7 @@ let ActivityDragDrop = {
             const oldDayIndex = evt.from.dataset.targetDay;
             const newIndex = evt.newIndex;
 
-            if (newDayIndex !== oldDayIndex) {
+            if (moveEvent && newDayIndex !== oldDayIndex) {
               let parsedDayIndex = null;
 
               if (newDayIndex !== "unassigned") {
@@ -118,7 +118,7 @@ let ActivityDragDrop = {
       groupName: "notes",
       idKey: "noteId",
       idParam: "note_id",
-      moveEvent: "move_note",
+      handle: "[data-note-drag-handle]",
       reorderEvent: "reorder_note",
     });
   },

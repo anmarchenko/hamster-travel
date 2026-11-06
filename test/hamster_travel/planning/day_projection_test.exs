@@ -11,8 +11,7 @@ defmodule HamsterTravel.Planning.DayProjectionTest do
       accommodations: [%{start_day: 2, end_day: 2}],
       transfers: [transfer(4, ~T[12:00:00], 10), transfer(1, ~T[13:00:00], 0)],
       activities: [activity(1, 2, 10), activity(1, 1, 20), activity(5, 1, 0)],
-      day_expenses: [%{day_index: 6, rank: 2}, %{day_index: 6, rank: 1}],
-      notes: [%{day_index: nil, rank: 1}, %{day_index: 1, rank: 2}]
+      day_expenses: [%{day_index: 6, rank: 2}, %{day_index: 6, rank: 1}]
     }
 
     projection = DayProjection.build(trip)
@@ -34,8 +33,6 @@ defmodule HamsterTravel.Planning.DayProjectionTest do
 
       assert Map.get(projection.day_expenses, day, []) ==
                Planning.day_expenses_for_day(day, trip.day_expenses)
-
-      assert Map.get(projection.notes, day, []) == Planning.notes_for_day(day, trip.notes)
     end
 
     assert projection.budget_days == [1, 4, 6]

@@ -279,6 +279,7 @@ defmodule HamsterTravel.EctoOrdered do
 
     options.module
     |> where([r], field(r, ^rank_field) >= ^current_rank)
+    |> scope_query(options, cs)
     |> exclude_existing(existing)
     |> cs.repo.update_all(inc: [{rank_field, 1}])
 
@@ -290,6 +291,7 @@ defmodule HamsterTravel.EctoOrdered do
 
     options.module
     |> where([r], field(r, ^rank_field) <= ^current_rank)
+    |> scope_query(options, cs)
     |> exclude_existing(existing)
     |> cs.repo.update_all(inc: [{rank_field, -1}])
 

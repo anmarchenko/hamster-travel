@@ -528,8 +528,7 @@ defmodule HamsterTravel.LegacyImport.TripsImporter do
       attrs =
         %{
           "title" => truncate_string(note["title"], 255),
-          "text" => blank_to_nil(note["text"]),
-          "day_index" => note["day_index"]
+          "text" => blank_to_nil(note["text"])
         }
         |> drop_nil_values()
 

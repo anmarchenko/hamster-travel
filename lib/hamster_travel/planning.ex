@@ -1183,7 +1183,7 @@ defmodule HamsterTravel.Planning do
   Lists notes for a trip.
 
   Pass a `%Trip{}` or trip id.
-  Returns a list of `%Note{}` structs ordered by day index and rank.
+  Returns a list of `%Note{}` structs ordered by rank.
 
   ## Examples
 
@@ -1232,11 +1232,11 @@ defmodule HamsterTravel.Planning do
 
   ## Examples
 
-      iex> new_note(trip, 0)
+      iex> new_note(trip, %{"title" => "Ideas"})
       %Ecto.Changeset{}
   """
-  def new_note(trip, day_index \\ nil, attrs \\ %{}) do
-    Notes.new_note(trip, day_index, attrs)
+  def new_note(trip, attrs \\ %{}) do
+    Notes.new_note(trip, attrs)
   end
 
   @doc """
@@ -1270,52 +1270,7 @@ defmodule HamsterTravel.Planning do
   end
 
   @doc """
-  Filters notes for a day and sorts by rank.
-
-  Pass the day index and a list of notes.
-  Returns a list of `%Note{}`.
-
-  ## Examples
-
-      iex> notes_for_day(0, notes)
-      [%Note{}, ...]
-  """
-  def notes_for_day(day_index, notes) do
-    Notes.notes_for_day(day_index, notes)
-  end
-
-  @doc """
-  Filters notes without a day assignment and sorts by rank.
-
-  Pass a list of notes.
-  Returns a list of `%Note{}` with `day_index` set to `nil`.
-
-  ## Examples
-
-      iex> notes_unassigned(notes)
-      [%Note{}, ...]
-  """
-  def notes_unassigned(notes) do
-    Notes.notes_unassigned(notes)
-  end
-
-  @doc """
-  Moves a note to a new day after authorization and validation.
-
-  Pass the `%Note{}`, new day index, trip, user, and optional position.
-  Returns `{:ok, %Note{}}` or `{:error, reason}`.
-
-  ## Examples
-
-      iex> move_note_to_day(note, 1, trip, user)
-      {:ok, %Note{}}
-  """
-  def move_note_to_day(note, new_day_index, trip, user, position \\ :last) do
-    Notes.move_note_to_day(note, new_day_index, trip, user, position)
-  end
-
-  @doc """
-  Reorders a note within its day after authorization and validation.
+  Reorders a note within its trip after authorization and validation.
 
   Pass the `%Note{}`, the new position, trip, and user.
   Returns `{:ok, %Note{}}` or `{:error, reason}`.

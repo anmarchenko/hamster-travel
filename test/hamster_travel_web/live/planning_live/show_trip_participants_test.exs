@@ -88,7 +88,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripParticipantsTest do
       refute has_element?(view, "#accommodation-new-0")
       refute has_element?(view, "#activity-new-0")
       refute has_element?(view, "#day-expense-new-0")
-      refute has_element?(view, "#note-new-unassigned")
+      refute has_element?(view, "#note-new")
     end
 
     test "non-participant friend cannot add participant via forged event", %{conn: conn} do

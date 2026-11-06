@@ -573,8 +573,7 @@ defmodule HamsterTravel.PlanningTest do
       {:ok, note} =
         Planning.create_note(trip, %{
           title: "Packing",
-          text: "<p>Bring layers</p>",
-          day_index: 0
+          text: "<p>Bring layers</p>"
         })
 
       {:ok, standalone_expense} =
@@ -670,7 +669,6 @@ defmodule HamsterTravel.PlanningTest do
       assert [new_note] = new_trip.notes
       assert new_note.title == note.title
       assert new_note.text == note.text
-      assert new_note.day_index == note.day_index
       assert new_note.rank == note.rank
       refute new_note.id == note.id
 
@@ -1290,7 +1288,7 @@ defmodule HamsterTravel.PlanningTest do
           expense: %{price: Money.new(:EUR, 1500), name: "Lunch", trip_id: trip.id}
         })
 
-      {:ok, note} = Planning.create_note(trip, %{title: "Remember tickets", day_index: 0})
+      {:ok, note} = Planning.create_note(trip, %{title: "Remember tickets"})
 
       assert {:ok, %Trip{}} = Planning.delete_trip(trip)
 
@@ -1311,7 +1309,7 @@ defmodule HamsterTravel.PlanningTest do
           end_day: 1
         })
 
-      Planning.create_note(trip, %{title: "Keep this", day_index: 0})
+      Planning.create_note(trip, %{title: "Keep this"})
 
       assert {:ok, %Trip{}} = Planning.delete_trip(trip)
 
@@ -1377,7 +1375,7 @@ defmodule HamsterTravel.PlanningTest do
           expense: %{price: Money.new(:EUR, 1500), name: "Lunch", trip_id: trip.id}
         })
 
-      {:ok, _note} = Planning.create_note(trip, %{title: "Remember tickets", day_index: 0})
+      {:ok, _note} = Planning.create_note(trip, %{title: "Remember tickets"})
 
       {:ok, _expense} =
         Planning.create_expense(trip, %{price: Money.new(:EUR, 5000), name: "Souvenirs"})
@@ -1567,9 +1565,8 @@ defmodule HamsterTravel.PlanningTest do
       {:ok, day_expense_day1} =
         Planning.create_day_expense(trip, %{name: "Expense 1", day_index: 1})
 
-      {:ok, note_day0} = Planning.create_note(trip, %{title: "Note 0", day_index: 0})
-      {:ok, note_day1} = Planning.create_note(trip, %{title: "Note 1", day_index: 1})
-      {:ok, unassigned_note} = Planning.create_note(trip, %{title: "Unassigned", day_index: nil})
+      {:ok, first_note} = Planning.create_note(trip, %{title: "Note 0"})
+      {:ok, second_note} = Planning.create_note(trip, %{title: "Note 1"})
 
       trip = Planning.get_trip!(trip.id)
 
@@ -1602,9 +1599,8 @@ defmodule HamsterTravel.PlanningTest do
       assert Enum.find(moved_trip.day_expenses, &(&1.id == day_expense_day0.id)).day_index == 1
       assert Enum.find(moved_trip.day_expenses, &(&1.id == day_expense_day1.id)).day_index == 0
 
-      assert Enum.find(moved_trip.notes, &(&1.id == note_day0.id)).day_index == 1
-      assert Enum.find(moved_trip.notes, &(&1.id == note_day1.id)).day_index == 0
-      assert Enum.find(moved_trip.notes, &(&1.id == unassigned_note.id)).day_index == nil
+      assert Enum.map(moved_trip.notes, &{&1.id, &1.rank}) ==
+               [{first_note.id, first_note.rank}, {second_note.id, second_note.rank}]
     end
 
     test "returns unauthorized when user is not a participant", %{trip: trip, stranger: stranger} do
@@ -4458,13 +4454,14 @@ defmodule HamsterTravel.PlanningTest do
   end
 
   describe "notes" do
-    test "list_notes/1 returns notes for trip ordered by day and rank" do
+    test "list_notes/1 returns notes for the trip in notebook order" do
       trip = trip_fixture()
 
-      note_late = note_fixture(%{trip_id: trip.id, day_index: 1, title: "Later"})
-      note_early = note_fixture(%{trip_id: trip.id, day_index: 0, title: "Early"})
+      first = note_fixture(%{trip_id: trip.id, title: "First"})
+      second = note_fixture(%{trip_id: trip.id, title: "Second"})
+      note_fixture()
 
-      assert [note_early.id, note_late.id] ==
+      assert [first.id, second.id] ==
                Planning.list_notes(trip.id) |> Enum.map(& &1.id)
     end
 
@@ -4473,19 +4470,17 @@ defmodule HamsterTravel.PlanningTest do
       assert Planning.get_note!(note.id).id == note.id
     end
 
-    test "create_note/2 with valid data creates a note with optional day index" do
+    test "create_note/2 creates a trip-wide note with valid data" do
       trip = trip_fixture()
 
       valid_attrs = %{
         title: "Trip report",
-        text: "<p>Great memories.</p>",
-        day_index: nil
+        text: "<p>Great memories.</p>"
       }
 
       assert {:ok, note} = Planning.create_note(trip, valid_attrs)
       assert note.title == "Trip report"
       assert note.text == "<p>Great memories.</p>"
-      assert note.day_index == nil
       assert note.trip_id == trip.id
     end
 
@@ -4500,9 +4495,8 @@ defmodule HamsterTravel.PlanningTest do
     test "update_note/2 updates the note" do
       note = note_fixture(%{title: "Old title"})
 
-      assert {:ok, note} = Planning.update_note(note, %{title: "New title", day_index: 2})
+      assert {:ok, note} = Planning.update_note(note, %{title: "New title"})
       assert note.title == "New title"
-      assert note.day_index == 2
     end
 
     test "delete_note/1 deletes the note" do
@@ -4511,160 +4505,24 @@ defmodule HamsterTravel.PlanningTest do
       assert_raise Ecto.NoResultsError, fn -> Planning.get_note!(note.id) end
     end
 
-    test "new_note/2 returns a changeset with defaults" do
+    test "new_note/1 returns a changeset for the trip" do
       trip = trip_fixture()
       changeset = Planning.new_note(trip)
 
       assert changeset.data.trip_id == trip.id
-      assert changeset.data.day_index == nil
     end
 
-    test "new_note/2 returns a changeset with day index when provided" do
+    test "new_note/2 returns a changeset with note attributes" do
       trip = trip_fixture()
-      changeset = Planning.new_note(trip, 2)
+      changeset = Planning.new_note(trip, %{title: "New note"})
 
       assert changeset.data.trip_id == trip.id
-      assert changeset.data.day_index == 2
+      assert Ecto.Changeset.get_change(changeset, :title) == "New note"
     end
 
     test "change_note/2 returns a note changeset" do
       note = note_fixture()
       assert %Ecto.Changeset{} = Planning.change_note(note, %{title: "Updated"})
-    end
-
-    test "notes_for_day/2 returns notes for the specified day ordered by rank" do
-      trip = trip_fixture()
-
-      {:ok, note1} = Planning.create_note(trip, %{title: "N1", day_index: 0})
-      {:ok, note2} = Planning.create_note(trip, %{title: "N2", day_index: 0})
-      {:ok, note3} = Planning.create_note(trip, %{title: "N3", day_index: 1})
-
-      notes = [note1, note2, note3]
-
-      day0_notes = Planning.notes_for_day(0, notes)
-      assert Enum.map(day0_notes, & &1.id) == [note1.id, note2.id]
-
-      assert [^note3] = Planning.notes_for_day(1, notes)
-      assert [] = Planning.notes_for_day(2, notes)
-    end
-
-    test "notes_unassigned/1 returns unassigned notes ordered by rank" do
-      trip = trip_fixture()
-
-      {:ok, assigned_note} = Planning.create_note(trip, %{title: "Assigned", day_index: 0})
-      {:ok, unassigned_note} = Planning.create_note(trip, %{title: "Unassigned", day_index: nil})
-
-      notes = [assigned_note, unassigned_note]
-
-      assert [unassigned_note.id] ==
-               Planning.notes_unassigned(notes) |> Enum.map(& &1.id)
-    end
-  end
-
-  describe "move_note_to_day/5" do
-    setup do
-      author = user_fixture()
-      friend = user_fixture()
-      stranger = user_fixture()
-
-      Social.add_friends(author.id, friend.id)
-
-      trip =
-        trip_fixture(%{
-          author_id: author.id,
-          duration: 5,
-          dates_unknown: true
-        })
-
-      {:ok, trip} = Planning.add_trip_participant(trip, author, friend.id)
-
-      trip = Planning.get_trip!(trip.id)
-
-      {:ok,
-       author: Repo.preload(author, :friendships),
-       friend: Repo.preload(friend, :friendships),
-       stranger: Repo.preload(stranger, :friendships),
-       trip: trip}
-    end
-
-    test "successfully moves note to valid day for trip author", %{author: author, trip: trip} do
-      {:ok, note} = Planning.create_note(trip, %{title: "Note", day_index: nil})
-      trip = Planning.get_trip!(trip.id)
-
-      assert {:ok, updated} = Planning.move_note_to_day(note, 2, trip, author)
-      assert updated.day_index == 2
-      assert updated.id == note.id
-    end
-
-    test "successfully moves note to valid day for participant", %{friend: friend, trip: trip} do
-      {:ok, note} = Planning.create_note(trip, %{title: "Note", day_index: 1})
-      trip = Planning.get_trip!(trip.id)
-
-      assert {:ok, updated} = Planning.move_note_to_day(note, 3, trip, friend)
-      assert updated.day_index == 3
-    end
-
-    test "successfully moves note to unassigned", %{author: author, trip: trip} do
-      {:ok, note} = Planning.create_note(trip, %{title: "Note", day_index: 1})
-      trip = Planning.get_trip!(trip.id)
-
-      assert {:ok, updated} = Planning.move_note_to_day(note, nil, trip, author)
-      assert updated.day_index == nil
-    end
-
-    test "successfully moves note to same day (updates rank)", %{author: author, trip: trip} do
-      {:ok, note1} = Planning.create_note(trip, %{title: "N1", day_index: 0})
-      {:ok, note2} = Planning.create_note(trip, %{title: "N2", day_index: 0})
-      trip = Planning.get_trip!(trip.id)
-
-      assert {:ok, updated} = Planning.move_note_to_day(note2, 0, trip, author, 0)
-      assert updated.day_index == 0
-
-      [first, second] = Planning.list_notes(trip)
-      assert first.id == updated.id
-      assert second.id == note1.id
-    end
-
-    test "fails when note is nil", %{author: author, trip: trip} do
-      assert {:error, "Note not found"} =
-               Planning.move_note_to_day(nil, 2, trip, author)
-    end
-
-    test "fails when user is not authorized", %{stranger: stranger, trip: trip} do
-      {:ok, note} = Planning.create_note(trip, %{title: "Note", day_index: 0})
-      trip = Planning.get_trip!(trip.id)
-
-      assert {:error, "Unauthorized"} =
-               Planning.move_note_to_day(note, 2, trip, stranger)
-    end
-
-    test "fails when day_index is out of bounds", %{author: author, trip: trip} do
-      {:ok, note} = Planning.create_note(trip, %{title: "Note", day_index: 0})
-      trip = Planning.get_trip!(trip.id)
-
-      assert {:error, "Day index must be between 0 and 4"} =
-               Planning.move_note_to_day(note, 5, trip, author)
-    end
-
-    test "fails when note does not belong to trip", %{author: author, trip: trip} do
-      other_user = user_fixture()
-      other_trip = trip_fixture(%{author_id: other_user.id})
-
-      {:ok, other_note} = Planning.create_note(other_trip, %{title: "Other", day_index: 0})
-
-      trip = Planning.get_trip!(trip.id)
-
-      assert {:error, "Note not found"} =
-               Planning.move_note_to_day(other_note, 2, trip, author)
-    end
-
-    test "sends pubsub event", %{author: author, trip: trip} do
-      Phoenix.PubSub.subscribe(HamsterTravel.PubSub, "planning:#{trip.id}")
-      {:ok, note} = Planning.create_note(trip, %{title: "Note", day_index: 0})
-      trip = Planning.get_trip!(trip.id)
-
-      assert {:ok, _} = Planning.move_note_to_day(note, 2, trip, author)
-      assert_receive {[:note, :updated], %{value: _}}
     end
   end
 
@@ -4673,16 +4531,16 @@ defmodule HamsterTravel.PlanningTest do
       author = user_fixture()
       trip = trip_fixture(%{author_id: author.id})
 
-      {:ok, n1} = Planning.create_note(trip, %{title: "N1", day_index: 0})
-      {:ok, n2} = Planning.create_note(trip, %{title: "N2", day_index: 0})
-      {:ok, n3} = Planning.create_note(trip, %{title: "N3", day_index: 0})
+      {:ok, n1} = Planning.create_note(trip, %{title: "N1"})
+      {:ok, n2} = Planning.create_note(trip, %{title: "N2"})
+      {:ok, n3} = Planning.create_note(trip, %{title: "N3"})
 
       trip = Planning.get_trip!(trip.id)
 
       {:ok, author: Repo.preload(author, :friendships), trip: trip, n1: n1, n2: n2, n3: n3}
     end
 
-    test "reorders note within same day", %{
+    test "reorders notes within the trip", %{
       author: author,
       trip: trip,
       n1: n1,
@@ -4707,10 +4565,29 @@ defmodule HamsterTravel.PlanningTest do
       assert {:error, "Unauthorized"} = Planning.reorder_note(n1, 1, trip, stranger)
     end
 
+    test "resolves a rank collision within the trip", %{
+      author: author,
+      trip: trip,
+      n1: n1,
+      n2: n2,
+      n3: n3
+    } do
+      other = note_fixture()
+
+      [n1, n2, n3, other] =
+        Enum.map([{n1, 1}, {n2, 2}, {n3, 3}, {other, 2}], fn {note, rank} ->
+          note |> Ecto.Changeset.change(rank: rank) |> Repo.update!()
+        end)
+
+      assert {:ok, _} = Planning.reorder_note(n3, 1, trip, author)
+      assert Enum.map(Planning.list_notes(trip), & &1.id) == [n1.id, n3.id, n2.id]
+      assert Planning.get_note!(other.id).rank == other.rank
+    end
+
     test "fails when note not in trip", %{author: author, trip: trip} do
       other_trip = trip_fixture()
 
-      {:ok, other_note} = Planning.create_note(other_trip, %{title: "Other", day_index: 0})
+      {:ok, other_note} = Planning.create_note(other_trip, %{title: "Other"})
 
       assert {:error, "Note not found"} =
                Planning.reorder_note(other_note, 0, trip, author)

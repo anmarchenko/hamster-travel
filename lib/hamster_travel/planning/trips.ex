@@ -431,8 +431,7 @@ defmodule HamsterTravel.Planning.Trips do
            :ok <- move_day_for_accommodations(trip.accommodations, from_day_index, to_day_index),
            :ok <- move_day_for_transfers(trip.transfers, from_day_index, to_day_index),
            :ok <- move_day_for_activities(trip.activities, from_day_index, to_day_index),
-           :ok <- move_day_for_day_expenses(trip.day_expenses, from_day_index, to_day_index),
-           :ok <- move_day_for_notes(trip.notes, from_day_index, to_day_index) do
+           :ok <- move_day_for_day_expenses(trip.day_expenses, from_day_index, to_day_index) do
         get_trip!(trip.id)
       else
         {:error, reason} -> Repo.rollback(reason)
@@ -478,18 +477,6 @@ defmodule HamsterTravel.Planning.Trips do
     move_day_for_records(day_expenses, &DayExpense.changeset/2, fn day_expense ->
       new_day_index = remap_day_index(day_expense.day_index, from_day_index, to_day_index)
       changed_attrs(day_expense, %{day_index: new_day_index})
-    end)
-  end
-
-  defp move_day_for_notes(notes, from_day_index, to_day_index) do
-    move_day_for_records(notes, &Note.changeset/2, fn note ->
-      new_day_index =
-        case note.day_index do
-          nil -> nil
-          day_index -> remap_day_index(day_index, from_day_index, to_day_index)
-        end
-
-      changed_attrs(note, %{day_index: new_day_index})
     end)
   end
 
@@ -803,7 +790,6 @@ defmodule HamsterTravel.Planning.Trips do
         trip_id: trip.id,
         title: note.title,
         text: note.text,
-        day_index: note.day_index,
         rank: note.rank
       }
       |> repo.insert()

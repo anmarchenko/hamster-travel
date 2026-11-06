@@ -186,7 +186,6 @@ defmodule HamsterTravel.PlanningFixtures do
       |> Enum.into(%{
         title: "Food ideas",
         text: "<p>Try local markets and street food.</p>",
-        day_index: 0,
         trip_id: trip_id
       })
 

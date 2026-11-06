@@ -10,7 +10,6 @@ defmodule HamsterTravelWeb.Planning.NoteForm do
 
   attr :action, :atom, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true
-  attr :day_index, :integer, default: nil
   attr :on_finish, :fun, required: true
   attr :can_edit, :boolean, default: false
 
@@ -26,7 +25,7 @@ defmodule HamsterTravelWeb.Planning.NoteForm do
         phx-submit="form_submit"
         phx-change="form_changed"
         phx-mounted={JS.focus_first(to: "#note-form-#{@id}")}
-        class="space-y-4 max-w-2xl min-[1920px]:max-w-6xl"
+        class="space-y-4"
       >
         <.field
           field={@form[:title]}
@@ -41,6 +40,7 @@ defmodule HamsterTravelWeb.Planning.NoteForm do
           field={@form[:text]}
           label={gettext("Text")}
           wrapper_class="mb-0"
+          content_class="!px-3 !py-2"
         />
 
         <div class="flex justify-between mt-2">
@@ -57,8 +57,6 @@ defmodule HamsterTravelWeb.Planning.NoteForm do
             {gettext("Save")}
           </.button>
         </div>
-
-        <.field field={@form[:day_index]} type="hidden" />
       </.form>
     </div>
     """
@@ -69,7 +67,7 @@ defmodule HamsterTravelWeb.Planning.NoteForm do
     changeset =
       case assigns.action do
         :new ->
-          Planning.new_note(assigns.trip, assigns.day_index)
+          Planning.new_note(assigns.trip)
 
         :edit ->
           Planning.change_note(assigns.note)
@@ -88,7 +86,7 @@ defmodule HamsterTravelWeb.Planning.NoteForm do
   def handle_event("form_changed", %{"note" => note_params}, socket) do
     changeset =
       case socket.assigns.action do
-        :new -> Planning.new_note(socket.assigns.trip, socket.assigns.day_index, note_params)
+        :new -> Planning.new_note(socket.assigns.trip, note_params)
         :edit -> Planning.change_note(socket.assigns.note, note_params)
       end
 
@@ -113,7 +111,7 @@ defmodule HamsterTravelWeb.Planning.NoteForm do
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
-    assign(socket, :form, to_form(changeset))
+    assign(socket, :form, to_form(changeset, id: "note-form-#{socket.assigns.id}"))
   end
 
   defp on_submit(socket, :new, note_params) do

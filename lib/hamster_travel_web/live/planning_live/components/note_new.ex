@@ -5,19 +5,20 @@ defmodule HamsterTravelWeb.Planning.NoteNew do
   use HamsterTravelWeb, :live_component
 
   attr :trip, HamsterTravel.Planning.Trip, required: true
-  attr :day_index, :integer, default: nil
   attr :edit, :boolean, default: false
-  attr :class, :string, default: nil
   attr :can_edit, :boolean, default: false
 
+  @impl true
   def render(%{edit: true} = assigns) do
     ~H"""
-    <div class={@class} id={@id}>
+    <div
+      id={@id}
+      class="w-full max-w-3xl rounded-xl border border-zinc-200 bg-white p-4 sm:p-6 dark:border-zinc-700 dark:bg-zinc-900"
+    >
       <.live_component
         module={HamsterTravelWeb.Planning.NoteForm}
         id={"new-#{@id}"}
         trip={@trip}
-        day_index={@day_index}
         action={:new}
         can_edit={@can_edit}
         on_finish={fn -> send(self(), {:finish_adding, "note"}) end}
@@ -28,27 +29,27 @@ defmodule HamsterTravelWeb.Planning.NoteNew do
 
   def render(assigns) do
     ~H"""
-    <div class={@class} id={@id}>
-      <a
+    <div id={@id} class="flex justify-start">
+      <.button
         :if={@can_edit}
-        href="#"
+        color="primary"
+        size="sm"
+        type="button"
         phx-click="add_note"
         phx-target={@myself}
-        class="inline-flex py-0.5 text-sm font-normal text-zinc-400 transition-colors hover:text-primary-600 focus-visible:text-primary-600 focus-visible:outline-none dark:text-zinc-500 dark:hover:text-primary-300 dark:focus-visible:text-primary-300"
       >
-        <.inline class="gap-1.5">
-          <.icon name="hero-plus-solid" class="h-4 w-4" />
-          {gettext("Add note")}
-        </.inline>
-      </a>
+        <.icon_text icon="hero-plus" label={gettext("Add note")} />
+      </.button>
     </div>
     """
   end
 
+  @impl true
   def update(assigns, socket) do
     {:ok, assign(socket, assigns)}
   end
 
+  @impl true
   def handle_event("add_note", _, socket) do
     if socket.assigns.can_edit do
       send(self(), {:start_adding, "note", socket.assigns.id})

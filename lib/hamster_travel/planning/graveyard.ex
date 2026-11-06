@@ -171,7 +171,6 @@ defmodule HamsterTravel.Planning.Graveyard do
     %{
       "title" => note.title,
       "text" => note.text,
-      "day_index" => note.day_index,
       "rank" => note.rank,
       "inserted_at" => datetime_to_iso(note.inserted_at),
       "updated_at" => datetime_to_iso(note.updated_at)
@@ -344,13 +343,17 @@ defmodule HamsterTravel.Planning.Graveyard do
   end
 
   defp restore_notes(%Trip{} = trip, notes) do
-    Enum.each(notes, fn note ->
+    legacy? = Enum.any?(notes, &Map.has_key?(&1, "day_index"))
+    rank_step = div(2_147_483_647, length(notes) + 1)
+
+    notes
+    |> Enum.with_index(1)
+    |> Enum.each(fn {note, index} ->
       %Note{
         trip_id: trip.id,
         title: Map.get(note, "title"),
         text: Map.get(note, "text"),
-        day_index: Map.get(note, "day_index"),
-        rank: Map.get(note, "rank")
+        rank: if(legacy?, do: index * rank_step, else: Map.get(note, "rank"))
       }
       |> insert_or_rollback()
     end)

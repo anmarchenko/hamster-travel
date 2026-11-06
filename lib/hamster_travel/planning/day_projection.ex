@@ -8,8 +8,7 @@ defmodule HamsterTravel.Planning.DayProjection do
       accommodations: ranged(trip.accommodations, trip.duration),
       transfers: singular(trip.transfers, & &1.departure_time),
       activities: singular(trip.activities, & &1.rank),
-      day_expenses: singular(trip.day_expenses, & &1.rank),
-      notes: singular(trip.notes, & &1.rank)
+      day_expenses: singular(trip.day_expenses, & &1.rank)
     }
 
     budget_transfers = priced(projection.transfers)

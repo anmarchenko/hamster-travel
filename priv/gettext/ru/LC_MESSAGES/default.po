@@ -1444,10 +1444,10 @@ msgstr "Поиск черновиков"
 msgid "Search trips"
 msgstr "Поиск поездок"
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2054
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1906
 #, elixir-autogen, elixir-format
-msgid "All places, transfers, hotels, activities, expenses, and notes will be moved together."
-msgstr ""
+msgid "Places, transfers, hotels, activities, and expenses will be moved together."
+msgstr "Города, трансферы, жильё, впечатления и расходы переместятся вместе."
 
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:2050
 #, elixir-autogen, elixir-format
@@ -1485,10 +1485,10 @@ msgstr ""
 msgid "No activities"
 msgstr "Активности"
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2323
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2166
 #, elixir-autogen, elixir-format
-msgid "No expenses or notes"
-msgstr ""
+msgid "No expenses"
+msgstr "Нет расходов"
 
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:2298
 #, elixir-autogen, elixir-format
@@ -1692,3 +1692,13 @@ msgstr "Переключить на русский"
 #, elixir-autogen, elixir-format
 msgid "Move to day"
 msgstr "Переместить на день"
+
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1129
+#, elixir-autogen, elixir-format
+msgid "No notes yet."
+msgstr "Заметок пока нет."
+
+#: lib/hamster_travel_web/live/planning_live/components/note.ex:37
+#, elixir-autogen, elixir-format
+msgid "Back to notes"
+msgstr "К заметкам"
