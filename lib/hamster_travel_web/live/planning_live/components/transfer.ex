@@ -11,6 +11,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
 
   import HamsterTravelWeb.Icons.{Airplane, Bus, Car, Ship, Taxi, Train}
 
+  attr :currency_options, :list, required: true
   attr(:transfer, Transfer, required: true)
   attr(:trip, Trip, required: true)
   attr(:current_user, HamsterTravel.Accounts.User, default: nil)
@@ -26,6 +27,7 @@ defmodule HamsterTravelWeb.Planning.Transfer do
         id={"transfer-form-#{@transfer.id}"}
         transfer={@transfer}
         trip={@trip}
+        currency_options={@currency_options}
         current_user={@current_user}
         action={:edit}
         can_edit={@can_edit}

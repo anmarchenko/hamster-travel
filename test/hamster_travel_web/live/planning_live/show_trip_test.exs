@@ -20,6 +20,64 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
   end
 
   describe "Show trip page" do
+    test "prioritizes home and destination currencies across trip expense forms", %{conn: conn} do
+      user = user_fixture(%{default_currency: "EUR"})
+      trip = trip_fixture(user, %{currency: "CHF"})
+      geonames_fixture()
+      country = country_fixture(%{iso: "TH"})
+      region = region_fixture(country)
+      city = city_fixture(country, region)
+
+      {:ok, destination} =
+        Planning.create_destination(trip, %{city_id: city.id, start_day: 0, end_day: 2})
+
+      day_expense_fixture(%{
+        trip_id: trip.id,
+        day_index: 0,
+        expense: %{price: Money.new(:CHF, 10), name: "Transport card", trip_id: trip.id}
+      })
+
+      {:ok, view, _html} = live(log_in_user(conn, user), ~p"/trips/#{trip.slug}")
+
+      for {tab, type, id} <- [
+            {"itinerary", "transfer", "transfer-new-0"},
+            {"itinerary", "accommodation", "accommodation-new-0"},
+            {"activities", "activity", "activity-new-0"},
+            {"budget", "day-expense", "day-expense-new-0"},
+            {"budget", "budget-category", "budget-category-new-#{trip.id}"}
+          ] do
+        render_click(view, "show_trip_tab", %{"tab" => tab})
+        send(view.pid, {:open_form, "new", type, id})
+
+        options =
+          view
+          |> render()
+          |> Floki.parse_document!()
+          |> Floki.find("select[name$='[currency]'] option")
+
+        assert Enum.take(Floki.attribute(options, "value"), 4) == ["EUR", "THB", "USD", "GBP"],
+               "Unexpected currency options in #{type} form"
+
+        assert Floki.attribute(Floki.find(options, "[selected]"), "value") == ["CHF"]
+        send(view.pid, :close_form)
+        render(view)
+      end
+
+      # Removing a destination should update the order without reloading the page.
+      {:ok, _destination} = Planning.delete_destination(destination)
+      render_click(view, "show_trip_tab", %{"tab" => "activities"})
+      send(view.pid, {:open_form, "new", "activity", "activity-new-0"})
+
+      currencies =
+        view
+        |> render()
+        |> Floki.parse_document!()
+        |> Floki.find("select[name$='[currency]'] option")
+        |> Floki.attribute("value")
+
+      assert Enum.take(currencies, 3) == ["EUR", "USD", "GBP"]
+    end
+
     test "renders trip page with empty trip and known dates", %{conn: conn} do
       # Arrange
       # Create a user and log them in

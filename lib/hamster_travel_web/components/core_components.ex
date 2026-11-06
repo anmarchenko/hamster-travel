@@ -825,6 +825,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   attr(:label, :string, required: true)
   attr(:field, Phoenix.HTML.FormField, required: true)
   attr(:default_currency, :string, default: "EUR")
+  attr(:currency_options, :list, default: nil)
   attr(:reserve_error_space, :boolean, default: false)
   attr(:blank_zero, :boolean, default: false)
 
@@ -866,7 +867,7 @@ defmodule HamsterTravelWeb.CoreComponents do
             type="select"
             id={"#{@id}_currency"}
             name={"#{@name}[currency]"}
-            options={Cldr.all_currencies()}
+            options={@currency_options || Cldr.all_currencies()}
             value={@value[:currency] || @default_currency}
             class="rounded-l-none"
             wrapper_class="mb-0"

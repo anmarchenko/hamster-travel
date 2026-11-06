@@ -5,6 +5,7 @@ defmodule HamsterTravelWeb.Planning.AccommodationNew do
 
   use HamsterTravelWeb, :live_component
 
+  attr :currency_options, :list, required: true
   attr :id, :string, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :day_index, :integer, required: true
@@ -19,6 +20,7 @@ defmodule HamsterTravelWeb.Planning.AccommodationNew do
         module={HamsterTravelWeb.Planning.AccommodationForm}
         id={"new-#{@id}"}
         trip={@trip}
+        currency_options={@currency_options}
         day_index={@day_index}
         action={:new}
         can_edit={@can_edit}

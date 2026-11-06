@@ -24,6 +24,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
     {:ok, socket}
   end
 
+  attr :currency_options, :list, required: true
   attr :category, Category, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :display_currency, :string, required: true
@@ -42,6 +43,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
         action={:edit}
         category={@category}
         trip={@trip}
+        currency_options={@currency_options}
         can_edit={@can_edit}
         on_finish={fn -> send(self(), :close_form) end}
       />
@@ -134,6 +136,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
             id={"budget-category-actual-#{expense.id}"}
             expense={expense}
             trip={@trip}
+            currency_options={@currency_options}
             display_currency={@display_currency}
             can_edit={@can_edit}
             edit={@editing_actual_expense_id == to_string(expense.id)}
@@ -167,6 +170,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
                 )
               }
               default_currency={@trip.currency}
+              currency_options={@currency_options}
               reserve_error_space
               blank_zero
             />

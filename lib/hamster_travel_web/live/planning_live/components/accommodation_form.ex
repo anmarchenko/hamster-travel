@@ -10,6 +10,7 @@ defmodule HamsterTravelWeb.Planning.AccommodationForm do
   alias HamsterTravelWeb.FormSubmission
   alias HamsterTravelWeb.Planning.DayRangeSelect
 
+  attr :currency_options, :list, required: true
   attr :action, :atom, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :day_index, :integer, required: true
@@ -54,6 +55,7 @@ defmodule HamsterTravelWeb.Planning.AccommodationForm do
             field={expense_form[:price]}
             label={gettext("Price")}
             default_currency={@trip.currency}
+            currency_options={@currency_options}
             blank_zero={@action == :new}
           />
         </.inputs_for>

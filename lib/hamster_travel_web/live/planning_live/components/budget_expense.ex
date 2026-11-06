@@ -6,6 +6,7 @@ defmodule HamsterTravelWeb.Planning.BudgetExpense do
 
   alias HamsterTravel.Planning
 
+  attr :currency_options, :list, required: true
   attr :edit, :boolean, default: false
 
   @impl true
@@ -51,6 +52,7 @@ defmodule HamsterTravelWeb.Planning.BudgetExpense do
             field={@form[:price]}
             label={gettext("Price")}
             default_currency={@trip.currency}
+            currency_options={@currency_options}
           />
         </div>
         <div class="flex justify-between gap-2 sm:justify-start">

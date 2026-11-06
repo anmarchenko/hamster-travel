@@ -985,6 +985,13 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   # COMPONENTS
   def render_tabs(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :currency_options,
+        Cldr.trip_currencies(assigns.trip, assigns.display_currency)
+      )
+
     ~H"""
     <div id="trip-tab-panels">
       <section
@@ -998,6 +1005,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         <.tab_itinerary
           day_projection={@day_projection}
           trip={@trip}
+          currency_options={@currency_options}
           accommodations={@trip.accommodations}
           accommodations_outside={accommodations_outside(@trip)}
           destinations={@trip.destinations}
@@ -1022,6 +1030,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         <.tab_activity
           day_projection={@day_projection}
           trip={@trip}
+          currency_options={@currency_options}
           destinations={@trip.destinations}
           destinations_outside={destinations_outside(@trip)}
           activities={@trip.activities}
@@ -1043,6 +1052,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         <.tab_budget_view
           day_projection={@day_projection}
           trip={@trip}
+          currency_options={@currency_options}
           budget={@budget}
           display_currency={@display_currency}
           can_edit={@can_edit}
@@ -1199,6 +1209,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:can_edit, :boolean, required: true)
   attr(:open_form, :map, default: nil)
 
+  attr(:currency_options, :list, required: true)
   attr(:day_projection, :map, required: true)
 
   def tab_itinerary(assigns) do
@@ -1238,6 +1249,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         />
         <.accommodations_list
           trip={@trip}
+          currency_options={@currency_options}
           accommodations={@accommodations_outside}
           display_currency={@display_currency}
           day_index={0}
@@ -1258,6 +1270,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         >
           <.transfers_list
             trip={@trip}
+            currency_options={@currency_options}
             transfers={@transfers_outside}
             current_user={@current_user}
             display_currency={@display_currency}
@@ -1364,6 +1377,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               >
                 <.transfers_list
                   trip={@trip}
+                  currency_options={@currency_options}
                   transfers={Map.get(@day_projection.transfers, i, [])}
                   current_user={@current_user}
                   display_currency={@display_currency}
@@ -1376,6 +1390,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                   module={TransferNew}
                   id={"transfer-new-#{i}"}
                   trip={@trip}
+                  currency_options={@currency_options}
                   current_user={@current_user}
                   day_index={i}
                   can_edit={@can_edit}
@@ -1393,6 +1408,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                 />
                 <.accommodations_list
                   trip={@trip}
+                  currency_options={@currency_options}
                   accommodations={Map.get(@day_projection.accommodations, i, [])}
                   display_currency={@display_currency}
                   day_index={i}
@@ -1404,6 +1420,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                   module={AccommodationNew}
                   id={"accommodation-new-#{i}"}
                   trip={@trip}
+                  currency_options={@currency_options}
                   day_index={i}
                   can_edit={@can_edit}
                   edit={
@@ -1434,6 +1451,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:can_edit, :boolean, required: true)
   attr(:open_form, :map, default: nil)
 
+  attr(:currency_options, :list, required: true)
   attr(:day_projection, :map, required: true)
 
   def tab_activity(assigns) do
@@ -1472,6 +1490,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               activities={@activities_outside}
               day_index={-1}
               trip={@trip}
+              currency_options={@currency_options}
               display_currency={@display_currency}
               can_edit={@can_edit}
               open_form={@open_form}
@@ -1514,6 +1533,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                 activities={Map.get(@day_projection.activities, i, [])}
                 day_index={i}
                 trip={@trip}
+                currency_options={@currency_options}
                 display_currency={@display_currency}
                 can_edit={@can_edit}
                 open_form={@open_form}
@@ -1523,6 +1543,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
                 module={ActivityNew}
                 id={"activity-new-#{i}"}
                 trip={@trip}
+                currency_options={@currency_options}
                 day_index={i}
                 can_edit={@can_edit}
                 position={length(Map.get(@day_projection.activities, i, [])) + 1}
@@ -1543,6 +1564,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:can_edit, :boolean, required: true)
   attr(:open_form, :map, default: nil)
 
+  attr(:currency_options, :list, required: true)
   attr(:day_projection, :map, required: true)
 
   def tab_budget_view(assigns) do
@@ -1561,6 +1583,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           id={"budget-category-#{category.id}"}
           category={category}
           trip={@trip}
+          currency_options={@currency_options}
           display_currency={@display_currency}
           can_edit={@can_edit}
           edit={open_form_matches?(@open_form, "edit", "budget-category", category.id)}
@@ -1580,6 +1603,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           module={BudgetCategoryNew}
           id={"budget-category-new-#{@trip.id}"}
           trip={@trip}
+          currency_options={@currency_options}
           can_edit={@can_edit}
           edit={
             open_form_matches?(
@@ -1602,6 +1626,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           module={BudgetExpense}
           id={"budget-expense-hotel-#{accommodation.expense.id}"}
           trip={@trip}
+          currency_options={@currency_options}
           source="hotel"
           source_item={accommodation}
           label={accommodation_budget_label(accommodation)}
@@ -1637,6 +1662,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               module={BudgetExpense}
               id={"budget-expense-transfer-#{transfer.expense.id}"}
               trip={@trip}
+              currency_options={@currency_options}
               source="transfer"
               source_item={transfer}
               label={transfer_budget_label(transfer)}
@@ -1664,6 +1690,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               module={BudgetExpense}
               id={"budget-expense-activity-#{activity.expense.id}"}
               trip={@trip}
+              currency_options={@currency_options}
               source="activity"
               source_item={activity}
               label={activity.name}
@@ -1693,6 +1720,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               day_expenses={Map.get(@day_projection.day_expenses, day_index, [])}
               day_index={day_index}
               trip={@trip}
+              currency_options={@currency_options}
               display_currency={@display_currency}
               can_edit={@can_edit}
               open_form={@open_form}
@@ -1702,6 +1730,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               module={DayExpenseNew}
               id={"day-expense-new-#{day_index}"}
               trip={@trip}
+              currency_options={@currency_options}
               day_index={day_index}
               can_edit={@can_edit}
               edit={
@@ -1838,6 +1867,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:day_index, :integer, required: true)
   attr(:display_currency, :string, required: true)
   attr(:can_edit, :boolean, required: true)
+  attr(:currency_options, :list, required: true)
   attr(:open_form, :map, default: nil)
 
   def transfers_list(assigns) do
@@ -1847,6 +1877,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       module={Transfer}
       id={"transfer-#{transfer.id}-day-#{@day_index}"}
       trip={@trip}
+      currency_options={@currency_options}
       transfer={transfer}
       current_user={@current_user}
       display_currency={@display_currency}
@@ -1862,6 +1893,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:day_index, :integer, required: true)
   attr(:display_currency, :string, required: true)
   attr(:can_edit, :boolean, required: true)
+  attr(:currency_options, :list, required: true)
   attr(:open_form, :map, default: nil)
 
   def accommodations_list(assigns) do
@@ -1871,6 +1903,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       module={Accommodation}
       id={accommodation_component_id(accommodation.id, @day_index)}
       trip={@trip}
+      currency_options={@currency_options}
       accommodation={accommodation}
       display_currency={@display_currency}
       day_index={@day_index}
@@ -1893,6 +1926,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:trip, Trip, required: true)
   attr(:display_currency, :string, required: true)
   attr(:can_edit, :boolean, required: true)
+  attr(:currency_options, :list, required: true)
   attr(:open_form, :map, default: nil)
 
   def activities_list(assigns) do
@@ -1903,6 +1937,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       id={"activities-#{activity.id}-day-#{@day_index}"}
       activity={activity}
       trip={@trip}
+      currency_options={@currency_options}
       display_currency={@display_currency}
       index={index}
       can_edit={@can_edit}
@@ -1917,6 +1952,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:display_currency, :string, required: true)
   attr(:can_edit, :boolean, required: true)
   attr(:draggable, :boolean, default: false)
+  attr(:currency_options, :list, required: true)
   attr(:open_form, :map, default: nil)
 
   def day_expenses_list(assigns) do
@@ -1927,6 +1963,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       id={"day-expenses-#{day_expense.id}-day-#{@day_index}"}
       day_expense={day_expense}
       trip={@trip}
+      currency_options={@currency_options}
       display_currency={@display_currency}
       can_edit={@can_edit}
       draggable={@draggable}

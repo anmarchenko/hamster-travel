@@ -4,6 +4,7 @@ defmodule HamsterTravelWeb.Planning.ActivityNew do
   """
   use HamsterTravelWeb, :live_component
 
+  attr :currency_options, :list, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :day_index, :integer, required: true
   attr :edit, :boolean, default: false
@@ -18,6 +19,7 @@ defmodule HamsterTravelWeb.Planning.ActivityNew do
         module={HamsterTravelWeb.Planning.ActivityForm}
         id={"activity-form-new-#{@id}"}
         trip={@trip}
+        currency_options={@currency_options}
         day_index={@day_index}
         action={:new}
         can_edit={@can_edit}

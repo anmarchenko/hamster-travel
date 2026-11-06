@@ -7,6 +7,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.{Activity, Trip}
 
+  attr :currency_options, :list, required: true
   attr(:activity, Activity, required: true)
   attr(:trip, Trip, required: true)
   attr(:display_currency, :string, required: true)
@@ -23,6 +24,7 @@ defmodule HamsterTravelWeb.Planning.Activity do
         id={"activity-form-#{@activity.id}"}
         activity={@activity}
         trip={@trip}
+        currency_options={@currency_options}
         day_index={@activity.day_index}
         action={:edit}
         can_edit={@can_edit}

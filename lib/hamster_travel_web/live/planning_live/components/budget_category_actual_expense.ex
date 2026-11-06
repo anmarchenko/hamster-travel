@@ -22,6 +22,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryActualExpense do
     {:ok, socket}
   end
 
+  attr :currency_options, :list, required: true
   attr :expense, HamsterTravel.Planning.Expense, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :display_currency, :string, required: true
@@ -48,6 +49,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryActualExpense do
             field={@form[:price]}
             label={gettext("Actual expense")}
             default_currency={@trip.currency}
+            currency_options={@currency_options}
             reserve_error_space
           />
         </div>

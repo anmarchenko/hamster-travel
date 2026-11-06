@@ -7,6 +7,7 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.Accommodation
 
+  attr :currency_options, :list, required: true
   attr :id, :string, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :accommodation, HamsterTravel.Planning.Accommodation, required: true
@@ -22,6 +23,7 @@ defmodule HamsterTravelWeb.Planning.Accommodation do
         id={@id}
         accommodation={@accommodation}
         trip={@trip}
+        currency_options={@currency_options}
         day_index={@accommodation.start_day}
         action={:edit}
         can_edit={@can_edit}

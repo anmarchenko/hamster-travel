@@ -36,6 +36,13 @@ defmodule HamsterTravelWeb.Planning.TripForm do
     socket =
       socket
       |> assign(assigns)
+      |> assign(
+        :currency_options,
+        Cldr.trip_currencies(
+          assigns[:trip] || assigns[:copy_from] || %Trip{},
+          assigns.current_user.default_currency
+        )
+      )
       |> assign(:dates_unknown, Changeset.get_field(changeset, :dates_unknown))
       |> assign(:start_date, Changeset.get_field(changeset, :start_date))
       |> assign(:end_date, Changeset.get_field(changeset, :end_date))
@@ -88,7 +95,7 @@ defmodule HamsterTravelWeb.Planning.TripForm do
               <.field
                 type="select"
                 field={@form[:currency]}
-                options={Cldr.all_currencies()}
+                options={@currency_options}
                 label={gettext("Trip currency")}
                 required={true}
               />

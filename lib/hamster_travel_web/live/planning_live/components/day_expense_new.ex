@@ -4,6 +4,7 @@ defmodule HamsterTravelWeb.Planning.DayExpenseNew do
   """
   use HamsterTravelWeb, :live_component
 
+  attr :currency_options, :list, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :day_index, :integer, required: true
   attr :edit, :boolean, default: false
@@ -17,6 +18,7 @@ defmodule HamsterTravelWeb.Planning.DayExpenseNew do
         module={HamsterTravelWeb.Planning.DayExpenseForm}
         id={"day-expense-form-new-#{@id}"}
         trip={@trip}
+        currency_options={@currency_options}
         day_index={@day_index}
         action={:new}
         can_edit={@can_edit}

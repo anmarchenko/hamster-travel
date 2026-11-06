@@ -15,6 +15,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryNew do
     {:ok, assign(socket, assigns)}
   end
 
+  attr :currency_options, :list, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :can_edit, :boolean, default: false
   attr :edit, :boolean, default: false
@@ -28,6 +29,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryNew do
         id={"budget-category-form-new-#{@id}"}
         action={:new}
         trip={@trip}
+        currency_options={@currency_options}
         can_edit={@can_edit}
         on_finish={fn -> send(self(), :close_form) end}
       />

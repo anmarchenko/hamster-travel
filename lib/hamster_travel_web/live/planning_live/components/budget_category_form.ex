@@ -26,6 +26,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryForm do
     {:ok, socket}
   end
 
+  attr :currency_options, :list, required: true
   attr :action, :atom, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :category, BudgetCategory, default: nil
@@ -69,6 +70,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryForm do
               field={expense_form[:price]}
               label={gettext("Estimated cost")}
               default_currency={@trip.currency}
+              currency_options={@currency_options}
               blank_zero={@action == :new}
             />
           </.inputs_for>
@@ -112,6 +114,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryForm do
             field={expense_form[:price]}
             label={gettext("Estimated cost")}
             default_currency={@trip.currency}
+            currency_options={@currency_options}
             blank_zero={@action == :new}
           />
         </.inputs_for>
@@ -137,6 +140,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryForm do
                 field={food_form[:price_per_day]}
                 label={gettext("Price per day per person")}
                 default_currency={@trip.currency}
+                currency_options={@currency_options}
                 blank_zero={@action == :new}
               />
             </div>

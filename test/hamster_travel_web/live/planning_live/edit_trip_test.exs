@@ -3,12 +3,43 @@ defmodule HamsterTravelWeb.Planning.EditTripTest do
 
   import Phoenix.LiveViewTest
   import HamsterTravel.AccountsFixtures
+  import HamsterTravel.GeoFixtures
   import HamsterTravel.PlanningFixtures
 
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.Trip
 
   describe "Edit trip page" do
+    test "orders currencies by home, destination, and major currencies while preserving the selection",
+         %{conn: conn} do
+      user = user_fixture(%{default_currency: "GBP"})
+      trip = trip_fixture(user, %{currency: "CHF"})
+      geonames_fixture()
+      country = country_fixture(%{iso: "TH"})
+      region = region_fixture(country)
+      city = city_fixture(country, region)
+
+      {:ok, _destination} =
+        Planning.create_destination(trip, %{city_id: city.id, start_day: 0, end_day: 2})
+
+      {:ok, _view, html} = live(log_in_user(conn, user), ~p"/trips/#{trip.slug}/edit")
+
+      options =
+        html
+        |> Floki.parse_document!()
+        |> Floki.find("select[name='trip[currency]'] option")
+
+      assert Enum.take(Floki.attribute(options, "value"), 5) == [
+               "GBP",
+               "THB",
+               "EUR",
+               "USD",
+               "CHF"
+             ]
+
+      assert Floki.attribute(Floki.find(options, "[selected]"), "value") == ["CHF"]
+    end
+
     test "rebuilds an edit form from the recovery change payload", %{conn: conn} do
       user = user_fixture()
       conn = log_in_user(conn, user)

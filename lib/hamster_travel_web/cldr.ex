@@ -11,6 +11,8 @@ defmodule HamsterTravelWeb.Cldr do
     precompile_number_formats: [@money_input_format],
     providers: [Cldr.Number, Cldr.Calendar, Cldr.DateTime]
 
+  alias HamsterTravel.Planning
+  alias HamsterTravel.Planning.Trip
   alias HamsterTravelWeb.Cldr.Currency
 
   def format_money(val, currency) do
@@ -73,7 +75,18 @@ defmodule HamsterTravelWeb.Cldr do
     "#{currency_name} - #{currency_code}"
   end
 
-  def all_currencies do
+  @spec trip_currencies(Trip.t(), String.t() | nil) :: [{atom(), atom()}]
+  def trip_currencies(%Trip{} = trip, home_currency) do
+    country_currencies =
+      trip
+      |> Planning.countries_by_trip_days()
+      |> Enum.map(& &1.currency_code)
+
+    all_currencies([home_currency || "EUR" | country_currencies])
+  end
+
+  @spec all_currencies([atom() | String.t() | nil]) :: [{atom(), atom()}]
+  def all_currencies(preferred_currencies \\ []) do
     not_real_currencies = [
       :XAG,
       :XAU,
@@ -117,11 +130,17 @@ defmodule HamsterTravelWeb.Cldr do
       :JPY
     ]
 
-    for currency <-
-          important_currencies ++
-            Enum.filter(Money.known_current_currencies(), fn currency ->
-              currency not in not_real_currencies && currency not in important_currencies
-            end),
+    known_currencies = Money.known_current_currencies()
+    currencies_by_code = Map.new(known_currencies, &{to_string(&1), &1})
+
+    preferred_currencies =
+      preferred_currencies
+      |> Enum.map(&Map.get(currencies_by_code, to_string(&1)))
+      |> Enum.reject(&is_nil/1)
+
+    other_currencies = Enum.reject(known_currencies, &(&1 in not_real_currencies))
+
+    for currency <- Enum.uniq(preferred_currencies ++ important_currencies ++ other_currencies),
         do: {currency, currency}
   end
 

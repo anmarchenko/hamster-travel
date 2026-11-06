@@ -9,6 +9,7 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
 
   alias HamsterTravelWeb.{CityInput, FormSubmission}
 
+  attr :currency_options, :list, required: true
   attr :action, :atom, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :current_user, HamsterTravel.Accounts.User, default: nil
@@ -94,6 +95,7 @@ defmodule HamsterTravelWeb.Planning.TransferForm do
             field={expense_form[:price]}
             label={gettext("Price")}
             default_currency={@trip.currency}
+            currency_options={@currency_options}
             blank_zero={@action == :new}
           />
         </.inputs_for>

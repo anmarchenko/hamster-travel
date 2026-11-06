@@ -2,6 +2,45 @@ defmodule HamsterTravelWeb.CldrTest do
   use ExUnit.Case
   alias HamsterTravelWeb.Cldr
 
+  describe "currency options" do
+    test "puts preferred currencies before major currencies and the rest without duplicates" do
+      options = Cldr.all_currencies(["THB", :USD, "EUR", "THB", nil, "INVALID"])
+      currencies = Enum.map(options, &elem(&1, 1))
+
+      assert Enum.take(currencies, 5) == [:THB, :USD, :EUR, :GBP, :CHF]
+      assert currencies == Enum.uniq(currencies)
+      assert MapSet.new(currencies) == MapSet.new(Cldr.all_currencies(), &elem(&1, 1))
+    end
+
+    test "prioritizes home currency, then visited countries, then other major currencies" do
+      trip = %HamsterTravel.Planning.Trip{
+        countries: [
+          %HamsterTravel.Geo.Country{iso: "TH", currency_code: "THB"},
+          %HamsterTravel.Geo.Country{iso: "FR", currency_code: "EUR"},
+          %HamsterTravel.Geo.Country{iso: "DE", currency_code: "EUR"},
+          %HamsterTravel.Geo.Country{iso: "GB", currency_code: "GBP"}
+        ]
+      }
+
+      currencies = Enum.map(Cldr.trip_currencies(trip, "GBP"), &elem(&1, 1))
+
+      assert Enum.take(currencies, 5) == [:GBP, :THB, :EUR, :USD, :CHF]
+      assert currencies == Enum.uniq(currencies)
+    end
+
+    test "includes a visited country's shared currency even when it is normally filtered out" do
+      trip = %HamsterTravel.Planning.Trip{
+        countries: [%HamsterTravel.Geo.Country{iso: "SN", currency_code: "XOF"}]
+      }
+
+      assert Enum.take(Cldr.trip_currencies(trip, "EUR"), 3) == [EUR: :EUR, XOF: :XOF, USD: :USD]
+    end
+
+    test "falls back to EUR for a new trip without a home currency" do
+      assert Cldr.trip_currencies(%HamsterTravel.Planning.Trip{}, nil) == Cldr.all_currencies()
+    end
+  end
+
   describe "format_time/1" do
     test "formats naive datetime to HH:mm format" do
       naive_datetime = ~N[2023-12-25 12:34:56]

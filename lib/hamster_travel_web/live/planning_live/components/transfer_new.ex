@@ -5,6 +5,7 @@ defmodule HamsterTravelWeb.Planning.TransferNew do
 
   use HamsterTravelWeb, :live_component
 
+  attr :currency_options, :list, required: true
   attr :id, :string, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :current_user, HamsterTravel.Accounts.User, default: nil
@@ -20,6 +21,7 @@ defmodule HamsterTravelWeb.Planning.TransferNew do
         module={HamsterTravelWeb.Planning.TransferForm}
         id={"new-#{@id}"}
         trip={@trip}
+        currency_options={@currency_options}
         current_user={@current_user}
         day_index={@day_index}
         action={:new}
