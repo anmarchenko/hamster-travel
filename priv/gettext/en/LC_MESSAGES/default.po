@@ -1699,3 +1699,23 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "Back to notes"
 msgstr ""
+
+#: lib/hamster_travel_web/live/planning_live/components/activity.ex:152
+#, elixir-autogen, elixir-format
+msgid "Choose a day to move this activity immediately."
+msgstr "Choose a day to move this activity immediately."
+
+#: lib/hamster_travel_web/live/planning_live/components/activity.ex:195
+#, elixir-autogen, elixir-format
+msgid "Current day"
+msgstr "Current day"
+
+#: lib/hamster_travel_web/live/planning_live/components/activity.ex:201
+#, elixir-autogen, elixir-format
+msgid "Move here"
+msgstr "Move here"
+
+#: lib/hamster_travel_web/live/planning_live/components/activity.ex:214
+#, elixir-autogen, elixir-format
+msgid "Close"
+msgstr "Close"

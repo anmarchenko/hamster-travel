@@ -107,6 +107,7 @@ defmodule HamsterTravelWeb.CoreComponents do
   attr(:show, :boolean, default: false)
   attr(:on_cancel, JS, default: %JS{})
   attr(:max_width_class, :string, default: "max-w-3xl")
+  attr(:padding_class, :string, default: "p-14")
   slot(:inner_block, required: true)
 
   def modal(assigns) do
@@ -139,7 +140,10 @@ defmodule HamsterTravelWeb.CoreComponents do
               phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
               phx-key="escape"
               phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
-              class="relative hidden rounded-2xl bg-white p-14 text-zinc-900 shadow-lg ring-1 ring-zinc-700/10 transition dark:bg-zinc-900 dark:text-zinc-100 dark:ring-zinc-100/10 dark:shadow-black/40"
+              class={[
+                "relative hidden rounded-2xl bg-white text-zinc-900 shadow-lg ring-1 ring-zinc-700/10 transition dark:bg-zinc-900 dark:text-zinc-100 dark:ring-zinc-100/10 dark:shadow-black/40",
+                @padding_class
+              ]}
             >
               <div class="absolute top-6 right-5">
                 <button

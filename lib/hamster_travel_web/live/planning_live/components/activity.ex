@@ -130,20 +130,29 @@ defmodule HamsterTravelWeb.Planning.Activity do
         :if={@can_edit and @move_modal_open}
         id={"move-activity-modal-#{@activity.id}"}
         max_width_class="max-w-lg"
+        padding_class="p-5 sm:p-6"
         show={true}
         on_cancel={JS.push("close_move_modal", target: @myself)}
       >
-        <h2 id={"move-activity-modal-#{@activity.id}-title"} class="text-lg font-semibold">
-          {gettext("Move to day")}
-        </h2>
+        <div class="flex items-center gap-3 pr-8">
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-600 dark:bg-primary-950 dark:text-primary-300">
+            <.icon name="hero-calendar-days" class="h-5 w-5" />
+          </span>
+          <div class="min-w-0">
+            <h2 id={"move-activity-modal-#{@activity.id}-title"} class="text-lg font-semibold">
+              {gettext("Move to day")}
+            </h2>
+            <p class="break-words text-sm text-zinc-500 dark:text-zinc-400">{@activity.name}</p>
+          </div>
+        </div>
         <p
           id={"move-activity-modal-#{@activity.id}-description"}
-          class="mt-2 text-sm text-zinc-500 dark:text-zinc-400"
+          class="mt-5 text-sm text-zinc-600 dark:text-zinc-400"
         >
-          {@activity.name}
+          {gettext("Choose a day to move this activity immediately.")}
         </p>
         <div
-          class="-mr-8 mt-4 max-h-60 overflow-y-auto overscroll-contain pr-6 [scrollbar-gutter:stable] [scrollbar-width:thin] lg:max-h-[min(65vh,40rem)]"
+          class="mt-3 flex max-h-60 flex-col gap-2 overflow-y-auto overscroll-contain p-1 [scrollbar-gutter:stable] [scrollbar-width:thin] lg:max-h-[min(55vh,32rem)]"
           data-activity-day-picker
         >
           <button
@@ -162,24 +171,45 @@ defmodule HamsterTravelWeb.Planning.Activity do
             }
             data-day-index={day_index}
             disabled={day_index == @activity.day_index}
-            class="flex w-full items-center justify-between gap-2 rounded px-3 py-2 text-left text-sm hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500 disabled:cursor-default disabled:opacity-50 dark:hover:bg-zinc-800"
+            class={[
+              "group flex w-full shrink-0 items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900",
+              if(day_index == @activity.day_index,
+                do:
+                  "cursor-default border-dashed border-zinc-200 bg-zinc-50 text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-400",
+                else:
+                  "cursor-pointer border-zinc-200 bg-white text-zinc-900 shadow-sm hover:border-primary-400 hover:bg-primary-50 active:bg-primary-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:border-primary-500 dark:hover:bg-primary-950 dark:active:bg-primary-900"
+              )
+            ]}
           >
-            <span class="shrink-0">{gettext("Day")} {day_index + 1}</span>
-            <span class="ml-auto flex items-center gap-3">
-              <span :if={@trip.start_date} class="text-right text-zinc-500 dark:text-zinc-400">
+            <span class="flex min-w-0 flex-col gap-0.5">
+              <span class="font-semibold">{gettext("Day")} {day_index + 1}</span>
+              <span :if={@trip.start_date} class="text-xs text-zinc-500 dark:text-zinc-400">
                 {Formatter.date_with_weekday(Date.add(@trip.start_date, day_index))}
               </span>
-              <span class="h-4 w-4 shrink-0" aria-hidden="true">
-                <.icon :if={day_index == @activity.day_index} name="hero-check" class="h-4 w-4" />
+            </span>
+            <span
+              :if={day_index == @activity.day_index}
+              class="flex shrink-0 items-center gap-1.5 text-xs font-medium"
+            >
+              <.icon name="hero-check" class="h-4 w-4" />
+              {gettext("Current day")}
+            </span>
+            <span
+              :if={day_index != @activity.day_index}
+              class="flex shrink-0 items-center gap-2 text-primary-600 dark:text-primary-300"
+            >
+              <span class="hidden text-xs font-semibold sm:inline">{gettext("Move here")}</span>
+              <span class="flex h-7 w-7 items-center justify-center rounded-full bg-primary-50 transition-colors group-hover:bg-primary-100 dark:bg-primary-950 dark:group-hover:bg-primary-900">
+                <.icon name="hero-arrow-right" class="h-4 w-4" />
               </span>
             </span>
           </button>
         </div>
-        <div class="mt-4 flex justify-end">
+        <div class="mt-4 flex justify-end border-t border-zinc-100 pt-4 dark:border-zinc-800">
           <button
             type="button"
             phx-click={JS.push("close_move_modal", target: @myself)}
-            class="rounded-md px-3 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:text-zinc-200 dark:hover:bg-zinc-800"
+            class="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 shadow-sm hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
           >
             {gettext("Close")}
           </button>

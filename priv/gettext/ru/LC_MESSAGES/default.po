@@ -1702,3 +1702,23 @@ msgstr "Заметок пока нет."
 #, elixir-autogen, elixir-format
 msgid "Back to notes"
 msgstr "К заметкам"
+
+#: lib/hamster_travel_web/live/planning_live/components/activity.ex:152
+#, elixir-autogen, elixir-format
+msgid "Choose a day to move this activity immediately."
+msgstr "Выберите день — событие будет перенесено сразу."
+
+#: lib/hamster_travel_web/live/planning_live/components/activity.ex:195
+#, elixir-autogen, elixir-format
+msgid "Current day"
+msgstr "Текущий день"
+
+#: lib/hamster_travel_web/live/planning_live/components/activity.ex:201
+#, elixir-autogen, elixir-format
+msgid "Move here"
+msgstr "Переместить сюда"
+
+#: lib/hamster_travel_web/live/planning_live/components/activity.ex:214
+#, elixir-autogen, elixir-format
+msgid "Close"
+msgstr "Закрыть"
