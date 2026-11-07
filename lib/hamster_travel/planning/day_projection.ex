@@ -14,17 +14,26 @@ defmodule HamsterTravel.Planning.DayProjection do
     budget_transfers = priced(projection.transfers)
     budget_activities = priced(projection.activities)
 
-    budget_days =
-      (Map.keys(budget_transfers) ++
-         Map.keys(budget_activities) ++ Map.keys(projection.day_expenses))
-      |> Enum.filter(&(is_integer(&1) and &1 >= 0))
+    priced_source_days = Map.keys(budget_transfers) ++ Map.keys(budget_activities)
+
+    budget_day_expenses =
+      Map.filter(projection.day_expenses, fn {day, expenses} ->
+        is_integer(day) and day >= 0 and
+          (day >= trip.duration or day in priced_source_days or
+             Enum.any?(expenses, &non_zero_expense?/1))
+      end)
+
+    budget_days_outside =
+      (priced_source_days ++ Map.keys(budget_day_expenses))
+      |> Enum.filter(&(is_integer(&1) and &1 >= trip.duration))
       |> Enum.uniq()
       |> Enum.sort()
 
     Map.merge(projection, %{
       budget_transfers: budget_transfers,
       budget_activities: budget_activities,
-      budget_days: budget_days
+      budget_day_expenses: budget_day_expenses,
+      budget_days_outside: budget_days_outside
     })
   end
 

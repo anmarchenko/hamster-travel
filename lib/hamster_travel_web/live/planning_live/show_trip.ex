@@ -1642,108 +1642,144 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         />
       </.budget_section>
 
-      <div class="flex flex-col gap-y-8">
-        <div :for={day_index <- @day_projection.budget_days} class="flex flex-col gap-y-3">
-          <.day_heading
-            day_index={day_index}
-            start_date={@trip.start_date}
-            class="max-w-3xl rounded-md py-2 text-left font-bold text-zinc-950 dark:text-zinc-50 min-[1920px]:max-w-6xl"
-          />
+      <.toggle
+        :if={@day_projection.budget_days_outside != []}
+        id="budget-outside-trip-duration"
+        label={gettext("Some items are scheduled outside of the trip duration")}
+      >
+        <.budget_days
+          days={@day_projection.budget_days_outside}
+          trip={@trip}
+          day_projection={@day_projection}
+          currency_options={@currency_options}
+          display_currency={@display_currency}
+          can_edit={@can_edit}
+          open_form={@open_form}
+        />
+      </.toggle>
 
-          <.budget_day_group
-            :if={Enum.any?(Map.get(@day_projection.budget_transfers, day_index, []))}
-            icon="hero-arrows-right-left"
-            title={gettext("Transfers")}
-          >
-            <.live_component
-              :for={transfer <- Map.get(@day_projection.budget_transfers, day_index, [])}
-              module={BudgetExpense}
-              id={"budget-expense-transfer-#{transfer.expense.id}"}
-              trip={@trip}
-              currency_options={@currency_options}
-              source="transfer"
-              source_item={transfer}
-              label={transfer_budget_label(transfer)}
-              expense={transfer.expense}
-              display_currency={@display_currency}
-              can_edit={@can_edit}
-              edit={
-                open_form_matches?(
-                  @open_form,
-                  "edit",
-                  "budget-expense",
-                  "transfer:#{transfer.expense.id}"
-                )
-              }
-            />
-          </.budget_day_group>
+      <.budget_days
+        days={0..(@trip.duration - 1)}
+        trip={@trip}
+        day_projection={@day_projection}
+        currency_options={@currency_options}
+        display_currency={@display_currency}
+        can_edit={@can_edit}
+        open_form={@open_form}
+      />
+    </div>
+    """
+  end
 
-          <.budget_day_group
-            :if={Enum.any?(Map.get(@day_projection.budget_activities, day_index, []))}
-            icon="hero-ticket"
-            title={gettext("Activities")}
-          >
-            <.live_component
-              :for={activity <- Map.get(@day_projection.budget_activities, day_index, [])}
-              module={BudgetExpense}
-              id={"budget-expense-activity-#{activity.expense.id}"}
-              trip={@trip}
-              currency_options={@currency_options}
-              source="activity"
-              source_item={activity}
-              label={activity.name}
-              expense={activity.expense}
-              display_currency={@display_currency}
-              can_edit={@can_edit}
-              edit={
-                open_form_matches?(
-                  @open_form,
-                  "edit",
-                  "budget-expense",
-                  "activity:#{activity.expense.id}"
-                )
-              }
-            />
-          </.budget_day_group>
+  attr(:days, :any, required: true)
+  attr(:trip, Trip, required: true)
+  attr(:day_projection, :map, required: true)
+  attr(:currency_options, :list, required: true)
+  attr(:display_currency, :string, required: true)
+  attr(:can_edit, :boolean, required: true)
+  attr(:open_form, :map, default: nil)
 
-          <.budget_day_group
-            :if={
-              day_index < @trip.duration ||
-                Enum.any?(Map.get(@day_projection.day_expenses, day_index, []))
+  defp budget_days(assigns) do
+    ~H"""
+    <div class="flex flex-col gap-y-8">
+      <div :for={day_index <- @days} class="flex flex-col gap-y-3">
+        <.day_heading
+          day_index={day_index}
+          start_date={@trip.start_date}
+          class="max-w-3xl rounded-md py-2 text-left font-bold text-zinc-950 dark:text-zinc-50 min-[1920px]:max-w-6xl"
+        />
+
+        <.budget_day_group
+          :if={Enum.any?(Map.get(@day_projection.budget_transfers, day_index, []))}
+          icon="hero-arrows-right-left"
+          title={gettext("Transfers")}
+        >
+          <.live_component
+            :for={transfer <- Map.get(@day_projection.budget_transfers, day_index, [])}
+            module={BudgetExpense}
+            id={"budget-expense-transfer-#{transfer.expense.id}"}
+            trip={@trip}
+            currency_options={@currency_options}
+            source="transfer"
+            source_item={transfer}
+            label={transfer_budget_label(transfer)}
+            expense={transfer.expense}
+            display_currency={@display_currency}
+            can_edit={@can_edit}
+            edit={
+              open_form_matches?(
+                @open_form,
+                "edit",
+                "budget-expense",
+                "transfer:#{transfer.expense.id}"
+              )
             }
-            icon="hero-banknotes"
-            title={gettext("Day expenses")}
-          >
-            <.day_expenses_list
-              day_expenses={Map.get(@day_projection.day_expenses, day_index, [])}
-              day_index={day_index}
-              trip={@trip}
-              currency_options={@currency_options}
-              display_currency={@display_currency}
-              can_edit={@can_edit}
-              open_form={@open_form}
-            />
-            <.live_component
-              :if={@can_edit && day_index < @trip.duration}
-              module={DayExpenseNew}
-              id={"day-expense-new-#{day_index}"}
-              trip={@trip}
-              currency_options={@currency_options}
-              day_index={day_index}
-              can_edit={@can_edit}
-              edit={
-                open_form_matches?(
-                  @open_form,
-                  "new",
-                  "day-expense",
-                  "day-expense-new-#{day_index}"
-                )
-              }
-            />
-          </.budget_day_group>
+          />
+        </.budget_day_group>
 
-          <hr />
-        </div>
+        <.budget_day_group
+          :if={Enum.any?(Map.get(@day_projection.budget_activities, day_index, []))}
+          icon="hero-ticket"
+          title={gettext("Activities")}
+        >
+          <.live_component
+            :for={activity <- Map.get(@day_projection.budget_activities, day_index, [])}
+            module={BudgetExpense}
+            id={"budget-expense-activity-#{activity.expense.id}"}
+            trip={@trip}
+            currency_options={@currency_options}
+            source="activity"
+            source_item={activity}
+            label={activity.name}
+            expense={activity.expense}
+            display_currency={@display_currency}
+            can_edit={@can_edit}
+            edit={
+              open_form_matches?(
+                @open_form,
+                "edit",
+                "budget-expense",
+                "activity:#{activity.expense.id}"
+              )
+            }
+          />
+        </.budget_day_group>
+
+        <.budget_day_group
+          :if={Map.has_key?(@day_projection.budget_day_expenses, day_index)}
+          icon="hero-banknotes"
+          title={gettext("Day expenses")}
+        >
+          <.day_expenses_list
+            day_expenses={Map.get(@day_projection.budget_day_expenses, day_index, [])}
+            day_index={day_index}
+            trip={@trip}
+            currency_options={@currency_options}
+            display_currency={@display_currency}
+            can_edit={@can_edit}
+            open_form={@open_form}
+          />
+        </.budget_day_group>
+
+        <.live_component
+          :if={@can_edit && day_index < @trip.duration}
+          module={DayExpenseNew}
+          id={"day-expense-new-#{day_index}"}
+          trip={@trip}
+          currency_options={@currency_options}
+          day_index={day_index}
+          can_edit={@can_edit}
+          edit={
+            open_form_matches?(
+              @open_form,
+              "new",
+              "day-expense",
+              "day-expense-new-#{day_index}"
+            )
+          }
+        />
+
+        <hr />
       </div>
     </div>
     """

@@ -700,9 +700,16 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       {:ok, zero_activity} =
         Planning.create_activity(trip, %{
           name: "Free walking tour",
-          day_index: 1,
+          day_index: 0,
           priority: 2,
           expense: %{price: Money.new(:EUR, 0), name: "Free walking tour", trip_id: trip.id}
+        })
+
+      {:ok, _zero_day_expense} =
+        Planning.create_day_expense(trip, %{
+          name: "Free water",
+          day_index: 0,
+          expense: %{price: Money.new(:EUR, 0), name: "Free water", trip_id: trip.id}
         })
 
       {:ok, day_expense} =
@@ -715,17 +722,18 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       {:ok, view, html} = live(conn, ~p"/trips/#{trip.slug}?tab=budget")
 
       assert has_element?(view, "#budget-#{trip.id}")
+      refute has_element?(view, "#budget-outside-trip-duration")
 
       budget_section_headers =
         html
         |> Floki.parse_document!()
         |> Floki.find("#budget-#{trip.id} .text-xs.font-semibold.uppercase")
-        |> Floki.text(sep: " ")
+        |> Enum.map(&(Floki.text(&1) |> String.trim()))
 
-      assert budget_section_headers =~ "Hotels"
-      assert budget_section_headers =~ "Transfers"
-      assert budget_section_headers =~ "Activities"
-      assert budget_section_headers =~ "Day expenses"
+      assert "Hotels" in budget_section_headers
+      assert "Transfers" in budget_section_headers
+      assert "Activities" in budget_section_headers
+      assert Enum.count(budget_section_headers, &(&1 == "Day expenses")) == 1
       assert html =~ "Hotels"
       assert html =~ "Grand Hotel Vienna, Day 1-2"
       budget_text = panel_text(html, "#trip-tab-panel-budget")
@@ -737,11 +745,18 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert html =~ "Museum"
       refute budget_text =~ "Hamburg → Berlin, ZeroBus FREE 1"
       refute budget_text =~ "Free walking tour"
+      refute budget_text =~ "Free water"
       assert html =~ "Day expenses"
       assert html =~ "Snacks"
-      refute has_element?(view, "#day-expense-new-0")
-      assert has_element?(view, "#day-expense-new-1")
-      refute has_element?(view, "#day-expense-new-2")
+
+      day_heading = "#budget-#{trip.id} .text-xl.font-semibold.py-2"
+
+      for day_index <- 0..(trip.duration - 1) do
+        date = Cldr.date_with_weekday(Date.add(trip.start_date, day_index))
+        assert has_element?(view, day_heading, date)
+        assert has_element?(view, "#day-expense-new-#{day_index} a", "Add expense")
+      end
+
       refute has_element?(view, "#budget-#{trip.id} a", "Add accommodation")
       refute has_element?(view, "#budget-#{trip.id} a", "Add transfer")
       refute has_element?(view, "#budget-#{trip.id} a", "Add activity")
@@ -1387,7 +1402,9 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       refute panel_text(html, "#trip-tab-panel-activities") =~ note.title
     end
 
-    test "deletes outside items from activities tab", %{conn: conn} do
+    test "groups outside expenses in the budget and deletes outside activities separately", %{
+      conn: conn
+    } do
       # Arrange
       user = user_fixture()
       conn = log_in_user(conn, user)
@@ -1443,6 +1460,31 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       # Act
       {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=activities")
+
+      outside_budget = "#budget-outside-trip-duration"
+
+      assert has_element?(
+               view,
+               outside_budget,
+               "Some items are scheduled outside of the trip duration"
+             )
+
+      assert has_element?(
+               view,
+               "#{outside_budget} [data-day-expense-id='#{outside_day_expense.id}']"
+             )
+
+      assert has_element?(
+               view,
+               "#{outside_budget} #budget-expense-activity-#{outside_activity.expense.id}"
+             )
+
+      refute has_element?(
+               view,
+               "#{outside_budget} [data-day-expense-id='#{inside_day_expense.id}']"
+             )
+
+      refute has_element?(view, "#{outside_budget} [id^='day-expense-new-']")
 
       view
       |> element("[phx-click='delete_outside_activities']")
@@ -2518,6 +2560,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       assert_eventually_contains(view, "€25.00")
       assert has_element?(view, row)
+      refute panel_text(render(view), "#trip-tab-panel-budget") =~ "Day expenses"
 
       {:ok, _activity} =
         Planning.update_activity(updated_activity, %{
@@ -2560,37 +2603,37 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "label", "Link")
     end
 
-    test "can create day expense via form", %{conn: conn} do
+    test "can create the first expense for a day from the budget tab", %{conn: conn} do
       # Arrange
 
       user = user_fixture()
       conn = log_in_user(conn, user)
-      trip = trip_fixture(%{author_id: user.id, status: "0_draft"})
 
-      {:ok, _activity} =
-        Planning.create_activity(trip, %{
-          name: "Anchor activity",
-          day_index: 0,
-          priority: 2,
-          expense: %{price: Money.new(:EUR, 1), name: "Anchor activity", trip_id: trip.id}
-        })
+      trip =
+        trip_fixture(%{author_id: user.id, status: "0_draft", dates_unknown: true, duration: 3})
 
       # Act
 
-      {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=budget")
+      {:ok, view, html} = live(conn, ~p"/trips/#{trip.slug}?tab=budget")
+      refute panel_text(html, "#trip-tab-panel-budget") =~ "Day expenses"
+      assert has_element?(view, "#budget-#{trip.id} .text-xl.font-semibold.py-2", "Day 3")
 
       # Open form
       view
-      |> element("#day-expense-new-0 [phx-click='add_day_expense']")
+      |> element("#day-expense-new-2 a", "Add expense")
       |> render_click()
+
+      assert has_element?(
+               view,
+               "#day-expense-new-2 input[name='day_expense[day_index]'][value='2']"
+             )
 
       # Submit form
       view
-      |> form("form[id*='day-expense-form-new-day-expense-new-0']", %{
+      |> form("form[id*='day-expense-form-new-day-expense-new-2']", %{
         day_expense: %{
           name: "Metro card",
           link: "https://example.com/metro-card",
-          day_index: "0",
           expense: %{
             price: %{
               amount: "12.00",
@@ -2612,6 +2655,9 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       day_expense = List.first(day_expenses)
       assert day_expense.name == "Metro card"
       assert day_expense.link == "https://example.com/metro-card"
+      assert day_expense.day_index == 2
+
+      assert panel_text(render(view), "#trip-tab-panel-budget") =~ "Day expenses"
       assert has_element?(view, "a[href='https://example.com/metro-card'][target='_blank']")
     end
 
