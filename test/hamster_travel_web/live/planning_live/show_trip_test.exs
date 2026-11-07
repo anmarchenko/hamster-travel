@@ -331,7 +331,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
         ])
 
       assert render_upload(cover, "IMG_0123.HEIC") =~ "Cover updated."
-      assert has_element?(view, "#cover-upload-form label", "Change cover")
+      refute has_element?(view, "#cover-upload-form label", "Change cover")
 
       updated_trip = Planning.get_trip!(trip.id)
       assert updated_trip.cover.file_name == "IMG_0123.HEIC"

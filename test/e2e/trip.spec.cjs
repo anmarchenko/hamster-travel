@@ -62,7 +62,8 @@ test('validates and displays mobile trip cover uploads', async ({ page }) => {
   await expect(alert).toHaveText('Upload failed. Please try again.');
   await expect(cover).toHaveAttribute('src', jpegUrl);
 
-  await input.setInputFiles(join(__dirname, 'fixtures', 'phone.HEIC'));
+  const [fileChooser] = await Promise.all([page.waitForEvent('filechooser'), cover.tap()]);
+  await fileChooser.setFiles(join(__dirname, 'fixtures', 'phone.HEIC'));
   await expect(cover).not.toHaveAttribute('src', jpegUrl);
   await expect.poll(() => cover.evaluate(img => img.naturalWidth > img.naturalHeight)).toBe(true);
   await expect(page.getByText('Cover updated.', { exact: true })).toBeVisible();

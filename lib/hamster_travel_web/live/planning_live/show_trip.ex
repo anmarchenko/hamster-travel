@@ -2163,16 +2163,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         </div>
       </div>
 
-      <label
-        :if={TripCover.present?(@trip.cover)}
-        for={@uploads.cover.ref}
-        class="pc-button pc-button--secondary-light pc-button--xs pc-button--radius-md pc-button--with-icon w-fit cursor-pointer"
-      >
-        <.icon name="hero-arrow-up-tray" class="pc-button__spinner-icon--sm" />
-        {gettext("Change cover")}
-      </label>
-
-      <.live_file_input upload={@uploads.cover} class="sr-only" />
+      <.live_file_input
+        upload={@uploads.cover}
+        class="sr-only"
+        aria-label={TripCover.present?(@trip.cover) && gettext("Change cover")}
+      />
 
       <div
         :for={entry <- @uploads.cover.entries}
