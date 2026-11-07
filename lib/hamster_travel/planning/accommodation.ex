@@ -52,10 +52,7 @@ defmodule HamsterTravel.Planning.Accommodation do
       }) do
     nights = end_day - start_day + 1
 
-    case Money.div(price, nights) do
-      {:ok, result} -> result
-      {:error, _} -> nil
-    end
+    if nights == 0, do: nil, else: Money.div!(price, nights)
   end
 
   def price_per_night(_), do: nil

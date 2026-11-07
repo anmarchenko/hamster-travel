@@ -5,13 +5,18 @@ defmodule HamsterTravel.MixProject do
     [
       app: :hamster_travel,
       version: "0.1.0",
-      elixir: "~> 1.12",
+      elixir: "~> 1.19",
+      elixirc_options: [warnings_as_errors: true],
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps()
     ]
+  end
+
+  def cli do
+    [preferred_envs: ["test.e2e": :test]]
   end
 
   # Configuration for the OTP application.
@@ -34,7 +39,7 @@ defmodule HamsterTravel.MixProject do
   defp deps do
     [
       # phoenix framework
-      {:phoenix, "~> 1.7.0"},
+      {:phoenix, "~> 1.8.0"},
       {:bandit, "~> 1.12"},
 
       # database
@@ -47,7 +52,7 @@ defmodule HamsterTravel.MixProject do
       {:phoenix_live_view, "~> 1.0"},
       {:phoenix_html, "~> 4.0"},
       {:html_sanitize_ex, "~> 1.4"},
-      {:petal_components, "~> 2.8.0"},
+      {:petal_components, "~> 2.9.3"},
       {:live_select, "~> 1.0"},
       {:live_stash, "~> 1.0"},
 
@@ -57,7 +62,7 @@ defmodule HamsterTravel.MixProject do
       {
         :heroicons,
         github: "tailwindlabs/heroicons",
-        tag: "v2.1.5",
+        tag: "v2.2.0",
         app: false,
         compile: false,
         sparse: "optimized"
@@ -99,7 +104,7 @@ defmodule HamsterTravel.MixProject do
 
       # observability
       {:phoenix_live_dashboard, "~> 0.8"},
-      {:telemetry_metrics, "~> 0.6"},
+      {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:telemetry_metrics_statsd, "~> 0.7"},
 
@@ -108,7 +113,7 @@ defmodule HamsterTravel.MixProject do
       {:floki, ">= 0.30.0", only: :test},
       {:lazy_html, ">= 0.1.0", only: :test},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
-      {:live_debugger, "~> 0.3.0", only: :dev},
+      {:live_debugger, "~> 1.0", only: :dev},
       {:tidewave, "~> 0.2", only: :dev}
     ]
   end

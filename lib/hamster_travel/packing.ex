@@ -3,8 +3,6 @@ defmodule HamsterTravel.Packing do
   The Packing context.
   """
 
-  require Logger
-
   import Ecto.Query, warn: false
   use Gettext, backend: HamsterTravelWeb.Gettext
 

@@ -191,11 +191,7 @@ defmodule HamsterTravel.Planning do
     end
   end
 
-  defp destination_country(%Destination{city: %{country: country} = city}) do
-    if Ecto.assoc_loaded?(city) && Ecto.assoc_loaded?(country) do
-      city.country
-    end
-  end
+  defp destination_country(%Destination{city: %{country: %Country{} = country}}), do: country
 
   defp destination_country(_destination), do: nil
 

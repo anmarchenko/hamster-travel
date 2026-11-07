@@ -5,8 +5,6 @@ defmodule HamsterTravel.Geo.Geonames.Features do
 
   alias HamsterTravel.Repo
 
-  require Logger
-
   def import(country_code) do
     download_translations = Task.async(fn -> Translations.fetch(country_code) end)
 

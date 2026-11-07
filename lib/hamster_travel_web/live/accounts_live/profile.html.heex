@@ -49,10 +49,7 @@
         </form>
 
         <div
-          :if={
-            @uploads.cover.entries != [] or @cover_upload_errors != [] or
-              cover_uploading?(@uploads.cover)
-          }
+          :if={@uploads.cover.entries != [] or @cover_upload_errors != []}
           class="absolute bottom-4 right-4 z-20 w-[calc(100%-2rem)] max-w-md rounded-xl bg-black/45 px-3 py-2 text-xs text-white/90 backdrop-blur-sm"
         >
           <div :for={entry <- @uploads.cover.entries} class="mt-1 first:mt-0">
@@ -63,21 +60,23 @@
             </div>
             <p
               :for={err <- upload_errors(@uploads.cover, entry)}
+              role="alert"
               class="mt-1 text-xs font-semibold text-rose-200"
             >
-              {cover_error(err)}
+              {upload_error(err)}
             </p>
           </div>
 
           <p
             :for={err <- @cover_upload_errors}
+            role="alert"
             class="mt-1 text-xs font-semibold text-rose-200"
           >
-            {cover_error(err)}
+            {upload_error(err)}
           </p>
 
           <p
-            :if={cover_uploading?(@uploads.cover)}
+            :if={uploading?(@uploads.cover)}
             class="mt-1 text-xs font-semibold text-white/90"
           >
             {gettext("Uploading...")}
@@ -155,21 +154,23 @@
                 </div>
                 <p
                   :for={err <- upload_errors(@uploads.avatar, entry)}
+                  role="alert"
                   class="mt-1 text-xs font-semibold text-rose-600"
                 >
-                  {avatar_error(err)}
+                  {upload_error(err)}
                 </p>
               </div>
 
               <p
                 :for={err <- @avatar_upload_errors}
+                role="alert"
                 class="mt-1 text-xs font-semibold text-rose-600"
               >
-                {avatar_error(err)}
+                {upload_error(err)}
               </p>
 
               <p
-                :if={avatar_uploading?(@uploads.avatar)}
+                :if={uploading?(@uploads.avatar)}
                 class="mt-1 text-xs font-semibold text-zinc-500 dark:text-zinc-400"
               >
                 {gettext("Uploading...")}

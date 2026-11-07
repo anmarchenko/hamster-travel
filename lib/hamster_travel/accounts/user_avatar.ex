@@ -2,9 +2,11 @@ defmodule HamsterTravel.Accounts.UserAvatar do
   use Waffle.Definition
   use Waffle.Ecto.Definition
 
+  alias HamsterTravel.PhotoUpload
+
   @async false
   @versions [:original, :thumb]
-  @extension_whitelist ~w(.jpg .jpeg .png .webp)
+  @extension_whitelist PhotoUpload.extensions()
 
   def validate({file, _scope}) do
     extension =
@@ -22,7 +24,7 @@ defmodule HamsterTravel.Accounts.UserAvatar do
     if skip_processing?() do
       :noaction
     else
-      {:convert, "-strip -thumbnail 256x256^ -gravity center -extent 256x256 -format jpg", :jpg}
+      PhotoUpload.jpeg_transform(~w(-strip -thumbnail 256x256^ -gravity center -extent 256x256))
     end
   end
 

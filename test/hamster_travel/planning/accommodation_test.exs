@@ -196,6 +196,16 @@ defmodule HamsterTravel.Planning.AccommodationTest do
       assert result == nil
     end
 
+    test "returns nil when the stay has zero nights" do
+      accommodation = %Accommodation{
+        start_day: 2,
+        end_day: 1,
+        expense: %{price: Money.new(:EUR, 100)}
+      }
+
+      assert Accommodation.price_per_night(accommodation) == nil
+    end
+
     test "handles accommodation with preloaded expense" do
       trip = trip_fixture()
 

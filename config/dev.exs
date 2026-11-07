@@ -32,14 +32,13 @@ config :hamster_travel, HamsterTravelWeb.Endpoint,
 
 config :hamster_travel, :static_gzip, false
 
-# Watch static and templates for browser reloading.
+# Watch static assets, translations, and web source files for browser reloading.
 config :hamster_travel, HamsterTravelWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/hamster_travel_web/(live|views)/.*(ex)$",
-      ~r"lib/hamster_travel_web/templates/.*(eex)$"
+      ~r"lib/hamster_travel_web/.*\.(ex|heex)$"
     ]
   ]
 

@@ -1,6 +1,5 @@
 defmodule HamsterTravel.Geo.Geonames.Countries do
   alias HamsterTravel.Geo.Geonames.{Client, CountriesImporter}
-  require Logger
 
   def import do
     case Client.fetch_countries() do

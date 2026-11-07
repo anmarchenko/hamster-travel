@@ -30,6 +30,8 @@ config :logger, level: :warning
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
 
+config :phoenix_live_view, :test_warnings, missing_form_id: :raise
+
 config :hamster_travel, HamsterTravelWeb.Telemetry,
   report_metrics: false,
   periodic_measurements_enabled: false

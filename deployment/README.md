@@ -30,3 +30,22 @@ sudo install --owner=root --group=root --mode=0755 \
 The full installation, routine operation, rollback, and recovery instructions
 are stored with the machine-local production infrastructure rather than in this
 public repository.
+
+## Weekly base image updates
+
+The weekly ChatGPT automation runs from a clean worktree based on
+`origin/master`. The script checks stable Elixir and Erlang/OTP releases and
+dated slim images for the Debian codename pinned in the Dockerfile. It verifies
+the published Linux amd64 builder, runner, and Node tags. A new Debian codename
+is a separate Dockerfile change.
+
+Run these from the repository root to update and then verify the pins.
+
+```bash
+python3 scripts/update-production-images
+python3 scripts/update-production-images --check
+git diff --check
+```
+
+The automation commits and pushes verified Dockerfile changes. Deployment is
+a separate operation.

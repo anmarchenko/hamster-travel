@@ -915,6 +915,11 @@ msgstr ""
 msgid "Cover removed."
 msgstr ""
 
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:491
+#, elixir-autogen, elixir-format
+msgid "Cover updated."
+msgstr ""
+
 #: lib/hamster_travel_web/live/accounts_live/profile.ex:147
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:646
 #, elixir-autogen, elixir-format, fuzzy
@@ -941,33 +946,26 @@ msgstr ""
 msgid "Uploading..."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:180
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:188
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2999
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:173
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:3034
 #, elixir-autogen, elixir-format
 msgid "File is too large. Maximum size is %{size} MB."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:182
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:190
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:3001
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:175
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:3036
 #, elixir-autogen, elixir-format
 msgid "Only one image can be uploaded at a time."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:183
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:191
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:3002
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:178
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:3039
 #, elixir-autogen, elixir-format, fuzzy
-msgid "Unsupported file type. Use JPG, PNG, or WebP."
+msgid "Unsupported file type. Use JPG, PNG, WebP, HEIC, or HEIF."
 msgstr ""
 
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:184
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:185
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:192
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:193
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:3003
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:3004
+#: lib/hamster_travel_web/live/accounts_live/profile.ex:180
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:3041
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Upload failed. Please try again."
 msgstr ""
@@ -1110,6 +1108,7 @@ msgid "Remove the avatar image?"
 msgstr ""
 
 #: lib/hamster_travel_web/live/accounts_live/profile.html.heex:30
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2171
 #, elixir-autogen, elixir-format
 msgid "Change cover"
 msgstr ""

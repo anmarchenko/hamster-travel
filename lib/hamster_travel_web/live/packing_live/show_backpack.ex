@@ -4,8 +4,6 @@ defmodule HamsterTravelWeb.Packing.ShowBackpack do
   """
   use HamsterTravelWeb, :live_view
 
-  require Logger
-
   import HamsterTravel.Collections
 
   alias HamsterTravel.Packing

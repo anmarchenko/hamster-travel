@@ -31,8 +31,8 @@ jobs:
       - name: Set up Elixir
         uses: erlef/setup-beam@v1
         with:
-          elixir-version: '1.18'
-          otp-version: '27.3'
+          elixir-version: '1.20'
+          otp-version: '29.1'
 
       - name: Restore dependencies cache
         uses: actions/cache@v4
@@ -66,4 +66,20 @@ jobs:
         run: mix do ecto.create, ecto.migrate
 
       - name: Run tests
-        run: mix test
+        run: mix test --warnings-as-errors
+
+      - name: Set up Node for browser tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install browser test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick libheif-plugin-libde265
+          npm ci --prefix test/e2e
+          cd test/e2e
+          npm exec -- playwright install --with-deps chromium
+
+      - name: Run Chromium end-to-end tests
+        run: mix test.e2e --warnings-as-errors

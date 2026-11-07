@@ -308,6 +308,38 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert has_element?(view, "[data-cover-dropzone]")
     end
 
+    test "replaces a cover with an HEIC above the old 8 MB limit", %{conn: conn} do
+      user = user_fixture()
+      trip = trip_fixture(user, %{})
+
+      trip =
+        trip
+        |> Ecto.Changeset.change(
+          cover: %{
+            file_name: "IMG_0123.HEIC",
+            updated_at: NaiveDateTime.add(NaiveDateTime.utc_now(:second), 60)
+          }
+        )
+        |> Repo.update!()
+
+      previous_url = TripCover.url({trip.cover, trip}, :hero)
+      {:ok, view, _html} = live(log_in_user(conn, user), ~p"/trips/#{trip.slug}")
+
+      cover =
+        file_input(view, "#cover-upload-form", :cover, [
+          %{name: "IMG_0123.HEIC", content: :binary.copy(<<0>>, 8_000_001)}
+        ])
+
+      assert render_upload(cover, "IMG_0123.HEIC") =~ "Cover updated."
+      assert has_element?(view, "#cover-upload-form label", "Change cover")
+
+      updated_trip = Planning.get_trip!(trip.id)
+      assert updated_trip.cover.file_name == "IMG_0123.HEIC"
+      updated_url = TripCover.url({updated_trip.cover, updated_trip}, :hero)
+      assert updated_url != previous_url
+      assert has_element?(view, ~s(img[data-cover-image][src="#{updated_url}"]))
+    end
+
     test "renders cover image when trip has a cover", %{conn: conn} do
       user = user_fixture()
       conn = log_in_user(conn, user)
@@ -2882,7 +2914,15 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       # Assert
 
-      # Need to reload to check order
+      rendered_order =
+        view
+        |> render()
+        |> Floki.parse_document!()
+        |> Floki.find("[data-activity-drop-zone][data-target-day='0'] [data-activity-id]")
+        |> Floki.attribute("data-activity-id")
+
+      assert rendered_order == [to_string(a2.id), to_string(a1.id)]
+
       activities = Planning.activities_for_day(0, Planning.list_activities(trip))
 
       [first, second] = activities

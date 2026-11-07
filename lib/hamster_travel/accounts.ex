@@ -183,7 +183,9 @@ defmodule HamsterTravel.Accounts do
         avatar_url = UserAvatar.url({file_name, user}, :thumb)
 
         user
-        |> Ecto.Changeset.change(avatar_url: "#{avatar_url}?v=#{System.system_time(:second)}")
+        |> Ecto.Changeset.change(
+          avatar_url: "#{avatar_url}?v=#{System.system_time(:microsecond)}"
+        )
         |> Repo.update()
         |> case do
           {:ok, updated_user} ->
@@ -233,7 +235,7 @@ defmodule HamsterTravel.Accounts do
         cover_url = UserCover.url({file_name, user}, :hero)
 
         user
-        |> Ecto.Changeset.change(cover_url: "#{cover_url}?v=#{System.system_time(:second)}")
+        |> Ecto.Changeset.change(cover_url: "#{cover_url}?v=#{System.system_time(:microsecond)}")
         |> Repo.update()
         |> case do
           {:ok, updated_user} ->

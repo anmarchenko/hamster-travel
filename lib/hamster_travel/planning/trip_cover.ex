@@ -2,9 +2,11 @@ defmodule HamsterTravel.Planning.TripCover do
   use Waffle.Definition
   use Waffle.Ecto.Definition
 
+  alias HamsterTravel.PhotoUpload
+
   @async false
   @versions [:original, :hero, :card]
-  @extension_whitelist ~w(.jpg .jpeg .png .webp)
+  @extension_whitelist PhotoUpload.extensions()
 
   def validate({file, _scope}) do
     extension =
@@ -24,10 +26,10 @@ defmodule HamsterTravel.Planning.TripCover do
     else
       case version do
         :hero ->
-          {:convert, "-strip -thumbnail 960x540 -format jpg", :jpg}
+          PhotoUpload.jpeg_transform(~w(-strip -thumbnail 960x540))
 
         :card ->
-          {:convert, "-strip -thumbnail 256x256 -format jpg", :jpg}
+          PhotoUpload.jpeg_transform(~w(-strip -thumbnail 256x256))
       end
     end
   end

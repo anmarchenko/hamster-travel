@@ -7,7 +7,7 @@ const ATTEMPT_TIMEOUT_MS = 5000;
 const RETRY_DELAY_MS = 250;
 const PARKED_RETRY_MS = 60_000;
 
-// Phoenix 1.7.24's Socket and LiveView 1.2.10 pass these callbacks through.
+// Phoenix Socket uses these callbacks for its own retries.
 // The controller cancels parked retries with disconnect() when its 5s attempt
 // deadline expires, keeping Phoenix's independent retry timers from outliving it.
 export const connectionSocketOptions = {

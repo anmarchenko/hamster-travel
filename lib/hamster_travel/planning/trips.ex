@@ -343,10 +343,22 @@ defmodule HamsterTravel.Planning.Trips do
     with {:ok, file_name} <- TripCover.store({upload, trip}) do
       cover = %{
         file_name: file_name,
-        updated_at: NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+        updated_at: next_cover_timestamp(trip.cover)
       }
 
       Repo.update(Ecto.Changeset.change(trip, cover: cover))
+    end
+  end
+
+  defp next_cover_timestamp(cover) do
+    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+
+    case cover do
+      %{updated_at: %NaiveDateTime{} = previous} ->
+        Enum.max([now, NaiveDateTime.add(previous, 1)], NaiveDateTime)
+
+      _ ->
+        now
     end
   end
 

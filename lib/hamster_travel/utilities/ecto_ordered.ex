@@ -115,12 +115,7 @@ defmodule HamsterTravel.EctoOrdered do
     case get_field(cs, position_field) do
       :last ->
         current_last = get_current_last(options, cs)
-
-        if current_last do
-          put_change(cs, rank_field, rank_between(@max, current_last))
-        else
-          update_rank(options, put_change(cs, position_field, :middle))
-        end
+        put_change(cs, rank_field, rank_between(@max, current_last))
 
       :middle ->
         put_change(cs, rank_field, rank_between(@max, @min))

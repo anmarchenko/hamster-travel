@@ -13,6 +13,17 @@ end
 
 config :hamster_travel, :trip_pdf_renderer, HamsterTravelWeb.TripPdf.ChromicRenderer
 
+if config_env() == :test do
+  config :hamster_travel, ChromicPDF, on_demand: true
+
+  if executable = System.get_env("E2E_CHROMIUM") do
+    config :hamster_travel, ChromicPDF,
+      chrome_executable: executable,
+      no_sandbox: true,
+      session_pool: [size: 1]
+  end
+end
+
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
 # system starts, so it is typically used to load production configuration

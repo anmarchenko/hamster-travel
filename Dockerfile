@@ -1,23 +1,11 @@
-# Find eligible builder and runner images on Docker Hub. We use Ubuntu/Debian instead of
-# Alpine to avoid DNS resolution issues in production.
-#
-# https://hub.docker.com/r/hexpm/elixir/tags?page=1&name=ubuntu
-# https://hub.docker.com/_/ubuntu?tab=tags
-#
-#
-# This file is based on these images:
-#
-#   - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
-#   - https://hub.docker.com/_/debian?tab=tags&page=1&name=bullseye-20221004-slim - for the release image
-#   - https://pkgs.org/ - resource for finding needed packages
-#   - Ex: hexpm/elixir:1.14.3-erlang-25.2-debian-bullseye-20221004-slim
-#
-ARG ELIXIR_VERSION=1.20.3
-ARG OTP_VERSION=27
-ARG DEBIAN_VERSION=bookworm-20250224-slim
+# Keep the builder and release runtime on the same Debian snapshot.
+# scripts/update-production-images maintains these pins.
+ARG ELIXIR_VERSION=1.20.5
+ARG OTP_VERSION=29.1.2
+ARG DEBIAN_VERSION=trixie-20261104-slim
 
-ARG BUILDER_IMAGE="elixir:${ELIXIR_VERSION}-otp-${OTP_VERSION}-slim"
-ARG NODE_IMAGE="node:22-bookworm-slim"
+ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
+ARG NODE_IMAGE="node:22-trixie-slim"
 ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
 
 FROM ${NODE_IMAGE} AS node
@@ -77,7 +65,7 @@ RUN apt-get update -y && apt-get install -y \
   libstdc++6 \
   openssl \
   curl \
-  libncurses5 \
+  libncurses6 \
   locales \
   imagemagick \
   chromium \

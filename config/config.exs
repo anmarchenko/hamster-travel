@@ -14,6 +14,16 @@ config :hamster_travel,
 config :hamster_travel, HamsterTravelWeb.Endpoint,
   adapter: Bandit.PhoenixAdapter,
   url: [host: "localhost"],
+  # LiveView sends photos in 64 KB chunks. Repeated bytes in an image can
+  # exceed Bandit's default 25:1 ratio and disconnect the entire LiveView.
+  # Keep compressed messages bounded while allowing those chunks to inflate.
+  http: [
+    websocket_options: [
+      max_inflate_ratio: 1_100,
+      max_frame_size: 128_000,
+      max_fragmented_message_size: 128_000
+    ]
+  ],
   render_errors: [
     formats: [html: HamsterTravelWeb.ErrorHTML, json: HamsterTravelWeb.ErrorJSON],
     layout: false

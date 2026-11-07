@@ -1009,7 +1009,9 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   def formatted_text(assigns) do
     if formatted_text_present?(assigns.text) do
-      sanitized_text = sanitize_formatted_text(assigns.text)
+      sanitized_text =
+        HtmlSanitizeEx.Scrubber.scrub(assigns.text, HamsterTravel.Utilities.HtmlScrubber)
+
       assigns = assign(assigns, :formatted_text_body, Phoenix.HTML.raw(sanitized_text))
 
       ~H"""
@@ -1027,13 +1029,6 @@ defmodule HamsterTravelWeb.CoreComponents do
       """
     end
   end
-
-  defp sanitize_formatted_text(nil), do: ""
-
-  defp sanitize_formatted_text(text) when is_binary(text),
-    do: HtmlSanitizeEx.Scrubber.scrub(text, HamsterTravel.Utilities.HtmlScrubber)
-
-  defp sanitize_formatted_text(_), do: ""
 
   def formatted_text_present?(nil), do: false
 

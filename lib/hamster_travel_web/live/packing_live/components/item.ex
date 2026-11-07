@@ -122,7 +122,15 @@ defmodule HamsterTravelWeb.Packing.Item do
       data-item-id={@item.id}
     >
       <.inline class="gap-0.5">
-        <.form :let={f} for={%{}} class="min-w-0 grow" phx-change="check" phx-target={@myself}>
+        <%!-- Checkbox changes save immediately, so replaying them could overwrite a newer value. --%>
+        <.form
+          :let={f}
+          for={%{}}
+          class="min-w-0 grow"
+          phx-change="check"
+          phx-auto-recover="ignore"
+          phx-target={@myself}
+        >
           <label class="block cursor-pointer rounded">
             <.inline class={"min-h-8 w-full gap-0.5 #{decoration_classes(@item.checked)}"}>
               <span
