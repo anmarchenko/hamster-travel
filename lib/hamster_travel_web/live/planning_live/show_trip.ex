@@ -49,6 +49,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   @open_form_types ~w(destination accommodation transfer activity day-expense note budget-category budget-category-actual-expense budget-expense)
   @budget_expense_sources ~w(hotel transfer activity)
   @drag_drop_edit_events ~w(move_transfer move_activity reorder_activity reorder_note)
+  @day_move_types [:destinations, :accommodations, :transfers, :activities, :day_expenses]
   @cover_upload_max_mb 8
   @cover_upload_max_file_size @cover_upload_max_mb * 1_000_000
   @cover_upload_accept ~w(.jpg .jpeg .png .webp)
@@ -183,13 +184,18 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     </.modal>
 
     <.modal
-      :if={@show_reorder_days_modal}
+      :if={@day_orders}
       id="trip-reorder-days-modal"
       show
       max_width_class="max-w-[95vw]"
       on_cancel={JS.push("close_reorder_days_modal")}
     >
-      <.reorder_days_modal trip={@trip} />
+      <.reorder_days_modal
+        trip={@trip}
+        item_types={@day_move_types}
+        day_orders={@day_orders}
+        error={@day_reorder_error}
+      />
     </.modal>
     """
   end
@@ -225,7 +231,8 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       |> assign(reading_note_id: nil)
       |> assign(cover_upload_errors: [])
       |> assign(show_invite_participant_modal: false)
-      |> assign(show_reorder_days_modal: false)
+      |> assign(day_orders: nil, day_reorder_error: nil)
+      |> assign(day_move_types: @day_move_types)
       |> assign(pdf_export_status: :idle)
       |> assign_trip_state(trip)
       |> recover_open_form()
@@ -665,7 +672,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   @impl true
   def handle_event("open_reorder_days_modal", _params, socket) do
     if socket.assigns.can_edit do
-      {:noreply, assign(socket, :show_reorder_days_modal, true)}
+      {:noreply, assign(socket, day_orders: %{}, day_reorder_error: nil)}
     else
       {:noreply, unauthorized_edit(socket)}
     end
@@ -673,8 +680,15 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   @impl true
   def handle_event("close_reorder_days_modal", _params, socket) do
+    {:noreply, assign(socket, day_orders: nil, day_reorder_error: nil)}
+  end
+
+  @impl true
+  def handle_event("select_day_move_types", params, socket) do
     if socket.assigns.can_edit do
-      {:noreply, assign(socket, :show_reorder_days_modal, false)}
+      selected = List.wrap(Map.get(params, "item_types"))
+      item_types = Enum.filter(@day_move_types, &(Atom.to_string(&1) in selected))
+      {:noreply, assign(socket, :day_move_types, item_types)}
     else
       {:noreply, unauthorized_edit(socket)}
     end
@@ -682,39 +696,28 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   @impl true
   def handle_event(
-        "move_day",
+        "stage_day_move",
         %{"from_day_index" => from_day_index, "to_day_index" => to_day_index},
         socket
       ) do
     if socket.assigns.can_edit do
-      from_day_index = ensure_int(from_day_index)
-      to_day_index = ensure_int(to_day_index)
-
-      case Planning.move_trip_day(
-             socket.assigns.trip,
-             from_day_index,
-             to_day_index,
-             socket.assigns.current_user
-           ) do
-        {:ok, updated_trip} ->
-          {:noreply, assign_trip_state(socket, updated_trip)}
-
-        {:error, reason} ->
-          reason_text = if is_binary(reason), do: reason, else: inspect(reason)
-
-          socket =
-            put_flash(
-              socket,
-              :error,
-              gettext("Failed to move day: %{reason}", reason: reason_text)
-            )
-
-          Logger.error("Failed to move day: #{inspect(reason)}")
-
-          {:noreply, socket}
-      end
+      {:noreply, stage_day_move(socket, from_day_index, to_day_index)}
     else
       {:noreply, unauthorized_edit(socket)}
+    end
+  end
+
+  @impl true
+  def handle_event("save_day_order", _params, socket) do
+    case socket.assigns do
+      %{can_edit: false} ->
+        {:noreply, unauthorized_edit(socket)}
+
+      %{day_orders: orders} when is_map(orders) and map_size(orders) > 0 ->
+        {:noreply, save_day_order(socket, orders)}
+
+      _ ->
+        {:noreply, socket}
     end
   end
 
@@ -1973,17 +1976,89 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   attr(:trip, Trip, required: true)
+  attr(:item_types, :list, required: true)
+  attr(:day_orders, :map, required: true)
+  attr(:error, :string, default: nil)
 
   def reorder_days_modal(assigns) do
+    assigns =
+      assign(assigns, :item_type_options, [
+        {:destinations, gettext("Places")},
+        {:accommodations, gettext("Hotels")},
+        {:transfers, gettext("Transfers")},
+        {:activities, gettext("Activities")},
+        {:day_expenses, gettext("Expenses")}
+      ])
+
     ~H"""
     <div class="mx-auto w-full max-w-6xl">
-      <h3 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-        {gettext("Change day order")}
-      </h3>
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h3
+          id="trip-reorder-days-modal-title"
+          class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100"
+        >
+          {gettext("Change day order")}
+        </h3>
+        <div class="flex items-center gap-2">
+          <.button
+            id="cancel-day-order"
+            type="button"
+            color="light"
+            phx-click="close_reorder_days_modal"
+          >
+            {gettext("Cancel")}
+          </.button>
+          <.button
+            id="save-day-order"
+            type="button"
+            color="primary"
+            phx-click="save_day_order"
+            phx-disable-with={gettext("Save")}
+            disabled={map_size(@day_orders) == 0}
+          >
+            {gettext("Save")}
+          </.button>
+        </div>
+      </div>
 
-      <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
-        {gettext("Places, transfers, hotels, activities, and expenses will be moved together.")}
+      <p
+        id="trip-reorder-days-modal-description"
+        class="mt-2 text-sm text-zinc-600 dark:text-zinc-300"
+      >
+        {gettext("Choose which items to move together when changing the day order.")}
       </p>
+
+      <p :if={@error} role="alert" class="mt-2 text-sm text-rose-600 dark:text-rose-400">
+        {@error}
+      </p>
+
+      <form id="day-move-types-form" phx-change="select_day_move_types" class="mt-4">
+        <fieldset>
+          <legend class="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+            {gettext("Items to move")}
+          </legend>
+          <input type="hidden" name="item_types[]" value="" />
+          <div class="mt-2 flex flex-wrap gap-x-6 gap-y-3">
+            <label
+              :for={{type, label} <- @item_type_options}
+              class="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300"
+            >
+              <input
+                id={"day-move-type-#{type}"}
+                type="checkbox"
+                name="item_types[]"
+                value={type}
+                checked={type in @item_types}
+                class="rounded border-zinc-300 text-primary-600 focus:ring-primary-500 dark:border-zinc-600"
+              />
+              {label}
+            </label>
+          </div>
+        </fieldset>
+        <p :if={@item_types == []} class="mt-2 text-sm text-zinc-600 dark:text-zinc-300" role="status">
+          {gettext("Select at least one item type.")}
+        </p>
+      </form>
 
       <div class="mt-6 overflow-x-auto">
         <div class="min-w-[920px] rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
@@ -1998,16 +2073,17 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
           <div
             :for={day_index <- 0..(@trip.duration - 1)}
+            id={"reorder-day-#{day_index}"}
             class="grid grid-cols-[84px_180px_1fr_1fr_1fr_1fr] gap-x-4 border-b border-zinc-100 px-4 py-3 text-sm last:border-b-0 dark:border-zinc-800"
           >
             <div class="flex items-center gap-1">
               <button
                 id={"move-day-up-#{day_index}"}
                 type="button"
-                phx-click="move_day"
+                phx-click="stage_day_move"
                 phx-value-from_day_index={day_index}
                 phx-value-to_day_index={day_index - 1}
-                disabled={day_index == 0}
+                disabled={day_index == 0 or @item_types == []}
                 class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-zinc-300 text-zinc-600 disabled:cursor-not-allowed disabled:opacity-40 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
                 aria-label={gettext("Move day up")}
               >
@@ -2016,10 +2092,10 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               <button
                 id={"move-day-down-#{day_index}"}
                 type="button"
-                phx-click="move_day"
+                phx-click="stage_day_move"
                 phx-value-from_day_index={day_index}
                 phx-value-to_day_index={day_index + 1}
-                disabled={day_index == @trip.duration - 1}
+                disabled={day_index == @trip.duration - 1 or @item_types == []}
                 class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-zinc-300 text-zinc-600 disabled:cursor-not-allowed disabled:opacity-40 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
                 aria-label={gettext("Move day down")}
               >
@@ -2030,16 +2106,28 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               <.day_label day_index={day_index} start_date={@trip.start_date} />
             </div>
             <div class="text-zinc-700 dark:text-zinc-300">
-              {reorder_day_places_summary(@trip, day_index)}
+              {reorder_day_places_summary(
+                @trip,
+                preview_day_index(@day_orders, :destinations, day_index)
+              )}
             </div>
             <div class="text-zinc-700 dark:text-zinc-300">
-              {reorder_day_transfers_summary(@trip, day_index)}
+              {reorder_day_transfers_summary(
+                @trip,
+                preview_day_index(@day_orders, :transfers, day_index)
+              )}
             </div>
             <div class="text-zinc-700 dark:text-zinc-300">
-              {reorder_day_activities_summary(@trip, day_index)}
+              {reorder_day_activities_summary(
+                @trip,
+                preview_day_index(@day_orders, :activities, day_index)
+              )}
             </div>
             <div class="text-zinc-700 dark:text-zinc-300">
-              {reorder_day_expenses_summary(@trip, day_index)}
+              {reorder_day_expenses_summary(
+                @trip,
+                preview_day_index(@day_orders, :day_expenses, day_index)
+              )}
             </div>
           </div>
         </div>
@@ -2219,6 +2307,51 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   end
 
   # HELPERS
+
+  defp stage_day_move(socket, from_day_index, to_day_index) do
+    %{trip: trip, day_orders: orders, day_move_types: types} = socket.assigns
+    days = 0..(trip.duration - 1)
+
+    with true <- is_map(orders),
+         {:ok, from} <- Ecto.Type.cast(:integer, from_day_index),
+         {:ok, to} <- Ecto.Type.cast(:integer, to_day_index),
+         true <- from in days and to in days do
+      original_order = Enum.to_list(days)
+
+      orders =
+        Enum.reduce(types, orders, fn type, acc ->
+          {day, order} = List.pop_at(Map.get(acc, type, original_order), from)
+          order = List.insert_at(order, to, day)
+          if order == original_order, do: Map.delete(acc, type), else: Map.put(acc, type, order)
+        end)
+
+      assign(socket, day_orders: orders, day_reorder_error: nil)
+    else
+      _ -> socket
+    end
+  end
+
+  defp save_day_order(socket, orders) do
+    case Planning.reorder_trip_days(socket.assigns.trip, orders, socket.assigns.current_user) do
+      {:ok, trip} ->
+        socket
+        |> assign_trip_state(trip)
+        |> assign(day_orders: nil, day_reorder_error: nil)
+
+      {:error, reason} ->
+        Logger.error("Failed to save day order: #{inspect(reason)}")
+
+        assign(
+          socket,
+          :day_reorder_error,
+          gettext("Could not save the day order. Reopen the dialog and try again.")
+        )
+    end
+  end
+
+  defp preview_day_index(orders, type, day_index) do
+    orders |> Map.get(type, []) |> Enum.at(day_index, day_index)
+  end
 
   defp reorder_day_places_summary(trip, day_index) do
     Planning.items_for_day(day_index, trip.destinations)

@@ -333,18 +333,33 @@ defmodule HamsterTravel.Planning do
   end
 
   @doc """
-  Moves one trip day to another position and shifts all day-based data accordingly.
+  Moves one trip day to another position and shifts the selected day-based data accordingly.
 
   Pass the `%Trip{}`, source day index, target day index, and current user.
   Returns `{:ok, %Trip{}}` with refreshed preloads or `{:error, reason}`.
+  The optional item types are `:destinations`, `:accommodations`, `:transfers`,
+  `:activities`, and `:day_expenses`. All types move by default.
 
   ## Examples
 
       iex> move_trip_day(trip, 0, 2, user)
       {:ok, %Trip{}}
   """
-  def move_trip_day(%Trip{} = trip, from_day_index, to_day_index, user) do
-    Trips.move_day(trip, from_day_index, to_day_index, user)
+  @spec move_trip_day(Trip.t(), integer(), integer(), User.t() | nil, :all | [atom()]) ::
+          {:ok, Trip.t()} | {:error, term()}
+  def move_trip_day(%Trip{} = trip, from_day_index, to_day_index, user, item_types \\ :all) do
+    Trips.move_day(trip, from_day_index, to_day_index, user, item_types)
+  end
+
+  @doc """
+  Saves the day orders for the given item types in one transaction.
+
+  Each order lists the original day indices in their new order.
+  """
+  @spec reorder_trip_days(Trip.t(), %{atom() => [non_neg_integer()]}, User.t() | nil) ::
+          {:ok, Trip.t()} | {:error, term()}
+  def reorder_trip_days(%Trip{} = trip, orders, user) do
+    Trips.reorder_days(trip, orders, user)
   end
 
   @doc """

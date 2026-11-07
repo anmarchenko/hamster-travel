@@ -1476,7 +1476,7 @@ defmodule HamsterTravel.PlanningTest do
     end
   end
 
-  describe "move_trip_day/4" do
+  describe "move_trip_day/5" do
     setup do
       geonames_fixture()
       author = user_fixture()
@@ -1601,6 +1601,85 @@ defmodule HamsterTravel.PlanningTest do
 
       assert Enum.map(moved_trip.notes, &{&1.id, &1.rank}) ==
                [{first_note.id, first_note.rank}, {second_note.id, second_note.rank}]
+    end
+
+    test "moves only selected item types in both directions", %{
+      trip: trip,
+      author: author,
+      berlin: berlin
+    } do
+      for day_index <- 0..1 do
+        {:ok, _} =
+          Planning.create_destination(trip, %{
+            city_id: berlin.id,
+            start_day: day_index,
+            end_day: day_index
+          })
+
+        {:ok, _} =
+          Planning.create_accommodation(trip, %{
+            name: "Hotel #{day_index}",
+            start_day: day_index,
+            end_day: day_index,
+            expense: %{price: Money.new(:EUR, 1000), name: "Hotel", trip_id: trip.id}
+          })
+
+        {:ok, _} =
+          Planning.create_transfer(trip, %{
+            transport_mode: "train",
+            day_index: day_index,
+            departure_city_id: berlin.id,
+            arrival_city_id: berlin.id,
+            departure_time: "08:00",
+            arrival_time: "10:00"
+          })
+
+        {:ok, _} =
+          Planning.create_activity(trip, %{name: "Activity", day_index: day_index, priority: 2})
+
+        {:ok, _} = Planning.create_day_expense(trip, %{name: "Expense", day_index: day_index})
+      end
+
+      trip = Planning.get_trip!(trip.id)
+
+      fields_by_type = [
+        destinations: [:start_day, :end_day],
+        accommodations: [:start_day, :end_day],
+        transfers: [:day_index],
+        activities: [:day_index],
+        day_expenses: [:day_index]
+      ]
+
+      selections = Enum.map(Keyword.keys(fields_by_type), &[&1]) ++ [[:transfers, :activities]]
+
+      for selected <- selections do
+        assert {:ok, moved_trip} = Planning.move_trip_day(trip, 0, 1, author, selected)
+
+        for {type, fields} <- fields_by_type,
+            original <- Map.fetch!(trip, type),
+            field <- fields do
+          moved = Enum.find(Map.fetch!(moved_trip, type), &(&1.id == original.id))
+          original_day = Map.fetch!(original, field)
+          expected_day = if type in selected, do: 1 - original_day, else: original_day
+          assert Map.fetch!(moved, field) == expected_day
+        end
+
+        assert {:ok, restored_trip} = Planning.move_trip_day(moved_trip, 1, 0, author, selected)
+
+        for {type, fields} <- fields_by_type do
+          day_values = fn record -> Map.take(record, [:id | fields]) end
+
+          assert MapSet.new(Map.fetch!(restored_trip, type), day_values) ==
+                   MapSet.new(Map.fetch!(trip, type), day_values)
+        end
+      end
+    end
+
+    test "rejects empty or invalid item selections", %{trip: trip, author: author} do
+      assert {:error, "Select at least one item type."} =
+               Planning.move_trip_day(trip, 0, 1, author, [])
+
+      assert {:error, "Invalid item types"} = Planning.move_trip_day(trip, 0, 1, author, [:notes])
     end
 
     test "returns unauthorized when user is not a participant", %{trip: trip, stranger: stranger} do

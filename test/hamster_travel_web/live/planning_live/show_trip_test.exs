@@ -1583,8 +1583,83 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       |> render_click()
 
       assert has_element?(view, "#trip-reorder-days-modal")
+      assert has_element?(view, "#save-day-order[disabled]", "Save")
+      assert has_element?(view, "#cancel-day-order", "Cancel")
       assert has_element?(view, "#move-day-up-0")
       assert has_element?(view, "#move-day-down-0")
+
+      for type <- ~w(destinations accommodations transfers activities day_expenses) do
+        assert has_element?(view, "#day-move-type-#{type}[checked]")
+      end
+    end
+
+    test "saves only the types selected for each staged move", %{conn: conn} do
+      user = user_fixture()
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft", duration: 3})
+      transfer = transfer_fixture(%{trip_id: trip.id, day_index: 0})
+      activity = activity_fixture(%{trip_id: trip.id, day_index: 1})
+      expense = day_expense_fixture(%{trip_id: trip.id, day_index: 0})
+
+      {:ok, view, _html} = live(log_in_user(conn, user), ~p"/trips/#{trip.slug}")
+      view |> element("#open-reorder-days-0") |> render_click()
+
+      view
+      |> form("#day-move-types-form", %{item_types: ["transfers"]})
+      |> render_change()
+
+      view |> element("#move-day-down-0") |> render_click()
+
+      assert Planning.get_transfer!(transfer.id).day_index == 0
+      assert Planning.get_activity!(activity.id).day_index == 1
+      assert Planning.get_day_expense!(expense.id).day_index == 0
+      assert has_element?(view, "#day-move-type-transfers[checked]")
+      refute has_element?(view, "#day-move-type-activities[checked]")
+
+      view
+      |> form("#day-move-types-form", %{item_types: ["transfers", "activities"]})
+      |> render_change()
+
+      view |> element("#move-day-down-1") |> render_click()
+
+      assert Planning.get_transfer!(transfer.id).day_index == 0
+      view |> element("#save-day-order") |> render_click()
+
+      assert Planning.get_transfer!(transfer.id).day_index == 2
+      assert Planning.get_activity!(activity.id).day_index == 2
+      assert Planning.get_day_expense!(expense.id).day_index == 0
+    end
+
+    test "disables moving days when all item types are unchecked", %{conn: conn} do
+      user = user_fixture()
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft", duration: 3})
+      {:ok, view, _html} = live(log_in_user(conn, user), ~p"/trips/#{trip.slug}")
+      view |> element("#open-reorder-days-0") |> render_click()
+      view |> form("#day-move-types-form", %{item_types: [""]}) |> render_change()
+
+      assert has_element?(
+               view,
+               "#day-move-types-form [role='status']",
+               "Select at least one item type."
+             )
+
+      assert has_element?(view, "#move-day-down-0[disabled]")
+      assert has_element?(view, "#move-day-up-1[disabled]")
+    end
+
+    test "translates the day reorder modal into Russian", %{conn: conn} do
+      user = user_fixture(%{locale: "ru"})
+      trip = trip_fixture(%{author_id: user.id, status: "0_draft", duration: 3})
+      {:ok, view, _html} = live(log_in_user(conn, user), ~p"/trips/#{trip.slug}")
+      view |> element("#open-reorder-days-0") |> render_click()
+
+      assert has_element?(view, "#trip-reorder-days-modal h3", "Изменить порядок дней")
+      assert has_element?(view, "#day-move-types-form legend", "Что перемещать")
+      assert has_element?(view, "#move-day-up-0[aria-label='Переместить день вверх']")
+      assert has_element?(view, "#move-day-down-0[aria-label='Переместить день вниз']")
+
+      for text <- ["Нет городов", "Нет трансферов", "Нет впечатлений", "Нет расходов"] do
+        assert has_element?(view, "#trip-reorder-days-modal", text)
+      end
     end
 
     test "reorders days from the modal and moves transfers", %{conn: conn} do
@@ -1616,8 +1691,57 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       |> element("#move-day-down-0")
       |> render_click()
 
+      assert Planning.get_transfer!(transfer_day0.id).day_index == 0
+      assert Planning.get_transfer!(transfer_day1.id).day_index == 1
+
+      view |> element("#save-day-order") |> render_click()
+
+      refute has_element?(view, "#trip-reorder-days-modal")
       assert Planning.get_transfer!(transfer_day0.id).day_index == 1
       assert Planning.get_transfer!(transfer_day1.id).day_index == 0
+    end
+
+    test "previews city ranges, discards them on cancel, and saves only the intended days", %{
+      conn: conn
+    } do
+      geonames_fixture()
+      user = user_fixture()
+      trip = trip_fixture(user, %{status: "0_draft"})
+      berlin = Geo.find_city_by_geonames_id("2950159")
+      hamburg = Geo.find_city_by_geonames_id("2911298")
+
+      {:ok, _} =
+        Planning.create_destination(trip, %{city_id: berlin.id, start_day: 0, end_day: 1})
+
+      {:ok, _} =
+        Planning.create_destination(trip, %{city_id: hamburg.id, start_day: 2, end_day: 2})
+
+      {:ok, view, _html} = live(log_in_user(conn, user), ~p"/trips/#{trip.slug}")
+      view |> element("#open-reorder-days-0") |> render_click()
+      view |> element("#move-day-down-1") |> render_click()
+
+      assert has_element?(view, "#reorder-day-0", "Berlin")
+      assert has_element?(view, "#reorder-day-1", "Hamburg")
+      refute has_element?(view, "#reorder-day-1", "Berlin")
+      assert has_element?(view, "#reorder-day-2", "Berlin")
+      refute has_element?(view, "#reorder-day-2", "Hamburg")
+
+      view |> element("#cancel-day-order") |> render_click()
+      refute has_element?(view, "#trip-reorder-days-modal")
+
+      view |> element("#open-reorder-days-0") |> render_click()
+      assert has_element?(view, "#reorder-day-1", "Berlin")
+      assert has_element?(view, "#reorder-day-2", "Hamburg")
+      assert has_element?(view, "#save-day-order[disabled]")
+
+      view |> element("#move-day-down-1") |> render_click()
+      view |> element("#save-day-order") |> render_click()
+
+      destinations = Planning.list_destinations(trip)
+
+      assert Enum.map(0..2, fn day ->
+               day |> Planning.items_for_day(destinations) |> Enum.map(& &1.city_id)
+             end) == [[berlin.id], [hamburg.id], [berlin.id]]
     end
 
     test "shows transfer form when clicking add transfer link", %{conn: conn} do

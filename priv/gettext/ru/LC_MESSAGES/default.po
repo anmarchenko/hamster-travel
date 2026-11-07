@@ -1444,25 +1444,15 @@ msgstr "Поиск черновиков"
 msgid "Search trips"
 msgstr "Поиск поездок"
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1906
-#, elixir-autogen, elixir-format
-msgid "Places, transfers, hotels, activities, and expenses will be moved together."
-msgstr "Города, трансферы, жильё, впечатления и расходы переместятся вместе."
-
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2050
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2000
 #, elixir-autogen, elixir-format
 msgid "Change day order"
-msgstr ""
+msgstr "Изменить порядок дней"
 
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:2067
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Expenses and notes"
 msgstr "Расходы"
-
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:717
-#, elixir-autogen, elixir-format, fuzzy
-msgid "Failed to move day: %{reason}"
-msgstr "Ошибка при перемещении впечатления: %{reason}"
 
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1405
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:2062
@@ -1470,35 +1460,35 @@ msgstr "Ошибка при перемещении впечатления: %{rea
 msgid "Move"
 msgstr "Переместить"
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2095
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2100
 #, elixir-autogen, elixir-format
 msgid "Move day down"
-msgstr ""
+msgstr "Переместить день вниз"
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2083
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2088
 #, elixir-autogen, elixir-format
 msgid "Move day up"
-msgstr ""
+msgstr "Переместить день вверх"
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2310
-#, elixir-autogen, elixir-format, fuzzy
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2372
+#, elixir-autogen, elixir-format
 msgid "No activities"
-msgstr "Активности"
+msgstr "Нет впечатлений"
 
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:2166
 #, elixir-autogen, elixir-format
 msgid "No expenses"
 msgstr "Нет расходов"
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2298
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2360
 #, elixir-autogen, elixir-format
 msgid "No places"
-msgstr ""
+msgstr "Нет городов"
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2304
-#, elixir-autogen, elixir-format, fuzzy
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2366
+#, elixir-autogen, elixir-format
 msgid "No transfers"
-msgstr "Трансферы"
+msgstr "Нет трансферов"
 
 #: lib/hamster_travel_web/live/planning_live/components/day_expense.ex:51
 #: lib/hamster_travel_web/live/planning_live/components/day_expense.ex:52
@@ -1722,3 +1712,24 @@ msgstr "Переместить сюда"
 #, elixir-autogen, elixir-format
 msgid "Close"
 msgstr "Закрыть"
+
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2028
+#, elixir-autogen, elixir-format
+msgid "Choose which items to move together when changing the day order."
+msgstr "Выберите, какие объекты перемещать вместе при изменении порядка дней."
+
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2038
+#, elixir-autogen, elixir-format
+msgid "Items to move"
+msgstr "Что перемещать"
+
+#: lib/hamster_travel/planning/trips.ex:454
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2059
+#, elixir-autogen, elixir-format
+msgid "Select at least one item type."
+msgstr "Выберите хотя бы один тип объектов."
+
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2347
+#, elixir-autogen, elixir-format
+msgid "Could not save the day order. Reopen the dialog and try again."
+msgstr "Не удалось сохранить порядок дней. Откройте окно заново и попробуйте ещё раз."

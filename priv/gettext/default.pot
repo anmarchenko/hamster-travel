@@ -1449,12 +1449,7 @@ msgstr ""
 msgid "Search trips"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:1906
-#, elixir-autogen, elixir-format
-msgid "Places, transfers, hotels, activities, and expenses will be moved together."
-msgstr ""
-
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2050
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2000
 #, elixir-autogen, elixir-format
 msgid "Change day order"
 msgstr ""
@@ -1464,28 +1459,23 @@ msgstr ""
 msgid "Expenses and notes"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:717
-#, elixir-autogen, elixir-format
-msgid "Failed to move day: %{reason}"
-msgstr ""
-
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:1405
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:2062
 #, elixir-autogen, elixir-format
 msgid "Move"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2095
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2100
 #, elixir-autogen, elixir-format
 msgid "Move day down"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2083
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2088
 #, elixir-autogen, elixir-format
 msgid "Move day up"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2310
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2372
 #, elixir-autogen, elixir-format
 msgid "No activities"
 msgstr ""
@@ -1495,12 +1485,12 @@ msgstr ""
 msgid "No expenses"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2298
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2360
 #, elixir-autogen, elixir-format
 msgid "No places"
 msgstr ""
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2304
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2366
 #, elixir-autogen, elixir-format
 msgid "No transfers"
 msgstr ""
@@ -1726,4 +1716,25 @@ msgstr ""
 #: lib/hamster_travel_web/live/planning_live/components/activity.ex:214
 #, elixir-autogen, elixir-format
 msgid "Close"
+msgstr ""
+
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2028
+#, elixir-autogen, elixir-format
+msgid "Choose which items to move together when changing the day order."
+msgstr ""
+
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2038
+#, elixir-autogen, elixir-format
+msgid "Items to move"
+msgstr ""
+
+#: lib/hamster_travel/planning/trips.ex:454
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2059
+#, elixir-autogen, elixir-format
+msgid "Select at least one item type."
+msgstr ""
+
+#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2347
+#, elixir-autogen, elixir-format
+msgid "Could not save the day order. Reopen the dialog and try again."
 msgstr ""

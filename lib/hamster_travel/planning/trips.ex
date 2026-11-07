@@ -43,6 +43,7 @@ defmodule HamsterTravel.Planning.Trips do
   alias HamsterTravel.Repo
 
   @default_page_size 12
+  @day_move_types [:destinations, :accommodations, :transfers, :activities, :day_expenses]
 
   def list_plans(user \\ nil) do
     user
@@ -295,20 +296,47 @@ defmodule HamsterTravel.Planning.Trips do
     end)
   end
 
-  def move_day(%Trip{} = _trip, _from_day_index, _to_day_index, nil), do: {:error, "Unauthorized"}
+  def move_day(%Trip{} = _trip, _from_day_index, _to_day_index, nil, _item_types),
+    do: {:error, "Unauthorized"}
 
-  def move_day(%Trip{} = trip, from_day_index, to_day_index, %User{} = user) do
+  def move_day(%Trip{} = trip, from_day_index, to_day_index, %User{} = user, item_types) do
+    item_types = if item_types == :all, do: @day_move_types, else: item_types
+
     with :ok <- Policy.authorize_edit(trip, user),
          :ok <- Common.validate_day_index_in_trip_duration(from_day_index, trip.duration),
-         :ok <- Common.validate_day_index_in_trip_duration(to_day_index, trip.duration) do
+         :ok <- Common.validate_day_index_in_trip_duration(to_day_index, trip.duration),
+         :ok <- validate_day_move_types(item_types) do
       if from_day_index == to_day_index do
         {:ok, get_trip!(trip.id)}
       else
-        trip
-        |> move_day_transaction(from_day_index, to_day_index)
-        |> PubSub.broadcast([:trip, :updated], trip.id)
+        {day, order} = 0..(trip.duration - 1) |> Enum.to_list() |> List.pop_at(from_day_index)
+        order = List.insert_at(order, to_day_index, day)
+        reorder_days(trip, Map.new(item_types, &{&1, order}), user)
       end
     end
+  end
+
+  def reorder_days(%Trip{}, _orders, nil), do: {:error, "Unauthorized"}
+
+  def reorder_days(%Trip{id: trip_id}, orders, %User{} = user) when is_map(orders) do
+    Repo.transaction(fn ->
+      trip = Repo.one!(from t in Trip, where: t.id == ^trip_id, lock: "FOR UPDATE")
+
+      with :ok <- Policy.authorize_edit(trip, user),
+           :ok <- validate_day_orders(orders, trip.duration) do
+        trip = single_trip_preloading(trip)
+
+        Enum.each(orders, fn {type, order} ->
+          day_positions = order |> Enum.with_index() |> Map.new()
+          Enum.each(Map.fetch!(trip, type), &reorder_day_record(&1, day_positions))
+        end)
+
+        get_trip!(trip_id)
+      else
+        {:error, reason} -> Repo.rollback(reason)
+      end
+    end)
+    |> PubSub.broadcast([:trip, :updated], trip_id)
   end
 
   def update_trip_cover(%Trip{} = trip, %Plug.Upload{} = upload) do
@@ -423,105 +451,85 @@ defmodule HamsterTravel.Planning.Trips do
     Repo.preload(trip, trip_participants: :user)
   end
 
-  defp move_day_transaction(%Trip{} = trip, from_day_index, to_day_index) do
-    Repo.transaction(fn ->
-      trip = get_trip!(trip.id)
+  defp validate_day_move_types([]), do: {:error, gettext("Select at least one item type.")}
 
-      with :ok <- move_day_for_destinations(trip.destinations, from_day_index, to_day_index),
-           :ok <- move_day_for_accommodations(trip.accommodations, from_day_index, to_day_index),
-           :ok <- move_day_for_transfers(trip.transfers, from_day_index, to_day_index),
-           :ok <- move_day_for_activities(trip.activities, from_day_index, to_day_index),
-           :ok <- move_day_for_day_expenses(trip.day_expenses, from_day_index, to_day_index) do
-        get_trip!(trip.id)
+  defp validate_day_move_types(item_types) when is_list(item_types) do
+    if Enum.all?(item_types, &(&1 in @day_move_types)),
+      do: :ok,
+      else: {:error, "Invalid item types"}
+  end
+
+  defp validate_day_move_types(_item_types), do: {:error, "Invalid item types"}
+
+  defp validate_day_orders(orders, duration) do
+    days = Enum.to_list(0..(duration - 1))
+
+    with :ok <- validate_day_move_types(Map.keys(orders)) do
+      if Enum.all?(orders, fn {_type, order} -> is_list(order) and Enum.sort(order) === days end) do
+        :ok
       else
-        {:error, reason} -> Repo.rollback(reason)
+        {:error, :invalid_day_order}
       end
-    end)
+    end
   end
 
-  defp move_day_for_destinations(destinations, from_day_index, to_day_index) do
-    move_day_for_records(destinations, &Destination.changeset/2, fn destination ->
-      new_start_day = remap_day_index(destination.start_day, from_day_index, to_day_index)
-      new_end_day = remap_day_index(destination.end_day, from_day_index, to_day_index)
-      {new_start_day, new_end_day} = normalize_day_range(new_start_day, new_end_day)
+  defp reorder_day_record(%Destination{} = destination, day_positions) do
+    last_trip_day = map_size(day_positions) - 1
+    last_covered_day = min(destination.end_day, last_trip_day)
 
-      changed_attrs(destination, %{start_day: new_start_day, end_day: new_end_day})
-    end)
-  end
+    if destination.start_day <= last_covered_day do
+      ranges =
+        destination.start_day..last_covered_day
+        |> Enum.map(&Map.fetch!(day_positions, &1))
+        |> Enum.sort()
+        |> Enum.reduce([], fn day, ranges -> add_destination_range(ranges, day, day) end)
 
-  defp move_day_for_accommodations(accommodations, from_day_index, to_day_index) do
-    move_day_for_records(accommodations, &Accommodation.changeset/2, fn accommodation ->
-      new_start_day = remap_day_index(accommodation.start_day, from_day_index, to_day_index)
-      new_end_day = remap_day_index(accommodation.end_day, from_day_index, to_day_index)
-      {new_start_day, new_end_day} = normalize_day_range(new_start_day, new_end_day)
-
-      changed_attrs(accommodation, %{start_day: new_start_day, end_day: new_end_day})
-    end)
-  end
-
-  defp move_day_for_transfers(transfers, from_day_index, to_day_index) do
-    move_day_for_records(transfers, &Transfer.changeset/2, fn transfer ->
-      new_day_index = remap_day_index(transfer.day_index, from_day_index, to_day_index)
-      changed_attrs(transfer, %{day_index: new_day_index})
-    end)
-  end
-
-  defp move_day_for_activities(activities, from_day_index, to_day_index) do
-    move_day_for_records(activities, &Activity.changeset/2, fn activity ->
-      new_day_index = remap_day_index(activity.day_index, from_day_index, to_day_index)
-      changed_attrs(activity, %{day_index: new_day_index})
-    end)
-  end
-
-  defp move_day_for_day_expenses(day_expenses, from_day_index, to_day_index) do
-    move_day_for_records(day_expenses, &DayExpense.changeset/2, fn day_expense ->
-      new_day_index = remap_day_index(day_expense.day_index, from_day_index, to_day_index)
-      changed_attrs(day_expense, %{day_index: new_day_index})
-    end)
-  end
-
-  defp move_day_for_records(records, changeset_fun, attrs_fun) do
-    Enum.reduce_while(records, :ok, fn record, :ok ->
-      attrs = attrs_fun.(record)
-
-      if map_size(attrs) == 0 do
-        {:cont, :ok}
-      else
-        case Repo.update(changeset_fun.(record, attrs)) do
-          {:ok, _updated_record} -> {:cont, :ok}
-          {:error, changeset} -> {:halt, {:error, changeset}}
+      ranges =
+        if destination.end_day > last_trip_day do
+          add_destination_range(ranges, last_trip_day + 1, destination.end_day)
+        else
+          ranges
         end
-      end
-    end)
+
+      [{start_day, end_day} | remaining_ranges] = Enum.reverse(ranges)
+      save_day_record(destination, %{start_day: start_day, end_day: end_day})
+
+      Enum.each(remaining_ranges, fn {start_day, end_day} ->
+        %Destination{city_id: destination.city_id, trip_id: destination.trip_id}
+        |> save_day_record(%{start_day: start_day, end_day: end_day})
+      end)
+    end
   end
 
-  defp changed_attrs(record, attrs) do
-    Enum.reduce(attrs, %{}, fn {key, value}, acc ->
-      if Map.get(record, key) == value do
-        acc
-      else
-        Map.put(acc, key, value)
-      end
-    end)
+  defp reorder_day_record(%Accommodation{} = accommodation, day_positions) do
+    start_day = Map.get(day_positions, accommodation.start_day, accommodation.start_day)
+    end_day = Map.get(day_positions, accommodation.end_day, accommodation.end_day)
+
+    save_day_record(accommodation, %{
+      start_day: min(start_day, end_day),
+      end_day: max(start_day, end_day)
+    })
   end
 
-  defp remap_day_index(day_index, from_day_index, to_day_index) when day_index == from_day_index,
-    do: to_day_index
+  defp reorder_day_record(record, day_positions) do
+    day_index = Map.get(day_positions, record.day_index, record.day_index)
+    save_day_record(record, %{day_index: day_index})
+  end
 
-  defp remap_day_index(day_index, from_day_index, to_day_index)
-       when from_day_index < to_day_index and day_index > from_day_index and
-              day_index <= to_day_index,
-       do: day_index - 1
+  defp add_destination_range([{start_day, previous_end} | rest], first, last)
+       when first == previous_end + 1,
+       do: [{start_day, last} | rest]
 
-  defp remap_day_index(day_index, from_day_index, to_day_index)
-       when from_day_index > to_day_index and day_index >= to_day_index and
-              day_index < from_day_index,
-       do: day_index + 1
+  defp add_destination_range(ranges, first, last), do: [{first, last} | ranges]
 
-  defp remap_day_index(day_index, _from_day_index, _to_day_index), do: day_index
-
-  defp normalize_day_range(start_day, end_day) when start_day <= end_day, do: {start_day, end_day}
-  defp normalize_day_range(start_day, end_day), do: {end_day, start_day}
+  defp save_day_record(%module{} = record, attrs) do
+    if Map.take(record, Map.keys(attrs)) != attrs do
+      case Repo.insert_or_update(module.changeset(record, attrs)) do
+        {:ok, _record} -> :ok
+        {:error, changeset} -> Repo.rollback(changeset)
+      end
+    end
+  end
 
   defp paginate(query, page, page_size, preload_callback) when is_function(preload_callback, 1) do
     page = normalize_page(page)
