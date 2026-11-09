@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
+export MIX_ENV=test
+
+./scripts/refresh-dev-travel --check-schema
+mix compile --warnings-as-errors
+mix credo --strict
+mix test --warnings-as-errors
+mix test.e2e --warnings-as-errors

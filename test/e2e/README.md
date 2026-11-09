@@ -5,7 +5,7 @@ With the Mix dependencies and local PostgreSQL available, run from the repositor
 ```sh
 npm ci --prefix test/e2e
 (cd test/e2e && npm exec -- playwright install chromium)
-mix test.e2e
+MIX_ENV=test mix test.e2e
 ```
 
 The cover checks use ImageMagick's `convert` with JPEG and HEIC support.

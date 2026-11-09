@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  printf '%s\n' \
+    'Usage: sudo ./scripts/refresh-dev-travel [--dry-run | --replace]' \
+    'Copies travel data visible to Andrey Marchenko into Bunny Hamsters.' \
+    '--dry-run (default) checks the source, destination and record counts.' \
+    '--replace deletes all existing dev trips and backpacks and imports the snapshot.' \
+    '--check-schema checks the migration files against the reviewed schema lock.' \
+    '--print-schema-lock prints the current migration checksums for review.'
+}
+
+if (( $# > 1 )); then
+  usage >&2
+  exit 2
+fi
+
+mode="${1:---dry-run}"
+case "$mode" in
+  --dry-run|--replace|--check-schema|--print-schema-lock) ;;
+  --help|-h) usage; exit 0 ;;
+  *) usage >&2; exit 2 ;;
+esac
+
+repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+sql_dir="$repo_dir/scripts/sql"
+schema_lock="$sql_dir/dev-travel-schema.lock"
+
+print_schema_lock() (
+  export LC_ALL=C
+  cd -- "$repo_dir/priv/repo/migrations"
+  sha256sum -- *.exs
+)
+
+if [[ "$mode" == --print-schema-lock ]]; then
+  print_schema_lock
+  exit
+fi
+
+if ! print_schema_lock | diff -u -- "$schema_lock" -; then
+  printf '%s\n' \
+    'Database migrations changed. Review the dev travel export and import SQL.' \
+    'See "Refresh dev travel data from production" in README.md for how to update the schema lock.' >&2
+  exit 1
+fi
+
+if [[ "$mode" == --check-schema ]]; then
+  exit 0
+fi
+
+reviewed_migrations="$(sed -E 's/^[[:xdigit:]]+  ([0-9]+)_.*/\1/' "$schema_lock" | paste -sd, -)"
+replace=false
+if [[ "$mode" == --replace ]]; then
+  replace=true
+fi
+
+umask 077
+snapshot="$(mktemp --tmpdir=/tmp hamster-travel-refresh.XXXXXXXX)"
+trap 'rm -f -- "$snapshot"' EXIT
+
+# Use the production container's local socket and existing credentials.
+if ! docker --host unix:///var/run/docker.sock exec -i hamster-travel-production-db sh -c '
+  export PGPASSWORD="$POSTGRES_PASSWORD"
+  export PGOPTIONS="-c default_transaction_read_only=on"
+  exec psql -X -q -w -v ON_ERROR_STOP=1 --host=/var/run/postgresql \
+    --username="$POSTGRES_USER" --dbname="$POSTGRES_DB" --file=- -v reviewed_migrations="$1"
+' sh "$reviewed_migrations" <"$sql_dir/export-dev-travel.sql" >"$snapshot"; then
+  printf 'Production export failed. See the error above.\n' >&2
+  exit 1
+fi
+
+# Start with a clean environment so libpq cannot redirect the dev connection.
+env -i PATH=/usr/bin:/bin PGPASSWORD=postgres PGCONNECT_TIMEOUT=5 \
+  psql -X -q -w -v ON_ERROR_STOP=1 -v replace="$replace" -v reviewed_migrations="$reviewed_migrations" \
+  --host=127.0.0.1 --port=6000 --username=postgres --dbname=hamster_travel_dev \
+  --file="$sql_dir/replace-dev-travel.sql" <"$snapshot"

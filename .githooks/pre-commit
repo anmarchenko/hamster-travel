@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd -- "$(git rev-parse --show-toplevel)"
+
+check_staged_tree() {
+  local untracked
+  untracked="$(git ls-files --others --exclude-standard)"
+  if ! git diff --quiet --ignore-submodules=none -- || [[ -n "$untracked" ]]; then
+    printf '%s\n' 'Pre-commit checks need the working tree to match the staged files.' \
+      'Stage or set aside unstaged changes and untracked files, then commit again.' >&2
+    return 1
+  fi
+}
+
+check_staged_tree
+MIX_ENV=test mix format
+git add --update
+./scripts/check
+check_staged_tree
