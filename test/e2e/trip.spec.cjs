@@ -86,6 +86,45 @@ test('locks trip editing offline and saves an edit after reconnecting', async ({
   await expect(page.getByRole('heading', { name: 'Offline E2E updated' })).toBeVisible();
 });
 
+test('reads loaded trip notes offline and picks up online edits on the next disconnect', async ({ page, context }) => {
+  await page.goto(`/trips/${process.env.E2E_NOTES_TRIP}`);
+  await expect(page.locator(connected)).toBeAttached();
+
+  const notebook = page.locator('[data-offline-notebook]');
+  const reader = notebook.locator('[data-offline-note-reader]');
+  const notesTab = page.locator('#mobile-trip-tab-notes');
+  const packing = notebook.getByRole('button', { name: /Packing/ });
+  const food = notebook.getByRole('button', { name: /Food/ });
+
+  await context.setOffline(true);
+  await notesTab.click();
+  await packing.click();
+  await expect(reader.getByRole('heading', { name: 'Packing' })).toBeFocused();
+  await expect(reader.locator('strong')).toHaveText('Bring tickets');
+  await expect(page.getByRole('button', { name: 'Edit', exact: true })).toHaveCount(0);
+
+  await reader.getByRole('button', { name: 'Back to notes' }).click();
+  await expect(packing).toBeFocused();
+  await food.click();
+  await expect(reader.getByText('Visit the market')).toBeVisible();
+
+  await context.setOffline(false);
+  await expect(notebook).toBeHidden();
+  await notesTab.click();
+  await page.getByRole('link', { name: /Packing/ }).click();
+  await expect(page).toHaveURL(/[?&]note=\d+/);
+  const onlineReader = page.locator('[data-online-notebook]');
+  await onlineReader.getByRole('button', { name: 'Edit', exact: true }).click();
+  await onlineReader.getByLabel('Note title').fill('Updated packing');
+  await onlineReader.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(onlineReader.getByRole('heading', { name: 'Updated packing' })).toBeVisible();
+
+  await context.setOffline(true);
+  await expect(reader.getByRole('heading', { name: 'Updated packing' })).toBeVisible();
+  await reader.getByRole('button', { name: 'Back to notes' }).click();
+  await expect(food).toBeVisible();
+});
+
 test('recovers an unsaved day expense after the LiveView socket drops', async ({ page, context }) => {
   let liveSocket;
   await page.routeWebSocket(/\/live\/websocket(?:\?|$)/, route => {

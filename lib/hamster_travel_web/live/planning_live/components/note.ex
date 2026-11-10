@@ -99,21 +99,7 @@ defmodule HamsterTravelWeb.Planning.Note do
           patch={"#{@notes_path}&note=#{@note.id}"}
           class="group min-w-0 flex-1 rounded-lg px-2 py-2 text-left transition hover:bg-zinc-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-500 sm:px-3 dark:hover:bg-zinc-800"
         >
-          <span class="flex items-start gap-2">
-            <span class="min-w-0 flex-1 break-words text-lg font-semibold leading-snug tracking-tight text-zinc-900 sm:text-xl dark:text-zinc-100">
-              {@note.title}
-            </span>
-            <.icon
-              name="hero-chevron-right"
-              class="mt-1 h-4 w-4 shrink-0 text-zinc-400 group-hover:text-primary-600 dark:group-hover:text-primary-300"
-            />
-          </span>
-          <span
-            :if={@preview != ""}
-            class="mt-1.5 line-clamp-3 break-words text-sm leading-relaxed text-zinc-600 dark:text-zinc-300"
-          >
-            {@preview}
-          </span>
+          <.preview_content title={@note.title} preview={@preview} />
         </.link>
         <.edit_delete_buttons
           :if={@can_edit}
@@ -126,30 +112,128 @@ defmodule HamsterTravelWeb.Planning.Note do
         />
       </div>
 
-      <div
+      <.reader_content
         :if={@reading && !@edit}
         id={"read-#{@id}"}
-        phx-mounted={JS.focus(to: "#read-#{@id}-title")}
-        class="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"
-      >
-        <header class="border-b border-zinc-100 px-5 py-7 sm:px-9 sm:py-9 dark:border-zinc-800">
-          <div class="mb-5 h-1 w-10 rounded-full bg-primary-400 dark:bg-primary-500"></div>
-          <h2
-            id={"read-#{@id}-title"}
-            tabindex="-1"
-            class="break-words text-3xl font-semibold leading-tight tracking-tight text-zinc-900 outline-none sm:text-4xl dark:text-zinc-100"
+        note={@note}
+        focus_on_mount
+      />
+    </article>
+    """
+  end
+
+  attr(:notes, :list, required: true)
+  attr(:reading_note, Note, default: nil)
+
+  def offline_notebook(assigns) do
+    ~H"""
+    <div
+      data-offline-notebook
+      data-reading-note={@reading_note && @reading_note.id}
+      data-offline-local
+      class="mt-5 hidden"
+    >
+      <div data-offline-note-list>
+        <div class="grid grid-cols-1 items-start gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+          <button
+            :for={note <- @notes}
+            type="button"
+            data-open-offline-note={note.id}
+            data-offline-local
+            class="group min-w-0 rounded-xl border border-zinc-200 border-l-4 border-l-primary-300 bg-white px-4 py-3 text-left shadow-sm transition hover:bg-zinc-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-500 dark:border-zinc-700 dark:border-l-primary-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
           >
-            {@note.title}
-          </h2>
-        </header>
-        <div class="px-5 py-6 sm:px-9 sm:py-8">
-          <.formatted_text
-            text={@note.text}
-            class="break-words !space-y-4 !text-base !leading-relaxed text-zinc-700 dark:text-zinc-200 [&_pre]:overflow-x-auto"
-          />
+            <.preview_content title={note.title} preview={text_preview(note.text)} />
+          </button>
         </div>
       </div>
-    </article>
+      <div
+        id="offline-note-reader"
+        phx-update="ignore"
+        data-offline-note-reader
+        class="max-w-3xl"
+        hidden
+      >
+        <button
+          type="button"
+          data-back-offline-note
+          data-offline-local
+          class="mb-5 inline-flex items-center gap-2 rounded-md py-2 text-sm font-medium text-zinc-500 transition hover:text-primary-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-500 dark:text-zinc-400 dark:hover:text-primary-300"
+        >
+          <.icon name="hero-arrow-left" class="h-4 w-4" />
+          {gettext("Back to notes")}
+        </button>
+        <div data-offline-note-content></div>
+      </div>
+      <template
+        :for={note <- @notes}
+        id={"offline-note-template-#{note.id}"}
+        data-offline-note-template
+      >
+        {offline_reader_content(note)}
+      </template>
+    </div>
+    """
+  end
+
+  defp offline_reader_content(note) do
+    # Keep the template fragment whole when LiveView sends a partial DOM patch.
+    %{id: "offline-note-#{note.id}", note: note, focus_on_mount: false, __changed__: nil}
+    |> reader_content()
+    |> Phoenix.HTML.Safe.to_iodata()
+    |> Phoenix.HTML.raw()
+  end
+
+  attr(:title, :string, required: true)
+  attr(:preview, :string, required: true)
+
+  defp preview_content(assigns) do
+    ~H"""
+    <span class="flex items-start gap-2">
+      <span class="min-w-0 flex-1 break-words text-lg font-semibold leading-snug tracking-tight text-zinc-900 sm:text-xl dark:text-zinc-100">
+        {@title}
+      </span>
+      <.icon
+        name="hero-chevron-right"
+        class="mt-1 h-4 w-4 shrink-0 text-zinc-400 group-hover:text-primary-600 dark:group-hover:text-primary-300"
+      />
+    </span>
+    <span
+      :if={@preview != ""}
+      class="mt-1.5 line-clamp-3 break-words text-sm leading-relaxed text-zinc-600 dark:text-zinc-300"
+    >
+      {@preview}
+    </span>
+    """
+  end
+
+  attr(:id, :string, required: true)
+  attr(:note, Note, required: true)
+  attr(:focus_on_mount, :boolean, default: false)
+
+  defp reader_content(assigns) do
+    ~H"""
+    <div
+      id={@id}
+      phx-mounted={@focus_on_mount && JS.focus(to: "##{@id}-title")}
+      class="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"
+    >
+      <header class="border-b border-zinc-100 px-5 py-7 sm:px-9 sm:py-9 dark:border-zinc-800">
+        <div class="mb-5 h-1 w-10 rounded-full bg-primary-400 dark:bg-primary-500"></div>
+        <h2
+          id={"#{@id}-title"}
+          tabindex="-1"
+          class="break-words text-3xl font-semibold leading-tight tracking-tight text-zinc-900 outline-none sm:text-4xl dark:text-zinc-100"
+        >
+          {@note.title}
+        </h2>
+      </header>
+      <div class="px-5 py-6 sm:px-9 sm:py-8">
+        <.formatted_text
+          text={@note.text}
+          class="break-words !space-y-4 !text-base !leading-relaxed text-zinc-700 dark:text-zinc-200 [&_pre]:overflow-x-auto"
+        />
+      </div>
+    </div>
     """
   end
 

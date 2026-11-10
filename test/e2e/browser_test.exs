@@ -32,6 +32,15 @@ defmodule HamsterTravelWeb.BrowserTest do
     user = user_fixture()
     cover_trip = trip_fixture(user, %{name: "Cover E2E"})
     offline_trip = trip_fixture(user, %{name: "Offline E2E"})
+    notes_trip = trip_fixture(user, %{name: "Offline Notes E2E"})
+
+    note_fixture(%{
+      trip_id: notes_trip.id,
+      title: "Packing",
+      text: "<p><strong>Bring tickets</strong></p>"
+    })
+
+    note_fixture(%{trip_id: notes_trip.id, title: "Food", text: "<p>Visit the market</p>"})
     recovery_trip = trip_fixture(user, %{name: "Recovery E2E"})
     existing_expense = day_expense_fixture(%{trip_id: recovery_trip.id})
     pdf_trip = trip_fixture(user, %{name: "PDF E2E"})
@@ -57,6 +66,7 @@ defmodule HamsterTravelWeb.BrowserTest do
           {"E2E_PASSWORD", valid_user_password()},
           {"E2E_COVER_TRIP", cover_trip.slug},
           {"E2E_OFFLINE_TRIP", offline_trip.slug},
+          {"E2E_NOTES_TRIP", notes_trip.slug},
           {"E2E_RECOVERY_TRIP", recovery_trip.slug},
           {"E2E_PDF_TRIP", pdf_trip.slug},
           {"E2E_SHEET_TRIP", sheet_trip.slug},

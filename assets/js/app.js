@@ -25,6 +25,7 @@ import PackingDragDrop from './packing_drag_drop';
 import { lazyHook } from './lazy_hook';
 import { registerPdfDownloadHandler } from './pdf_download';
 import { initTheme } from './theme';
+import { initOfflineNotes, updateOfflineNoteTemplate } from './offline_notes';
 import {
   connectionSocketOptions,
   createConnectionController,
@@ -72,11 +73,13 @@ let liveSocket = new LiveSocket('/live', Socket, {
       }
 
       preserveOfflineLock(from, to);
+      updateOfflineNoteTemplate(from, to);
     },
     onNodeAdded: lockAddedOfflineRegion,
   },
 });
 
+initOfflineNotes();
 initOfflineReadOnly();
 
 // Show progress bar on live navigation and form submits after 200ms of waiting

@@ -55,6 +55,18 @@
     transition: all 0.2s ease;
 }
 
+body[data-offline-readonly] [data-online-notebook] {
+    display: none;
+}
+
+body[data-offline-readonly] [data-offline-notebook] {
+    display: block;
+}
+
+[data-offline-notebook]:has([data-offline-note-reader]:not([hidden])) [data-offline-note-list] {
+    display: none;
+}
+
 /* Offline lock regions are inert; these rules make that state visible. */
 body[data-offline-readonly] [data-offline-lock] :is(
         a,

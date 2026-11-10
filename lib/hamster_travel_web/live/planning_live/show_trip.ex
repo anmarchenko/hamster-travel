@@ -1136,6 +1136,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       id={"notes-#{@trip.id}"}
       phx-hook="ActivityDragDrop"
       data-can-edit={to_string(@can_edit)}
+      data-online-notebook={@trip.notes != []}
       class={["mt-5 flex w-full flex-col gap-4", @reading_note && "max-w-3xl"]}
     >
       <.live_component
@@ -1185,6 +1186,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         />
       </div>
     </div>
+    <Note.offline_notebook
+      :if={@trip.notes != []}
+      notes={@trip.notes}
+      reading_note={@reading_note}
+    />
     """
   end
 
