@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ -z "${HAMSTER_TRAVEL_PRODUCTION_ENV_FILE:-}" && -f /etc/hamster-travel/credentials/db.toml ]]; then
+  exec /usr/bin/bash "$(dirname -- "${BASH_SOURCE[0]}")/with-production-credentials" db "$0" "$@"
+fi
+
 production_env="${HAMSTER_TRAVEL_PRODUCTION_ENV_FILE:-/home/marvin/Work/hamster-travel-production/.env}"
 backup_path="${1:-}"
 checksum_path="${2:-}"

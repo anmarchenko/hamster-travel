@@ -9,6 +9,9 @@ ExecStart=/home/marvin/Projects/hamster-travel/scripts/backup-production-infra
 Environment=PATH=/usr/bin
 Environment=RESTIC_CACHE_DIR=/home/marvin/.cache/hamster-travel-infra-restic
 UMask=0077
+RuntimeDirectory=hamster-travel-infra-backup
+RuntimeDirectoryMode=0700
+LoadCredentialEncrypted=age-identity:/etc/hamster-travel/credentials/infra-user.cred
 Nice=10
 IOSchedulingClass=best-effort
 IOSchedulingPriority=7

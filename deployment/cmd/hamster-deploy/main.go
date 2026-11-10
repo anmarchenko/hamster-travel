@@ -35,6 +35,14 @@ func run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
+	switch os.Args[1] {
+	case "deploy", "rollback", "status", "check-config", "compose":
+		cleanup, err := deploy.PrepareProductionSecrets(ctx, &config)
+		if err != nil {
+			return err
+		}
+		defer cleanup()
+	}
 	d := deploy.New(config, deploy.ExecRunner{Log: log.Default()})
 
 	switch os.Args[1] {
@@ -53,6 +61,16 @@ func run() error {
 			return usageError()
 		}
 		return d.Status(ctx)
+	case "check-config":
+		if len(os.Args) != 2 {
+			return usageError()
+		}
+		return d.CheckConfig(ctx)
+	case "compose":
+		if len(os.Args) < 3 {
+			return usageError()
+		}
+		return d.Compose(ctx, os.Args[2:])
 	case "releases":
 		if len(os.Args) != 2 {
 			return usageError()
@@ -77,6 +95,8 @@ Commands:
   deploy               Build, verify, and deploy the current source tree
   rollback <release>   Switch to an existing release and verify it
   status               Show the production Compose services and image
+  check-config         Validate the Compose inputs without changing containers
+  compose <args>       Run Compose with the production inputs for manual recovery
   releases             List locally available production images
 `
 }

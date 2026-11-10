@@ -31,6 +31,11 @@ The full installation, routine operation, rollback, and recovery instructions
 are stored with the machine-local production infrastructure rather than in this
 public repository.
 
+On the production host, the deployer resolves the default app and database
+inputs from the installed fnox manifest into temporary files under `/run`.
+Use `sudo /usr/local/sbin/hamster-deploy check-config` to validate those inputs
+without changing containers or displaying resolved values.
+
 ## Weekly base image updates
 
 The weekly ChatGPT automation runs from a clean worktree based on

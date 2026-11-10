@@ -10,6 +10,9 @@ Group=marvin
 ExecStart=/home/marvin/Projects/hamster-travel/scripts/backup-production
 Environment=PATH=/usr/bin
 UMask=0077
+RuntimeDirectory=hamster-travel-db-backup
+RuntimeDirectoryMode=0700
+LoadCredentialEncrypted=age-identity:/etc/hamster-travel/credentials/db.cred
 Nice=10
 IOSchedulingClass=best-effort
 IOSchedulingPriority=7

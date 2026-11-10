@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ -z "${HAMSTER_TRAVEL_PRODUCTION_ENV_FILE:-}" && -f /etc/hamster-travel/credentials/infra.toml ]]; then
+  exec /usr/bin/bash "$(dirname -- "${BASH_SOURCE[0]}")/with-production-credentials" infra "$0" "$@"
+fi
+
 infra_dir="${HAMSTER_TRAVEL_PRODUCTION_DIR:-/home/marvin/Work/hamster-travel-production}"
 production_env="${HAMSTER_TRAVEL_PRODUCTION_ENV_FILE:-${infra_dir}/.env}"
 password_file="${HAMSTER_TRAVEL_INFRA_RESTIC_PASSWORD_FILE:-/home/marvin/.config/hamster-travel/infra-backup-restic-password}"

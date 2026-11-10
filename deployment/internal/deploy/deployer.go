@@ -184,7 +184,29 @@ func (d *Deployer) Releases(ctx context.Context) error {
 	)
 }
 
-func (d *Deployer) preflight(ctx context.Context, requireBackup bool) error {
+// CheckConfig validates the same Compose inputs as a deployment without
+// building images or changing containers.
+func (d *Deployer) CheckConfig(ctx context.Context) error {
+	if err := d.requireRoot(); err != nil {
+		return err
+	}
+	if err := d.validateInputs(); err != nil {
+		return err
+	}
+	return d.checkCompose(ctx)
+}
+
+// Compose supports manual bootstrap and recovery using the same runtime files
+// as the regular deployment commands.
+func (d *Deployer) Compose(ctx context.Context, args []string) error {
+	if err := d.requireRoot(); err != nil {
+		return err
+	}
+	image := envOrDefault("HAMSTER_TRAVEL_IMAGE", d.Config.ImageRepository+":current")
+	return d.Runner.Run(ctx, d.composeEnvironment(image), d.Config.DockerBinary, d.composeArgs(args...)...)
+}
+
+func (d *Deployer) validateInputs() error {
 	for _, path := range []string{
 		d.Config.SourceDir,
 		d.Config.InfrastructureDir,
@@ -203,7 +225,19 @@ func (d *Deployer) preflight(ctx context.Context, requireBackup bool) error {
 	if err := validateEnvironmentFile(d.Config.DatabaseEnvFile, requiredDatabaseEnvironment); err != nil {
 		return err
 	}
-	if err := validateFileMode(d.Config.InfrastructureEnvFile, 0o600); err != nil {
+	return validateFileMode(d.Config.InfrastructureEnvFile, 0o600)
+}
+
+func (d *Deployer) checkCompose(ctx context.Context) error {
+	composeEnv := d.composeEnvironment(d.Config.ImageRepository + ":current")
+	if err := d.Runner.Run(ctx, composeEnv, d.Config.DockerBinary, d.composeArgs("config", "--quiet")...); err != nil {
+		return fmt.Errorf("invalid production Compose configuration: %w", err)
+	}
+	return nil
+}
+
+func (d *Deployer) preflight(ctx context.Context, requireBackup bool) error {
+	if err := d.validateInputs(); err != nil {
 		return err
 	}
 	if requireBackup {
@@ -217,9 +251,8 @@ func (d *Deployer) preflight(ctx context.Context, requireBackup bool) error {
 	if err := d.Runner.Run(ctx, nil, d.Config.DockerBinary, "info"); err != nil {
 		return fmt.Errorf("Docker is unavailable: %w", err)
 	}
-	composeEnv := d.composeEnvironment(d.Config.ImageRepository + ":current")
-	if err := d.Runner.Run(ctx, composeEnv, d.Config.DockerBinary, d.composeArgs("config", "--quiet")...); err != nil {
-		return fmt.Errorf("invalid production Compose configuration: %w", err)
+	if err := d.checkCompose(ctx); err != nil {
+		return err
 	}
 	databaseHealth, err := d.Runner.Output(ctx, nil, d.Config.DockerBinary, "inspect", d.Config.DatabaseContainer, "--format", "{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}")
 	if err != nil {
