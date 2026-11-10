@@ -764,6 +764,27 @@ defmodule HamsterTravel.Planning do
   end
 
   @doc """
+  Saves up to 100 actual expense cells atomically for a trip participant.
+
+  Existing expenses require their expected original price. New expenses require only a price.
+  A nil price deletes an existing expense.
+  Pass `:expected_tail` to check the last expense ID before appending to the sheet.
+  Returns the refreshed category or the zero-based index of a rejected cell and its error.
+  """
+  @spec save_actual_expense_cells(
+          BudgetCategory.t(),
+          User.t() | nil,
+          [
+            %{price: Money.t()}
+            | %{id: pos_integer(), expected: Money.t(), price: Money.t() | nil}
+          ],
+          keyword()
+        ) :: {:ok, BudgetCategory.t()} | {:error, term()}
+  def save_actual_expense_cells(%BudgetCategory{} = category, user, cells, opts \\ []) do
+    BudgetCategories.save_actual_expense_cells(category, user, cells, opts)
+  end
+
+  @doc """
   Deletes an actual expense for a budget category.
   """
   def delete_budget_category_actual_expense(%Expense{} = expense) do

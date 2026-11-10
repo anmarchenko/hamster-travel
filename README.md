@@ -11,10 +11,11 @@ mix deps.get
 mix setup
 ```
 
-Run server:
+Sign in to the 1Password CLI with access to the development credentials
+referenced in `.env.op`, then start the server:
 
 ```bash
-mix phx.server
+mix dev
 ```
 
 Visit `http://localhost:4000` to start using the app.

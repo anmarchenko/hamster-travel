@@ -49,7 +49,7 @@ defmodule HamsterTravelWeb.UserSessionControllerTest do
         })
 
       assert redirected_to(conn) == "/foo/bar"
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Welcome back!"
+      refute Phoenix.Flash.get(conn.assigns.flash, :info)
     end
 
     test "login following registration", %{conn: conn, user: user} do
@@ -64,7 +64,7 @@ defmodule HamsterTravelWeb.UserSessionControllerTest do
         })
 
       assert redirected_to(conn) == ~p"/"
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Account created successfully"
+      refute Phoenix.Flash.get(conn.assigns.flash, :info)
     end
 
     test "login following password update", %{conn: conn, user: user} do
@@ -79,7 +79,7 @@ defmodule HamsterTravelWeb.UserSessionControllerTest do
         })
 
       assert redirected_to(conn) == ~p"/profile"
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Password updated successfully"
+      refute Phoenix.Flash.get(conn.assigns.flash, :info)
     end
 
     test "redirects to login page with invalid credentials", %{conn: conn} do
@@ -98,7 +98,7 @@ defmodule HamsterTravelWeb.UserSessionControllerTest do
       conn = conn |> log_in_user(user) |> delete(~p"/users/log_out")
       assert redirected_to(conn) == ~p"/"
       refute get_session(conn, :user_token)
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Logged out successfully"
+      refute Phoenix.Flash.get(conn.assigns.flash, :info)
     end
 
     test "fails if the user is not logged in", %{conn: conn} do

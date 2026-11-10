@@ -127,6 +127,7 @@ defmodule HamsterTravel.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
+      dev: "cmd bash scripts/dev",
       setup: [
         "deps.get",
         "localize.download_locales",

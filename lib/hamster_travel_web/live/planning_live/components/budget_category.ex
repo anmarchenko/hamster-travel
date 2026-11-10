@@ -8,30 +8,15 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.BudgetCategory, as: Category
   alias HamsterTravel.Planning.Trip
-
-  @impl true
-  def mount(socket) do
-    {:ok, assign(socket, edit: false, add_actual: false, actual_form_version: 0)}
-  end
-
-  @impl true
-  def update(assigns, socket) do
-    socket =
-      socket
-      |> assign(assigns)
-      |> assign_actual_form()
-
-    {:ok, socket}
-  end
+  alias HamsterTravelWeb.Planning.BudgetExpenseSheet
 
   attr :currency_options, :list, required: true
   attr :category, Category, required: true
   attr :trip, HamsterTravel.Planning.Trip, required: true
   attr :display_currency, :string, required: true
+  attr :current_user, HamsterTravel.Accounts.User, default: nil
   attr :can_edit, :boolean, default: false
   attr :edit, :boolean, default: false
-  attr :add_actual, :boolean, default: false
-  attr :editing_actual_expense_id, :string, default: nil
 
   @impl true
   def render(%{edit: true} = assigns) do
@@ -121,119 +106,216 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
         )}
       </div>
 
-      <div
+      <details
         :if={@can_edit || Enum.any?(@category.actual_expenses)}
-        class="ml-4 max-w-3xl border-l border-zinc-200 py-1 pl-4 dark:border-zinc-700 min-[1920px]:max-w-6xl"
+        id={"budget-actual-expenses-#{@category.id}"}
+        phx-mounted={JS.ignore_attributes("open")}
+        class="group ml-4 max-w-3xl border-l border-zinc-200 py-1 pl-4 dark:border-zinc-700 min-[1920px]:max-w-6xl"
       >
+        <summary
+          aria-label={gettext("Actual expenses for %{category}", category: category_label(@category))}
+          data-offline-local
+          class="flex w-fit cursor-pointer list-none items-center gap-1.5 rounded-sm py-1 text-xs font-medium focus-visible:outline-primary-500 [&::-webkit-details-marker]:hidden [@media(pointer:coarse)]:min-h-[44px]"
+        >
+          <.icon name="hero-chevron-right" class="h-3.5 w-3.5 group-open:rotate-90" />
+          <span>{gettext("Actual expenses")}</span>
+          <span class="hidden text-zinc-500 group-open:inline dark:text-zinc-400">
+            · {@display_currency}
+          </span>
+        </summary>
+        <div
+          id={"budget-expense-sheet-#{@category.id}"}
+          phx-hook="BudgetExpenseSheet"
+          phx-target={@myself}
+          phx-update="ignore"
+          data-snapshot={
+            Jason.encode!(BudgetExpenseSheet.snapshot(@category, @display_currency, @can_edit))
+          }
+          data-labels={Jason.encode!(BudgetExpenseSheet.labels())}
+          data-currencies={
+            Jason.encode!(Enum.map(@currency_options, fn {_, value} -> to_string(value) end))
+          }
+          class="budget-expense-sheet mt-1"
+        >
+          <table
+            role="grid"
+            aria-label={
+              gettext("Actual expenses for %{category}", category: category_label(@category))
+            }
+            data-sheet-grid
+          >
+          </table>
+          <div
+            data-sheet-toolbar
+            class="mt-1 flex flex-wrap items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400"
+          >
+            <span data-sheet-selection aria-live="polite"></span>
+            <button
+              type="button"
+              data-sheet-edit
+              data-edit-label={gettext("Edit")}
+              class="budget-sheet-action"
+              hidden
+            >
+              {gettext("Edit")}
+            </button>
+            <button type="button" data-sheet-delete class="budget-sheet-action" hidden>
+              {gettext("Delete")}
+            </button>
+            <div data-sheet-editor class="flex-wrap items-center gap-2 [&:not([hidden])]:flex" hidden>
+              <select
+                data-sheet-edit-currency
+                aria-label={gettext("Currency")}
+                class="budget-sheet-action budget-sheet-native-currency bg-transparent"
+              ></select>
+              <button
+                type="button"
+                data-sheet-edit-currency-button
+                aria-haspopup="dialog"
+                class="budget-sheet-action budget-sheet-mobile-currency items-center gap-1"
+              >
+                <span class="sr-only">{gettext("Currency")}</span>
+                <span data-sheet-currency-code></span>
+                <span aria-hidden="true"><.icon name="hero-chevron-down" class="h-3.5 w-3.5" /></span>
+              </button>
+              <button
+                type="button"
+                data-sheet-save
+                aria-label={gettext("Save")}
+                class="budget-sheet-action"
+              >
+                <span class="budget-sheet-edit-label">{gettext("Save")}</span>
+                <span class="budget-sheet-edit-icon" aria-hidden="true">
+                  <.icon name="hero-check" class="h-5 w-5" />
+                </span>
+              </button>
+              <button
+                type="button"
+                data-sheet-cancel
+                aria-label={gettext("Cancel")}
+                class="budget-sheet-action"
+              >
+                <span class="budget-sheet-edit-label">{gettext("Cancel")}</span>
+                <span class="budget-sheet-edit-icon" aria-hidden="true">
+                  <.icon name="hero-x-mark" class="h-5 w-5" />
+                </span>
+              </button>
+            </div>
+          </div>
+          <div data-sheet-paste hidden class="mt-2 text-sm">
+            <div class="flex flex-wrap items-center gap-2">
+              <label for={"budget-sheet-paste-currency-#{@category.id}"}>
+                {gettext("Currency for pasted expenses")}
+              </label>
+              <select
+                id={"budget-sheet-paste-currency-#{@category.id}"}
+                data-sheet-paste-currency
+                class="budget-sheet-native-currency rounded border border-zinc-300 bg-transparent text-sm dark:border-zinc-600"
+              ></select>
+              <button
+                type="button"
+                data-sheet-paste-currency-button
+                aria-haspopup="dialog"
+                class="budget-sheet-action budget-sheet-mobile-currency items-center gap-1"
+              >
+                <span class="sr-only">{gettext("Currency for pasted expenses")}</span>
+                <span data-sheet-currency-code></span>
+                <span aria-hidden="true"><.icon name="hero-chevron-down" class="h-3.5 w-3.5" /></span>
+              </button>
+            </div>
+            <p data-sheet-paste-count class="my-1 text-xs"></p>
+            <button type="button" data-sheet-paste-save class="budget-sheet-action">{gettext(
+              "Add expenses"
+            )}</button>
+            <button type="button" data-sheet-paste-cancel class="budget-sheet-action">{gettext(
+              "Cancel"
+            )}</button>
+          </div>
+          <dialog
+            data-sheet-currency-picker
+            aria-labelledby={"budget-sheet-currency-title-#{@category.id}"}
+            class="budget-sheet-currency-picker"
+          >
+            <div class="flex items-center justify-between gap-2">
+              <h2 id={"budget-sheet-currency-title-#{@category.id}"} class="font-medium">
+                {gettext("Currency")}
+              </h2>
+              <button
+                type="button"
+                data-sheet-currency-close
+                aria-label={gettext("Close")}
+                class="budget-sheet-action"
+                autofocus
+              >
+                <span aria-hidden="true"><.icon name="hero-x-mark" class="h-5 w-5 align-middle" /></span>
+              </button>
+            </div>
+            <input
+              type="search"
+              data-sheet-currency-search
+              aria-label={gettext("Search currency codes")}
+              placeholder={gettext("Search currency codes")}
+              autocomplete="off"
+              class="min-w-0 rounded border-zinc-300 bg-transparent text-base dark:border-zinc-600"
+            />
+            <div data-sheet-currency-options class="min-h-0 overflow-y-auto overscroll-contain"></div>
+            <p data-sheet-currency-empty class="text-sm text-zinc-600 dark:text-zinc-400" hidden>
+              {gettext("No matching currencies")}
+            </p>
+          </dialog>
+          <p
+            data-sheet-status
+            role="status"
+            class="text-xs text-zinc-600 dark:text-zinc-400"
+          >
+          </p>
+        </div>
+
         <div
           :if={Enum.any?(@category.actual_expenses)}
           id={"budget-category-actual-expenses-#{@category.id}"}
-          class="grid grid-cols-2 gap-x-3 gap-y-1 sm:grid-cols-3 lg:grid-cols-4"
+          class="budget-expense-fallback grid w-fit grid-cols-2 gap-x-1 gap-y-1 sm:grid-cols-4"
         >
-          <.live_component
+          <.money_display
             :for={expense <- @category.actual_expenses}
-            module={HamsterTravelWeb.Planning.BudgetCategoryActualExpense}
-            id={"budget-category-actual-#{expense.id}"}
-            expense={expense}
-            trip={@trip}
-            currency_options={@currency_options}
+            money={expense.price}
             display_currency={@display_currency}
-            can_edit={@can_edit}
-            edit={@editing_actual_expense_id == to_string(expense.id)}
+            class="px-2 py-0.5 text-sm tabular-nums text-zinc-500 dark:text-zinc-400"
           />
         </div>
-
-        <.form
-          :if={@add_actual}
-          id={"budget-category-actual-new-form-#{@category.id}-#{@actual_form_version}"}
-          for={@actual_form}
-          as={:expense}
-          phx-target={@myself}
-          phx-submit="save_actual"
-          phx-change="form_changed_actual"
-          phx-window-keydown="cancel_actual"
-          phx-key="escape"
-          phx-mounted={
-            JS.focus_first(
-              to: "#budget-category-actual-new-form-#{@category.id}-#{@actual_form_version}"
-            )
-          }
-          class="mt-2 flex max-w-2xl flex-col gap-3 sm:flex-row sm:items-start"
-        >
-          <div class="grow">
-            <.money_input
-              id={"budget-category-actual-new-price-#{@category.id}"}
-              field={@actual_form[:price]}
-              label={
-                gettext("Actual expense for %{category}",
-                  category: category_label(@category)
-                )
-              }
-              default_currency={@trip.currency}
-              currency_options={@currency_options}
-              reserve_error_space
-              blank_zero
-            />
-          </div>
-          <div class="flex gap-2 sm:mt-7">
-            <.button color="light" type="button" phx-click="cancel_actual" phx-target={@myself}>
-              {gettext("Cancel")}
-            </.button>
-            <.button color="primary" size="xs" type="submit">
-              {gettext("Save")}
-            </.button>
-          </div>
-        </.form>
-
-        <button
-          :if={!@add_actual}
-          type="button"
-          phx-click="add_actual"
-          phx-target={@myself}
-          class="mt-1 inline-flex items-center gap-1.5 py-0.5 text-sm font-normal text-zinc-400 transition-colors hover:text-primary-600 focus-visible:text-primary-600 focus-visible:outline-none dark:text-zinc-500 dark:hover:text-primary-300"
-        >
-          <.icon name="hero-plus-solid" class="h-4 w-4" />
-          <span>
-            {gettext("Add actual expense for %{category}",
-              category: category_label(@category)
-            )}
-          </span>
-        </button>
-      </div>
+      </details>
     </div>
     """
   end
 
   @impl true
-  def handle_event("add_actual", _params, socket) do
-    if socket.assigns.can_edit do
-      send(
-        self(),
-        {:open_form, "new", "budget-category-actual-expense", socket.assigns.category.id}
-      )
+  def handle_event("expense_sheet_save", params, socket) do
+    %{
+      category: category,
+      current_user: user,
+      display_currency: display_currency
+    } =
+      socket.assigns
 
-      {:noreply, socket}
-    else
-      {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
-    end
-  end
+    result =
+      if socket.assigns.can_edit do
+        with {:ok, changes, opts} <- BudgetExpenseSheet.changes(params, display_currency) do
+          Planning.save_actual_expense_cells(category, user, changes, opts)
+        end
+      else
+        {:error, :unauthorized}
+      end
 
-  def handle_event("cancel_actual", _params, socket) do
-    send(self(), :close_form)
-    {:noreply, socket}
-  end
+    case result do
+      {:ok, category} ->
+        snapshot = BudgetExpenseSheet.snapshot(category, display_currency, true)
+        {:reply, %{snapshot: snapshot}, assign(socket, :category, category)}
 
-  def handle_event("form_changed_actual", %{"expense" => params}, socket) do
-    {:noreply, assign_actual_form(socket, params)}
-  end
+      {:error, {index, reason}} when is_integer(index) ->
+        {:reply, %{index: index, error: BudgetExpenseSheet.error_message(reason)}, socket}
 
-  def handle_event("save_actual", %{"expense" => params}, socket) do
-    if socket.assigns.can_edit do
-      socket.assigns.category
-      |> Planning.create_budget_category_actual_expense(params)
-      |> actual_result(socket)
-    else
-      {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
+      {:error, reason} ->
+        {:reply, %{error: BudgetExpenseSheet.error_message(reason)}, socket}
     end
   end
 
@@ -275,34 +357,6 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
     else
       {:noreply, put_flash(socket, :error, gettext("Only trip participants can edit this trip."))}
     end
-  end
-
-  defp actual_result({:ok, _expense}, socket) do
-    send(self(), :clear_form_stash)
-
-    {:noreply,
-     socket
-     |> update(:actual_form_version, &(&1 + 1))
-     |> assign_actual_form()}
-  end
-
-  defp actual_result({:error, changeset}, socket) do
-    {:noreply, assign(socket, :actual_form, to_form(changeset))}
-  end
-
-  defp assign_actual_form(socket, attrs \\ %{}) do
-    attrs =
-      Map.merge(
-        %{
-          "name" => socket.assigns.category.name,
-          "price" => Money.new(socket.assigns.trip.currency, 0)
-        },
-        attrs
-      )
-
-    expense = Planning.new_expense(socket.assigns.trip, attrs)
-
-    assign(socket, :actual_form, to_form(expense))
   end
 
   defp category_label(%Category{} = category) do

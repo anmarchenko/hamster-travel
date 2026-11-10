@@ -55,6 +55,7 @@ let hooks = {
   ...TransferDragDrop,
   ...ActivityDragDrop,
   ...PackingDragDrop,
+  BudgetExpenseSheet: lazyHook(() => import('./budget_expense_sheet'), 'BudgetExpenseSheet'),
   FormattedTextArea: lazyHook(() => import('./formatted_text_area'), 'FormattedTextArea'),
   UserMap: lazyHook(() => import('./user_map'), 'UserMap'),
   OfflineReadOnly,

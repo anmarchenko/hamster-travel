@@ -330,7 +330,7 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
           %{name: "IMG_0123.HEIC", content: :binary.copy(<<0>>, 8_000_001)}
         ])
 
-      assert render_upload(cover, "IMG_0123.HEIC") =~ "Cover updated."
+      refute render_upload(cover, "IMG_0123.HEIC") =~ "Cover updated."
       refute has_element?(view, "#cover-upload-form label", "Change cover")
 
       updated_trip = Planning.get_trip!(trip.id)
@@ -985,24 +985,19 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert category.food_setting.price_per_day == Money.new(:EUR, "10.00")
       assert_eventually_contains(view, "€60.00")
 
-      view
-      |> element("#budget-category-#{category.id} [phx-click='add_actual']")
-      |> render_click()
+      sheet = element(view, "#budget-expense-sheet-#{category.id}")
 
-      assert has_element?(view, "form[id^='budget-category-actual-new-form-#{category.id}-']")
-
-      view
-      |> form("form[id^='budget-category-actual-new-form-#{category.id}-']", %{
-        expense: %{price: %{amount: "30.00", currency: "EUR"}}
+      render_hook(sheet, "expense_sheet_save", %{
+        mode: "add",
+        tail: nil,
+        cells: [%{amount: "30.00", currency: "EUR"}]
       })
-      |> render_submit()
 
       category = Planning.get_budget_category!(category.id)
       assert [actual_expense] = category.actual_expenses
       assert actual_expense.price == Money.new(:EUR, "30.00")
       assert category.estimated_expense.price == Money.new(:EUR, "60.00")
       assert_eventually_contains(view, "€30.00")
-      assert has_element?(view, "form[id^='budget-category-actual-new-form-#{category.id}-']")
 
       view
       |> element("#budget-category-#{category.id} [phx-click='recalculate']")
@@ -1012,15 +1007,12 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert category.estimated_expense.price == Money.new(:EUR, "30.00")
       assert category.food_setting.price_per_day == Money.new(:EUR, "5.00")
 
-      view
-      |> element("#budget-category-actual-#{actual_expense.id} [phx-click='edit']")
-      |> render_click()
+      target = %{id: to_string(actual_expense.id), expected: "30.00", expected_currency: "EUR"}
 
-      view
-      |> form("#budget-category-actual-form-#{actual_expense.id}", %{
-        expense: %{price: %{amount: "80.00", currency: "EUR"}}
+      render_hook(sheet, "expense_sheet_save", %{
+        mode: "edit",
+        cells: [Map.merge(target, %{amount: "80.00", currency: "EUR"})]
       })
-      |> render_submit()
 
       category = Planning.get_budget_category!(category.id)
       assert [updated_actual_expense] = category.actual_expenses
@@ -1028,16 +1020,15 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert category.estimated_expense.price == Money.new(:EUR, "80.00")
       assert_eventually_contains(view, "€80.00")
 
-      view
-      |> element("#budget-category-actual-#{actual_expense.id} [phx-click='edit']")
-      |> render_click()
+      render_hook(sheet, "expense_sheet_save", %{
+        mode: "edit",
+        cells: [Map.merge(target, %{expected: "80.00", amount: "0,00", currency: "EUR"})]
+      })
 
-      view
-      |> element("#budget-category-actual-#{actual_expense.id} [phx-click='delete']")
-      |> render_click()
-
-      assert Planning.get_budget_category!(category.id).actual_expenses == []
-      refute has_element?(view, "#budget-category-actual-#{actual_expense.id}")
+      category = Planning.get_budget_category!(category.id)
+      assert category.actual_expenses == []
+      assert category.estimated_expense.price == Money.new(:EUR, "80.00")
+      refute has_element?(view, "#budget-category-actual-expenses-#{category.id}")
 
       view
       |> element("#budget-category-#{category.id} [phx-click='edit']")
@@ -1080,81 +1071,39 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       {:ok, view, _html} = live(conn, ~p"/trips/#{trip.slug}?tab=budget")
 
-      add_button =
-        "#budget-category-#{category.id} button[phx-click='add_actual']"
+      sheet = element(view, "#budget-expense-sheet-#{category.id}")
+      assert has_element?(sheet)
 
-      assert has_element?(view, add_button, "Add actual expense for Souvenirs")
-
-      view
-      |> element(add_button)
-      |> render_click()
-
-      actual_form = "form[id^='budget-category-actual-new-form-#{category.id}-']"
-      assert has_element?(view, "#budget-category-actual-new-form-#{category.id}-0")
-
-      assert has_element?(
-               view,
-               "#{actual_form}[phx-window-keydown='cancel_actual'][phx-key='escape']"
-             )
-
-      view
-      |> form(actual_form, %{
-        expense: %{price: %{amount: "0", currency: "EUR"}}
+      render_hook(sheet, "expense_sheet_save", %{
+        mode: "add",
+        tail: nil,
+        cells: [%{amount: "0", currency: "EUR"}]
       })
-      |> render_submit()
 
-      assert has_element?(view, actual_form, "must be greater than 0")
       assert Planning.get_budget_category!(category.id).actual_expenses == []
 
-      view
-      |> form(actual_form, %{
-        expense: %{price: %{amount: "25.00", currency: "EUR"}}
+      render_hook(sheet, "expense_sheet_save", %{
+        mode: "add",
+        tail: nil,
+        cells: [%{amount: "25.00", currency: "EUR"}]
       })
-      |> render_submit()
 
-      assert has_element?(
-               view,
-               "#budget-category-actual-new-form-#{category.id}-1 input[name='expense[price][amount]'][value='']"
-             )
+      assert [first] = Planning.get_budget_category!(category.id).actual_expenses
 
-      view
-      |> form(actual_form, %{
-        expense: %{price: %{amount: "15.00", currency: "EUR"}}
+      render_hook(sheet, "expense_sheet_save", %{
+        mode: "add",
+        tail: to_string(first.id),
+        cells: [%{amount: "15.00", currency: "EUR"}]
       })
-      |> render_submit()
-
-      assert has_element?(view, "#budget-category-actual-new-form-#{category.id}-2")
 
       category = Planning.get_budget_category!(category.id)
 
-      assert category.actual_expenses
-             |> Enum.map(& &1.price)
-             |> Enum.sort() == Enum.sort([Money.new(:EUR, "25.00"), Money.new(:EUR, "15.00")])
+      assert Enum.map(category.actual_expenses, & &1.price) ==
+               [Money.new(:EUR, "25.00"), Money.new(:EUR, "15.00")]
 
-      actual_expenses_grid = "#budget-category-actual-expenses-#{category.id}"
-      assert has_element?(view, actual_expenses_grid)
-
-      assert has_element?(
-               view,
-               "#{actual_expenses_grid} #budget-category-actual-#{Enum.at(category.actual_expenses, 0).id}"
-             )
-
-      assert has_element?(
-               view,
-               "#{actual_expenses_grid} #budget-category-actual-#{Enum.at(category.actual_expenses, 1).id}"
-             )
-
-      view
-      |> element(actual_form)
-      |> render_keydown(%{"key" => "Escape"})
-
-      refute has_element?(view, actual_form)
-
-      html = render(view)
-      {last_expense_position, _length} = :binary.match(html, "budget-category-actual-")
-      {add_button_position, _length} = :binary.match(html, "Add actual expense for Souvenirs")
-
-      assert last_expense_position < add_button_position
+      grid = "#budget-category-actual-expenses-#{category.id}"
+      assert has_element?(view, grid, "€25.00")
+      assert has_element?(view, grid, "€15.00")
     end
 
     test "manually reconciles a zero-actual category after the trip is finished", %{conn: conn} do

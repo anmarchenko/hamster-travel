@@ -47,7 +47,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   @tabs ["itinerary", "activities", "budget", "notes"]
   @destination_tabs ["itinerary", "activities"]
-  @open_form_types ~w(destination accommodation transfer activity day-expense note budget-category budget-category-actual-expense budget-expense)
+  @open_form_types ~w(destination accommodation transfer activity day-expense note budget-category budget-expense)
   @budget_expense_sources ~w(hotel transfer activity)
   @drag_drop_edit_events ~w(move_transfer move_activity reorder_activity reorder_note)
   @day_move_types [:destinations, :accommodations, :transfers, :activities, :day_expenses]
@@ -487,7 +487,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
               socket
               |> assign_trip_state(updated_trip)
               |> assign(cover_upload_errors: [])
-              |> put_flash(:info, gettext("Cover updated."))
 
             {:error, reason} ->
               Logger.error("Failed to store cover for trip=#{trip.id}: #{inspect(reason)}")
@@ -565,9 +564,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       if Policy.authorized?(:delete, trip, user) do
         case Planning.delete_trip(trip) do
           {:ok, _trip} ->
-            socket
-            |> put_flash(:info, gettext("Trip deleted."))
-            |> push_navigate(to: socket.assigns.return_to)
+            push_navigate(socket, to: socket.assigns.return_to)
 
           {:error, _reason} ->
             put_flash(socket, :error, gettext("Failed to delete trip."))
@@ -632,9 +629,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       socket =
         case Planning.update_trip(trip, %{cover: nil}) do
           {:ok, updated_trip} ->
-            socket
-            |> assign_trip_state(updated_trip)
-            |> put_flash(:info, gettext("Cover removed."))
+            assign_trip_state(socket, updated_trip)
 
           {:error, _changeset} ->
             put_flash(socket, :error, gettext("Failed to remove cover."))
@@ -769,9 +764,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     socket =
       case Planning.remove_trip_participant(trip, current_user, participant_id) do
         {:ok, updated_trip} ->
-          socket
-          |> assign_trip_state(updated_trip)
-          |> put_flash(:info, gettext("Participant removed."))
+          assign_trip_state(socket, updated_trip)
 
         {:error, :cannot_remove_author} ->
           put_flash(socket, :error, gettext("The trip author cannot be removed."))
@@ -1050,6 +1043,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         <.tab_budget_view
           day_projection={@day_projection}
           trip={@trip}
+          current_user={@current_user}
           currency_options={@currency_options}
           budget={@budget}
           display_currency={@display_currency}
@@ -1560,6 +1554,7 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
   attr(:budget, Money, required: true)
   attr(:display_currency, :string, required: true)
   attr(:can_edit, :boolean, required: true)
+  attr(:current_user, HamsterTravel.Accounts.User, default: nil)
   attr(:open_form, :map, default: nil)
 
   attr(:currency_options, :list, required: true)
@@ -1581,21 +1576,11 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
           id={"budget-category-#{category.id}"}
           category={category}
           trip={@trip}
+          current_user={@current_user}
           currency_options={@currency_options}
           display_currency={@display_currency}
           can_edit={@can_edit}
           edit={open_form_matches?(@open_form, "edit", "budget-category", category.id)}
-          add_actual={
-            open_form_matches?(
-              @open_form,
-              "new",
-              "budget-category-actual-expense",
-              category.id
-            )
-          }
-          editing_actual_expense_id={
-            open_form_id(@open_form, "edit", "budget-category-actual-expense")
-          }
         />
         <.live_component
           module={BudgetCategoryNew}
@@ -2472,7 +2457,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
         socket
         |> assign_trip_state(updated_trip)
         |> assign(show_invite_participant_modal: false)
-        |> put_flash(:info, gettext("Participant added."))
 
       {:error, :already_participant} ->
         put_flash(socket, :error, gettext("This user is already participating in the trip."))
@@ -2762,12 +2746,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
     entity_id_exists?(trip.budget_categories, id)
   end
 
-  defp form_identity_exists?(trip, "edit", "budget-category-actual-expense", id) do
-    trip.budget_categories
-    |> Enum.flat_map(& &1.actual_expenses)
-    |> entity_id_exists?(id)
-  end
-
   defp form_identity_exists?(trip, "edit", "budget-expense", id) do
     case String.split(id, ":", parts: 2) do
       [source, expense_id] when source in @budget_expense_sources ->
@@ -2789,10 +2767,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
 
   defp new_form_ids(trip, "budget-category") do
     ["budget-category-new-#{trip.id}"]
-  end
-
-  defp new_form_ids(trip, "budget-category-actual-expense") do
-    Enum.map(trip.budget_categories, &to_string(&1.id))
   end
 
   defp new_form_ids(_trip, _type), do: []
@@ -2901,9 +2875,6 @@ defmodule HamsterTravelWeb.Planning.ShowTrip do
       Enum.filter(0..(trip.duration - 1), &(&1 >= item.start_day && &1 <= item.end_day))
     end
   end
-
-  defp open_form_id(%{mode: mode, type: type, id: form_id}, mode, type), do: form_id
-  defp open_form_id(_open_form, _mode, _type), do: nil
 
   defp handle_entity_event(entity_type, operation, entity, socket) do
     # Preload associations based on entity type

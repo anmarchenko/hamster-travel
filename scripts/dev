@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Give Phoenix and its watchers a process group we can stop together.
+set -m
+export MIX_ENV=dev
+op run --env-file=.env.op -- mix phx.server "$@" </dev/null &
+server=$!
+
+# Mix closes the port's stdin on exit, even when Ctrl+C bypasses this shell.
+(
+  while IFS= read -r _; do :; done
+  kill -- "-$server" 2>/dev/null || true
+) <&0 &
+watcher=$!
+
+trap 'kill -- "-$server" "$watcher" 2>/dev/null || true' EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+wait "$server"

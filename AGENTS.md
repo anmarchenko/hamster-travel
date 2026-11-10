@@ -23,7 +23,7 @@ mix ecto.setup
 ### Development Server
 ```bash
 # Start Phoenix server (http://localhost:4000)
-mix phx.server
+mix dev
 
 # Test credentials: bunny@hamsters.test / test1234
 ```
@@ -187,7 +187,7 @@ mix gettext
 - Follow Arrange/Act/Assert and use `async: true` when no DB access is needed.
 
 ## Project Rules
-- Check if port 4000 is already in use before running `mix phx.server`.
+- Check if port 4000 is already in use before running `mix dev`.
 - The user is GitHub user `anmarchenko` and owns `https://github.com/anmarchenko/hamster-travel`.
 - Never commit changes unless the user explicitly asks for a commit.
 - When the user explicitly asks to commit, push, or deploy, treat that request as authorization for the named actions and

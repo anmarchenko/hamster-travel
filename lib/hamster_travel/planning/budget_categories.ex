@@ -8,6 +8,7 @@ defmodule HamsterTravel.Planning.BudgetCategories do
   alias HamsterTravel.Planning.BudgetCategoryFoodSetting
   alias HamsterTravel.Planning.Common
   alias HamsterTravel.Planning.Expense
+  alias HamsterTravel.Planning.Policy
   alias HamsterTravel.Planning.PubSub
   alias HamsterTravel.Planning.Trip
   alias HamsterTravel.Repo
@@ -103,66 +104,60 @@ defmodule HamsterTravel.Planning.BudgetCategories do
   end
 
   def create_budget_category_actual_expense(%BudgetCategory{} = category, attrs \\ %{}) do
-    category = Repo.preload(category, [:trip])
-
-    Repo.transaction(fn ->
-      attrs = normalize_actual_expense_attrs(category, attrs)
-
-      %Expense{
-        trip_id: category.trip_id,
-        budget_category_id: category.id,
-        budget_role: Expense.budget_role_actual()
-      }
-      |> actual_expense_changeset(attrs)
-      |> Repo.insert()
-      |> case do
-        {:ok, expense} ->
-          case raise_estimate_if_actual_sum_exceeds(category) do
-            :ok -> expense
-            {:error, changeset} -> Repo.rollback(changeset)
-          end
-
-        {:error, changeset} ->
-          Repo.rollback(changeset)
+    with_locked_category(category.id, fn category ->
+      with {:ok, expense} <- insert_actual_expense(category, attrs),
+           :ok <- raise_estimate_if_actual_sum_exceeds(category) do
+        {:ok, expense}
       end
     end)
-    |> broadcast_expense_event([:budget_category_actual_expense, :created], category.trip_id)
+    |> PubSub.broadcast([:budget_category_actual_expense, :created], category.trip_id)
   end
 
   def update_budget_category_actual_expense(%Expense{} = expense, attrs) do
-    with :ok <- validate_actual_expense(expense),
-         %BudgetCategory{} = category <- get_actual_expense_category(expense) do
-      Repo.transaction(fn ->
-        expense
-        |> actual_expense_changeset(attrs)
-        |> Repo.update()
-        |> case do
-          {:ok, updated_expense} ->
-            case raise_estimate_if_actual_sum_exceeds(category) do
-              :ok -> updated_expense
-              {:error, changeset} -> Repo.rollback(changeset)
-            end
-
-          {:error, changeset} ->
-            Repo.rollback(changeset)
+    with :ok <- validate_actual_expense(expense) do
+      with_locked_category(expense.budget_category_id, fn category ->
+        with {:ok, current} <- find_actual_expense(category, expense.id),
+             {:ok, updated} <- Repo.update(actual_expense_changeset(current, attrs)),
+             :ok <- raise_estimate_if_actual_sum_exceeds(category) do
+          {:ok, updated}
         end
       end)
-      |> broadcast_expense_event([:budget_category_actual_expense, :updated], expense.trip_id)
+      |> PubSub.broadcast([:budget_category_actual_expense, :updated], expense.trip_id)
     end
   end
 
   def delete_budget_category_actual_expense(%Expense{} = expense) do
     with :ok <- validate_actual_expense(expense) do
-      Repo.delete(expense)
+      with_locked_category(expense.budget_category_id, fn category ->
+        with {:ok, current} <- find_actual_expense(category, expense.id), do: Repo.delete(current)
+      end)
       |> PubSub.broadcast([:budget_category_actual_expense, :deleted], expense.trip_id)
     end
   end
 
-  def recalculate_budget_category_estimate(%BudgetCategory{} = category) do
-    category = preloading(category)
-    total = actual_expenses_sum(category, category.trip.currency)
+  def save_actual_expense_cells(%BudgetCategory{} = category, user, [_ | _] = cells, opts)
+      when length(cells) <= 100 do
+    with_locked_category(category.id, fn category ->
+      if Policy.authorized?(:edit, category.trip, user) do
+        with :ok <- check_actual_expense_tail(category, Keyword.fetch(opts, :expected_tail)),
+             :ok <- write_actual_expense_cells(category, cells),
+             :ok <- raise_estimate_after_sheet_changes(category, cells) do
+          {:ok, preloading(category)}
+        end
+      else
+        {:error, :unauthorized}
+      end
+    end)
+    |> PubSub.broadcast([:budget_category_actual_expense, :batch_saved], category.trip_id)
+  end
 
-    set_estimate_price(category, total)
+  def save_actual_expense_cells(%BudgetCategory{}, _user, _cells, _opts),
+    do: {:error, :invalid_cells}
+
+  def recalculate_budget_category_estimate(%BudgetCategory{} = category) do
+    with_locked_category(category.id, fn category ->
+      set_estimate_price(category, actual_expenses_sum(category, category.trip.currency))
+    end)
     |> PubSub.broadcast([:budget_category, :updated], category.trip_id)
   end
 
@@ -366,6 +361,95 @@ defmodule HamsterTravel.Planning.BudgetCategories do
     |> Map.put_new("name", category.name)
   end
 
+  defp with_locked_category(id, operation) do
+    Repo.transact(fn ->
+      case Repo.one(
+             from category in BudgetCategory, where: category.id == ^id, lock: "FOR UPDATE"
+           ) do
+        %BudgetCategory{} = category -> operation.(Repo.preload(category, :trip))
+        nil -> {:error, :category_not_found}
+      end
+    end)
+  end
+
+  defp find_actual_expense(category, id) do
+    case Repo.get(actual_expenses_query(category.id), id) do
+      %Expense{} = expense -> {:ok, expense}
+      nil -> {:error, :stale_expense}
+    end
+  end
+
+  defp check_actual_expense_tail(category, {:ok, expected}) do
+    latest =
+      from(expense in actual_expenses_query(category.id),
+        order_by: [desc: expense.inserted_at, desc: expense.id],
+        select: expense.id,
+        limit: 1
+      )
+      |> Repo.one()
+
+    if latest == expected, do: :ok, else: {:error, :stale_append}
+  end
+
+  defp check_actual_expense_tail(_category, :error), do: :ok
+
+  defp insert_actual_expense(category, attrs) do
+    %Expense{
+      trip_id: category.trip_id,
+      budget_category_id: category.id,
+      budget_role: Expense.budget_role_actual()
+    }
+    |> actual_expense_changeset(normalize_actual_expense_attrs(category, attrs))
+    |> Repo.insert()
+  end
+
+  defp write_actual_expense_cells(category, cells) do
+    cells
+    |> Enum.with_index()
+    |> Enum.reduce_while(:ok, fn {cell, index}, :ok ->
+      case write_actual_expense_cell(category, cell) do
+        {:ok, _expense} -> {:cont, :ok}
+        {:error, reason} -> {:halt, {:error, {index, reason}}}
+      end
+    end)
+  end
+
+  defp write_actual_expense_cell(category, %{
+         id: id,
+         expected: %Money{} = expected,
+         price: price
+       })
+       when is_integer(id) and (is_nil(price) or is_struct(price, Money)) do
+    with {:ok, expense} <- find_actual_expense(category, id) do
+      if Money.equal?(expense.price, expected) do
+        save_actual_expense_price(expense, price)
+      else
+        {:error, {:stale_expense, expense.price}}
+      end
+    end
+  end
+
+  defp write_actual_expense_cell(category, %{price: %Money{} = price} = cell)
+       when not is_map_key(cell, :id) do
+    insert_actual_expense(category, %{price: price})
+  end
+
+  defp write_actual_expense_cell(_category, _cell), do: {:error, :invalid_cells}
+
+  defp save_actual_expense_price(expense, nil), do: Repo.delete(expense)
+
+  defp save_actual_expense_price(expense, price) do
+    Repo.update(actual_expense_changeset(expense, %{price: price}))
+  end
+
+  defp raise_estimate_after_sheet_changes(category, cells) do
+    if Enum.any?(cells, &match?(%{price: %Money{}}, &1)) do
+      raise_estimate_if_actual_sum_exceeds(category)
+    else
+      :ok
+    end
+  end
+
   defp actual_expense_changeset(%Expense{} = expense, attrs) do
     expense
     |> Expense.changeset(attrs)
@@ -506,12 +590,6 @@ defmodule HamsterTravel.Planning.BudgetCategories do
     end
   end
 
-  defp get_actual_expense_category(%Expense{} = expense) do
-    BudgetCategory
-    |> Repo.get!(expense.budget_category_id)
-    |> Repo.preload([:trip])
-  end
-
   defp category_name(%BudgetCategory{name: name}), do: name
   defp category_name(_category), do: nil
 
@@ -578,10 +656,4 @@ defmodule HamsterTravel.Planning.BudgetCategories do
 
   defp preloading(records) when is_list(records), do: Repo.preload(records, preloading_query())
   defp preloading(record), do: Repo.preload(record, preloading_query())
-
-  defp broadcast_expense_event({:ok, _expense} = result, event, trip_id) do
-    PubSub.broadcast(result, event, trip_id)
-  end
-
-  defp broadcast_expense_event({:error, _reason} = result, _event, _trip_id), do: result
 end

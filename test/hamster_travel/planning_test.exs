@@ -2431,6 +2431,74 @@ defmodule HamsterTravel.PlanningTest do
       assert Money.equal?(budget, Money.new(:EUR, 6000))
     end
 
+    test "saves sheet cells in order and rejects an entire batch when a cell is invalid or stale" do
+      author = user_fixture()
+      trip = trip_fixture(author, %{})
+      category = Planning.get_food_budget_category!(trip)
+      first = Money.new(:EUR, "100.00")
+      second = Money.new(:USD, "220.00")
+      append = [%{price: first}, %{price: second}]
+
+      assert {:ok, updated} =
+               Planning.save_actual_expense_cells(category, author, append, expected_tail: nil)
+
+      assert {:error, :stale_append} =
+               Planning.save_actual_expense_cells(category, author, append, expected_tail: nil)
+
+      assert [eur, usd] = updated.actual_expenses
+      assert Money.equal?(eur.price, first)
+      assert Money.equal?(usd.price, second)
+      assert Money.equal?(updated.estimated_expense.price, Money.new(:EUR, "300"))
+
+      edit = %{id: eur.id, expected: first, price: Money.new(:EUR, "125.00")}
+      stale = %{id: usd.id, expected: Money.new(:USD, "1.00"), price: Money.new(:USD, "300.00")}
+      invalid = %{price: Money.new(:EUR, 0)}
+
+      assert {:error, {1, %Ecto.Changeset{}}} =
+               Planning.save_actual_expense_cells(category, author, [edit, invalid])
+
+      assert {:error, {1, {:stale_expense, _current}}} =
+               Planning.save_actual_expense_cells(category, author, [edit, stale])
+
+      assert {:error, :unauthorized} =
+               Planning.save_actual_expense_cells(category, user_fixture(), [edit])
+
+      assert Planning.get_budget_category!(category.id).actual_expenses == updated.actual_expenses
+
+      assert {:ok, _category} = Planning.save_actual_expense_cells(category, author, [edit])
+
+      assert {:error, {0, {:stale_expense, _current}}} =
+               Planning.save_actual_expense_cells(category, author, [edit])
+
+      delete = %{id: eur.id, expected: edit.price, price: nil}
+
+      assert {:error, {1, {:stale_expense, _current}}} =
+               Planning.save_actual_expense_cells(category, author, [
+                 delete,
+                 %{stale | price: nil}
+               ])
+
+      assert Money.equal?(Planning.get_expense!(eur.id).price, edit.price)
+
+      assert {:ok, %{actual_expenses: [^usd]}} =
+               Planning.save_actual_expense_cells(category, author, [delete])
+    end
+
+    test "cannot save an expense from another category through the sheet" do
+      author = user_fixture()
+      trip = trip_fixture(author, %{})
+      food = Planning.get_food_budget_category!(trip)
+      {:ok, other} = Planning.create_budget_category(trip, %{name: "Other"})
+      price = Money.new(:EUR, 10)
+      {:ok, expense} = Planning.create_budget_category_actual_expense(other, %{price: price})
+      cell = %{id: expense.id, expected: price, price: Money.new(:EUR, 15)}
+
+      assert {:error, {0, :stale_expense}} =
+               Planning.save_actual_expense_cells(food, author, [cell])
+
+      assert Money.equal?(Planning.get_expense!(expense.id).price, price)
+    end
+
     test "creating an actual expense raises the estimate when the accumulated sum exceeds it" do
       trip = trip_fixture()
 

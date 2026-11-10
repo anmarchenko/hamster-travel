@@ -181,3 +181,164 @@ ul[data-task-list="true"] li > div p {
 .mapboxgl-popup-content {
     color: #1f2937;
 }
+
+.budget-category-field {
+    display: grid;
+    grid-template-rows: auto auto minmax(2.25rem, auto);
+}
+
+.budget-expense-sheet {
+    display: none;
+}
+
+.budget-expense-sheet-ready {
+    display: block;
+}
+
+.budget-expense-sheet-ready ~ .budget-expense-fallback {
+    display: none;
+}
+
+.budget-expense-sheet table {
+    --sheet-cell-width: 104px;
+    --sheet-row-height: 28px;
+    width: calc(28px + var(--sheet-columns) * var(--sheet-cell-width));
+    max-width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+}
+
+.budget-expense-sheet :is(th, td) {
+    @apply border border-zinc-200 dark:border-zinc-700;
+}
+
+.budget-expense-sheet th {
+    @apply bg-zinc-100 text-center text-xs font-normal text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400;
+    height: 22px;
+}
+
+.budget-expense-sheet .budget-sheet-gutter {
+    width: 28px;
+}
+
+.budget-expense-sheet td {
+    @apply p-0 text-left text-sm;
+    height: var(--sheet-row-height);
+}
+
+.budget-expense-sheet td[data-index] {
+    @apply cursor-cell;
+    user-select: none;
+}
+
+.budget-expense-sheet td > span {
+    @apply block truncate px-1.5;
+}
+
+.budget-expense-sheet td[data-converted] > span {
+    @apply underline decoration-dotted underline-offset-4;
+}
+
+.budget-expense-sheet td[data-add] {
+    @apply text-base text-primary-700 dark:text-primary-300;
+}
+
+.budget-expense-sheet:focus-within td[aria-selected="true"] {
+    @apply bg-primary-50 dark:bg-primary-900/30;
+}
+
+.budget-expense-sheet:focus-within td[data-anchor],
+.budget-expense-sheet td:focus-visible {
+    @apply outline outline-2 -outline-offset-2 outline-primary-600 dark:outline-primary-400;
+}
+
+.budget-expense-sheet td input {
+    @apply block w-full border-0 bg-white px-1.5 py-0 text-sm text-inherit dark:bg-zinc-900;
+    min-height: calc(var(--sheet-row-height) - 1px);
+}
+
+.budget-expense-sheet td input[aria-invalid="true"] {
+    @apply ring-2 ring-inset ring-rose-600 dark:ring-rose-400;
+}
+
+.budget-expense-sheet [data-error] {
+    @apply text-rose-700 dark:text-rose-300;
+}
+
+.budget-sheet-action {
+    @apply rounded border border-zinc-200 px-1.5 py-0.5 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-zinc-800;
+}
+
+.budget-sheet-action.budget-sheet-native-currency {
+    @apply pr-9;
+}
+
+.budget-sheet-edit-icon,
+.budget-expense-sheet [data-sheet-editor-row] .budget-sheet-edit-label {
+    display: none;
+}
+
+.budget-expense-sheet [data-sheet-editor-row] .budget-sheet-edit-icon {
+    @apply inline-flex align-middle;
+}
+
+.budget-expense-sheet [data-sheet-editor-row] td {
+    @apply border-0 py-1;
+}
+
+.budget-expense-sheet [data-sheet-editor-row] [data-sheet-editor] {
+    @apply justify-end gap-1;
+}
+
+.budget-sheet-mobile-currency,
+.budget-sheet-currency-picker:not([open]) {
+    display: none;
+}
+
+.budget-sheet-currency-picker[open] {
+    @apply fixed m-0 flex -translate-x-1/2 -translate-y-1/2 flex-col gap-2 overflow-hidden rounded-lg bg-white p-3 text-zinc-900 shadow-xl dark:bg-zinc-800 dark:text-zinc-100;
+    inset: auto;
+    left: 50%;
+    top: 50%;
+    width: min(22rem, calc(var(--currency-width, 100vw) - 1rem));
+    max-height: calc(var(--currency-height, 100vh) - 1rem);
+}
+
+.budget-sheet-currency-picker::backdrop {
+    @apply bg-black/40;
+}
+
+.budget-sheet-currency-picker [data-currency-choice] {
+    @apply block w-full rounded px-2 text-left hover:bg-zinc-100 focus-visible:bg-zinc-100 dark:hover:bg-zinc-700 dark:focus-visible:bg-zinc-700;
+    min-height: 44px;
+}
+
+.budget-sheet-currency-picker [aria-current="true"] {
+    @apply bg-primary-50 font-medium dark:bg-primary-900/30;
+}
+
+@media (pointer: coarse), (max-width: 639px) {
+    .budget-sheet-currency-picker-ready .budget-sheet-native-currency {
+        display: none;
+    }
+
+    .budget-sheet-currency-picker-ready .budget-sheet-mobile-currency {
+        display: inline-flex;
+    }
+}
+
+@media (pointer: coarse) {
+    .budget-expense-sheet table {
+        --sheet-row-height: 44px;
+    }
+
+    .budget-expense-sheet td input {
+        font-size: 16px;
+    }
+
+    .budget-sheet-action {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}

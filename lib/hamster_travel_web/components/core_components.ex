@@ -167,17 +167,15 @@ defmodule HamsterTravelWeb.CoreComponents do
   end
 
   @doc """
-  Renders flash notices.
+  Renders an error flash notice.
 
    ## Examples
 
-       <.flash kind={:info} flash={@flash} />
-      <.flash kind={:info} phx-mounted={show("#flash")}>Welcome Back!</.flash>
+       <.flash flash={@flash} />
   """
   attr(:id, :string, default: "flash", doc: "the optional id of flash container")
   attr(:flash, :map, default: %{}, doc: "the map of flash messages to display")
   attr(:title, :string, default: nil)
-  attr(:kind, :atom, values: [:info, :error], doc: "used for styling and flash lookup")
   attr(:rest, :global, doc: "the arbitrary HTML attributes to add to the flash container")
 
   slot(:inner_block, doc: "the optional inner block that renders the flash message")
@@ -185,20 +183,15 @@ defmodule HamsterTravelWeb.CoreComponents do
   def flash(assigns) do
     ~H"""
     <div
-      :if={msg = render_slot(@inner_block) || Phoenix.Flash.get(@flash, @kind)}
+      :if={msg = render_slot(@inner_block) || Phoenix.Flash.get(@flash, :error)}
       id={@id}
-      phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
+      phx-click={JS.push("lv:clear-flash", value: %{key: :error}) |> hide("##{@id}")}
       role="alert"
-      class={[
-        "fixed top-2 right-2 w-80 sm:w-96 z-50 rounded-lg p-3 ring-1",
-        @kind == :info && "bg-emerald-50 text-emerald-800 ring-emerald-500 fill-cyan-900",
-        @kind == :error && "bg-rose-50 text-rose-900 shadow-md ring-rose-500 fill-rose-900"
-      ]}
+      class="fixed top-2 right-2 w-80 sm:w-96 z-50 rounded-lg p-3 ring-1 bg-rose-50 text-rose-900 shadow-md ring-rose-500 fill-rose-900"
       {@rest}
     >
       <p :if={@title} class="flex items-center gap-1.5 text-sm font-semibold leading-6">
-        <.icon :if={@kind == :info} name="hero-information-circle" class="h-4 w-4" />
-        <.icon :if={@kind == :error} name="hero-exclamation-circle" class="h-4 w-4" />
+        <.icon name="hero-exclamation-circle" class="h-4 w-4" />
         {@title}
       </p>
       <p class="mt-2 text-sm leading-5">{msg}</p>
@@ -220,8 +213,7 @@ defmodule HamsterTravelWeb.CoreComponents do
 
   def flash_group(assigns) do
     ~H"""
-    <.flash kind={:info} title={gettext("Success!")} flash={@flash} />
-    <.flash kind={:error} title={gettext("Error!")} flash={@flash} />
+    <.flash title={gettext("Error!")} flash={@flash} />
     <div
       id="disconnected"
       data-offline-notice
@@ -875,7 +867,7 @@ defmodule HamsterTravelWeb.CoreComponents do
           />
         </div>
       </div>
-      <div :if={@reserve_error_space} class="h-9 pt-3">
+      <div :if={@reserve_error_space} class="min-h-9 pt-3">
         <.error :for={msg <- @errors} class="!mt-0">{msg}</.error>
       </div>
       <.error :for={msg <- @errors} :if={!@reserve_error_space}>{msg}</.error>

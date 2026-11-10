@@ -109,7 +109,6 @@ defmodule HamsterTravelWeb.Accounts.Profile do
           socket
           |> assign(current_user: updated_user)
           |> assign(avatar_upload_errors: [])
-          |> put_flash(:info, gettext("Avatar removed."))
 
         {:error, changeset} ->
           Logger.error(
@@ -132,7 +131,6 @@ defmodule HamsterTravelWeb.Accounts.Profile do
           socket
           |> assign(current_user: updated_user)
           |> assign(cover_upload_errors: [])
-          |> put_flash(:info, gettext("Cover removed."))
 
         {:error, changeset} ->
           Logger.error(

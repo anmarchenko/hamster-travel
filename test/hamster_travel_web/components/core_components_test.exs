@@ -5,6 +5,16 @@ defmodule HamsterTravelWeb.CoreComponentsTest do
 
   alias HamsterTravelWeb.CoreComponents
 
+  test "renders error flashes and ignores success flashes" do
+    html =
+      render_component(&CoreComponents.flash_group/1,
+        flash: %{"error" => "Could not save.", "info" => "Saved successfully."}
+      )
+
+    assert html =~ "Could not save."
+    refute html =~ "Saved successfully."
+  end
+
   describe "offline edit boundaries" do
     test "modals are always part of an offline lock region" do
       html =

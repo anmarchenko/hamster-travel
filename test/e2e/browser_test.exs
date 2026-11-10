@@ -35,6 +35,16 @@ defmodule HamsterTravelWeb.BrowserTest do
     recovery_trip = trip_fixture(user, %{name: "Recovery E2E"})
     existing_expense = day_expense_fixture(%{trip_id: recovery_trip.id})
     pdf_trip = trip_fixture(user, %{name: "PDF E2E"})
+    sheet_trip = trip_fixture(user, %{name: "Expense Sheet E2E"})
+    mobile_sheet_trip = trip_fixture(user, %{name: "Mobile Expense Sheet E2E", currency: "USD"})
+    food = Planning.get_food_budget_category!(sheet_trip)
+    {:ok, _other} = Planning.create_budget_category(sheet_trip, %{name: "Other"})
+
+    for {currency, amount} <- [{:EUR, 7}, {:EUR, 11}, {:USD, 22}, {:EUR, 17}, {:EUR, 20}] do
+      {:ok, _expense} =
+        Planning.create_budget_category_actual_expense(food, %{price: Money.new(currency, amount)})
+    end
+
     base_url = start_browser_server!()
 
     {output, status} =
@@ -48,7 +58,9 @@ defmodule HamsterTravelWeb.BrowserTest do
           {"E2E_COVER_TRIP", cover_trip.slug},
           {"E2E_OFFLINE_TRIP", offline_trip.slug},
           {"E2E_RECOVERY_TRIP", recovery_trip.slug},
-          {"E2E_PDF_TRIP", pdf_trip.slug}
+          {"E2E_PDF_TRIP", pdf_trip.slug},
+          {"E2E_SHEET_TRIP", sheet_trip.slug},
+          {"E2E_MOBILE_SHEET_TRIP", mobile_sheet_trip.slug}
         ]
       )
 

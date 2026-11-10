@@ -189,10 +189,7 @@ defmodule HamsterTravelWeb.UserSettingsLive do
 
     case Accounts.update_user_email(user, password, user_params) do
       {:ok, _user} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, gettext("Email changed successfully."))
-         |> push_navigate(to: ~p"/profile")}
+        {:noreply, push_navigate(socket, to: ~p"/profile")}
 
       {:error, changeset} ->
         {:noreply, assign(socket, :email_form, to_form(Map.put(changeset, :action, :insert)))}
@@ -237,17 +234,11 @@ defmodule HamsterTravelWeb.UserSettingsLive do
       {:ok, user} ->
         locale_changed = user.locale != socket.assigns.current_user.locale
 
-        {:noreply,
-         if(locale_changed,
-           do:
-             socket
-             |> put_flash(:info, gettext("Settings updated successfully."))
-             |> redirect(to: ~p"/profile"),
-           else:
-             socket
-             |> put_flash(:info, gettext("Settings updated successfully."))
-             |> push_navigate(to: ~p"/profile")
-         )}
+        if locale_changed do
+          {:noreply, redirect(socket, to: ~p"/profile")}
+        else
+          {:noreply, push_navigate(socket, to: ~p"/profile")}
+        end
 
       {:error, changeset} ->
         {:noreply, assign(socket, :general_form, to_form(Map.put(changeset, :action, :insert)))}

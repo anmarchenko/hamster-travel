@@ -53,14 +53,15 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryForm do
       >
         <div
           :if={!@food}
-          class="grid grid-cols-1 gap-3 md:grid-cols-2 md:items-end"
+          class="grid grid-cols-1 items-start gap-3 md:grid-cols-2"
         >
           <.field
             field={@form[:name]}
             type="text"
             label={gettext("Category name")}
             placeholder={gettext("e.g. Souvenirs")}
-            wrapper_class="mb-0"
+            wrapper_class="budget-category-field"
+            no_margin
             required
           />
 
@@ -71,6 +72,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryForm do
               label={gettext("Estimated cost")}
               default_currency={@trip.currency}
               currency_options={@currency_options}
+              reserve_error_space
               blank_zero={@action == :new}
             />
           </.inputs_for>
@@ -115,6 +117,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryForm do
             label={gettext("Estimated cost")}
             default_currency={@trip.currency}
             currency_options={@currency_options}
+            reserve_error_space
             blank_zero={@action == :new}
           />
         </.inputs_for>
@@ -141,6 +144,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryForm do
                 label={gettext("Price per day per person")}
                 default_currency={@trip.currency}
                 currency_options={@currency_options}
+                reserve_error_space
                 blank_zero={@action == :new}
               />
             </div>
@@ -150,6 +154,8 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryForm do
               min="1"
               step="1"
               label={gettext("Days")}
+              wrapper_class="budget-category-field"
+              no_margin
             />
             <.field
               field={food_form[:people_count]}
@@ -157,6 +163,8 @@ defmodule HamsterTravelWeb.Planning.BudgetCategoryForm do
               min="1"
               step="1"
               label={gettext("People")}
+              wrapper_class="budget-category-field"
+              no_margin
             />
           </div>
         </.inputs_for>

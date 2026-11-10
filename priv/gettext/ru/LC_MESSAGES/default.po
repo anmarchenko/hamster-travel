@@ -134,7 +134,7 @@ msgstr "Адрес"
 #: lib/hamster_travel_web/live/planning_live/components/budget_category_actual_expense.ex:92
 #: lib/hamster_travel_web/live/planning_live/components/budget_category_actual_expense.ex:93
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:82
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Edit"
 msgstr "Редактировать"
 
@@ -365,11 +365,6 @@ msgstr "Новый черновик"
 msgid "Edit trip"
 msgstr "Редактировать"
 
-#: lib/hamster_travel_web/controllers/user_session_controller.ex:10
-#, elixir-autogen, elixir-format
-msgid "Account created successfully!"
-msgstr "Аккаунт создан"
-
 #: lib/hamster_travel_web/components/core_components.ex:220
 #, elixir-autogen, elixir-format
 msgid "Error!"
@@ -379,26 +374,6 @@ msgstr "Ошибка"
 #, elixir-autogen, elixir-format
 msgid "Invalid email or password"
 msgstr "Неправильный email или пароль"
-
-#: lib/hamster_travel_web/controllers/user_session_controller.ex:41
-#, elixir-autogen, elixir-format
-msgid "Logged out successfully."
-msgstr "Выход выполнен успешно"
-
-#: lib/hamster_travel_web/controllers/user_session_controller.ex:16
-#, elixir-autogen, elixir-format
-msgid "Password updated successfully!"
-msgstr "Пароль успешно обновлён"
-
-#: lib/hamster_travel_web/components/core_components.ex:219
-#, elixir-autogen, elixir-format
-msgid "Success!"
-msgstr "Успех"
-
-#: lib/hamster_travel_web/controllers/user_session_controller.ex:20
-#, elixir-autogen, elixir-format
-msgid "Welcome back!"
-msgstr "Добро пожаловать!"
 
 #: lib/hamster_travel_web/live/accounts_live/profile.html.heex:294
 #: lib/hamster_travel_web/live/planning_live/components/destination_form.ex:38
@@ -886,11 +861,6 @@ msgstr "Вы точно-точно уверены, что хотите удал�
 msgid "Failed to delete trip."
 msgstr "Не удалось удалить путешествие."
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:575
-#, elixir-autogen, elixir-format
-msgid "Trip deleted."
-msgstr "Путешествие удалено."
-
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:2137
 #, elixir-autogen, elixir-format
 msgid "Add cover"
@@ -911,17 +881,6 @@ msgstr "Перетащите изображение или выберите фа
 #, elixir-autogen, elixir-format
 msgid "Failed to update cover."
 msgstr "Не удалось обновить обложку."
-
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:140
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:643
-#, elixir-autogen, elixir-format
-msgid "Cover removed."
-msgstr "Обложка удалена"
-
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:491
-#, elixir-autogen, elixir-format
-msgid "Cover updated."
-msgstr "Обложка обновлена"
 
 #: lib/hamster_travel_web/live/accounts_live/profile.ex:147
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:646
@@ -1039,11 +998,6 @@ msgstr "Новый пароль"
 msgid "Password settings"
 msgstr "Настройки пароля"
 
-#: lib/hamster_travel_web/live/user_settings_live.ex:194
-#, elixir-autogen, elixir-format
-msgid "Email changed successfully."
-msgstr "Email успешно изменён"
-
 #: lib/hamster_travel_web/live/user_settings_live.ex:42
 #, elixir-autogen, elixir-format
 msgid "Default currency"
@@ -1078,17 +1032,6 @@ msgstr "Русский"
 #, elixir-autogen, elixir-format
 msgid "Save settings"
 msgstr "Сохранить настройки"
-
-#: lib/hamster_travel_web/live/user_settings_live.ex:244
-#: lib/hamster_travel_web/live/user_settings_live.ex:248
-#, elixir-autogen, elixir-format
-msgid "Settings updated successfully."
-msgstr "Настройки успешно обновлены."
-
-#: lib/hamster_travel_web/live/accounts_live/profile.ex:117
-#, elixir-autogen, elixir-format
-msgid "Avatar removed."
-msgstr "Аватар удалён"
 
 #: lib/hamster_travel_web/live/accounts_live/profile.ex:124
 #, elixir-autogen, elixir-format
@@ -1188,20 +1131,10 @@ msgstr "В эту поездку можно добавлять только др
 msgid "Only trip participants can add participants."
 msgstr "Только участники поездки могут добавлять новых участников."
 
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:2417
-#, elixir-autogen, elixir-format
-msgid "Participant added."
-msgstr "Участник добавлен."
-
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:793
 #, elixir-autogen, elixir-format
 msgid "Participant not found."
 msgstr "Участник не найден."
-
-#: lib/hamster_travel_web/live/planning_live/show_trip.ex:784
-#, elixir-autogen, elixir-format
-msgid "Participant removed."
-msgstr "Участник удален."
 
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:733
 #: lib/hamster_travel_web/live/planning_live/show_trip.ex:756
@@ -1732,3 +1665,124 @@ msgstr "Выберите хотя бы один тип объектов."
 #, elixir-autogen, elixir-format
 msgid "Could not save the day order. Reopen the dialog and try again."
 msgstr "Не удалось сохранить порядок дней. Откройте окно заново и попробуйте ещё раз."
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_expense_sheet.ex:50
+#, elixir-autogen, elixir-format
+msgid "%{range} selected"
+msgstr "Выделено %{range}"
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_category.ex:146
+#, elixir-autogen, elixir-format
+msgid "Actual expenses"
+msgstr "Фактические расходы"
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_category.ex:152
+#, elixir-autogen, elixir-format
+msgid "Actual expenses for %{category}"
+msgstr "Фактические расходы в категории «%{category}»"
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_category.ex:181
+#, elixir-autogen, elixir-format
+msgid "Add expenses"
+msgstr "Добавить расходы"
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_expense_sheet.ex:47
+#, elixir-autogen, elixir-format
+msgid "Amount in %{currency}"
+msgstr "Сумма в %{currency}"
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_expense_sheet.ex:57
+#, elixir-autogen, elixir-format
+msgid "Amounts to add: %{count}"
+msgstr "Сумм к добавлению: %{count}"
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_expense_sheet.ex:52
+#, elixir-autogen, elixir-format
+msgid "Connection interrupted. Check the saved values before retrying."
+msgstr "Связь прервалась. Проверьте сохранённые суммы перед повторной попыткой."
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_expense_sheet.ex:42
+#, elixir-autogen, elixir-format
+msgid "Could not save actual expenses."
+msgstr "Не удалось сохранить фактические расходы."
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_category.ex:174
+#, elixir-autogen, elixir-format
+msgid "Currency for pasted expenses"
+msgstr "Валюта вставляемых расходов"
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_expense_sheet.ex:33
+#, elixir-autogen, elixir-format
+msgid "Edit this amount in its original currency."
+msgstr "Измените эту сумму в исходной валюте."
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_expense_sheet.ex:31
+#, elixir-autogen, elixir-format
+msgid "Enter a positive amount using digits and a decimal separator."
+msgstr "Введите положительную сумму цифрами с десятичным разделителем."
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_expense_sheet.ex:49
+#, elixir-autogen, elixir-format
+msgid "New expense in %{currency}"
+msgstr "Новый расход в %{currency}"
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_expense_sheet.ex:48
+#, elixir-autogen, elixir-format
+msgid "Original amount: %{amount}"
+msgstr "Исходная сумма: %{amount}"
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_expense_sheet.ex:54
+#, elixir-autogen, elixir-format
+msgid "Paste must fit existing cells. Paste into + to append expenses."
+msgstr "Вставляемые данные должны помещаться в существующие ячейки. Чтобы добавить расходы, вставьте данные в ячейку «+»."
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_expense_sheet.ex:53
+#, elixir-autogen, elixir-format
+msgid "Paste up to 100 amounts at a time."
+msgstr "За один раз можно вставить до 100 сумм."
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_expense_sheet.ex:51
+#, elixir-autogen, elixir-format
+msgid "Saving…"
+msgstr "Сохраняем…"
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_expense_sheet.ex:56
+#, elixir-autogen, elixir-format
+msgid "This amount could not be converted for copying."
+msgstr "Не удалось пересчитать сумму для копирования."
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_expense_sheet.ex:37
+#, elixir-autogen, elixir-format
+msgid "This expense changed to %{amount}. Cancel and reopen it to edit the current value."
+msgstr "Сумма расхода изменилась на %{amount}. Отмените редактирование и снова откройте ячейку."
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_expense_sheet.ex:34
+#, elixir-autogen, elixir-format
+msgid "This expense is no longer available."
+msgstr "Этот расход больше недоступен."
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_expense_sheet.ex:40
+#, elixir-autogen, elixir-format
+msgid "The expense list changed. Reopen the add cell before trying again."
+msgstr "Список расходов изменился. Снова откройте ячейку добавления."
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_category.ex:157
+#, elixir-autogen, elixir-format
+msgid "Currency"
+msgstr "Валюта"
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_expense_sheet.ex:61
+#, elixir-autogen, elixir-format
+msgid "Select up to 100 expenses to delete at a time."
+msgstr "За один раз можно удалить до 100 расходов."
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_category.ex:247
+#: lib/hamster_travel_web/live/planning_live/components/budget_category.ex:248
+#, elixir-autogen, elixir-format
+msgid "Search currency codes"
+msgstr "Поиск по коду валюты"
+
+#: lib/hamster_travel_web/live/planning_live/components/budget_category.ex:254
+#, elixir-autogen, elixir-format
+msgid "No matching currencies"
+msgstr "Подходящие валюты не найдены"
