@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -z "${HAMSTER_TRAVEL_PRODUCTION_ENV_FILE:-}" ]]; then
+  exec /usr/bin/bash "$(dirname -- "${BASH_SOURCE[0]}")/with-production-credentials" infra "$0" "$@"
+fi
+
+set -a
+# shellcheck disable=SC1090
+source "$HAMSTER_TRAVEL_PRODUCTION_ENV_FILE"
+set +a
+export AWS_ACCESS_KEY_ID="$HAMSTER_TRAVEL_BACKUP_AWS_ACCESS_KEY_ID"
+export AWS_SECRET_ACCESS_KEY="$HAMSTER_TRAVEL_BACKUP_AWS_SECRET_ACCESS_KEY"
+export AWS_REGION="$HAMSTER_TRAVEL_BACKUP_AWS_REGION"
+export RESTIC_REPOSITORY="${RESTIC_REPOSITORY:-s3:s3.${AWS_REGION}.amazonaws.com/${HAMSTER_TRAVEL_BACKUP_AWS_S3_BUCKET}/beelink-infra-backups}"
+export RESTIC_PASSWORD_FILE="${HAMSTER_TRAVEL_INFRA_RESTIC_PASSWORD_FILE:?Restic password file is required}"
+exec /usr/bin/restic "$@"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ -z "${HAMSTER_TRAVEL_PRODUCTION_ENV_FILE:-}" && -f /etc/hamster-travel/credentials/infra.toml ]]; then
+if [[ -z "${HAMSTER_TRAVEL_PRODUCTION_ENV_FILE:-}" ]]; then
   exec /usr/bin/bash "$(dirname -- "${BASH_SOURCE[0]}")/with-production-credentials" infra "$0" "$@"
 fi
 

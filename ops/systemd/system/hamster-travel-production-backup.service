@@ -5,14 +5,10 @@ Wants=network-online.target docker.service
 
 [Service]
 Type=oneshot
-User=marvin
-Group=marvin
-ExecStart=/home/marvin/Projects/hamster-travel/scripts/backup-production
+ExecStart=/usr/local/libexec/hamster-production-credentials run db /home/marvin/Projects/hamster-travel/scripts/backup-production
 Environment=PATH=/usr/bin
 UMask=0077
-RuntimeDirectory=hamster-travel-db-backup
-RuntimeDirectoryMode=0700
-LoadCredentialEncrypted=age-identity:/etc/hamster-travel/credentials/db.cred
+LoadCredentialEncrypted=op-token:/etc/hamster-travel/credentials/backup-op.cred
 Nice=10
 IOSchedulingClass=best-effort
 IOSchedulingPriority=7
