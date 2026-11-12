@@ -1522,6 +1522,13 @@ msgstr ""
 msgid "Set estimate to actual expenses total"
 msgstr ""
 
+#: lib/hamster_travel_web/live/planning_live/components/budget_category.ex:81
+#: lib/hamster_travel_web/live/planning_live/components/budget_category.ex:105
+#: lib/hamster_travel_web/live/planning_live/components/budget_category.ex:106
+#, elixir-autogen, elixir-format
+msgid "Estimate follows actual expenses"
+msgstr ""
+
 #: lib/hamster_travel_web/live/planning_live/components/budget_category_form.ex:91
 #, elixir-autogen, elixir-format
 msgid "Total amount"

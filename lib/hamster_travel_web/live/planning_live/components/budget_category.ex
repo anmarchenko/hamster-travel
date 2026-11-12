@@ -8,6 +8,7 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
   alias HamsterTravel.Planning
   alias HamsterTravel.Planning.BudgetCategory, as: Category
   alias HamsterTravel.Planning.Trip
+  alias HamsterTravelWeb.Cldr
   alias HamsterTravelWeb.Planning.BudgetExpenseSheet
 
   attr :currency_options, :list, required: true
@@ -37,12 +38,19 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
   end
 
   def render(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :spending_progress,
+        Planning.budget_category_spending_progress(assigns.category, assigns.trip.currency)
+      )
+
     ~H"""
     <div
       id={"budget-category-#{@category.id}"}
       class="max-w-3xl py-1 min-[1920px]:max-w-6xl"
     >
-      <div class="flex w-full items-center gap-2 py-1.5 2xl:text-lg">
+      <div class="flex w-full items-start gap-2 py-1.5 leading-6 2xl:text-lg">
         <span class="flex min-w-0 flex-1 items-center gap-1.5">
           <span class="min-w-0 truncate font-medium">
             {category_label(@category)}
@@ -62,23 +70,53 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
           <button
             :if={
               @can_edit &&
-                (@trip.status == Trip.finished() || Enum.any?(@category.actual_expenses))
+                (@category.recalculated || @trip.status == Trip.finished() ||
+                   Enum.any?(@category.actual_expenses))
             }
             type="button"
             phx-click="recalculate"
             phx-target={@myself}
-            title={gettext("Set estimate to actual expenses total")}
+            title={
+              if @category.recalculated do
+                gettext("Estimate follows actual expenses")
+              else
+                gettext("Set estimate to actual expenses total")
+              end
+            }
             aria-label={gettext("Set estimate to actual expenses total")}
-            class="inline-flex h-5 w-5 shrink-0 items-center justify-center text-zinc-400 transition-colors hover:text-primary-600 dark:hover:text-primary-300"
+            class={[
+              "inline-flex h-5 w-5 shrink-0 items-center justify-center transition-colors hover:text-primary-600 dark:hover:text-primary-300",
+              if(@category.recalculated,
+                do: "text-zinc-700 dark:text-zinc-200",
+                else: "text-zinc-400"
+              )
+            ]}
           >
-            <.icon name="hero-arrow-path" class="h-4 w-4" />
+            <.icon
+              name={if(@category.recalculated, do: "hero-arrow-path-solid", else: "hero-arrow-path")}
+              class="h-4 w-4"
+            />
           </button>
+          <.icon
+            :if={@category.recalculated && !@can_edit}
+            name="hero-arrow-path-solid"
+            class="h-4 w-4 shrink-0 text-zinc-700 dark:text-zinc-200"
+            role="img"
+            aria-label={gettext("Estimate follows actual expenses")}
+            title={gettext("Estimate follows actual expenses")}
+          />
         </span>
-        <div class="ml-auto flex shrink-0 justify-end sm:w-44">
+        <div class="ml-auto flex shrink-0 flex-col items-end sm:w-44">
           <.money_display
             money={@category.estimated_expense.price}
             display_currency={@display_currency}
             class="text-right text-base font-normal tabular-nums text-zinc-500 dark:text-zinc-400 2xl:text-lg"
+          />
+          <.spending_progress
+            :if={@spending_progress}
+            id={"budget-category-spending-#{@category.id}"}
+            spending_progress={@spending_progress}
+            display_currency={@display_currency}
           />
         </div>
       </div>
@@ -284,6 +322,47 @@ defmodule HamsterTravelWeb.Planning.BudgetCategory do
           />
         </div>
       </details>
+    </div>
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :spending_progress, :any, required: true
+  attr :display_currency, :string, required: true
+
+  defp spending_progress(%{spending_progress: {spent, fraction}} = assigns) do
+    assigns =
+      assign(assigns,
+        spent: spent,
+        percent: Cldr.Number.to_string!(fraction, format: :percent, fractional_digits: 2),
+        dash_length: Decimal.mult(fraction, 100) |> Decimal.to_string(:normal)
+      )
+
+    ~H"""
+    <div
+      id={@id}
+      class="flex items-center gap-1.5 text-xs tabular-nums text-zinc-500 dark:text-zinc-400"
+    >
+      <svg
+        viewBox="0 0 16 16"
+        class="size-3.5 shrink-0 cursor-help fill-none stroke-current"
+        stroke-width="2"
+        role="img"
+        aria-label={@percent}
+      >
+        <title>{@percent}</title>
+        <circle cx="8" cy="8" r="6" class="text-zinc-300 dark:text-zinc-600" />
+        <circle
+          cx="8"
+          cy="8"
+          r="6"
+          pathLength="100"
+          stroke-dasharray={"#{@dash_length} 100"}
+          transform="rotate(-90 8 8)"
+          class="text-primary-600 dark:text-primary-400"
+        />
+      </svg>
+      <.money_display money={@spent} display_currency={@display_currency} />
     </div>
     """
   end

@@ -997,7 +997,9 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       assert [actual_expense] = category.actual_expenses
       assert actual_expense.price == Money.new(:EUR, "30.00")
       assert category.estimated_expense.price == Money.new(:EUR, "60.00")
-      assert_eventually_contains(view, "€30.00")
+      progress = "#budget-category-spending-#{category.id}"
+      assert has_element?(view, progress, "€30.00")
+      assert has_element?(view, "#{progress} svg title", "50.00%")
 
       view
       |> element("#budget-category-#{category.id} [phx-click='recalculate']")
@@ -1006,6 +1008,8 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       category = Planning.get_budget_category!(category.id)
       assert category.estimated_expense.price == Money.new(:EUR, "30.00")
       assert category.food_setting.price_per_day == Money.new(:EUR, "5.00")
+      refute has_element?(view, progress)
+      assert has_element?(view, "#budget-category-#{category.id} .hero-arrow-path-solid")
 
       target = %{id: to_string(actual_expense.id), expected: "30.00", expected_currency: "EUR"}
 
@@ -1027,7 +1031,9 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
 
       category = Planning.get_budget_category!(category.id)
       assert category.actual_expenses == []
-      assert category.estimated_expense.price == Money.new(:EUR, "80.00")
+      assert Money.equal?(category.estimated_expense.price, Money.new(:EUR, 0))
+      assert category.recalculated
+      assert has_element?(view, "#budget-category-#{category.id} .hero-arrow-path-solid")
       refute has_element?(view, "#budget-category-actual-expenses-#{category.id}")
 
       view
@@ -1056,6 +1062,8 @@ defmodule HamsterTravelWeb.Planning.ShowTripTest do
       category = Planning.get_food_budget_category!(trip)
       assert category.estimated_expense.price == Money.new(:EUR, "120.00")
       assert category.food_setting.calculation_mode == "total"
+      refute category.recalculated
+      assert has_element?(view, progress, "€0.00")
     end
 
     test "adds actual expenses continuously from the bottom of their category", %{conn: conn} do

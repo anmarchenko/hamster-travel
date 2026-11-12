@@ -16,6 +16,7 @@ defmodule HamsterTravel.Planning.BudgetCategory do
   schema "budget_categories" do
     field :name, :string
     field :kind, :string, default: @kind_general
+    field :recalculated, :boolean, default: false
 
     belongs_to(:trip, Trip, type: :binary_id)
 

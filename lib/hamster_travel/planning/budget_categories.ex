@@ -54,16 +54,13 @@ defmodule HamsterTravel.Planning.BudgetCategories do
   end
 
   def update_budget_category(%BudgetCategory{} = category, attrs) do
-    category =
+    with_locked_category(category.id, fn category ->
       category
-      |> Repo.preload([:trip | preloading_query()])
-
-    attrs = normalize_category_attrs(category.trip, attrs, category)
-
-    category
-    |> BudgetCategory.changeset(attrs)
-    |> Repo.update()
-    |> Common.preload_after_db_call(&preloading(&1))
+      |> preloading()
+      |> category_update_changeset(attrs)
+      |> maybe_reset_recalculated()
+      |> Repo.update()
+    end)
     |> PubSub.broadcast([:budget_category, :updated], category.trip_id)
   end
 
@@ -106,7 +103,7 @@ defmodule HamsterTravel.Planning.BudgetCategories do
   def create_budget_category_actual_expense(%BudgetCategory{} = category, attrs \\ %{}) do
     with_locked_category(category.id, fn category ->
       with {:ok, expense} <- insert_actual_expense(category, attrs),
-           :ok <- raise_estimate_if_actual_sum_exceeds(category) do
+           {:ok, _category} <- sync_estimate_to_actuals(category) do
         {:ok, expense}
       end
     end)
@@ -118,7 +115,7 @@ defmodule HamsterTravel.Planning.BudgetCategories do
       with_locked_category(expense.budget_category_id, fn category ->
         with {:ok, current} <- find_actual_expense(category, expense.id),
              {:ok, updated} <- Repo.update(actual_expense_changeset(current, attrs)),
-             :ok <- raise_estimate_if_actual_sum_exceeds(category) do
+             {:ok, _category} <- sync_estimate_to_actuals(category) do
           {:ok, updated}
         end
       end)
@@ -129,7 +126,11 @@ defmodule HamsterTravel.Planning.BudgetCategories do
   def delete_budget_category_actual_expense(%Expense{} = expense) do
     with :ok <- validate_actual_expense(expense) do
       with_locked_category(expense.budget_category_id, fn category ->
-        with {:ok, current} <- find_actual_expense(category, expense.id), do: Repo.delete(current)
+        with {:ok, current} <- find_actual_expense(category, expense.id),
+             {:ok, deleted} <- Repo.delete(current),
+             {:ok, _category} <- sync_estimate_to_actuals(category) do
+          {:ok, deleted}
+        end
       end)
       |> PubSub.broadcast([:budget_category_actual_expense, :deleted], expense.trip_id)
     end
@@ -140,9 +141,8 @@ defmodule HamsterTravel.Planning.BudgetCategories do
     with_locked_category(category.id, fn category ->
       if Policy.authorized?(:edit, category.trip, user) do
         with :ok <- check_actual_expense_tail(category, Keyword.fetch(opts, :expected_tail)),
-             :ok <- write_actual_expense_cells(category, cells),
-             :ok <- raise_estimate_after_sheet_changes(category, cells) do
-          {:ok, preloading(category)}
+             :ok <- write_actual_expense_cells(category, cells) do
+          sync_estimate_to_actuals(category)
         end
       else
         {:error, :unauthorized}
@@ -156,6 +156,7 @@ defmodule HamsterTravel.Planning.BudgetCategories do
 
   def recalculate_budget_category_estimate(%BudgetCategory{} = category) do
     with_locked_category(category.id, fn category ->
+      category = preloading(category)
       set_estimate_price(category, actual_expenses_sum(category, category.trip.currency))
     end)
     |> PubSub.broadcast([:budget_category, :updated], category.trip_id)
@@ -163,7 +164,7 @@ defmodule HamsterTravel.Planning.BudgetCategories do
 
   def maybe_recalculate_after_trip_finished(%Trip{} = updated_trip, %Trip{} = original_trip) do
     if updated_trip.status == Trip.finished() and original_trip.status != Trip.finished() do
-      case recalculate_trip_category_estimates(updated_trip, skip_zero_actuals: true) do
+      case recalculate_trip_category_estimates(updated_trip) do
         :ok -> {:ok, updated_trip}
         {:error, changeset} -> {:error, changeset}
       end
@@ -174,9 +175,14 @@ defmodule HamsterTravel.Planning.BudgetCategories do
 
   def maybe_adjust_food_category_for_duration(%Trip{} = updated_trip, %Trip{} = original_trip) do
     if updated_trip.duration != original_trip.duration do
-      updated_trip
-      |> get_food_budget_category!()
-      |> adjust_food_category_duration(updated_trip)
+      category = get_food_budget_category!(updated_trip)
+
+      with_locked_category(category.id, fn category ->
+        category
+        |> preloading()
+        |> adjust_food_category_duration(updated_trip)
+      end)
+      |> PubSub.broadcast([:budget_category, :updated], updated_trip.id)
       |> case do
         {:ok, _category} -> updated_trip
         {:error, changeset} -> Repo.rollback(changeset)
@@ -186,15 +192,17 @@ defmodule HamsterTravel.Planning.BudgetCategories do
     end
   end
 
-  def recalculate_trip_category_estimates(%Trip{} = trip, opts \\ []) do
-    skip_zero_actuals? = Keyword.get(opts, :skip_zero_actuals, false)
-
-    trip
-    |> list_budget_categories()
+  defp recalculate_trip_category_estimates(%Trip{} = trip) do
+    BudgetCategory
+    |> ordered_query()
+    |> where([category], category.trip_id == ^trip.id)
+    |> lock("FOR UPDATE")
+    |> Repo.all()
+    |> preloading()
     |> Enum.reduce_while(:ok, fn category, :ok ->
       total = actual_expenses_sum(category, trip.currency)
 
-      if skip_zero_actuals? and zero_money?(total) do
+      if zero_money?(total) do
         {:cont, :ok}
       else
         case set_estimate_price(category, total) do
@@ -203,6 +211,17 @@ defmodule HamsterTravel.Planning.BudgetCategories do
         end
       end
     end)
+  end
+
+  def spending_progress(%BudgetCategory{recalculated: true}, _currency), do: nil
+
+  def spending_progress(%BudgetCategory{} = category, currency) do
+    total = actual_expenses_sum(category, currency)
+    estimate = estimate_price(category, currency)
+
+    if Money.positive?(estimate) and Decimal.compare(total.amount, estimate.amount) == :lt do
+      {total, Decimal.div(total.amount, estimate.amount)}
+    end
   end
 
   def preloading_query do
@@ -228,6 +247,21 @@ defmodule HamsterTravel.Planning.BudgetCategories do
         asc: category.name,
         asc: category.id
       ]
+  end
+
+  defp category_update_changeset(category, attrs) do
+    BudgetCategory.changeset(category, normalize_category_attrs(category.trip, attrs, category))
+  end
+
+  defp maybe_reset_recalculated(changeset) do
+    estimate = get_change(changeset, :estimated_expense)
+    food_setting = get_change(changeset, :food_setting)
+
+    if (estimate && changed?(estimate, :price)) || food_setting do
+      put_change(changeset, :recalculated, false)
+    else
+      changeset
+    end
   end
 
   defp normalize_category_attrs(%Trip{} = trip, attrs, category \\ nil) do
@@ -442,14 +476,6 @@ defmodule HamsterTravel.Planning.BudgetCategories do
     Repo.update(actual_expense_changeset(expense, %{price: price}))
   end
 
-  defp raise_estimate_after_sheet_changes(category, cells) do
-    if Enum.any?(cells, &match?(%{price: %Money{}}, &1)) do
-      raise_estimate_if_actual_sum_exceeds(category)
-    else
-      :ok
-    end
-  end
-
   defp actual_expense_changeset(%Expense{} = expense, attrs) do
     expense
     |> Expense.changeset(attrs)
@@ -460,37 +486,35 @@ defmodule HamsterTravel.Planning.BudgetCategories do
     end)
   end
 
-  defp raise_estimate_if_actual_sum_exceeds(%BudgetCategory{} = category) do
+  defp sync_estimate_to_actuals(%BudgetCategory{} = category) do
     category = preloading(category)
     total = actual_expenses_sum(category, category.trip.currency)
     estimate = estimate_price(category, category.trip.currency)
 
-    if money_gt?(total, estimate, category.trip.currency) do
-      case set_estimate_price(category, total) do
-        {:ok, _category} -> :ok
-        {:error, changeset} -> {:error, changeset}
-      end
+    if category.recalculated or
+         (Money.positive?(total) and Decimal.compare(total.amount, estimate.amount) != :lt) do
+      set_estimate_price(category, total)
     else
-      :ok
+      {:ok, category}
     end
   end
 
   defp set_estimate_price(%BudgetCategory{} = category, %Money{} = price) do
-    category = preloading(category)
-    estimate = category.estimated_expense || new_estimate_expense(category)
+    estimate = category.estimated_expense || %Expense{}
 
-    estimate
-    |> Expense.changeset(%{
-      name: category.name,
-      price: price,
-      trip_id: category.trip_id,
-      budget_category_id: category.id,
-      budget_role: Expense.budget_role_estimate()
-    })
-    |> Repo.insert_or_update()
-    |> case do
-      {:ok, _expense} -> maybe_update_food_setting(category, price)
-      {:error, changeset} -> {:error, changeset}
+    with {:ok, estimate} <-
+           estimate
+           |> Expense.changeset(%{
+             name: category.name,
+             price: price,
+             trip_id: category.trip_id,
+             budget_category_id: category.id,
+             budget_role: Expense.budget_role_estimate()
+           })
+           |> Repo.insert_or_update(),
+         {:ok, food_setting} <- maybe_update_food_setting(category, price),
+         {:ok, category} <- category |> change(recalculated: true) |> Repo.update() do
+      {:ok, %{category | estimated_expense: estimate, food_setting: food_setting}}
     end
   end
 
@@ -504,31 +528,18 @@ defmodule HamsterTravel.Planning.BudgetCategories do
              price,
              food_setting.days_count,
              food_setting.people_count
-           ),
-         {:ok, _food_setting} <-
-           food_setting
-           |> BudgetCategoryFoodSetting.changeset(%{price_per_day: price_per_day})
-           |> Repo.update() do
-      {:ok, get_budget_category!(food_setting.budget_category_id)}
+           ) do
+      food_setting
+      |> BudgetCategoryFoodSetting.changeset(%{price_per_day: price_per_day})
+      |> Repo.update()
     end
   end
 
-  defp maybe_update_food_setting(%BudgetCategory{} = category, _price) do
-    {:ok, get_budget_category!(category.id)}
-  end
-
-  defp new_estimate_expense(%BudgetCategory{} = category) do
-    %Expense{
-      trip_id: category.trip_id,
-      budget_category_id: category.id,
-      budget_role: Expense.budget_role_estimate()
-    }
-  end
+  defp maybe_update_food_setting(%BudgetCategory{food_setting: food_setting}, _price),
+    do: {:ok, food_setting}
 
   defp actual_expenses_sum(%BudgetCategory{} = category, currency) do
-    category.id
-    |> actual_expenses_query()
-    |> Repo.all()
+    category.actual_expenses
     |> Enum.map(&convert_expense_to_currency(&1, currency))
     |> sum_money(currency)
   end
@@ -573,13 +584,6 @@ defmodule HamsterTravel.Planning.BudgetCategories do
     end)
   end
 
-  defp money_gt?(left, right, currency) do
-    left = convert_money_to_currency(left, currency)
-    right = convert_money_to_currency(right, currency)
-
-    Decimal.compare(left.amount, right.amount) == :gt
-  end
-
   defp zero_money?(%Money{} = money), do: Money.equal?(money, Money.new(money.currency, 0))
 
   defp validate_actual_expense(%Expense{} = expense) do
@@ -619,32 +623,34 @@ defmodule HamsterTravel.Planning.BudgetCategories do
          } = category,
          trip
        ) do
-    if food_setting.calculation_mode == BudgetCategoryFoodSetting.calculation_mode_total() do
+    if category.recalculated or
+         food_setting.calculation_mode == BudgetCategoryFoodSetting.calculation_mode_total() do
       with {:ok, price_per_day} <-
              BudgetCategoryFoodSetting.price_per_day_from_total(
                estimate,
                trip.duration,
                food_setting.people_count
              ) do
-        update_budget_category(category, %{
+        category
+        |> category_update_changeset(%{
           estimated_expense: %{price: estimate},
           food_setting: %{
             price_per_day: price_per_day,
-            days_count: trip.duration,
-            people_count: food_setting.people_count,
-            calculation_mode: BudgetCategoryFoodSetting.calculation_mode_total()
+            days_count: trip.duration
           }
         })
+        |> Repo.update()
       end
     else
-      update_budget_category(category, %{
+      category
+      |> category_update_changeset(%{
         food_setting: %{
           price_per_day: food_setting.price_per_day,
           days_count: trip.duration,
-          people_count: food_setting.people_count,
-          calculation_mode: BudgetCategoryFoodSetting.calculation_mode_per_day()
+          people_count: food_setting.people_count
         }
       })
+      |> Repo.update()
     end
   end
 

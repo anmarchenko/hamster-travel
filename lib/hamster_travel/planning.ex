@@ -702,6 +702,15 @@ defmodule HamsterTravel.Planning do
   end
 
   @doc """
+  Returns the actual total and fraction spent for a preloaded category below its plan.
+  """
+  @spec budget_category_spending_progress(BudgetCategory.t(), String.t()) ::
+          {Money.t(), Decimal.t()} | nil
+  def budget_category_spending_progress(%BudgetCategory{} = category, currency) do
+    BudgetCategories.spending_progress(category, currency)
+  end
+
+  @doc """
   Returns the protected Food budget category for a trip.
   """
   def get_food_budget_category!(trip_or_id) do
@@ -726,7 +735,7 @@ defmodule HamsterTravel.Planning do
   end
 
   @doc """
-  Updates a budget category and its estimated expense.
+  Updates a budget category and resets automatic recalculation when its estimate changes.
   """
   def update_budget_category(%BudgetCategory{} = category, attrs) do
     BudgetCategories.update_budget_category(category, attrs)
@@ -792,7 +801,7 @@ defmodule HamsterTravel.Planning do
   end
 
   @doc """
-  Replaces a category estimate with the sum of its actual expenses.
+  Replaces a category estimate with the sum of its actual expenses and keeps it in sync.
   """
   def recalculate_budget_category_estimate(%BudgetCategory{} = category) do
     BudgetCategories.recalculate_budget_category_estimate(category)

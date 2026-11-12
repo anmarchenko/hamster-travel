@@ -1392,6 +1392,9 @@ defmodule HamsterTravel.PlanningTest do
           price: Money.new(:EUR, 2000)
         })
 
+      assert {:ok, %{recalculated: true}} =
+               Planning.recalculate_budget_category_estimate(category)
+
       assert {:ok, %Trip{}} = Planning.delete_trip(trip)
 
       tombstone =
@@ -1421,7 +1424,8 @@ defmodule HamsterTravel.PlanningTest do
       restored_shopping = Enum.find(restored_categories, &(&1.name == "Shopping"))
 
       assert restored_food.estimated_expense.price == Money.new(:EUR, 0)
-      assert restored_shopping.estimated_expense.price == Money.new(:EUR, 8000)
+      assert restored_shopping.estimated_expense.price == Money.new(:EUR, 2000)
+      assert restored_shopping.recalculated
       assert [%{name: "Magnet", price: actual_price}] = restored_shopping.actual_expenses
       assert actual_price == Money.new(:EUR, 2000)
 
@@ -2480,8 +2484,10 @@ defmodule HamsterTravel.PlanningTest do
 
       assert Money.equal?(Planning.get_expense!(eur.id).price, edit.price)
 
-      assert {:ok, %{actual_expenses: [^usd]}} =
+      assert {:ok, %{actual_expenses: [^usd], recalculated: true} = updated} =
                Planning.save_actual_expense_cells(category, author, [delete])
+
+      assert Money.equal?(updated.estimated_expense.price, Money.new(:EUR, "200"))
     end
 
     test "cannot save an expense from another category through the sheet" do
@@ -2499,7 +2505,7 @@ defmodule HamsterTravel.PlanningTest do
       assert Money.equal?(Planning.get_expense!(expense.id).price, price)
     end
 
-    test "creating an actual expense raises the estimate when the accumulated sum exceeds it" do
+    test "the estimate follows actuals after they reach it, until a new estimate is set" do
       trip = trip_fixture()
 
       assert {:ok, category} =
@@ -2508,22 +2514,53 @@ defmodule HamsterTravel.PlanningTest do
                  estimated_expense: %{price: Money.new(:EUR, 5000)}
                })
 
-      assert {:ok, _first_actual_expense} =
+      assert {:ok, first_actual_expense} =
                Planning.create_budget_category_actual_expense(category, %{
                  price: Money.new(:EUR, 3000)
                })
 
-      assert Planning.get_budget_category!(category.id).estimated_expense.price ==
-               Money.new(:EUR, 5000)
+      category = Planning.get_budget_category!(category.id)
+      refute category.recalculated
+      assert category.estimated_expense.price == Money.new(:EUR, 5000)
 
-      assert {:ok, _second_actual_expense} =
+      assert {:ok, second_actual_expense} =
                Planning.create_budget_category_actual_expense(category, %{
-                 price: Money.new(:EUR, 2500)
+                 price: Money.new(:EUR, 2000)
                })
 
       category = Planning.get_budget_category!(category.id)
-      assert category.estimated_expense.price == Money.new(:EUR, 5500)
-      assert Money.equal?(Planning.calculate_budget(trip), Money.new(:EUR, 5500))
+      assert category.recalculated
+      assert category.estimated_expense.price == Money.new(:EUR, 5000)
+
+      assert {:ok, _expense} =
+               Planning.delete_budget_category_actual_expense(first_actual_expense)
+
+      assert Money.equal?(Planning.calculate_budget(trip), Money.new(:EUR, 2000))
+
+      assert {:ok, _expense} =
+               Planning.update_budget_category_actual_expense(second_actual_expense, %{
+                 price: Money.new(:EUR, 1000)
+               })
+
+      assert Money.equal?(Planning.calculate_budget(trip), Money.new(:EUR, 1000))
+
+      assert {:ok, %{recalculated: true} = renamed} =
+               Planning.update_budget_category(category, %{
+                 name: "Fuel",
+                 estimated_expense: %{price: Money.new(:EUR, 1000)}
+               })
+
+      assert {:ok, %{recalculated: false} = replanned} =
+               Planning.update_budget_category(renamed, %{
+                 estimated_expense: %{price: Money.new(:EUR, 4000)}
+               })
+
+      assert {:ok, _expense} =
+               Planning.create_budget_category_actual_expense(replanned, %{
+                 price: Money.new(:EUR, 2000)
+               })
+
+      assert Money.equal?(Planning.calculate_budget(trip), Money.new(:EUR, 4000))
     end
 
     test "raising the Food estimate from actual expenses updates its per-person daily cost" do
@@ -2818,6 +2855,7 @@ defmodule HamsterTravel.PlanningTest do
 
       assert {:ok, updated_category} = Planning.recalculate_budget_category_estimate(category)
       assert updated_category.estimated_expense.price == Money.new(:EUR, 0)
+      assert updated_category.recalculated
     end
 
     test "category and actual expense operations broadcast PubSub events" do
@@ -2977,6 +3015,9 @@ defmodule HamsterTravel.PlanningTest do
       assert souvenirs.estimated_expense.price == Money.new(:EUR, 7000)
       assert food.estimated_expense.price == Money.new(:EUR, 6000)
       assert food.food_setting.price_per_day == Money.new(:EUR, 1000)
+      assert gasoline.recalculated
+      assert food.recalculated
+      refute souvenirs.recalculated
 
       assert {:ok, gasoline} =
                Planning.update_budget_category(gasoline, %{

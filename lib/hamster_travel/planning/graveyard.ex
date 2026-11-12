@@ -181,6 +181,7 @@ defmodule HamsterTravel.Planning.Graveyard do
     %{
       "name" => category.name,
       "kind" => category.kind,
+      "recalculated" => category.recalculated,
       "estimated_expense" => expense_payload(category.estimated_expense),
       "actual_expenses" => Enum.map(category.actual_expenses, &expense_payload/1),
       "food_setting" => food_setting_payload(category.food_setting),
@@ -362,6 +363,12 @@ defmodule HamsterTravel.Planning.Graveyard do
   defp restore_budget_categories(%Trip{} = trip, categories) do
     Enum.each(categories, fn category ->
       restored_category = restore_budget_category(trip, category)
+
+      if Map.get(category, "recalculated", false) do
+        restored_category
+        |> Ecto.Changeset.change(recalculated: true)
+        |> Repo.update!()
+      end
 
       Enum.each(Map.get(category, "actual_expenses", []), fn expense ->
         %Expense{
